@@ -6,6 +6,7 @@ SRCS +=		cmd_c.c cmd_cdel.c cmd_clist.c cmd_cnew.c cmd_cren.c cmd_del.c \
 		cmd_edit.c cmd_import.c cmd_export.c cmd_getnum.c cmd_help.c \
 		cmd_list.c cmd_new.c cmd_quit.c cmd_random.c cmd_search.c \
 		cmd_searchre.c cmd_write.c cmd_version.c commands.c commands_init.c
+OBJS =		kc.o malloc_check.o
 OBJS +=		cmd_c.o cmd_cdel.o cmd_clist.o cmd_cnew.o cmd_cren.o cmd_del.o \
 		cmd_edit.o cmd_import.o cmd_export.o cmd_getnum.o cmd_help.o \
 		cmd_list.o cmd_new.o cmd_quit.o cmd_random.o cmd_search.o \
