@@ -166,9 +166,9 @@ int	length = 1;
 xmlChar *convert_utf8(char *string, char dir) {		// 'dir'=direction, 0: locale=>utf8, 1: utf8=>locale
 iconv_t		iconv_ctx;
 size_t		conv_bytes = 0;
-size_t		iconv_out_size = 1;
-size_t		iconv_in_left = 0, iconv_out_left = 0;
-char		*iconv_out_buf = NULL, *iconv_out_buf_orig = NULL, *iconv_in_buf = NULL;
+size_t		out_size = 0;
+size_t		in_left = 0, out_left = 0;
+char		*out_ptr = NULL, *out_str = NULL, *in_ptr = NULL, *in_str = NULL;
 int		ret = 0;
 
 
@@ -176,12 +176,11 @@ int		ret = 0;
 		return(xmlCharStrdup(""));
 
 
-	iconv_in_buf = strdup(string);
-
-	printf("in_buf='%s'\n", iconv_in_buf);
+	in_str = strdup(string);
+	in_ptr = in_str;
 
 	if (strcmp(locale, "UTF-8") == 0)	// if there is no need to convert
-		return(BAD_CAST iconv_in_buf);
+		return(BAD_CAST in_str);
 
 
 	if (dir)
@@ -191,47 +190,45 @@ int		ret = 0;
 
 	if (iconv_ctx < 0) {
 		perror("character conversion error (iconv_open())");
-		return(BAD_CAST iconv_in_buf);
+		return(BAD_CAST in_str);
 	}
 
-	iconv_out_buf_orig = malloc(iconv_out_size + 1); malloc_check(iconv_out_buf_orig);
-	iconv_out_buf = iconv_out_buf_orig;	// _orig will be the unmodified (by iconv()) string, from the start
-	iconv_out_left = iconv_out_size;
-	iconv_in_left = strlen(iconv_in_buf);
-	while (iconv_in_left != 0) {
-		ret = iconv(iconv_ctx, &iconv_in_buf, &iconv_in_left,
-				&iconv_out_buf, &iconv_out_left);
+	out_size = strlen(in_str) * 4;		// I don't care about this shitty, f*cked up library
+	out_str = malloc(out_size + 1); malloc_check(out_str);
+	out_ptr = out_str;
+	out_left = out_size;
+	in_left = strlen(in_str);
+	while (in_left != 0) {
+		ret = iconv(iconv_ctx, &in_ptr, &in_left, &out_ptr, &out_left);
 
-		if (ret < 0)
+		if (ret < 0) {
 			switch (errno) {
 				case E2BIG:
-					iconv_out_left += 1;	// grow the buffer by this amount
-					iconv_out_size += 1;	// grow the buffer by this amount
-					printf("out_size=%zd out_left=%zd\n", iconv_out_size, iconv_out_left);
-					iconv_out_buf_orig = realloc(iconv_out_buf_orig, iconv_out_size); malloc_check(iconv_out_buf_orig);
-					iconv_out_buf = iconv_out_buf_orig + iconv_out_size - iconv_out_left;	// point to the already converted string's end in the new pointer
-				break;
 				case EINVAL:
-				break;
 				case EILSEQ:
+					// I don't care about this shitty, f*cked up library
 					printf("character conversion error (iconv()): '%s' to 'UTF-8'\n", locale);
 					perror("iconv()");
+					return(BAD_CAST in_str);
 				break;
 				default:
 				break;
 			}
+		}
 	}
-	conv_bytes = iconv_out_size - iconv_out_left;
-	iconv_out_buf_orig[conv_bytes] = '\0';	// this the converted string, from the start (ie. unmodified by iconv())
+
+	conv_bytes = out_size - out_left;
+	out_str[conv_bytes] = '\0';
 
 	if (debug)
-		printf("string converted to UTF-8 (%zd bytes)", conv_bytes);
+		printf("string converted to UTF-8 (%zd bytes)\n", conv_bytes);
 
 
-	return(BAD_CAST iconv_out_buf_orig);
-
-	if (iconv_close(iconv_ctx) < 0) {
-		perror(iconv_close);
-		quit(e, eh, bio_chain, EXIT_FAILURE);
+	if (iconv_close(iconv_ctx) != 0) {
+		perror("iconv_close()");
+		return(BAD_CAST in_str);
 	}
+
+
+	return(BAD_CAST out_str);
 } /* convert_to_utf8() */
