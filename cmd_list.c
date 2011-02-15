@@ -63,13 +63,12 @@ int		idx = 0;
 			if (db_node->type == XML_ELEMENT_NODE) {	// we only care about ELEMENT nodes
 				printf("%d. ", idx);
 
-				key = db_node->children->content;
+				key = xmlNodeGetContent(db_node->children);
 				key_locale = convert_utf8(key, 1);
 				printf("%s\n", key_locale);
 
-				if (key_locale) {
-					free(key_locale); key_locale = NULL;
-				}
+				xmlFree(key); key = NULL;
+				free(key_locale); key_locale = NULL;
 
 				idx++;
 			}

@@ -67,8 +67,9 @@ command		*commands = NULL;
 
 	db_node = find_key(idx);
 	if (db_node) {
-		key = db_node->children->content;
+		key = xmlNodeGetContent(db_node->children);
 		key_locale = convert_utf8(key, 1);
+		xmlFree(key); key = NULL;
 		printf("'%s'", key_locale);
 		if (key_locale)
 			free(key_locale);

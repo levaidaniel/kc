@@ -29,7 +29,7 @@
 #include "commands.h"
 
 
-char get_line(xmlChar *value, int value_len, int *pos, char *c, int idx);
+char get_line(xmlChar *, int, int *, char *, int);
 
 
 extern xmlNodePtr	keychain;
@@ -56,8 +56,9 @@ char		*rand_str = NULL;
 
 	db_node = find_key(idx);
 	if (db_node) {
-		key = db_node->children->content;
+		key = xmlNodeGetContent(db_node->children);
 		key_locale = convert_utf8(key, 1);
+		xmlFree(key); key = NULL;
 
 		printf("[%s]\n", key_locale);	// print the key
 
@@ -75,8 +76,14 @@ char		*rand_str = NULL;
 		}
 
 		idx = 1;
-		value = db_node->children->next->children->content;
-		value_locale = convert_utf8(value, 1);
+		value = xmlNodeGetContent(db_node->children->next->children);
+		if (value)
+			value_locale = convert_utf8(value, 1);
+		else
+			value_locale = xmlStrdup("");
+
+		xmlFree(value); value = NULL;
+
 		value_len = xmlStrlen(value_locale);
 
 		// count how many lines are in the string
@@ -191,7 +198,7 @@ char		*rand_str = NULL;
 } /* cmd_getnum() */
 
 
-char get_line(xmlChar *value, int value_len, int *pos, char *c, int idx) {
+char get_line(xmlChar *value_locale, int value_len, int *pos, char *c, int idx) {
 int	i = 1;	// this counts how many '\n' we've found so far
 
 	// if we want the first line (which can't be identified like the rest
@@ -199,19 +206,19 @@ int	i = 1;	// this counts how many '\n' we've found so far
 	// just set everything to the beginning, and break; from this switch()
 	if (idx == 1) {
 		*pos = 0;
-		*c = value[*pos];
+		*c = value_locale[*pos];
 		return(*pos);
 	}
 
 	for(*pos=0; *pos < value_len; (*pos)++) {	// search the entire string
 		if (i < idx) {			// while newline count ('i') is smaller than the line number requested
-			if (value[*pos] == '\n')	// we found a '\n'
+			if (value_locale[*pos] == '\n')	// we found a '\n'
 				i++;
 		} else
 			break;
 	}
 
-	*c = value[*pos];	// set the current character ('c') to the position's character in 'value'
+	*c = value_locale[*pos];	// set the current character ('c') to the position's character in 'value_locale'
 
 	return(*pos);
 } /* get_line() */

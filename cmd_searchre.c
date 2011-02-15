@@ -114,9 +114,9 @@ int		hits = 0, idx = 0;
 	while (db_node) {
 		if (db_node->type == XML_ELEMENT_NODE) {	// skip the non element nodes
 			if (chain)
-				key = xmlGetProp(db_node, BAD_CAST "name");
+				key = xmlStrdup(xmlGetProp(db_node, BAD_CAST "name"));
 			else
-				key = db_node->children->content;
+				key = xmlNodeGetContent(db_node->children);
 
 			if (debug)
 				printf("name=%s", key);
@@ -136,6 +136,8 @@ int		hits = 0, idx = 0;
 			} else
 				if (debug)
 					puts("");
+
+			xmlFree(key); key = NULL;
 
 			idx++;
 		}

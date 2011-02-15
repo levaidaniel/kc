@@ -80,9 +80,9 @@ int		hits = 0, idx = 0;
 	while (db_node) {
 		if (db_node->type == XML_ELEMENT_NODE) {	// skip the non element nodes
 			if (chain)
-				key = xmlGetProp(db_node, BAD_CAST "name");	// search for keychains
+				key = xmlStrdup(xmlGetProp(db_node, BAD_CAST "name"));	// search for keychains
 			else
-				key = db_node->children->content;	// search for keys in the actual keychain
+				key = xmlNodeGetContent(db_node->children);	// search for keys in the actual keychain
 
 			if (debug)
 				printf("name=%s", key);
@@ -103,6 +103,8 @@ int		hits = 0, idx = 0;
 			} else
 				if (debug)
 					puts("");
+
+			xmlFree(key); key = NULL;
 
 			idx++;
 		}

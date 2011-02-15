@@ -40,7 +40,7 @@ va_list		ap;
 History		*eh = NULL;
 
 xmlNodePtr	db_node = NULL, db_node_new = NULL;
-xmlChar		*key_locale = NULL, *value_locale = NULL, *key = NULL, *value = NULL;
+xmlChar		*key_locale = NULL, *key = NULL, *value_locale = NULL, *value_nl = NULL, *value = NULL;
 
 command		*commands = NULL;
 
@@ -82,8 +82,9 @@ int		idx = 0, e_count = 0;
 			perror("el_set(EL_CLIENTDATA)");
 		}
 		// if we edit an existing entry, push the current value to the edit buffer
-		key = db_node->children->content;
+		key = xmlNodeGetContent(db_node->children);
 		key_locale = convert_utf8(key, 1);
+		xmlFree(key); key = NULL;
 		el_push(e, (const char *)key_locale);
 		if (key_locale) {
 			free(key_locale); key_locale = NULL;
@@ -106,13 +107,17 @@ int		idx = 0, e_count = 0;
 			perror("el_set(EL_CLIENTDATA)");
 		}
 		// if we edit an existing entry, push the current value to the edit buffer
-		value = db_node->children->next->children->content;
-		value = parse_newlines(value, 1);
-		value_locale = convert_utf8(value, 1);
-		el_push(e, (const char *)value_locale);
+		value = xmlNodeGetContent(db_node->children->next->children);
 		if (value) {
-			free(value); value = NULL;
-		}
+			value_nl = parse_newlines(value, 1);
+			value_locale = convert_utf8(value_nl, 1);
+			free(value_nl); value_nl = NULL;
+		} else
+			value_locale = xmlStrdup("");
+
+		xmlFree(value); value = NULL;
+
+		el_push(e, (const char *)value_locale);
 		if (value_locale) {
 			free(value_locale); value_locale = NULL;
 		}
