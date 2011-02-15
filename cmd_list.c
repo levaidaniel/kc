@@ -66,7 +66,6 @@ int		idx = 0;
 				key = xmlNodeGetContent(db_node->children);
 				key_locale = convert_utf8(key, 1);
 				printf("%s\n", key_locale);
-				//printf("%s\n", key);
 
 				xmlFree(key); key = NULL;
 				free(key_locale); key_locale = NULL;
