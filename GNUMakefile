@@ -1,0 +1,40 @@
+CC =		gcc
+PROG =		kc
+
+SRCS =		kc.c malloc_check.c
+SRCS +=		cmd_c.c cmd_cdel.c cmd_clist.c cmd_cnew.c cmd_cren.c cmd_del.c \
+		cmd_edit.c cmd_import.c cmd_export.c cmd_getnum.c cmd_help.c \
+		cmd_list.c cmd_new.c cmd_quit.c cmd_random.c cmd_search.c \
+		cmd_searchre.c cmd_write.c cmd_version.c commands.c commands_init.c
+OBJS +=		cmd_c.o cmd_cdel.o cmd_clist.o cmd_cnew.o cmd_cren.o cmd_del.o \
+		cmd_edit.o cmd_import.o cmd_export.o cmd_getnum.o cmd_help.o \
+		cmd_list.o cmd_new.o cmd_quit.o cmd_random.o cmd_search.o \
+		cmd_searchre.o cmd_write.o cmd_version.o commands.o commands_init.o
+
+CFLAGS +=	-Wall -g
+CFLAGS +=	-D_LINUX
+CFLAGS +=	`pkg-config --cflags libssl`
+CFLAGS +=	`pkg-config --cflags libbsd`
+CFLAGS +=	`pkg-config --cflags libedit`
+CFLAGS +=	`pkg-config --cflags libxml-2.0`
+ifdef HAVE_PCRE
+CFLAGS +=	`pkg-config --cflags libpcre` -D_HAVE_PCRE
+endif
+
+LDADD +=	`pkg-config --libs libssl`
+LDADD +=	`pkg-config --libs libbsd`
+LDADD +=	`pkg-config --libs libedit`
+LDADD +=	`pkg-config --libs libxml-2.0`
+ifdef HAVE_PCRE
+LDADD +=	`pkg-config --libs libpcre`
+endif
+
+
+all: ${PROG}
+
+clean:
+	rm -f *.o kc *.cat[0-9]
+
+${PROG}: ${OBJS}
+	${CC} -o ${PROG} ${CFLAGS} ${LDADD} \
+		${SRCS}
