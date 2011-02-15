@@ -30,6 +30,7 @@
 
 
 extern xmlNodePtr	keychain;
+extern char		dirty;
 
 
 void cmd_del(EditLine *e, ...) {
@@ -82,6 +83,8 @@ command		*commands = NULL;
 		xmlFreeNode(db_node);
 
 		puts(" deleted");
+
+		dirty = 1;
 	} else
 		puts("invalid entry!");
 } /* cmd_del() */
