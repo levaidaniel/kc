@@ -69,6 +69,5 @@ char		*line = NULL;
 	else
 		puts("keychain not found.");
 
-	if (cname)
-		free(cname);
+	free(cname);
 } /* cmd_c() */

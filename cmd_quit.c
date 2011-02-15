@@ -68,7 +68,7 @@ char		c = 0, *e_line = NULL;
 
 		puts("");
 		if (c == 'Y'  ||  c == 'y'  ||  c == '\n')
-			cmd_write(e, e_line, eh, bio_chain, db);
+			cmd_write(e, e_line, eh, bio_chain);
 	}
 
 	quit(e, eh, bio_chain, EXIT_SUCCESS);

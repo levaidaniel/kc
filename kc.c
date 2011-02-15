@@ -217,22 +217,23 @@ int		c = 0, len = 0;
 	// so when the user interrupts the password prompt, we won't end up
 	// with a messed up db file, which only contains the salt and the IV.
 	if (new_db_file) {
+		if (debug)
+			puts("generating salt and IV");
+
 		// create the new file and write the IV and the salt first.
 		db_file = fopen(db_filename, "w");
 
-		strlcpy((char *)iv, get_random(sizeof(iv) - 1), sizeof(iv));
+		strlcpy((char *)iv, get_random_str(sizeof(iv) - 1), sizeof(iv));
 		fwrite(iv, sizeof(iv) - 1, 1, db_file);
 
-		strlcpy((char *)salt, get_random(sizeof(salt) - 1), sizeof(salt));
+		strlcpy((char *)salt, get_random_str(sizeof(salt) - 1), sizeof(salt));
 		fwrite(salt, sizeof(salt) - 1, 1, db_file);
 
 		fclose(db_file);
 	}
 
-	/*
 	if (debug)
 		printf("iv='%s'\nsalt='%s'\n", iv, salt);
-	*/
 
 
 	bio_file = BIO_new_file(db_filename, "r+");
@@ -243,12 +244,14 @@ int		c = 0, len = 0;
 	BIO_set_close(bio_file, BIO_CLOSE);
 	bio_chain = BIO_push(bio_file, bio_chain);
 
+	/*
 	bio_b64 = BIO_new(BIO_f_base64());
 	if (!bio_b64) {
 		perror("BIO_new(f_base64)");
 		quit(e, eh, bio_chain, EXIT_FAILURE);
 	}
 	bio_chain = BIO_push(bio_b64, bio_chain);
+	*/
 
 	bio_cipher = BIO_new(BIO_f_cipher());
 	if (!bio_cipher) {
@@ -264,7 +267,7 @@ int		c = 0, len = 0;
 	BIO_set_cipher(bio_cipher, EVP_aes_256_cbc(), key, iv, 0);
 
 
-	strlcpy(pass, "\0", pass_maxlen + 1);
+	memset(pass, '\0', pass_maxlen);
 	free(pass); pass = NULL;
 	free(db_filename); db_filename = NULL;
 
@@ -548,8 +551,7 @@ xmlChar		*cname_locale = NULL, *cname = NULL;
 
 	snprintf(prompt, prompt_len, "%s%% %s> ", cname_locale, cl_data);
 
-	if (cname_locale)
-		free(cname_locale);
+	free(cname_locale);
 
 	return(prompt);
 } /* e_prompt() */
@@ -610,8 +612,7 @@ char		*ret = NULL;
 			tmp[0] == 44  || tmp[0] == 46  ||
 			tmp[0] == 96  || tmp[0] == 94) {
 
-			if (tmp)
-				free(tmp);
+			free(tmp); tmp = NULL;
 
 			tmp = (char *)get_random(1);
 		}
@@ -619,8 +620,7 @@ char		*ret = NULL;
 		tmp[0] = '\0';		// reset the value
 	}
 
-	if (tmp)
-		free(tmp);
+	free(tmp); tmp = NULL;
 
 	ret[length] = '\0';
 
@@ -707,10 +707,8 @@ int		hits = 0, len = 0;
 			el_set(e, EL_REFRESH);
 		break;
 	}
-	if (line_buf)
-		free(line_buf);
-	if (match)
-		free(match);
+	free(line_buf);
+	free(match);
 
 
 	return(CC_CURSOR);

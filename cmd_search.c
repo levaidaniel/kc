@@ -97,14 +97,14 @@ int		hits = 0, idx = 0;
 				printf("%d. ", idx);    // prefix the name with the index number
 				key_locale = convert_utf8(key, 1);
 				printf("%s\n", key_locale);    // this is the name of the entry
-				if (key_locale) {
-					free(key_locale); key_locale = NULL;
-				}
+				free(key_locale); key_locale = NULL;
 			} else
 				if (debug)
 					puts("");
 
-			xmlFree(key); key = NULL;
+			if (key) {
+				xmlFree(key); key = NULL;
+			}
 
 			idx++;
 		}
@@ -115,6 +115,5 @@ int		hits = 0, idx = 0;
 	if (!hits)
 		printf("'%s' not found.\n", pattern_locale);
 
-	if (pattern)
-		free(pattern);
+	free(pattern);
 } /* cmd_search() */

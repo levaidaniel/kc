@@ -86,8 +86,7 @@ char		*line = NULL;
 			}
 
 
-			if (cname)
-				free(cname);
+			free(cname);
 			cname = xmlGetProp(db_node, BAD_CAST "name");
 			cname_locale = convert_utf8(cname, 1);
 			printf("Do you really want to delete '%s'? <yes/no> ", cname_locale);
@@ -134,8 +133,7 @@ char		*line = NULL;
 
 				if (db_node_tmp) {
 					printf("'%s'", cname_locale);
-					if (cname_locale)
-						free(cname_locale);
+					free(cname_locale);
 
 					db_node_tmp = db_node->prev;
 					xmlUnlinkNode(db_node_tmp);
@@ -163,7 +161,6 @@ char		*line = NULL;
 		}
 	} else {
 		printf("'%s' keychain not found.\n", cname_locale);
-		if (cname)
-			free(cname);
+		free(cname);
 	}
 } /* cmd_cdel() */

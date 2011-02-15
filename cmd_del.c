@@ -70,10 +70,9 @@ command		*commands = NULL;
 	if (db_node) {
 		key = xmlNodeGetContent(db_node->children);
 		key_locale = convert_utf8(key, 1);
-		xmlFree(key); key = NULL;
-		printf("'%s'", key_locale);
-		if (key_locale)
-			free(key_locale);
+		if (key) {
+			xmlFree(key); key = NULL;
+		}
 
 		db_node_prev = db_node->prev;
 		xmlUnlinkNode(db_node_prev);	// remove the adjacent 'text' node, which are the indent and newline
@@ -82,7 +81,8 @@ command		*commands = NULL;
 		xmlUnlinkNode(db_node);
 		xmlFreeNode(db_node);
 
-		puts(" deleted");
+		printf("'%s' deleted\n", key_locale);
+		free(key_locale); key_locale = NULL;
 
 		dirty = 1;
 	} else

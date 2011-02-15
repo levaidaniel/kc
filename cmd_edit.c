@@ -84,11 +84,11 @@ int		idx = 0, e_count = 0;
 		// if we edit an existing entry, push the current value to the edit buffer
 		key = xmlNodeGetContent(db_node->children);
 		key_locale = convert_utf8(key, 1);
-		xmlFree(key); key = NULL;
-		el_push(e, (const char *)key_locale);
-		if (key_locale) {
-			free(key_locale); key_locale = NULL;
+		if (key) {
+			xmlFree(key); key = NULL;
 		}
+		el_push(e, (const char *)key_locale);
+		free(key_locale); key_locale = NULL;
 
 
 		e_line = el_gets(e, &e_count);
@@ -108,19 +108,16 @@ int		idx = 0, e_count = 0;
 		}
 		// if we edit an existing entry, push the current value to the edit buffer
 		value = xmlNodeGetContent(db_node->children->next->children);
+		value_nl = parse_newlines(value, 1);
 		if (value) {
-			value_nl = parse_newlines(value, 1);
-			value_locale = convert_utf8(value_nl, 1);
-			free(value_nl); value_nl = NULL;
-		} else
-			value_locale = xmlCharStrdup("");
+			xmlFree(value); value = NULL;
+		}
+		value_locale = convert_utf8(value_nl, 1);
+		free(value_nl); value_nl = NULL;
 
-		xmlFree(value); value = NULL;
 
 		el_push(e, (const char *)value_locale);
-		if (value_locale) {
-			free(value_locale); value_locale = NULL;
-		}
+		free(value_locale); value_locale = NULL;
 
 
 		e_line = el_gets(e, &e_count);
@@ -133,8 +130,7 @@ int		idx = 0, e_count = 0;
 		value_locale[xmlStrlen(value_locale) - 1] = '\0';	// remove the newline character from the end
 		value_locale = parse_newlines(value_locale, 0);
 		value = convert_utf8(value_locale, 0);
-		if (value_locale)
-			free(value_locale);
+		free(value_locale);
 
 
 		db_node_new = xmlNewNode(NULL, BAD_CAST "key");
@@ -145,10 +141,8 @@ int		idx = 0, e_count = 0;
 		xmlFreeNode(db_node);
 
 
-		if (key)
-			free(key);
-		if (value)
-			free(value);
+		free(key);
+		free(value);
 
 		// change back to the default prompt
 		if (el_set(e, EL_CLIENTDATA, "") != 0) {

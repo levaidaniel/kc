@@ -54,9 +54,7 @@ int		idx = 0;
 				cname_locale = convert_utf8(cname, 1);
 				printf("%s\n", cname_locale);
 
-				if (cname_locale) {
-					free(cname_locale); cname_locale = NULL;
-				}
+				free(cname_locale); cname_locale = NULL;
 
 				idx++;
 			}

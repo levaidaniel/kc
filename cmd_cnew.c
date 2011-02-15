@@ -111,8 +111,6 @@ const char	*e_line = NULL;
 		printf("'%s' name is taken!\n", cname_locale);
 	}
 
-	if (cname)
-		free(cname);
-	if (cname_locale)
-		free(cname_locale);
+	free(cname);
+	free(cname_locale);
 } /* cmd_cnew() */

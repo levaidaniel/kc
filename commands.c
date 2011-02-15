@@ -92,6 +92,10 @@ char		*ret = NULL;
 int		nlnum = 0, i = 0, j = 0, ret_len = 0;
 
 
+	if (!line)
+		return(strdup(""));
+
+
 	if (dir) {
 		// count the number of '\n' characters in the string, and use it later to figure how many bytes
 		// will be the new string, with replaced newline characters.
@@ -168,7 +172,13 @@ char		*iconv_out_buf = NULL, *iconv_out_buf_orig = NULL, *iconv_in_buf = NULL;
 int		ret = 0;
 
 
+	if (!string)
+		return(xmlCharStrdup(""));
+
+
 	iconv_in_buf = strdup(string);
+
+	printf("in_buf='%s'\n", iconv_in_buf);
 
 	if (strcmp(locale, "UTF-8") == 0)	// if there is no need to convert
 		return(BAD_CAST iconv_in_buf);
@@ -197,6 +207,7 @@ int		ret = 0;
 				case E2BIG:
 					iconv_out_left += 1;	// grow the buffer by this amount
 					iconv_out_size += 1;	// grow the buffer by this amount
+					printf("out_size=%zd out_left=%zd\n", iconv_out_size, iconv_out_left);
 					iconv_out_buf_orig = realloc(iconv_out_buf_orig, iconv_out_size); malloc_check(iconv_out_buf_orig);
 					iconv_out_buf = iconv_out_buf_orig + iconv_out_size - iconv_out_left;	// point to the already converted string's end in the new pointer
 				break;
@@ -214,8 +225,13 @@ int		ret = 0;
 	iconv_out_buf_orig[conv_bytes] = '\0';	// this the converted string, from the start (ie. unmodified by iconv())
 
 	if (debug)
-		printf("string converted to UTF-8 (%zd bytes)\n", conv_bytes);
+		printf("string converted to UTF-8 (%zd bytes)", conv_bytes);
 
 
 	return(BAD_CAST iconv_out_buf_orig);
+
+	if (iconv_close(iconv_ctx) < 0) {
+		perror(iconv_close);
+		quit(e, eh, bio_chain, EXIT_FAILURE);
+	}
 } /* convert_to_utf8() */

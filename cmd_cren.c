@@ -82,14 +82,11 @@ int		e_count = 0;
 			perror("el_set(EL_CLIENTDATA)");
 		}
 		// if we edit an existing entry, push the current value to the edit buffer
-		if (cname)
-			free(cname);
+		free(cname);
 		cname = xmlGetProp(db_node, BAD_CAST "name");
 		cname_locale = convert_utf8(cname, 1);
 		el_push(e, (const char *)cname_locale);
-		if (cname_locale) {
-			free(cname_locale); cname_locale = NULL;
-		}
+		free(cname_locale); cname_locale = NULL;
 
 		e_line = el_gets(e, &e_count);
 		if (!e_line) {
@@ -104,8 +101,7 @@ int		e_count = 0;
 
 		xmlSetProp(db_node, BAD_CAST "name", cname);
 
-		if (cname)
-			free(cname);
+		free(cname);
 
 		// change back to the default prompt
 		if (el_set(e, EL_CLIENTDATA, "") != 0) {
@@ -119,7 +115,6 @@ int		e_count = 0;
 		dirty = 1;
 	} else {
 		printf("keychain '%s' not found.\n", cname_locale);
-		if (cname)
-			free(cname);
+		free(cname);
 	}
 } /* cmd_cren() */

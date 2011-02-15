@@ -82,8 +82,7 @@ const char	*e_line = NULL;
 	e_line = el_gets(e, &e_count);
 	if (!e_line) {
 		perror("input");
-		if (key)
-			free(key);
+		free(key);
 		return;
 	} else
 		value_locale = BAD_CAST e_line;
@@ -91,8 +90,7 @@ const char	*e_line = NULL;
 	value_locale[xmlStrlen(value_locale) - 1] = '\0';	// remove the newline
 	value_locale = parse_newlines(value_locale, 0);
 	value = convert_utf8(value_locale, 0);
-	if (value_locale)
-		free(value_locale);
+	free(value_locale);
 
 
 	// change back to the default prompt
@@ -116,8 +114,6 @@ const char	*e_line = NULL;
 
 	dirty = 1;
 
-	if (key)
-		free(key);
-	if (value)
-		free(value);
+	free(key);
+	free(value);
 } /* cmd_new() */

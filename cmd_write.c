@@ -45,9 +45,11 @@ int			ret = 0;
 
 
 	va_start(ap, e);
+
 	va_arg(ap, char *);		/* ignore the (char *)line parameter */
 	va_arg(ap, History *);		/* ignore the (History *) parameter */
 	bio_chain = va_arg(ap, BIO *);
+
 	va_end(ap);
 
 	xml_buf = xmlBufferCreate();
@@ -56,6 +58,8 @@ int			ret = 0;
 	if (xml_save) {
 		xmlSaveDoc(xml_save, db);
 		xmlSaveFlush(xml_save);
+		if (debug)
+			printf("xml_buf->content:\n'%s'\n", xmlBufferContent(xml_buf));
 		xmlSaveClose(xml_save);
 
 		BIO_reset(bio_chain);		// we must reset the cipher BIO to work after subsequent calls to cmd_write()

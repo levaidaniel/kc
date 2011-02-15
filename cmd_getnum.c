@@ -58,13 +58,13 @@ char		*rand_str = NULL;
 	if (db_node) {
 		key = xmlNodeGetContent(db_node->children);
 		key_locale = convert_utf8(key, 1);
-		xmlFree(key); key = NULL;
+		if (key) {
+			xmlFree(key); key = NULL;
+		}
 
 		printf("[%s]\n", key_locale);	// print the key
 
-		if (key_locale) {
-			free(key_locale); key_locale = NULL;
-		}
+		free(key_locale); key_locale = NULL;
 
 		// clear the prompt temporarily
 		if (el_set(e, EL_PROMPT, e_prompt_null) != 0) {
@@ -77,12 +77,10 @@ char		*rand_str = NULL;
 
 		idx = 1;
 		value = xmlNodeGetContent(db_node->children->next->children);
-		if (value)
-			value_locale = convert_utf8(value, 1);
-		else
-			value_locale = xmlCharStrdup("");
-
-		xmlFree(value); value = NULL;
+		value_locale = convert_utf8(value, 1);
+		if (value) {
+			xmlFree(value); value = NULL;
+		}
 
 		value_len = xmlStrlen(value_locale);
 
@@ -183,9 +181,7 @@ char		*rand_str = NULL;
 			line_len = 0;	// this is the actual line length
 		}
 
-		if (value_locale) {
-			free(value_locale); value_locale = NULL;
-		}
+		free(value_locale); value_locale = NULL;
 
 		// re-enable the default prompt
 		if (el_set(e, EL_PROMPT, e_prompt) != 0) {
