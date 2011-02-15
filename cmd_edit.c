@@ -113,7 +113,7 @@ int		idx = 0, e_count = 0;
 			value_locale = convert_utf8(value_nl, 1);
 			free(value_nl); value_nl = NULL;
 		} else
-			value_locale = xmlStrdup("");
+			value_locale = xmlCharStrdup("");
 
 		xmlFree(value); value = NULL;
 

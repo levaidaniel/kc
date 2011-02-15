@@ -80,7 +80,7 @@ char		*rand_str = NULL;
 		if (value)
 			value_locale = convert_utf8(value, 1);
 		else
-			value_locale = xmlStrdup("");
+			value_locale = xmlCharStrdup("");
 
 		xmlFree(value); value = NULL;
 
