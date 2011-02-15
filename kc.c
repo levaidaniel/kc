@@ -222,6 +222,8 @@ int		c = 0, len = 0;
 
 		// create the new file and write the IV and the salt first.
 		db_file = fopen(db_filename, "w");
+		if (chmod(db_filename, 0600) != 0)
+			perror("chmod(database file)");
 
 		strlcpy((char *)iv, get_random_str(sizeof(iv) - 1), sizeof(iv));
 		fwrite(iv, sizeof(iv) - 1, 1, db_file);
@@ -244,14 +246,12 @@ int		c = 0, len = 0;
 	BIO_set_close(bio_file, BIO_CLOSE);
 	bio_chain = BIO_push(bio_file, bio_chain);
 
-	/*
 	bio_b64 = BIO_new(BIO_f_base64());
 	if (!bio_b64) {
 		perror("BIO_new(f_base64)");
 		quit(e, eh, bio_chain, EXIT_FAILURE);
 	}
 	bio_chain = BIO_push(bio_b64, bio_chain);
-	*/
 
 	bio_cipher = BIO_new(BIO_f_cipher());
 	if (!bio_cipher) {
@@ -293,7 +293,6 @@ int		c = 0, len = 0;
 		pos += ret;
 		switch (ret) {
 			case 0:
-				//perror("read()");
 			break;
 			case -1:
 				perror("read()");
