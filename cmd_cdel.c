@@ -69,8 +69,8 @@ cmd_cdel(EditLine *e, ...)
 	}
 
 	cname = convert_utf8(cname_locale, 0);
-
 	db_node = find_keychain(cname);
+	free(cname);
 	if (db_node) {
 		if (xmlUTF8Charcmp(xmlGetProp(keychain, BAD_CAST "name"),
 				   xmlGetProp(db_node, BAD_CAST "name")) == 0) {	// don't allow to delete the actual keychain. this saves us trouble.
@@ -87,7 +87,6 @@ cmd_cdel(EditLine *e, ...)
 			}
 
 
-			free(cname);
 			cname = xmlGetProp(db_node, BAD_CAST "name");
 			cname_locale = convert_utf8(cname, 1);
 			printf("Do you really want to delete '%s'? <yes/no> ", cname_locale);
@@ -99,53 +98,16 @@ cmd_cdel(EditLine *e, ...)
 			}
 
 			if (strncmp(e_line, "yes", 3) == 0) {
-				// check if it was the last keychain,
-				// by checking its neighbors if they exist.
-				// we don't allow to delete the last keychain
-				db_node_tmp = db_node->next;
+				free(cname_locale);
 
-				// first, search forward.
-				while (db_node_tmp) {
-					if (db_node_tmp->type == XML_ELEMENT_NODE) {	// we only care about ELEMENT nodes
-						keychain = db_node_tmp;
-						printf("actual keychain has changed to '%s' (next).\n", xmlGetProp(keychain, BAD_CAST "name"));
-						break;
-					}
+				db_node_tmp = db_node->prev;
+				xmlUnlinkNode(db_node_tmp);
+				xmlFreeNode(db_node_tmp);
 
-					db_node_tmp = db_node_tmp->next;
-				}
+				xmlUnlinkNode(db_node);
+				xmlFreeNode(db_node);
 
-				// if we didn't find a consequent valid node,
-				// search backwards.
-				if (!db_node_tmp) {
-					db_node_tmp = db_node->prev;
-
-					while (db_node_tmp) {
-						if (db_node_tmp->type == XML_ELEMENT_NODE) {	// we only care about ELEMENT nodes
-							keychain = db_node_tmp;
-							break;
-						}
-
-						db_node_tmp = db_node_tmp->prev;
-					}
-				}
-
-				// now 'keychain' points to a sibling (next or previous one)
-
-				if (db_node_tmp) {
-					printf("'%s'", cname_locale);
-					free(cname_locale);
-
-					db_node_tmp = db_node->prev;
-					xmlUnlinkNode(db_node_tmp);
-					xmlFreeNode(db_node_tmp);
-
-					xmlUnlinkNode(db_node);
-					xmlFreeNode(db_node);
-
-					puts(" deleted");
-				} else
-					puts("Can not delete the last keychain!\n");
+				printf("'%s' deleted\n", cname_locale);
 			}
 
 
