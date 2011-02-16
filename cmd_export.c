@@ -32,14 +32,15 @@
 extern xmlDocPtr	db;
 
 
-void cmd_export(EditLine *e, ...) {
+void
+cmd_export(EditLine *e, ...)
+{
+	va_list		ap;
 
-va_list		ap;
+	command		*commands = NULL;
 
-command		*commands = NULL;
-
-char		*line = NULL;
-char		*export_filename = NULL;
+	char		*line = NULL;
+	char		*export_filename = NULL;
 
 
 	va_start(ap, e);

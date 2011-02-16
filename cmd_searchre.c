@@ -36,24 +36,26 @@
 extern xmlNodePtr	keychain;
 
 
-void cmd_searchre(EditLine *e, ...) {
+void
+cmd_searchre(EditLine *e, ...)
+{
 #ifdef	_HAVE_PCRE
-va_list		ap;
+	va_list		ap;
 
-xmlNodePtr	db_node = NULL;
-xmlChar		*pattern_locale = NULL, *key_locale = NULL, *pattern = NULL, *key = NULL;
+	xmlNodePtr	db_node = NULL;
+	xmlChar		*pattern_locale = NULL, *key_locale = NULL, *pattern = NULL, *key = NULL;
 
-command		*commands = NULL;
+	command		*commands = NULL;
 
-pcre		*re = NULL;
-pcre_extra	*re_study = NULL;
-const char	*error = NULL;
-int		erroffset = 0;
-int		ovector[30];
+	pcre		*re = NULL;
+	pcre_extra	*re_study = NULL;
+	const char	*error = NULL;
+	int		erroffset = 0;
+	int		ovector[30];
 
-char		*line = NULL, *cmd = NULL;
-char		chain = 0;
-int		hits = 0, idx = 0;
+	char		*line = NULL, *cmd = NULL;
+	char		chain = 0;
+	int		hits = 0, idx = 0;
 
 
 	va_start(ap, e);

@@ -33,15 +33,16 @@ extern xmlDocPtr	db;
 extern char		dirty;
 
 
-void cmd_quit(EditLine *e, ...) {
+void
+cmd_quit(EditLine *e, ...)
+{
+	va_list		ap;
 
-va_list		ap;
+	History		*eh = NULL;
 
-History		*eh = NULL;
+	BIO		*bio_chain = NULL;
 
-BIO		*bio_chain = NULL;
-
-char		c = 0, *e_line = NULL;
+	char		c = 0, *e_line = NULL;
 
 
 	va_start(ap, e);

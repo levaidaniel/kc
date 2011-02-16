@@ -33,14 +33,15 @@ extern xmlDocPtr	db;
 extern xmlNodePtr	keychain;
 
 
-void cmd_list(EditLine *e, ...) {
+void
+cmd_list(EditLine *e, ...)
+{
+	va_list		ap;
 
-va_list		ap;
+	xmlNodePtr	db_node = NULL;
+	xmlChar		*key_locale = NULL, *key = NULL;
 
-xmlNodePtr	db_node = NULL;
-xmlChar		*key_locale = NULL, *key = NULL;
-
-int		idx = 0;
+	int		idx = 0;
 
 
 	va_start(ap, e);

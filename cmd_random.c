@@ -28,12 +28,14 @@
 #include "common.h"
 
 
-void cmd_random(EditLine *e, ...) {
+void
+cmd_random(EditLine *e, ...)
+{
+	va_list		ap;
 
-va_list		ap;
-char		*line = NULL;
-int		length = 0;
-char		*rand_str = NULL;
+	char		*line = NULL;
+	int		length = 0;
+	char		*rand_str = NULL;
 
 
 	va_start(ap, e);

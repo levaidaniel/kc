@@ -32,13 +32,14 @@
 extern command	*commands_first;
 
 
-void cmd_help(EditLine *e, ...) {
+void
+cmd_help(EditLine *e, ...)
+{
+	va_list		ap;
 
-va_list		ap;
+	command		*commands = commands_first;
 
-command		*commands = commands_first;
-
-char		*line = NULL, *got_command = NULL;
+	char		*line = NULL, *got_command = NULL;
 
 
 	va_start(ap, e);

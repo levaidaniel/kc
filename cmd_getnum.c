@@ -35,16 +35,17 @@ char get_line(xmlChar *, int, int *, char *, int);
 extern xmlNodePtr	keychain;
 
 
-void cmd_getnum(EditLine *e, ...) {
+void
+cmd_getnum(EditLine *e, ...)
+{
+	va_list		ap;
 
-va_list		ap;
+	xmlNodePtr	db_node = NULL;
+	xmlChar		*key_locale = NULL, *value_locale = NULL, *key = NULL, *value = NULL;
 
-xmlNodePtr	db_node = NULL;
-xmlChar		*key_locale = NULL, *value_locale = NULL, *key = NULL, *value = NULL;
-
-int		idx = 0, newlines = 0, i = 0, pos = 0, space = 0, erase_len = 0, line_len = 0, value_len = 0;
-char		c = -1, rc = -1;
-char		*rand_str = NULL;
+	int		idx = 0, newlines = 0, i = 0, pos = 0, space = 0, erase_len = 0, line_len = 0, value_len = 0;
+	char		c = -1, rc = -1;
+	char		*rand_str = NULL;
 
 
 	va_start(ap, e);
@@ -194,8 +195,10 @@ char		*rand_str = NULL;
 } /* cmd_getnum() */
 
 
-char get_line(xmlChar *value_locale, int value_len, int *pos, char *c, int idx) {
-int	i = 1;	// this counts how many '\n' we've found so far
+char
+get_line(xmlChar *value_locale, int value_len, int *pos, char *c, int idx)
+{
+	int	i = 1;	// this counts how many '\n' we've found so far
 
 	// if we want the first line (which can't be identified like the rest
 	// of the lines: by presuming a '\n' character before the line)

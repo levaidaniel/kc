@@ -26,6 +26,8 @@
 #include "common.h"
 
 
-void cmd_version(EditLine *e, ...) {
+void
+cmd_version(EditLine *e, ...)
+{
 	printf("%s\n", VERSION);
 } /* cmd_version() */

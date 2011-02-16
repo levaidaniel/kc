@@ -29,8 +29,10 @@
 
 /* create a linked list for the commands.
  * the list contains the command's name and the function which handles it. */
-void commands_init(command **commands) {
-command		*first = NULL;
+void
+commands_init(command **commands)
+{
+	command		*first = NULL;
 
 
 	*commands = (command *)malloc(sizeof(command)); malloc_check(*commands);

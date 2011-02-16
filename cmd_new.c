@@ -34,17 +34,18 @@ extern char		dirty;
 extern char		*locale;
 
 
-void cmd_new(EditLine *e, ...) {
+void
+cmd_new(EditLine *e, ...)
+{
+	va_list		ap;
 
-va_list		ap;
+	History		*eh = NULL;
 
-History		*eh = NULL;
+	xmlNodePtr	db_node = NULL;
+	xmlChar		*key_locale = NULL, *value_locale = NULL, *key = NULL, *value = NULL;
 
-xmlNodePtr	db_node = NULL;
-xmlChar		*key_locale = NULL, *value_locale = NULL, *key = NULL, *value = NULL;
-
-int		e_count = 0;
-const char	*e_line = NULL;
+	int		e_count = 0;
+	const char	*e_line = NULL;
 
 
 	va_start(ap, e);

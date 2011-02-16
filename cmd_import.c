@@ -34,17 +34,18 @@ extern xmlNodePtr	keychain;
 extern char		dirty;
 
 
-void cmd_import(EditLine *e, ...) {
+void
+cmd_import(EditLine *e, ...)
+{
+	va_list		ap;
 
-va_list		ap;
+	xmlDocPtr	db_new = NULL;
+	xmlNodePtr	db_root = NULL;
 
-xmlDocPtr	db_new = NULL;
-xmlNodePtr	db_root = NULL;
+	command		*commands = NULL;
 
-command		*commands = NULL;
-
-char		*line = NULL;
-char		*import_filename = NULL;
+	char		*line = NULL;
+	char		*import_filename = NULL;
 
 
 	va_start(ap, e);

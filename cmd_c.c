@@ -32,16 +32,17 @@
 extern xmlNodePtr	keychain;
 
 
-void cmd_c(EditLine *e, ...) {
+void
+cmd_c(EditLine *e, ...)
+{
+	va_list		ap;	
 
-va_list		ap;	
+	xmlNodePtr	db_node = NULL;
+	xmlChar		*cname_locale = NULL, *cname = NULL;
 
-xmlNodePtr	db_node = NULL;
-xmlChar		*cname_locale = NULL, *cname = NULL;
+	command		*commands = NULL;
 
-command		*commands = NULL;
-
-char		*line = NULL;
+	char		*line = NULL;
 
 
 	va_start(ap, e);

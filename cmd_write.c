@@ -32,16 +32,17 @@ extern xmlDocPtr	db;
 extern char		dirty;
 
 
-void cmd_write(EditLine *e, ...) {
+void
+cmd_write(EditLine *e, ...)
+{
+	va_list			ap;
 
-va_list			ap;
+	xmlSaveCtxtPtr		xml_save = NULL;
+	xmlBufferPtr		xml_buf = NULL;
 
-xmlSaveCtxtPtr		xml_save = NULL;
-xmlBufferPtr		xml_buf = NULL;
+	BIO			*bio_chain = NULL;
 
-BIO			*bio_chain = NULL;
-
-int			ret = 0;
+	int			ret = 0;
 
 
 	va_start(ap, e);

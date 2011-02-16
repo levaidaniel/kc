@@ -29,7 +29,9 @@
 #include <errno.h>
 
 
-int malloc_check(void *p) {
+int
+malloc_check(void *p)
+{
 	if (p == NULL) {
 		fprintf(stderr, "%s\n", strerror(ENOMEM));
 		exit(EXIT_FAILURE);

@@ -30,12 +30,13 @@ extern xmlNodePtr	keychain;
 extern char		*locale;
 
 
-xmlNodePtr find_keychain(xmlChar *cname) {
+xmlNodePtr
+find_keychain(xmlChar *cname)
+{
+	xmlNodePtr	db_node = NULL;
 
-xmlNodePtr	db_node = NULL;
-
-char		*inv = NULL;
-int		idx = -1, i = 0;
+	char		*inv = NULL;
+	int		idx = -1, i = 0;
 
 
 	// if we got a number
@@ -67,10 +68,12 @@ int		idx = -1, i = 0;
 } /* find_keychain() */
 
 
-xmlNodePtr find_key(int idx) {
-xmlNodePtr	db_node = NULL;
+xmlNodePtr
+find_key(int idx)
+{
+	xmlNodePtr	db_node = NULL;
 
-int		i = -1;
+	int		i = -1;
 
 
 	db_node = keychain->children;
@@ -87,9 +90,11 @@ int		i = -1;
 } /* find_key */
 
 
-char *parse_newlines(char *line, char dir) {		// dir(direction) convert "\n" to '\n' (dir=0), or backwards
-char		*ret = NULL;
-int		nlnum = 0, i = 0, j = 0, ret_len = 0;
+char *
+parse_newlines(char *line, char dir)		// dir(direction) convert "\n" to '\n' (dir=0), or backwards
+{
+	char		*ret = NULL;
+	int		nlnum = 0, i = 0, j = 0, ret_len = 0;
 
 
 	if (!line)
@@ -150,8 +155,10 @@ int		nlnum = 0, i = 0, j = 0, ret_len = 0;
 } /* parse_newlines() */
 
 
-int digit_length(int idx) {
-int	length = 1;
+int
+digit_length(int idx)
+{
+	int	length = 1;
 
 
 	while ((idx / 10) != 0) {
@@ -163,13 +170,15 @@ int	length = 1;
 } /* digit_length() */
 
 
-xmlChar *convert_utf8(char *string, char dir) {		// 'dir'=direction, 0: locale=>utf8, 1: utf8=>locale
-iconv_t		iconv_ctx;
-size_t		conv_bytes = 0;
-size_t		out_size = 0;
-size_t		in_left = 0, out_left = 0;
-char		*out_ptr = NULL, *out_str = NULL, *in_ptr = NULL, *in_str = NULL;
-int		ret = 0;
+xmlChar *
+convert_utf8(char *string, char dir)		// 'dir'=direction, 0: locale=>utf8, 1: utf8=>locale
+{
+	iconv_t		iconv_ctx;
+	size_t		conv_bytes = 0;
+	size_t		out_size = 0;
+	size_t		in_left = 0, out_left = 0;
+	char		*out_ptr = NULL, *out_str = NULL, *in_ptr = NULL, *in_str = NULL;
+	int		ret = 0;
 
 
 	if (!string)

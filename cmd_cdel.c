@@ -33,20 +33,21 @@ extern xmlNodePtr	keychain;
 extern char		dirty;
 
 
-void cmd_cdel(EditLine *e, ...) {
+void
+cmd_cdel(EditLine *e, ...)
+{
+	va_list		ap;
 
-va_list		ap;
+	History 	*eh = NULL;
 
-History 	*eh = NULL;
+	xmlNodePtr	db_node = NULL, db_node_tmp = NULL;
+	xmlChar		*cname_locale = NULL, *cname = NULL;
 
-xmlNodePtr	db_node = NULL, db_node_tmp = NULL;
-xmlChar		*cname_locale = NULL, *cname = NULL;
+	command		*commands = NULL;
 
-command		*commands = NULL;
-
-const char	*e_line = NULL;
-int		e_count = 0;
-char		*line = NULL;
+	const char	*e_line = NULL;
+	int		e_count = 0;
+	char		*line = NULL;
 
 
 	va_start(ap, e);

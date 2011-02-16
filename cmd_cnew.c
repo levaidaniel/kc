@@ -33,18 +33,19 @@ extern xmlNodePtr	keychain;
 extern char		dirty;
 
 
-void cmd_cnew(EditLine *e, ...) {
+void
+cmd_cnew(EditLine *e, ...)
+{
+	va_list		ap;
 
-va_list		ap;
+	History		*eh = NULL;
 
-History		*eh = NULL;
+	xmlNodePtr	db_node = NULL;
+	xmlChar		*cname_locale = NULL, *cname = NULL;
 
-xmlNodePtr	db_node = NULL;
-xmlChar		*cname_locale = NULL, *cname = NULL;
-
-char		*line = NULL;
-int		e_count = 0;
-const char	*e_line = NULL;
+	char		*line = NULL;
+	int		e_count = 0;
+	const char	*e_line = NULL;
 
 
 	va_start(ap, e);

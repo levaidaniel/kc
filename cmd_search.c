@@ -32,19 +32,20 @@
 extern xmlNodePtr	keychain;
 
 
-void cmd_search(EditLine *e, ...) {
+void
+cmd_search(EditLine *e, ...)
+{
+	va_list		ap;
 
-va_list		ap;
+	xmlNodePtr	db_node = NULL;
+	xmlChar		*pattern_locale = NULL, *pattern = NULL, *key_locale = NULL, *key = NULL;
+	const xmlChar	*search = NULL;
 
-xmlNodePtr	db_node = NULL;
-xmlChar		*pattern_locale = NULL, *pattern = NULL, *key_locale = NULL, *key = NULL;
-const xmlChar	*search = NULL;
+	command		*commands = NULL;
 
-command		*commands = NULL;
-
-char		*line = NULL, *cmd = NULL;
-char		chain = 0;
-int		hits = 0, idx = 0;
+	char		*line = NULL, *cmd = NULL;
+	char		chain = 0;
+	int		hits = 0, idx = 0;
 
 
 	va_start(ap, e);

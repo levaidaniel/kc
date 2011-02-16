@@ -32,12 +32,13 @@
 extern xmlNodePtr	keychain;
 
 
-void cmd_clist(EditLine *e, ...) {
+void
+cmd_clist(EditLine *e, ...)
+{
+	xmlNodePtr	db_node = NULL;
+	xmlChar		*cname_locale = NULL, *cname = NULL;
 
-xmlNodePtr	db_node = NULL;
-xmlChar		*cname_locale = NULL, *cname = NULL;
-
-int		idx = 0;
+	int		idx = 0;
 
 
 	db_node = keychain->parent->children;

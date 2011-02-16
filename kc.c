@@ -26,6 +26,7 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <fcntl.h>
 #ifndef _LINUX
 #include <readpassphrase.h>
 #else
@@ -44,49 +45,50 @@ void print_bio_chain(BIO *);
 command		*commands_first = NULL;
 xmlDocPtr	db = NULL;
 xmlNodePtr	keychain = NULL;
+int		db_file = -1;
 char		dirty = 0;
 char		*locale = NULL;
 
 
-int main(int argc, char *argv[]) {
+int
+main(int argc, char *argv[])
+{
+	EditLine	*e = NULL;
+	int		e_count = 0;
+	const char	*e_line = NULL;
+	History		*eh = NULL;
+	HistEvent	eh_ev;
 
-EditLine	*e = NULL;
-int		e_count = 0;
-const char	*e_line = NULL;
-History		*eh = NULL;
-HistEvent	eh_ev;
+	BIO		*bio_chain = NULL;
+	BIO		*bio_file = NULL;
+	BIO		*bio_cipher = NULL;
+	BIO		*bio_b64 = NULL;
+	char		*db_buf = NULL;
+	int		ret = 0;
+	size_t		db_buf_size = 4096, pos = 0;
+	unsigned char	key[128];
+	char		*pass = NULL;
+	const unsigned char	salt[17];
+	const unsigned char	iv[17];
+	void		*rbuf = NULL;
+	int		pass_maxlen = 64;
+	char		pass_prompt[15];
+	char		*pass_filename = NULL;
+	FILE		*pass_file = NULL;
+	size_t		pass_size = 128;
 
-FILE		*db_file = NULL;
-BIO		*bio_chain = NULL;
-BIO		*bio_file = NULL;
-BIO		*bio_cipher = NULL;
-BIO		*bio_b64 = NULL;
-char		*db_buf = NULL;
-int		ret = 0;
-size_t		db_buf_size = 4096, pos = 0;
-unsigned char	key[128];
-char		*pass = NULL;
-const unsigned char	salt[17];
-const unsigned char	iv[17];
-void		*rbuf = NULL;
-int		pass_maxlen = 64;
-char		pass_prompt[15];
-char		*pass_filename = NULL;
-FILE		*pass_file = NULL;
-size_t		pass_size = 128;
+	char		batchmode = 0;
 
-char		batchmode = 0;
+	struct stat	st;
+	const char	*default_db_dir = ".kc";
+	const char	*default_db_filename = "default";
+	char		*db_filename = NULL;
+	char		new_db_file = 0;
+	char		*env_home = NULL;
 
-struct stat	st;
-const char	*default_db_dir = ".kc";
-const char	*default_db_filename = "default";
-char		*db_filename = NULL;
-char		new_db_file = 0;
-char		*env_home = NULL;
+	xmlNodePtr	db_root = NULL, db_node = NULL;
 
-xmlNodePtr	db_root = NULL, db_node = NULL;
-
-int		c = 0, len = 0;
+	int		c = 0, len = 0;
 
 
 	debug = 0;
@@ -137,42 +139,57 @@ int		c = 0, len = 0;
 		db_filename = realloc(db_filename, len); malloc_check(db_filename);
 
 		snprintf(db_filename, len, "%s/%s/%s", env_home, default_db_dir, default_db_filename);
-
-
-		if(stat(db_filename, &st) == 0) {
-			if(!S_ISLNK(st.st_mode)  &&  !S_ISREG(st.st_mode)) {
-				printf("'%s' is not a regular file or a link!\n", db_filename);
-				quit(e, eh, bio_chain, EXIT_FAILURE);
-			}
-			new_db_file = 0;
-
-			printf("Opening '%s'\n", db_filename);
-
-			// open the file and read the IV and the salt.
-			db_file = fopen(db_filename, "r");
-
-			rbuf = malloc(17); malloc_check(rbuf);
-
-			fread(rbuf, 16, 1, db_file);
-			strlcpy((char *)iv, (char *)rbuf, sizeof(iv));
-
-			fread(rbuf, 16, 1, db_file);
-			strlcpy((char *)salt, (char *)rbuf, sizeof(salt));
-
-			fclose(db_file);
-
-			strlcpy(pass_prompt, "Password: ", 15);
-		} else {
-			new_db_file = 1;
-
-			printf("Creating '%s'\n", db_filename);
-
-			// we'll write the IV and salt later after we got a password
-
-			strlcpy(pass_prompt, "New password: ", 15);
-		}
 	}
-	fflush(stdout);
+
+	if(stat(db_filename, &st) == 0) {	// if db_filename exists
+		if(!S_ISLNK(st.st_mode)  &&  !S_ISREG(st.st_mode)) {
+			printf("'%s' is not a regular file or a link!\n", db_filename);
+			quit(e, eh, bio_chain, EXIT_FAILURE);
+		}
+		printf("Opening '%s'\n", db_filename);
+	} else
+		printf("Creating '%s'\n", db_filename);
+
+	db_file = open(db_filename, O_RDWR | O_CREAT);
+	if (db_file < 0) {
+		printf("error opening '%s'\n", db_filename);
+		perror("open()");
+		quit(e, eh, bio_chain, EXIT_FAILURE);
+	}
+
+	if (flock(db_file, LOCK_NB | LOCK_EX) < 0) {
+		perror("could not lock database file");
+		puts("Maybe another instance is using that database?");
+		quit(e, eh, bio_chain, EXIT_FAILURE);
+	}
+
+	if (chmod(db_filename, 0600) != 0)
+		perror("chmod(database file)");
+
+	fstat(db_file, &st);
+	if(st.st_size > 0) {	// if db_filename is not empty
+		// read the IV and the salt.
+
+		rbuf = malloc(17); malloc_check(rbuf);
+
+		read(db_file, rbuf, 16);
+		strlcpy((char *)iv, (char *)rbuf, sizeof(iv));
+
+		read(db_file, rbuf, 16);
+		strlcpy((char *)salt, (char *)rbuf, sizeof(salt));
+
+		free(rbuf);
+
+
+		strlcpy(pass_prompt, "Password: ", 15);
+	} else {
+		new_db_file = 1;
+
+		// we'll write the IV and salt later after we got a password
+
+
+		strlcpy(pass_prompt, "New password: ", 15);
+	}
 
 	if (batchmode) {
 		if (!pass_filename) {
@@ -220,18 +237,12 @@ int		c = 0, len = 0;
 		if (debug)
 			puts("generating salt and IV");
 
-		// create the new file and write the IV and the salt first.
-		db_file = fopen(db_filename, "w");
-		if (chmod(db_filename, 0600) != 0)
-			perror("chmod(database file)");
-
+		// write the IV and the salt first.
 		strlcpy((char *)iv, get_random_str(sizeof(iv) - 1), sizeof(iv));
-		fwrite(iv, sizeof(iv) - 1, 1, db_file);
+		write(db_file, iv, sizeof(iv) - 1);
 
 		strlcpy((char *)salt, get_random_str(sizeof(salt) - 1), sizeof(salt));
-		fwrite(salt, sizeof(salt) - 1, 1, db_file);
-
-		fclose(db_file);
+		write(db_file, salt, sizeof(salt) - 1);
 	}
 
 	if (debug)
@@ -484,11 +495,12 @@ int		c = 0, len = 0;
 } /* main() */
 
 
-void cmd_match(EditLine *e, const char *e_line, History *eh, BIO *bio_chain) {
-
-int	idx = -1, space = -1;
-char	*str = NULL, *line = strdup(e_line);
-command	*commands = commands_first;
+void
+cmd_match(EditLine *e, const char *e_line, History *eh, BIO *bio_chain)
+{
+	int	idx = -1, space = -1;
+	char	*str = NULL, *line = strdup(e_line);
+	command	*commands = commands_first;
 
 
 	line[strlen(line) - 1] = '\0';		// remove the newline character from the end
@@ -532,12 +544,13 @@ command	*commands = commands_first;
 } /* cmd_match() */
 
 
-const char *e_prompt(EditLine *e) {
-
-const char	*cl_data = NULL;
-unsigned long	prompt_len = 0;
-static char	*prompt = NULL;
-xmlChar		*cname_locale = NULL, *cname = NULL;
+const char *
+e_prompt(EditLine *e)
+{
+	const char	*cl_data = NULL;
+	unsigned long	prompt_len = 0;
+	static char	*prompt = NULL;
+	xmlChar		*cname_locale = NULL, *cname = NULL;
 
 
 	el_get(e, EL_CLIENTDATA, &cl_data);
@@ -556,13 +569,17 @@ xmlChar		*cname_locale = NULL, *cname = NULL;
 } /* e_prompt() */
 
 
-const char *e_prompt_null(EditLine *e) {
+const char *
+e_prompt_null(EditLine *e)
+{
 	return("");
 }
 
 
-void print_bio_chain(BIO *bio_chain) {
-BIO	*bio_tmp = NULL;
+void
+print_bio_chain(BIO *bio_chain)
+{
+	BIO	*bio_tmp = NULL;
 
 
 	printf("bio_chain: ");
@@ -594,10 +611,12 @@ BIO	*bio_tmp = NULL;
 } /* print_bio_chain */
 
 
-char *get_random_str(int length) {
-int		i = 0;
-char		*tmp = NULL;
-char		*ret = NULL;
+char *
+get_random_str(int length)
+{
+	int		i = 0;
+	char		*tmp = NULL;
+	char		*ret = NULL;
 
 
 	ret = malloc(length + 1); malloc_check(ret);
@@ -628,9 +647,11 @@ char		*ret = NULL;
 } /* get_random_str() */
 
 
-void *get_random(int length) {
-char		*ret = NULL;
-FILE		*rnd_file = NULL;
+void *
+get_random(int length)
+{
+	char		*ret = NULL;
+	FILE		*rnd_file = NULL;
 
 
 #ifndef _LINUX
@@ -653,11 +674,13 @@ FILE		*rnd_file = NULL;
 } /* get_random() */
 
 
-char tab_complete(EditLine *e, int ch) {
-char		*line_buf = NULL, *match = NULL, *tmp = NULL;
-const LineInfo	*el_lineinfo = NULL;
-command		*commands = commands_first;
-int		hits = 0, len = 0;
+char
+tab_complete(EditLine *e, int ch)
+{
+	char		*line_buf = NULL, *match = NULL, *tmp = NULL;
+	const LineInfo	*el_lineinfo = NULL;
+	command		*commands = commands_first;
+	int		hits = 0, len = 0;
 
 
 	el_lineinfo = el_line(e);
@@ -714,34 +737,44 @@ int		hits = 0, len = 0;
 } /* tab_complete() */
 
 
-void quit(EditLine *e, History *eh, BIO *bio_chain, int retval) {
+void
+quit(EditLine *e, History *eh, BIO *bio_chain, int retval)
+{
 	if (bio_chain) {
 		BIO_free_all(bio_chain);
 		if (debug)
-			printf("closed bio_chain\n");
+			puts("closed bio_chain");
 	}
 
 	if (eh) {
 		history_end(eh);
 		if (debug)
-			printf("closed editline history\n");
+			puts("closed editline history");
 	}
 
 	if (e) {
 		el_end(e);
 		if (debug)
-			printf("closed editline\n");
+			puts("closed editline");
+	}
+
+	if (db_file) {
+		close(db_file);
+		if (debug)
+			puts("closed database file");
 	}
 
 	if (debug)
-		printf("exiting...\n");
+		puts("exiting...");
 
 	exit(retval);
 } /* quit() */
 
 
-void print_hex(unsigned char *buf, int len) {
-int i = 0;
+void
+print_hex(unsigned char *buf, int len)
+{
+	int i = 0;
 
 
 	for (i = 0; i < len; i++) {
