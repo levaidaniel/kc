@@ -26,10 +26,11 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
 #ifndef _LINUX
+#include <fcntl.h>
 #include <readpassphrase.h>
 #else
+#include <sys/file.h>
 #include <bsd/readpassphrase.h>
 #endif
 
