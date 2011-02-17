@@ -616,7 +616,7 @@ char *
 get_random_str(int length, char alnum)
 {
 	int		i = 0;
-	int		rnd_file = NULL;
+	int		rnd_file = -1;
 #ifndef _LINUX
 	char		*rnd_dev = "/dev/random";
 #else
