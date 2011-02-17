@@ -641,7 +641,8 @@ get_random_str(int length, char alnum)
 	for (i=0; i < length; i++) {
 		if (alnum)	// only alphanumeric was requested
 			while (	(*tmp < 65  ||  *tmp > 90)  &&
-				(*tmp < 97  ||  *tmp > 122)) {
+				(*tmp < 97  ||  *tmp > 122)  &&
+				(*tmp < 48  ||  *tmp > 57)) {
 
 				read(rnd_file, tmp, 1);
 			}
