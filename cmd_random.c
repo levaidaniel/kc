@@ -46,14 +46,14 @@ cmd_random(EditLine *e, ...)
 	va_end(ap);
 
 	if (sscanf(line, "%*s %d", &length) <= 0)
-		length = 10;
+		length = 8;
 
 	if (length > 100  ||  length <= 0) {
 		puts("length must be 1-100.");
 		return;
 	}
 
-	rand_str = get_random_str(length);
+	rand_str = get_random_str(length, 1);
 	if (!rand_str)
 		return;
 	printf("%s\n", rand_str);

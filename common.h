@@ -29,8 +29,7 @@
 const char *e_prompt(EditLine *);
 const char *e_prompt_null(EditLine *);
 int malloc_check(void *);
-void *get_random(int);
-char *get_random_str(int);
+char *get_random_str(int, char);
 void quit(EditLine *, History *, BIO *, int);
 
 

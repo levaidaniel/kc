@@ -97,7 +97,7 @@ cmd_getnum(EditLine *e, ...)
 
 			if (space) {
 				// print the first random character(s)
-				rand_str = get_random_str(space);
+				rand_str = get_random_str(space, 0);
 				if (!rand_str)
 					return;
 				printf("%s", rand_str);
@@ -113,7 +113,7 @@ cmd_getnum(EditLine *e, ...)
 
 					if (space) {
 						// print random character(s)
-						rand_str = get_random_str(space);
+						rand_str = get_random_str(space, 0);
 						if (!rand_str)
 							return;
 						printf("%s", rand_str);

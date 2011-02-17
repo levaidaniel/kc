@@ -152,7 +152,7 @@ commands_init(command **commands)
 
 	(*commands)->name = "random";
 	(*commands)->usage = "random [length]";
-	(*commands)->help = "Generate a random number with the given length. Default is 10.";
+	(*commands)->help = "Generate a random alphanumeric string with the given length. Default is 8.";
 	(*commands)->fn = cmd_random;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;

@@ -239,10 +239,10 @@ main(int argc, char *argv[])
 			puts("generating salt and IV");
 
 		// write the IV and the salt first.
-		strlcpy((char *)iv, get_random_str(sizeof(iv) - 1), sizeof(iv));
+		strlcpy((char *)iv, get_random_str(sizeof(iv) - 1, 0), sizeof(iv));
 		write(db_file, iv, sizeof(iv) - 1);
 
-		strlcpy((char *)salt, get_random_str(sizeof(salt) - 1), sizeof(salt));
+		strlcpy((char *)salt, get_random_str(sizeof(salt) - 1, 0), sizeof(salt));
 		write(db_file, salt, sizeof(salt) - 1);
 	}
 
@@ -613,66 +613,58 @@ print_bio_chain(BIO *bio_chain)
 
 
 char *
-get_random_str(int length)
+get_random_str(int length, char alnum)
 {
 	int		i = 0;
+	int		rnd_file = NULL;
+#ifndef _LINUX
+	char		*rnd_dev = "/dev/random";
+#else
+	char		*rnd_dev = "/dev/urandom";
+#endif
 	char		*tmp = NULL;
 	char		*ret = NULL;
 
 
+	rnd_file = open(rnd_dev, O_RDONLY, 0000);
+	if (rnd_file < 0) {
+		printf("Error opening %s!", rnd_dev);
+		perror("open()");
+		return(NULL);
+	}
+
+
 	ret = malloc(length + 1); malloc_check(ret);
+	tmp = malloc(1); malloc_check(tmp);
 
-	tmp = (char *)get_random(1);
+	read(rnd_file, tmp, 1);
 	for (i=0; i < length; i++) {
-		// until a printable character appears, read from random file,
-		// plus ignore some characters I don't like :)
-		while (	tmp[0] < 33  ||  tmp[0] > 125  ||
-			tmp[0] == 34  || tmp[0] == 39  ||
-			tmp[0] == 44  || tmp[0] == 46  ||
-			tmp[0] == 96  || tmp[0] == 94) {
+		if (alnum)	// only alphanumeric was requested
+			while (	(*tmp < 65  ||  *tmp > 90)  &&
+				(*tmp < 97  ||  *tmp > 122)) {
 
-			free(tmp); tmp = NULL;
+				read(rnd_file, tmp, 1);
+			}
+		else
+			// give anything printable
+			while (	*tmp < 33  ||  *tmp > 126) {
 
-			tmp = (char *)get_random(1);
-		}
-		ret[i] = tmp[0];	// store the value
-		tmp[0] = '\0';		// reset the value
+				read(rnd_file, tmp, 1);
+			}
+
+		ret[i] = *tmp;		// store the value
+		*tmp = '\0';		// reset the value
 	}
 
 	free(tmp); tmp = NULL;
 
 	ret[length] = '\0';
 
+	close(rnd_file);
+
 
 	return(ret);
 } /* get_random_str() */
-
-
-void *
-get_random(int length)
-{
-	char		*ret = NULL;
-	FILE		*rnd_file = NULL;
-
-
-#ifndef _LINUX
-	rnd_file = fopen("/dev/random", "r");
-#else
-	rnd_file = fopen("/dev/urandom", "r");
-#endif
-	if (!rnd_file) {
-		puts("Error opening /dev/random!");
-		return(NULL);
-	}
-
-	ret = malloc(length + 1); malloc_check(ret);
-
-	fread(ret, length, 1, rnd_file);
-
-	fclose(rnd_file);
-
-	return(ret);
-} /* get_random() */
 
 
 char
