@@ -98,8 +98,6 @@ cmd_cdel(EditLine *e, ...)
 			}
 
 			if (strncmp(e_line, "yes", 3) == 0) {
-				free(cname_locale);
-
 				db_node_tmp = db_node->prev;
 				xmlUnlinkNode(db_node_tmp);
 				xmlFreeNode(db_node_tmp);
@@ -108,6 +106,7 @@ cmd_cdel(EditLine *e, ...)
 				xmlFreeNode(db_node);
 
 				printf("'%s' deleted\n", cname_locale);
+				free(cname_locale);
 			}
 
 
