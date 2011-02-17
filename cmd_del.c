@@ -71,9 +71,7 @@ cmd_del(EditLine *e, ...)
 	if (db_node) {
 		key = xmlNodeGetContent(db_node->children);
 		key_locale = convert_utf8(key, 1);
-		if (key) {
-			xmlFree(key); key = NULL;
-		}
+		xmlFree(key); key = NULL;
 
 		db_node_prev = db_node->prev;
 		xmlUnlinkNode(db_node_prev);	// remove the adjacent 'text' node, which are the indent and newline
@@ -83,7 +81,7 @@ cmd_del(EditLine *e, ...)
 		xmlFreeNode(db_node);
 
 		printf("'%s' deleted\n", key_locale);
-		free(key_locale); key_locale = NULL;
+		free(key_locale);
 
 		dirty = 1;
 	} else

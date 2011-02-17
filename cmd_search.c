@@ -103,9 +103,7 @@ cmd_search(EditLine *e, ...)
 				if (debug)
 					puts("");
 
-			if (key) {
-				xmlFree(key); key = NULL;
-			}
+			xmlFree(key); key = NULL;
 
 			idx++;
 		}

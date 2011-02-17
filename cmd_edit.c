@@ -85,9 +85,7 @@ cmd_edit(EditLine *e, ...)
 		// if we edit an existing entry, push the current value to the edit buffer
 		key = xmlNodeGetContent(db_node->children);
 		key_locale = convert_utf8(key, 1);
-		if (key) {
-			xmlFree(key); key = NULL;
-		}
+		xmlFree(key); key = NULL;
 		el_push(e, (const char *)key_locale);
 		free(key_locale); key_locale = NULL;
 
@@ -110,9 +108,7 @@ cmd_edit(EditLine *e, ...)
 		// if we edit an existing entry, push the current value to the edit buffer
 		value = xmlNodeGetContent(db_node->children->next->children);
 		value_nl = parse_newlines(value, 1);
-		if (value) {
-			xmlFree(value); value = NULL;
-		}
+		xmlFree(value); value = NULL;
 		value_locale = convert_utf8(value_nl, 1);
 		free(value_nl); value_nl = NULL;
 

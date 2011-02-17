@@ -59,9 +59,7 @@ cmd_getnum(EditLine *e, ...)
 	if (db_node) {
 		key = xmlNodeGetContent(db_node->children);
 		key_locale = convert_utf8(key, 1);
-		if (key) {
-			xmlFree(key); key = NULL;
-		}
+		xmlFree(key); key = NULL;
 
 		printf("[%s]\n", key_locale);	// print the key
 
@@ -79,9 +77,7 @@ cmd_getnum(EditLine *e, ...)
 		idx = 1;
 		value = xmlNodeGetContent(db_node->children->next->children);
 		value_locale = convert_utf8(value, 1);
-		if (value) {
-			xmlFree(value); value = NULL;
-		}
+		xmlFree(value); value = NULL;
 
 		value_len = xmlStrlen(value_locale);
 
