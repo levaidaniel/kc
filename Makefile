@@ -1,4 +1,11 @@
+LOCALBASE ?=	/usr/local
+BINOWN =	root
+BINGRP =	bin
+BINDIR =	${LOCALBASE}/bin
 PROG =		kc
+
+MANDIR=		${LOCALBASE}/man/cat
+MAN=		kc.1
 
 SRCS =		kc.c malloc_check.c
 SRCS +=		cmd_c.c cmd_cdel.c cmd_clist.c cmd_cnew.c cmd_cren.c cmd_del.c \
