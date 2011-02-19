@@ -93,17 +93,29 @@ main(int argc, char *argv[])
 
 
 	debug = 0;
-	while ((c = getopt(argc, argv, "k:b:d")) != -1)
+	while ((c = getopt(argc, argv, "k:b:vhd")) != -1)
 		switch (c) {
-			case 'd':
-				debug = 1;
-			break;
 			case 'k':
 				db_filename = optarg;
 			break;
 			case 'b':
 				batchmode = 1;
 				pass_filename = optarg;
+			break;
+			case 'v':
+				printf(	"%s\n", VERSION);
+				exit(EXIT_SUCCESS);
+			break;
+			case 'h':
+				printf(	"%s\n\n%s [-k database file] [-b password file] [-v] [-h]\n"
+					"-k: specify a non-default database file\n"
+					"-b: batch mode. read password from password file, and listen on stdin for commands.\n"
+					"-v: version\n"
+					"-h: this help\n", VERSION, argv[0]);
+				exit(EXIT_SUCCESS);
+			break;
+			case 'd':
+				debug = 1;
 			break;
 			default:
 			break;
