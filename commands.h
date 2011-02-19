@@ -32,6 +32,7 @@ void cmd_write(EditLine *, ...);
 void cmd_export(EditLine *, ...);
 void cmd_import(EditLine *, ...);
 void cmd_random(EditLine *, ...);
+void cmd_clear(EditLine *, ...);
 void cmd_version(EditLine *, ...);
 void cmd_help(EditLine *, ...);
 

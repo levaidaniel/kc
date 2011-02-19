@@ -157,6 +157,13 @@ commands_init(command **commands)
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
+	(*commands)->name = "clear";
+	(*commands)->usage = "clear [count]";
+	(*commands)->help = "Emulate a screen clearing.\nScrolls 50 lines by default, which can be multiplied by 'count' times if specified.";
+	(*commands)->fn = cmd_clear;
+	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
+	(*commands) = (*commands)->next;
+
 	(*commands)->name = "quit";
 	(*commands)->usage = "quit";
 	(*commands)->help = "Quit from program. Will ask if there are any unwritten changes.";
