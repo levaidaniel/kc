@@ -65,7 +65,7 @@ cmd_help(EditLine *e, ...)
 	} else {
 		printf("\nCommands:\n\n");
 
-		puts("Name------------Usage\n");
+		puts("[Name]     -    [Usage]\n");
 
 		while(commands) {
 			printf("%-10s - \t%s\n", commands->name, commands->usage);

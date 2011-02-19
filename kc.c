@@ -281,7 +281,6 @@ main(int argc, char *argv[])
 
 	memset(pass, '\0', pass_maxlen);
 	free(pass); pass = NULL;
-	free(db_filename); db_filename = NULL;
 
 
 	if (debug)
