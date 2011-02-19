@@ -103,7 +103,7 @@ main(int argc, char *argv[])
 				pass_filename = optarg;
 			break;
 			case 'v':
-				printf(	"%s\n", VERSION);
+				printf("%s\n", VERSION);
 				exit(EXIT_SUCCESS);
 			break;
 			case 'h':
@@ -118,6 +118,8 @@ main(int argc, char *argv[])
 				debug = 1;
 			break;
 			default:
+				printf("%s [-k database file] [-b password file] [-v] [-h]\n", argv[0]);
+				exit(EXIT_SUCCESS);
 			break;
 		}
 
