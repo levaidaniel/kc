@@ -2,6 +2,7 @@ LOCALBASE ?=	/usr/local
 BINOWN =	root
 BINGRP =	bin
 BINDIR =	${LOCALBASE}/bin
+INSTALL_STRIP =	
 PROG =		kc
 
 MANDIR=		${LOCALBASE}/man/cat
