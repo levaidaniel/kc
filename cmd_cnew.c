@@ -109,9 +109,9 @@ cmd_cnew(EditLine *e, ...)
 		dirty = 1;
 	} else {
 		cname_locale = convert_utf8(cname, 1);
-		printf("'%s' name is taken!\n", cname_locale);
+		printf("'%s' already exists!\n", cname_locale);
+		free(cname_locale);
 	}
 
 	free(cname);
-	free(cname_locale);
 } /* cmd_cnew() */
