@@ -34,20 +34,19 @@ extern char		dirty;
 
 
 void
-cmd_cdel(EditLine *e, ...)
+cmd_copy(EditLine *e, ...)
 {
 	va_list		ap;
 
-	History 	*eh = NULL;
+	History		*eh = NULL;
 
-	xmlNodePtr	db_node = NULL, db_node_tmp = NULL;
-	xmlChar		*cname_locale = NULL, *cname = NULL;
+	xmlNodePtr	db_node = NULL, db_node_c = NULL, db_node_prev = NULL;
+	xmlChar		*cname = NULL, *cname_locale = NULL;
 
 	command		*commands = NULL;
 
-	const char	*e_line = NULL;
-	int		e_count = 0;
-	char		*line = NULL;
+	char		*line = NULL, *idx_str = NULL;
+	int		idx = 0;
 
 
 	va_start(ap, e);
@@ -61,68 +60,48 @@ cmd_cdel(EditLine *e, ...)
 
 	va_end(ap);
 
-	strtok(line, " ");		// remove the command from the line
+	strtok(line, " ");				// remove the command name
+	idx_str = strtok(NULL, " ");
 	cname_locale = BAD_CAST strtok(NULL, " ");	// assign the command's parameter
-	if (!cname_locale) {
+	if (!cname_locale  ||  !idx_str) {
+		puts(commands->usage);
+		return;
+	}
+
+	if (sscanf(idx_str, "%d", &idx) <= 0) {
+		puts(commands->usage);
+		return;
+	}
+	if (idx < 0) {
 		puts(commands->usage);
 		return;
 	}
 
 	cname = convert_utf8(cname_locale, 0);
-	db_node = find_keychain(cname);
+	db_node_c = find_keychain(cname);
 	free(cname);
-	if (db_node) {
-		if (xmlUTF8Charcmp(xmlGetProp(keychain, BAD_CAST "name"),
-				   xmlGetProp(db_node, BAD_CAST "name")) == 0) {	// don't allow to delete the current keychain. this saves us trouble.
-
-			puts("Can not delete the current keychain!");
-		} else {
-			// disable history temporarily
-			if (el_set(e, EL_HIST, history, NULL) != 0) {
-				perror("el_set(EL_HIST)");
-			}
-			// clear the prompt temporarily
-			if (el_set(e, EL_PROMPT, e_prompt_null) != 0) {
-				perror("el_set(EL_PROMPT)");
-			}
-
-
-			cname = xmlGetProp(db_node, BAD_CAST "name");
-			cname_locale = convert_utf8(cname, 1);
-			printf("Do you really want to delete '%s'? <yes/no> ", cname_locale);
-
-			e_line = el_gets(e, &e_count);
-			if (!e_line) {
-				perror("input");
-				return;
-			}
-
-			if (strncmp(e_line, "yes", 3) == 0) {
-				db_node_tmp = db_node->prev;
-				xmlUnlinkNode(db_node_tmp);
-				xmlFreeNode(db_node_tmp);
-
-				xmlUnlinkNode(db_node);
-				xmlFreeNode(db_node);
-
-				printf("'%s' deleted\n", cname_locale);
-				free(cname_locale);
-			}
-
-
-			// re-enable the default prompt
-			if (el_set(e, EL_PROMPT, e_prompt) != 0) {
-				perror("el_set(EL_PROMPT)");
-			}
-			// re-enable history
-			if (el_set(e, EL_HIST, history, eh) != 0) {
-				perror("el_set(EL_HIST)");
-			}
-
-			dirty = 1;
-		}
-	} else {
-		printf("'%s' keychain not found.\n", cname_locale);
-		free(cname);
+	if (!db_node_c) {
+		puts("keychain not found.");
+		return;
 	}
-} /* cmd_cdel() */
+
+	db_node = find_key(idx);
+	if (!db_node) {
+		puts("invalid index!");
+		return;
+	} else {
+		// unlink from the original keychain
+		db_node_prev = db_node->prev;
+		xmlUnlinkNode(db_node_prev);	// remove the adjacent 'text' node, which is the indent and newline
+		xmlFreeNode(db_node_prev);
+
+		xmlUnlinkNode(db_node);
+
+
+		// add the entry to the destination keychain
+		xmlAddChild(db_node_c, xmlNewText(BAD_CAST "\n    "));
+		xmlAddChild(db_node_c, db_node);
+
+		dirty = 1;
+	}
+} /* cmd_copy() */

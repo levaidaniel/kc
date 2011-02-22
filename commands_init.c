@@ -40,42 +40,49 @@ commands_init(command **commands)
 
 	(*commands)->name = "list";
 	(*commands)->usage = "list";
-	(*commands)->help = "List all keys in the actual keychain.";
+	(*commands)->help = "List all keys in the current keychain.";
 	(*commands)->fn = cmd_list;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "new";
 	(*commands)->usage = "new";
-	(*commands)->help = "Add a new key to the actual keychain.\n\nTo the value field, it is possible to enter multiline values\nby writing '\\n' in place of a needed new line.\nOne can escape this with '\\\\n'.";
+	(*commands)->help = "Add a new key to the current keychain.\n\nTo the value field, it is possible to enter multiline values\nby writing '\\n' in place of a needed new line.\nOne can escape this with '\\\\n'.";
 	(*commands)->fn = cmd_new;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "edit";
 	(*commands)->usage = "edit <index>";
-	(*commands)->help = "Edit the given key in the actual keychain.";
+	(*commands)->help = "Edit the given key in the current keychain.";
 	(*commands)->fn = cmd_edit;
+	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
+	(*commands) = (*commands)->next;
+
+	(*commands)->name = "copy";
+	(*commands)->usage = "copy <index> <destination keychain's name or index>";
+	(*commands)->help = "Copy the given key in the current keychain to the destination keychain.";
+	(*commands)->fn = cmd_copy;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "del";
 	(*commands)->usage = "del <index>";
-	(*commands)->help = "Delete the given key from the actual keychain.";
+	(*commands)->help = "Delete the given key from the current keychain.";
 	(*commands)->fn = cmd_del;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "search";
 	(*commands)->usage = "search <search string>";
-	(*commands)->help = "Search for the given string in key names in the actual keychain.";
+	(*commands)->help = "Search for the given string in key names in the current keychain.";
 	(*commands)->fn = cmd_search;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "/";
 	(*commands)->usage = "/<search pattern>";
-	(*commands)->help = "Search for the given regular expression in key names in the actual keychain.";
+	(*commands)->help = "Search for the given regular expression in key names in the current keychain.";
 	(*commands)->fn = cmd_searchre;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
@@ -89,7 +96,7 @@ commands_init(command **commands)
 
 	(*commands)->name = "c";
 	(*commands)->usage = "c <keychain's name or index>";
-	(*commands)->help = "Set the given keychain as the actual keychain.";
+	(*commands)->help = "Set the given keychain as the current keychain.";
 	(*commands)->fn = cmd_c;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;

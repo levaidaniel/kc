@@ -83,7 +83,7 @@ cmd_search(EditLine *e, ...)
 			if (chain)
 				key = xmlStrdup(xmlGetProp(db_node, BAD_CAST "name"));	// search for keychains
 			else
-				key = xmlNodeGetContent(db_node->children);	// search for keys in the actual keychain
+				key = xmlNodeGetContent(db_node->children);	// search for keys in the current keychain
 
 			if (debug)
 				printf("name=%s", key);

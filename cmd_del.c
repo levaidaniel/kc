@@ -74,7 +74,7 @@ cmd_del(EditLine *e, ...)
 		xmlFree(key); key = NULL;
 
 		db_node_prev = db_node->prev;
-		xmlUnlinkNode(db_node_prev);	// remove the adjacent 'text' node, which are the indent and newline
+		xmlUnlinkNode(db_node_prev);	// remove the adjacent 'text' node, which is the indent and newline
 		xmlFreeNode(db_node_prev);
 
 		xmlUnlinkNode(db_node);
@@ -85,5 +85,5 @@ cmd_del(EditLine *e, ...)
 
 		dirty = 1;
 	} else
-		puts("invalid entry!");
+		puts("invalid index!");
 } /* cmd_del() */

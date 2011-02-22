@@ -152,5 +152,5 @@ cmd_edit(EditLine *e, ...)
 
 		dirty = 1;
 	} else
-		puts("invalid entry!");
+		puts("invalid index!");
 } /* cmd_edit() */

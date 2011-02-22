@@ -186,7 +186,7 @@ cmd_getnum(EditLine *e, ...)
 		}
 		el_set(e, EL_UNBUFFERED, 0);
 	} else {
-		puts("invalid entry!");
+		puts("invalid index!");
 	}
 } /* cmd_getnum() */
 
