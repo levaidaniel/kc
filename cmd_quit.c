@@ -42,7 +42,8 @@ cmd_quit(EditLine *e, ...)
 
 	BIO		*bio_chain = NULL;
 
-	char		c = 0, *e_line = NULL;
+	const char	*e_line = NULL;
+	int		e_count = 0;
 
 
 	va_start(ap, e);
@@ -59,17 +60,17 @@ cmd_quit(EditLine *e, ...)
 			perror("el_set(EL_PROMPT)");
 		}
 
-		printf("Do you want to write the changes? <Y/n> ");
+		printf("Do you want to write the changes? <yes/no> ");
+		e_line = el_gets(e, &e_count);
+		if (!e_line) {
+			perror("input");
+			return;
+		}
 
-		c = 0;
-		while (	c != 'y'  &&  c != 'n'  &&
-			c != 'Y'  &&  c != 'N')
-
-			el_getc(e, &c);
-
-		puts("");
-		if (c == 'Y'  ||  c == 'y'  ||  c == '\n')
+		if (strncmp(e_line, "yes", 3) == 0)
 			cmd_write(e, e_line, eh, bio_chain);
+		else
+			puts("Changes were NOT saved.");
 	}
 
 	quit(e, eh, bio_chain, EXIT_SUCCESS);
