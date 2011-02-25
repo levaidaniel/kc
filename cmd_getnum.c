@@ -33,6 +33,7 @@ char get_line(xmlChar *, int, int *, char *, int);
 
 
 extern xmlNodePtr	keychain;
+extern char		batchmode;
 
 
 void
@@ -119,60 +120,65 @@ cmd_getnum(EditLine *e, ...)
 				line_len++;	// this is the actual line length
 			} while (c != '\n'  &&  c != '\0');
 
-			// after printing a line, wait for user input
-			rc = 0;
-			while (	rc != 'q' &&
-				rc != 10  &&  rc != 'f'  &&  rc != 'n'  &&  rc != 'j'  &&  rc != ' ' &&	// newline or 'f' ... display next line
-				rc != 8   &&  rc != 'b'  &&  rc != 'p'  &&  rc != 'k'  &&		// backspace or 'b' ... display previous line
-				(rc < '1'  ||  rc > '9')
-				)
-				el_getc(e, &rc);
+			if (!batchmode) {
+				// after printing a line, wait for user input
+				rc = 0;
+				while (	rc != 'q' &&
+					rc != 10  &&  rc != 'f'  &&  rc != 'n'  &&  rc != 'j'  &&  rc != ' ' &&	// newline or 'f' ... display next line
+					rc != 8   &&  rc != 'b'  &&  rc != 'p'  &&  rc != 'k'  &&		// backspace or 'b' ... display previous line
+					(rc < '1'  ||  rc > '9')
+					)
+					el_getc(e, &rc);
 
-			// erase (overwrite) the written value with spaces
-			erase_len = (space ? line_len + line_len * space + space : line_len) +			// add the random characters too
-					(newlines ? digit_length(idx) + digit_length(newlines + 1) + 4 : 0);	// add the line number prefix too
-			printf("\r");
-			for (i=0; i < erase_len; i++)
-				putchar(' ');
+				// erase (overwrite) the written value with spaces
+				erase_len = (space ? line_len + line_len * space + space : line_len) +			// add the random characters too
+						(newlines ? digit_length(idx) + digit_length(newlines + 1) + 4 : 0);	// add the line number prefix too
+				printf("\r");
+				for (i=0; i < erase_len; i++)
+					putchar(' ');
 
-			printf("\r");
+				printf("\r");
 
-			switch (rc) {
-				// forward
-				case 10:
-				case 'f':
-				case 'n':
-				case 'j':
-				case ' ':
-					idx++;
-				break;
-				// backward
-				case 8:
-				case 'b':
-				case 'p':
-				case 'k':
-					if (idx - 1 > 0) {	// don't go back, if we are already on the first line
-						idx--;		// 'idx' is the line number we want!
+				switch (rc) {
+					// forward
+					case 10:
+					case 'f':
+					case 'n':
+					case 'j':
+					case ' ':
+						idx++;
+					break;
+					// backward
+					case 8:
+					case 'b':
+					case 'p':
+					case 'k':
+						if (idx - 1 > 0) {	// don't go back, if we are already on the first line
+							idx--;		// 'idx' is the line number we want!
 
-						pos = get_line(value_locale, value_len, &pos, &c, idx);
-					} else
-						pos -= line_len + 1;	// rewind back to the current line's start, to display it again
-				break;
-				// quit
-				case 'q':
-					c = '\0';	// this is our exit condition
-				break;
-				// we got a number (this will be a line number)
-				default:
-					rc -= 48;		// 'idx' is the line number we want and 'rc' is the ascii version of the line number we got
-					if ( rc <= newlines + 1 ) {
-						idx = rc;
-						pos = get_line(value_locale, value_len, &pos, &c, idx);
-					} else {
-						pos -= line_len + 1;	// rewind back to the current line's start, to display it again
-						c = value_locale[pos];
-					}
-				break;
+							pos = get_line(value_locale, value_len, &pos, &c, idx);
+						} else
+							pos -= line_len + 1;	// rewind back to the current line's start, to display it again
+					break;
+					// quit
+					case 'q':
+						c = '\0';	// this is our exit condition
+					break;
+					// we got a number (this will be a line number)
+					default:
+						rc -= 48;		// 'idx' is the line number we want and 'rc' is the ascii version of the line number we got
+						if ( rc <= newlines + 1 ) {
+							idx = rc;
+							pos = get_line(value_locale, value_len, &pos, &c, idx);
+						} else {
+							pos -= line_len + 1;	// rewind back to the current line's start, to display it again
+							c = value_locale[pos];
+						}
+					break;
+				}
+			} else {
+				// if we are in batch mode
+				puts("");
 			}
 
 			line_len = 0;	// this is the actual line length

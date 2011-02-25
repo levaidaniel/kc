@@ -31,6 +31,7 @@
 
 extern xmlDocPtr	db;
 extern char		dirty;
+extern char		batchmode;
 
 
 void
@@ -54,7 +55,7 @@ cmd_quit(EditLine *e, ...)
 
 	va_end(ap);
 
-	if (dirty) {
+	if (dirty  &&  !batchmode) {
 		// clear the prompt temporarily
 		if (el_set(e, EL_PROMPT, e_prompt_null) != 0) {
 			perror("el_set(EL_PROMPT)");

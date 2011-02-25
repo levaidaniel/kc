@@ -49,6 +49,7 @@ xmlNodePtr	keychain = NULL;
 int		db_file = -1;
 char		dirty = 0;
 char		*locale = NULL;
+char		batchmode = 0;
 
 
 int
@@ -65,7 +66,7 @@ main(int argc, char *argv[])
 	BIO		*bio_cipher = NULL;
 	BIO		*bio_b64 = NULL;
 	char		*db_buf = NULL;
-	int		ret = 0;
+	ssize_t		ret = -1;
 	size_t		db_buf_size = 4096, pos = 0;
 	unsigned char	key[128];
 	char		*pass = NULL;
@@ -75,10 +76,8 @@ main(int argc, char *argv[])
 	int		pass_maxlen = 64;
 	char		pass_prompt[15];
 	char		*pass_filename = NULL;
-	FILE		*pass_file = NULL;
+	int		pass_file = -1;
 	size_t		pass_size = 128;
-
-	char		batchmode = 0;
 
 	struct stat	st;
 	const char	*default_db_dir = ".kc";
@@ -93,13 +92,15 @@ main(int argc, char *argv[])
 
 
 	debug = 0;
-	while ((c = getopt(argc, argv, "k:b:vhd")) != -1)
+	while ((c = getopt(argc, argv, "k:bp:vhd")) != -1)
 		switch (c) {
 			case 'k':
 				db_filename = optarg;
 			break;
 			case 'b':
 				batchmode = 1;
+			break;
+			case 'p':
 				pass_filename = optarg;
 			break;
 			case 'v':
@@ -165,7 +166,7 @@ main(int argc, char *argv[])
 	} else
 		printf("Creating '%s'\n", db_filename);
 
-	db_file = open(db_filename, O_RDWR | O_CREAT);
+	db_file = open(db_filename, O_RDWR | O_CREAT, 0600);
 	if (db_file < 0) {
 		printf("error opening '%s'\n", db_filename);
 		perror("open()");
@@ -178,20 +179,23 @@ main(int argc, char *argv[])
 		quit(e, eh, bio_chain, EXIT_FAILURE);
 	}
 
-	if (chmod(db_filename, 0600) != 0)
-		perror("chmod(database file)");
-
 	fstat(db_file, &st);
 	if(st.st_size > 0) {	// if db_filename is not empty
 		// read the IV and the salt.
 
 		rbuf = malloc(17); malloc_check(rbuf);
 
-		read(db_file, rbuf, 16);
-		strlcpy((char *)iv, (char *)rbuf, sizeof(iv));
+		ret = read(db_file, rbuf, 16);
+		if (ret < 0)
+			perror("read(database file)");
+		else
+			strlcpy((char *)iv, (char *)rbuf, sizeof(iv));
 
-		read(db_file, rbuf, 16);
-		strlcpy((char *)salt, (char *)rbuf, sizeof(salt));
+		ret = read(db_file, rbuf, 16);
+		if (ret < 0)
+			perror("read(database file)");
+		else
+			strlcpy((char *)salt, (char *)rbuf, sizeof(salt));
 
 		free(rbuf);
 
@@ -206,15 +210,9 @@ main(int argc, char *argv[])
 		strlcpy(pass_prompt, "New password: ", 15);
 	}
 
-	if (batchmode) {
-		if (!pass_filename) {
-			puts("You must specify a password file!");
-			quit(e, eh, bio_chain, EXIT_FAILURE);
-		}
-
+	if (pass_filename) {	// we were given a password file name
 		// read in the password from the specified file
-
-		pass_file = fopen(pass_filename, "r");
+		pass_file = open(pass_filename, O_RDONLY);
 		if (!pass_file) {
 			perror("password file");
 			quit(e, eh, bio_chain, EXIT_FAILURE);
@@ -222,14 +220,19 @@ main(int argc, char *argv[])
 
 		pass = calloc(1, pass_size); malloc_check(pass);
 		pos = 0;
-		while (!feof(pass_file)) {
+		while (ret) {
 			// if we've reached the size of 'pass', grow it
 			if (pos >= pass_size) {
 				pass_size += 128;
 				pass = realloc(pass, pass_size); malloc_check(pass);
 			}
 
-			pos += fread(pass, 1, pass_size, pass_file);
+			ret = read(pass_file, pass, pass_size);
+			if (ret < 0) {
+				perror("read(password file)");
+				break;
+			} else
+				pos += ret;
 		}
 		pass[pos] = '\0';
 		if (strchr(pass, '\n'))
@@ -452,7 +455,8 @@ main(int argc, char *argv[])
 	if (el_set(e, EL_PROMPT, e_prompt) != 0) {
 		perror("el_set(EL_PROMPT)");
 	}
-	signal(SIGINT, SIG_IGN);
+	if (!batchmode)
+		signal(SIGINT, SIG_IGN);
 	if (el_set(e, EL_SIGNAL, 1) != 0) {
 		perror("el_set(EL_SIGNAL)");
 	}
@@ -636,10 +640,11 @@ get_random_str(int length, char alnum)
 	char		*rnd_dev = "/dev/urandom";
 #endif
 	char		*tmp = NULL;
-	char		*ret = NULL;
+	ssize_t		ret = -1;
+	char		*rnd_str = NULL;
 
 
-	rnd_file = open(rnd_dev, O_RDONLY, 0000);
+	rnd_file = open(rnd_dev, O_RDONLY);
 	if (rnd_file < 0) {
 		printf("Error opening %s!", rnd_dev);
 		perror("open()");
@@ -647,7 +652,7 @@ get_random_str(int length, char alnum)
 	}
 
 
-	ret = malloc(length + 1); malloc_check(ret);
+	rnd_str = malloc(length + 1); malloc_check(rnd_str);
 	tmp = malloc(1); malloc_check(tmp);
 
 	read(rnd_file, tmp, 1);
@@ -657,27 +662,35 @@ get_random_str(int length, char alnum)
 				(*tmp < 97  ||  *tmp > 122)  &&
 				(*tmp < 48  ||  *tmp > 57)) {
 
-				read(rnd_file, tmp, 1);
+				ret = read(rnd_file, tmp, 1);
+				if (ret < 0) {
+					perror("read(random device)");
+					return(NULL);
+				}
 			}
 		else
 			// give anything printable
 			while (	*tmp < 33  ||  *tmp > 126) {
 
-				read(rnd_file, tmp, 1);
+				ret = read(rnd_file, tmp, 1);
+				if (ret < 0) {
+					perror("read(random device)");
+					return(NULL);
+				}
 			}
 
-		ret[i] = *tmp;		// store the value
+		rnd_str[i] = *tmp;		// store the value
 		*tmp = '\0';		// reset the value
 	}
 
 	free(tmp); tmp = NULL;
 
-	ret[length] = '\0';
+	rnd_str[length] = '\0';
 
 	close(rnd_file);
 
 
-	return(ret);
+	return(rnd_str);
 } /* get_random_str() */
 
 
