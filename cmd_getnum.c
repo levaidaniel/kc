@@ -178,6 +178,7 @@ cmd_getnum(EditLine *e, ...)
 				}
 			} else {
 				// if we are in batch mode
+				idx++;
 				puts("");
 			}
 
