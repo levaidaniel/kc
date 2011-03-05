@@ -37,15 +37,11 @@ extern xmlNodePtr	keychain;
 
 
 void
-cmd_searchre(EditLine *e, ...)
+cmd_searchre(char *e_line, command *commands)
 {
 #ifdef	_HAVE_PCRE
-	va_list		ap;
-
 	xmlNodePtr	db_node = NULL;
 	xmlChar		*pattern_locale = NULL, *key_locale = NULL, *pattern = NULL, *key = NULL;
-
-	command		*commands = NULL;
 
 	pcre		*re = NULL;
 	pcre_extra	*re_study = NULL;
@@ -53,32 +49,19 @@ cmd_searchre(EditLine *e, ...)
 	int		erroffset = 0;
 	int		ovector[30];
 
-	char		*line = NULL, *cmd = NULL;
 	char		chain = 0;
 	int		hits = 0, idx = 0;
 
 
-	va_start(ap, e);
-
-	line = va_arg(ap, char *);
-	line[strlen(line) - 1] = '\0';		// remove the newline character from the end
-
-	va_arg(ap, History *);
-	va_arg(ap, BIO *);
-	commands = va_arg(ap, command *);
-
-	va_end(ap);
-
-	cmd = strtok(line, " ");
-	if (strncmp(cmd, "c/", 2) == 0)
+	if (strncmp(e_line, "c/", 2) == 0)
 		chain = 1;
 	else
 		chain = 0;
 
 	if (chain)
-		pattern_locale = BAD_CAST line + 2;	// remove the 'c/' from the line. the remaining part is the pattern
+		pattern_locale = BAD_CAST e_line + 2;	// remove the 'c/' from the line. the remaining part is the pattern
 	else
-		pattern_locale = BAD_CAST line + 1;	// remove the '/'(slash) from the line. the remaining part is the pattern
+		pattern_locale = BAD_CAST e_line + 1;	// remove the '/'(slash) from the line. the remaining part is the pattern
 
 	if (!pattern_locale) {
 		puts(commands->usage);

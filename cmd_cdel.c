@@ -32,36 +32,25 @@
 extern xmlNodePtr	keychain;
 extern char		dirty;
 
+#ifndef _READLINE
+extern EditLine		*e;
+extern History		*eh;
+extern HistEvent	eh_ev;
+#endif
+
 
 void
-cmd_cdel(EditLine *e, ...)
+cmd_cdel(char *e_line, command *commands)
 {
-	va_list		ap;
-
-	History 	*eh = NULL;
-
 	xmlNodePtr	db_node = NULL, db_node_tmp = NULL;
 	xmlChar		*cname_locale = NULL, *cname = NULL;
 
-	command		*commands = NULL;
-
-	const char	*e_line = NULL;
+#ifndef _READLINE
 	int		e_count = 0;
-	char		*line = NULL;
+#endif
 
 
-	va_start(ap, e);
-
-	line = va_arg(ap, char *);
-	line[strlen(line) - 1] = '\0';		// remove the newline character from the end
-
-	eh = va_arg(ap, History *);
-	va_arg(ap, BIO *);
-	commands = va_arg(ap, command *);
-
-	va_end(ap);
-
-	strtok(line, " ");		// remove the command from the line
+	strtok((char *)e_line, " ");		// remove the command from the line
 	cname_locale = BAD_CAST strtok(NULL, " ");	// assign the command's parameter
 	if (!cname_locale) {
 		puts(commands->usage);
@@ -77,21 +66,30 @@ cmd_cdel(EditLine *e, ...)
 
 			puts("Can not delete the current keychain!");
 		} else {
+#ifndef _READLINE
 			// disable history temporarily
-			if (el_set(e, EL_HIST, history, NULL) != 0) {
+			if (el_set(e, EL_HIST, eh, NULL) != 0) {
 				perror("el_set(EL_HIST)");
 			}
 			// clear the prompt temporarily
-			if (el_set(e, EL_PROMPT, e_prompt_null) != 0) {
+			if (el_set(e, EL_PROMPT, el_prompt_null) != 0) {
 				perror("el_set(EL_PROMPT)");
 			}
-
-
+#endif
 			cname = xmlGetProp(db_node, BAD_CAST "name");
 			cname_locale = convert_utf8(cname, 1);
+
 			printf("Do you really want to delete '%s'? <yes/no> ", cname_locale);
 
-			e_line = el_gets(e, &e_count);
+#ifdef _READLINE
+			rl_redisplay();
+#endif
+
+#ifndef _READLINE
+			e_line = (char *)el_gets(e, &e_count);
+#else
+			e_line = readline("");
+#endif
 			if (!e_line) {
 				perror("input");
 				return;
@@ -110,14 +108,16 @@ cmd_cdel(EditLine *e, ...)
 			}
 
 
+#ifndef _READLINE
 			// re-enable the default prompt
-			if (el_set(e, EL_PROMPT, e_prompt) != 0) {
+			if (el_set(e, EL_PROMPT, prompt_str) != 0) {
 				perror("el_set(EL_PROMPT)");
 			}
 			// re-enable history
-			if (el_set(e, EL_HIST, history, eh) != 0) {
+			if (el_set(e, EL_HIST, eh, history) != 0) {
 				perror("el_set(EL_HIST)");
 			}
+#endif
 
 			dirty = 1;
 		}

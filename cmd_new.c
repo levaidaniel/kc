@@ -32,55 +32,59 @@
 extern xmlNodePtr	keychain;
 extern char		dirty;
 extern char		*locale;
+extern char		prompt_context[20];
+
+#ifndef _READLINE
+extern EditLine		*e;
+extern History		*eh;
+extern HistEvent	eh_ev;
+#endif
 
 
 void
-cmd_new(EditLine *e, ...)
+cmd_new(char *e_line, command *commands)
 {
-	va_list		ap;
-
-	History		*eh = NULL;
-
 	xmlNodePtr	db_node = NULL;
 	xmlChar		*key_locale = NULL, *value_locale = NULL, *key = NULL, *value = NULL;
 
+#ifndef _READLINE
 	int		e_count = 0;
-	const char	*e_line = NULL;
+#endif
 
 
-	va_start(ap, e);
-	va_arg(ap, char *);	// ignore the (char *)line parameter
-	eh = va_arg(ap, History *);
-	va_end(ap);
+	strlcpy(prompt_context, "NEW key", sizeof(prompt_context));
 
+#ifndef _READLINE
 	// disable history temporarily
 	if (el_set(e, EL_HIST, history, NULL) != 0) {
 		perror("el_set(EL_HIST)");
 	}
 
+	e_line = (char *)el_gets(e, &e_count);
 
-	// set the new edit prompt
-	if (el_set(e, EL_CLIENTDATA, "NEW key") != 0) {
-		perror("el_set(EL_CLIENTDATA)");
-	}
-
-	e_line = el_gets(e, &e_count);
+	e_line[strlen(e_line) - 1] = '\0';	// remove the newline
+#else
+	e_line = readline(prompt_str());
+#endif
 	if (!e_line) {
 		perror("input");
 		return;
 	} else
 		key_locale = BAD_CAST e_line;
 
-	key_locale[xmlStrlen(key_locale) - 1] = '\0';	// remove the newline
 	key = convert_utf8(key_locale, 0);
 
 
-	// set the new edit prompt
-	if (el_set(e, EL_CLIENTDATA, "NEW value") != 0) {
-		perror("el_set(EL_CLIENTDATA)");
-	}
+	strlcpy(prompt_context, "NEW value", sizeof(prompt_context));
 
-	e_line = el_gets(e, &e_count);
+#ifndef _READLINE
+	e_line = (char *)el_gets(e, &e_count);
+
+	e_line[strlen(e_line) - 1] = '\0';	// remove the newline
+#else
+	e_line = readline(prompt_str());
+#endif
+
 	if (!e_line) {
 		perror("input");
 		free(key);
@@ -88,20 +92,18 @@ cmd_new(EditLine *e, ...)
 	} else
 		value_locale = BAD_CAST e_line;
 
-	value_locale[xmlStrlen(value_locale) - 1] = '\0';	// remove the newline
 	value_locale = parse_newlines(value_locale, 0);
 	value = convert_utf8(value_locale, 0);
 	free(value_locale);
 
 
-	// change back to the default prompt
-	if (el_set(e, EL_CLIENTDATA, "") != 0) {
-		perror("el_set(EL_CLIENTDATA)");
-	}
+#ifndef _READLINE
 	// re-enable history
 	if (el_set(e, EL_HIST, history, eh) != 0) {
 		perror("el_set(EL_HIST)");
 	}
+#endif
+	strlcpy(prompt_context, "", sizeof(prompt_context));
 
 
 	// XXX reloading a saved document inserts a 'text' element between each visible node (why?)

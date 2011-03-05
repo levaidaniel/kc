@@ -38,30 +38,44 @@
 #include "commands.h"
 
 
-void print_hex(unsigned char *, int);
-char tab_complete(EditLine *, int);
 void print_bio_chain(BIO *);
+#ifndef _READLINE
+char el_tab_complete(EditLine *, int);
+#else
+char **rl_tab_complete(const char *, int, int);
+#endif
 
+
+BIO		*bio_chain = NULL;
 
 command		*commands_first = NULL;
+
 xmlDocPtr	db = NULL;
 xmlNodePtr	keychain = NULL;
+
 int		db_file = -1;
+
 char		dirty = 0;
 char		*locale = NULL;
 char		batchmode = 0;
+
+#ifndef _READLINE
+	EditLine	*e = NULL;
+	History		*eh = NULL;
+	HistEvent	eh_ev;
+#endif
+
+char prompt_context[20];
 
 
 int
 main(int argc, char *argv[])
 {
-	EditLine	*e = NULL;
+#ifndef _READLINE
 	int		e_count = 0;
-	const char	*e_line = NULL;
-	History		*eh = NULL;
-	HistEvent	eh_ev;
+#endif
+	char		*e_line = NULL;
 
-	BIO		*bio_chain = NULL;
 	BIO		*bio_file = NULL;
 	BIO		*bio_cipher = NULL;
 	BIO		*bio_b64 = NULL;
@@ -138,7 +152,7 @@ main(int argc, char *argv[])
 		if(stat(db_filename, &st) == 0) {
 			if(!S_ISDIR(st.st_mode)) {
 				printf("'%s' is not a directory!\n", db_filename);
-				quit(e, eh, bio_chain, EXIT_FAILURE);
+				quit(EXIT_FAILURE);
 			}
 		} else {
 			if (debug)
@@ -146,7 +160,7 @@ main(int argc, char *argv[])
 
 			if(mkdir(db_filename, 0777) != 0) {
 				printf("could not create '%s': %s\n", db_filename, strerror(errno));
-				quit(e, eh, bio_chain, EXIT_FAILURE);
+				quit(EXIT_FAILURE);
 			}
 		}
 
@@ -160,7 +174,7 @@ main(int argc, char *argv[])
 	if(stat(db_filename, &st) == 0) {	// if db_filename exists
 		if(!S_ISLNK(st.st_mode)  &&  !S_ISREG(st.st_mode)) {
 			printf("'%s' is not a regular file or a link!\n", db_filename);
-			quit(e, eh, bio_chain, EXIT_FAILURE);
+			quit(EXIT_FAILURE);
 		}
 		printf("Opening '%s'\n", db_filename);
 	} else
@@ -170,13 +184,13 @@ main(int argc, char *argv[])
 	if (db_file < 0) {
 		printf("error opening '%s'\n", db_filename);
 		perror("open()");
-		quit(e, eh, bio_chain, EXIT_FAILURE);
+		quit(EXIT_FAILURE);
 	}
 
 	if (flock(db_file, LOCK_NB | LOCK_EX) < 0) {
 		perror("could not lock database file");
 		puts("Maybe another instance is using that database?");
-		quit(e, eh, bio_chain, EXIT_FAILURE);
+		quit(EXIT_FAILURE);
 	}
 
 	fstat(db_file, &st);
@@ -215,7 +229,7 @@ main(int argc, char *argv[])
 		pass_file = open(pass_filename, O_RDONLY);
 		if (!pass_file) {
 			perror("password file");
-			quit(e, eh, bio_chain, EXIT_FAILURE);
+			quit(EXIT_FAILURE);
 		}
 
 		pass = calloc(1, pass_size); malloc_check(pass);
@@ -270,7 +284,7 @@ main(int argc, char *argv[])
 	bio_file = BIO_new_file(db_filename, "r+");
 	if (!bio_file) {
 		perror("BIO_new_file()");
-		quit(e, eh, bio_chain, EXIT_FAILURE);
+		quit(EXIT_FAILURE);
 	}
 	BIO_set_close(bio_file, BIO_CLOSE);
 	bio_chain = BIO_push(bio_file, bio_chain);
@@ -278,19 +292,19 @@ main(int argc, char *argv[])
 	bio_b64 = BIO_new(BIO_f_base64());
 	if (!bio_b64) {
 		perror("BIO_new(f_base64)");
-		quit(e, eh, bio_chain, EXIT_FAILURE);
+		quit(EXIT_FAILURE);
 	}
 	bio_chain = BIO_push(bio_b64, bio_chain);
 
 	bio_cipher = BIO_new(BIO_f_cipher());
 	if (!bio_cipher) {
 		perror("BIO_new(f_cipher)");
-		quit(e, eh, bio_chain, EXIT_FAILURE);
+		quit(EXIT_FAILURE);
 	}
 	bio_chain = BIO_push(bio_cipher, bio_chain);
 
 	// generate a proper key for encoding/decoding BIO
-	PKCS5_PBKDF2_HMAC_SHA1(pass, strlen(pass), salt, sizeof(salt), 5000, 128, key);// print_hex(key, 128);
+	PKCS5_PBKDF2_HMAC_SHA1(pass, strlen(pass), salt, sizeof(salt), 5000, 128, key);
 
 	// turn on decoding
 	BIO_set_cipher(bio_cipher, EVP_aes_256_cbc(), key, iv, 0);
@@ -324,7 +338,7 @@ main(int argc, char *argv[])
 			break;
 			case -1:
 				perror("read()");
-				quit(e, eh, bio_chain, EXIT_FAILURE);
+				quit(EXIT_FAILURE);
 			break;
 			case -2:
 				if (debug)
@@ -341,7 +355,7 @@ main(int argc, char *argv[])
 
 	if (!BIO_get_cipher_status(bio_chain)  &&  pos > 0) {
 		puts("Failed to decrypt database file!");
-		quit(e, eh, bio_chain, EXIT_FAILURE);
+		quit(EXIT_FAILURE);
 	}
 
 
@@ -369,7 +383,7 @@ main(int argc, char *argv[])
 		db = xmlNewDoc(BAD_CAST "1.0");
 		if (!db) {
 			puts("could not create XML document!");
-			quit(e, eh, bio_chain, EXIT_FAILURE);
+			quit(EXIT_FAILURE);
 		}
 
 		xmlCreateIntSubset(db, BAD_CAST "kc", NULL, BAD_CAST "kc.dtd");
@@ -377,7 +391,7 @@ main(int argc, char *argv[])
 		db_root = xmlNewNode(NULL, BAD_CAST "kc");	// 'THE' root node
 		if (!db_root) {
 			puts("could not create root node!");
-			quit(e, eh, bio_chain, EXIT_FAILURE);
+			quit(EXIT_FAILURE);
 		}
 		xmlDocSetRootElement(db, db_root);
 
@@ -387,7 +401,7 @@ main(int argc, char *argv[])
 		keychain = xmlNewNode(NULL, BAD_CAST "keychain");	// the first keychain ...
 		if (!keychain) {
 			puts("could not create default keychain!");
-			quit(e, eh, bio_chain, EXIT_FAILURE);
+			quit(EXIT_FAILURE);
 		}
 		xmlAddChild(db_root, keychain);
 		xmlNewProp(keychain, BAD_CAST "name", BAD_CAST "default");	// ... its name is "default"
@@ -396,7 +410,7 @@ main(int argc, char *argv[])
 		xmlAddChild(db_root, db_node);
 
 		// write the initial empty XML doc to the file
-		cmd_write(e, e_line, eh, bio_chain);
+		cmd_write(NULL, NULL);
 	} else {
 		if (debug)
 			db = xmlReadMemory(db_buf, pos, NULL, "UTF-8", XML_PARSE_NONET);
@@ -404,23 +418,23 @@ main(int argc, char *argv[])
 			db = xmlReadMemory(db_buf, pos, NULL, "UTF-8", XML_PARSE_NONET | XML_PARSE_NOERROR | XML_PARSE_NOWARNING);
 		if (!db) {
 			puts("could not parse XML document!");
-			quit(e, eh, bio_chain, EXIT_FAILURE);
+			quit(EXIT_FAILURE);
 		}
 
 		db_root = xmlDocGetRootElement(db);
 		if (!db_root) {
 			puts("could not find root node!");
-			quit(e, eh, bio_chain, EXIT_FAILURE);
+			quit(EXIT_FAILURE);
 		}
 		if (!db_root->children) {
 			puts("could not find first keychain!");
-			quit(e, eh, bio_chain, EXIT_FAILURE);
+			quit(EXIT_FAILURE);
 		}
 
 		keychain = db_root->children->next;
 		if (!keychain) {
 			puts("could not find first keychain!");
-			quit(e, eh, bio_chain, EXIT_FAILURE);
+			quit(EXIT_FAILURE);
 		}
 	}
 	free(db_buf); db_buf = NULL;
@@ -428,18 +442,22 @@ main(int argc, char *argv[])
 
 	// init and start the CLI
 
+	if (!batchmode)
+		signal(SIGINT, SIG_IGN);
+
+#ifndef _READLINE
 	// init editline
 	e = el_init("kc", stdin, stdout, stderr);
 	if (!e) {
 		perror("el_init()");
-		quit(e, eh, bio_chain, EXIT_FAILURE);
+		quit(EXIT_FAILURE);
 	}
 
 	// init editline history
 	eh = history_init();
 	if (!eh) {
 		perror("history_init()");
-		quit(e, eh, bio_chain, EXIT_FAILURE);
+		quit(EXIT_FAILURE);
 	}
 	if (history(eh, &eh_ev, H_SETSIZE, 100) < 0) {
 		fprintf(stderr, "history(H_SETSIZE): %s\n", eh_ev.str);
@@ -449,21 +467,16 @@ main(int argc, char *argv[])
 	}
 
 	// setup editline/history parameters
-	if (el_set(e, EL_CLIENTDATA, "") != 0) {
-		perror("el_set(EL_CLIENTDATA)");
-	}
-	if (el_set(e, EL_PROMPT, e_prompt) != 0) {
+	if (el_set(e, EL_PROMPT, prompt_str) != 0) {
 		perror("el_set(EL_PROMPT)");
 	}
-	if (!batchmode)
-		signal(SIGINT, SIG_IGN);
 	if (el_set(e, EL_SIGNAL, 1) != 0) {
 		perror("el_set(EL_SIGNAL)");
 	}
 	if (el_set(e, EL_HIST, history, eh) != 0) {
 		perror("el_set(EL_HIST)");
 	}
-	if (el_set(e, EL_ADDFN, "TAB", "TAB completion", tab_complete) != 0) {
+	if (el_set(e, EL_ADDFN, "TAB", "TAB completion", el_tab_complete) != 0) {
 		perror("el_set(EL_ADDFN)");
 	}
 	if (el_set(e, EL_BIND, "\t", "TAB", NULL) != 0) {
@@ -488,8 +501,21 @@ main(int argc, char *argv[])
 	}
 	if (el_set(e, EL_EDITMODE, 1) != 0) {
 		perror("el_set(EL_EDITMODE)");
-		quit(e, eh, bio_chain, EXIT_FAILURE);
+		quit(EXIT_FAILURE);
 	}
+#else
+	// init readline
+	if (rl_initialize() != 0) {
+		perror("rl_initialize()");
+		quit(EXIT_FAILURE);
+	}
+
+	rl_catch_signals = 1;
+
+	rl_readline_name = "kc";
+#endif
+
+	strlcpy(prompt_context, "", sizeof(prompt_context));
 
 
 	// create the command list
@@ -498,12 +524,22 @@ main(int argc, char *argv[])
 
 	// command loop
 	do {
-		e_line = el_gets(e, &e_count);
+#ifndef _READLINE
+		e_line = (char *)el_gets(e, &e_count);
 
-		if (e_count > 0) {
-			if (strlen(e_line) > 1) {
+		e_line[strlen(e_line) - 1] = '\0';		// remove the newline character from the end
+#else
+		e_line = readline(prompt_str());
+#endif
+
+		if (e_line) {
+			if (strlen(e_line) > 0) {
+#ifndef _READLINE
 				history(eh, &eh_ev, H_ENTER, e_line);
-				cmd_match(e, e_line, eh, bio_chain);
+#else
+				add_history(e_line);
+#endif
+				cmd_match(e_line);
 			}
 		}
 	} while(1);
@@ -514,36 +550,33 @@ main(int argc, char *argv[])
 
 
 void
-cmd_match(EditLine *e, const char *e_line, History *eh, BIO *bio_chain)
+cmd_match(char *e_line)
 {
 	int	idx = -1, space = -1;
 	char	*str = NULL, *line = strdup(e_line);
 	command	*commands = commands_first;
 
 
-	line[strlen(line) - 1] = '\0';		// remove the newline character from the end
-
-
 	// special case, if only a number was entered,
 	// we display the appropriate entry, and if there
 	// is another number after it, use it as space for jamming
-	sscanf(line, "%d %d", &idx, &space);
+	sscanf(e_line, "%d %d", &idx, &space);
 	if (idx >= 0) {
 		if (space >= 0)
-			cmd_getnum(e, idx, space);
+			cmd_getnum(idx, space);
 		else
-			cmd_getnum(e, idx, 0);
+			cmd_getnum(idx, 0);
 	} else {
 		// special case, if a '/'(slash) or 'c/' is the first character,
 		// then everything that follows is a search pattern (even a space),
 		// so we must not tokenize the line
-		if (strncmp(line, "/", 1) == 0)
+		if (strncmp(e_line, "/", 1) == 0)
 			str = "/";
 		else
-		if (strncmp(line, "c/", 2) == 0)
+		if (strncmp(e_line, "c/", 2) == 0)
 			str = "c/";
 		else
-			str = strtok(line, " ");
+			str = strtok(e_line, " ");
 
 		while(commands) {
 			if (strcmp(commands->name, str) == 0)	// find an exact match
@@ -553,45 +586,46 @@ cmd_match(EditLine *e, const char *e_line, History *eh, BIO *bio_chain)
 		}
 
 		if (commands)
-			commands->fn(e, e_line, eh, bio_chain, commands);	// we call the command's respective function here
+			commands->fn(line, commands);	// we call the command's respective function here
 		else
-			printf("unknown command: '%s'\n", line);
+			printf("unknown command: '%s'\n", e_line);
 	}
 
 	free(line); line = NULL;
 } /* cmd_match() */
 
 
+#ifndef _READLINE
 const char *
-e_prompt(EditLine *e)
+el_prompt_null(EditLine *e)
 {
-	const char	*cl_data = NULL;
+	return("");
+}
+
+const char *
+prompt_str(EditLine *e)
+#else
+const char *
+prompt_str(void)
+#endif
+{
 	unsigned long	prompt_len = 0;
 	static char	*prompt = NULL;
 	xmlChar		*cname_locale = NULL, *cname = NULL;
 
 
-	el_get(e, EL_CLIENTDATA, &cl_data);
-
 	cname = xmlGetProp(keychain, BAD_CAST "name");
 	cname_locale = convert_utf8(cname, 1);
 
-	prompt_len = xmlStrlen(cname_locale) + 2 + strlen(cl_data) + 2 + 1;
+	prompt_len = xmlStrlen(cname_locale) + 2 + sizeof(prompt_context) + 2 + 1;
 	prompt = realloc(prompt, prompt_len); malloc_check(prompt);
 
-	snprintf(prompt, prompt_len, "%s%% %s> ", cname_locale, cl_data);
+	snprintf(prompt, prompt_len, "%s%% %s> ", cname_locale, prompt_context);
 
 	free(cname_locale);
 
 	return(prompt);
-} /* e_prompt() */
-
-
-const char *
-e_prompt_null(EditLine *e)
-{
-	return("");
-}
+} /* prompt_str() */
 
 
 void
@@ -694,8 +728,9 @@ get_random_str(int length, char alnum)
 } /* get_random_str() */
 
 
+#ifndef _READLINE
 char
-tab_complete(EditLine *e, int ch)
+el_tab_complete(EditLine *e, int ch)
 {
 	char		*line_buf = NULL, *match = NULL, *tmp = NULL;
 	const LineInfo	*el_lineinfo = NULL;
@@ -755,27 +790,16 @@ tab_complete(EditLine *e, int ch)
 
 	return(CC_CURSOR);
 } /* tab_complete() */
+#endif
 
 
 void
-quit(EditLine *e, History *eh, BIO *bio_chain, int retval)
+quit(int retval)
 {
 	if (bio_chain) {
 		BIO_free_all(bio_chain);
 		if (debug)
 			puts("closed bio_chain");
-	}
-
-	if (eh) {
-		history_end(eh);
-		if (debug)
-			puts("closed editline history");
-	}
-
-	if (e) {
-		el_end(e);
-		if (debug)
-			puts("closed editline");
 	}
 
 	if (db_file) {
@@ -787,18 +811,19 @@ quit(EditLine *e, History *eh, BIO *bio_chain, int retval)
 	if (debug)
 		puts("exiting...");
 
+#ifndef _READLINE
+	if (eh) {
+		history_end(eh);
+		if (debug)
+			puts("closed editline history");
+	}
+
+	if (e) {
+		el_end(e);
+		if (debug)
+			puts("closed editline");
+	}
+#endif
+
 	exit(retval);
 } /* quit() */
-
-
-void
-print_hex(unsigned char *buf, int len)
-{
-	int i = 0;
-
-
-	for (i = 0; i < len; i++) {
-		printf("%02x", buf[i]);
-	}
-	puts("");
-} /* print_hex() */

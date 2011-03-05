@@ -16,5 +16,3 @@ case "$(uname -s)" in
 		echo "unknown system."
 	;;
 esac
-
-echo "You can now run ./kc"

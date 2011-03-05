@@ -29,32 +29,31 @@
 #include "commands.h"
 
 
-char get_line(xmlChar *, int, int *, char *, int);
+char get_line(xmlChar *, int, int *, int *, int);
 
 
 extern xmlNodePtr	keychain;
 extern char		batchmode;
 
+#ifndef _READLINE
+extern EditLine		*e;
+extern History		*eh;
+extern HistEvent	eh_ev;
+#endif
+
 
 void
-cmd_getnum(EditLine *e, ...)
+cmd_getnum(int idx, int space)
 {
-	va_list		ap;
-
 	xmlNodePtr	db_node = NULL;
 	xmlChar		*key_locale = NULL, *value_locale = NULL, *key = NULL, *value = NULL;
 
-	int		idx = 0, newlines = 0, i = 0, pos = 0, space = 0, erase_len = 0, line_len = 0, value_len = 0;
-	char		c = -1, rc = -1;
+	int		newlines = 0, i = 0, pos = 0, erase_len = 0, line_len = 0, value_len = 0;
+	int		*utfclen = NULL;
+	int		c = -1;
+	char		rc = 0;
 	char		*rand_str = NULL;
 
-
-	va_start(ap, e);
-
-	idx = va_arg(ap, int);
-	space = va_arg(ap, int);
-
-	va_end(ap);
 
 	db_node = find_key(idx);
 	if (db_node) {
@@ -66,14 +65,18 @@ cmd_getnum(EditLine *e, ...)
 
 		free(key_locale); key_locale = NULL;
 
+#ifndef _READLINE
 		// clear the prompt temporarily
-		if (el_set(e, EL_PROMPT, e_prompt_null) != 0) {
+		if (el_set(e, EL_PROMPT, el_prompt_null) != 0) {
 			perror("el_set(EL_PROMPT)");
 		}
 		if (el_set(e, EL_UNBUFFERED, 1) != 0) {
 			perror("el_set(EL_UNBUFFERED)");
 			return;
 		}
+#else
+		rl_prep_terminal(1);
+#endif
 
 		idx = 1;
 		value = xmlNodeGetContent(db_node->children->next->children);
@@ -87,6 +90,9 @@ cmd_getnum(EditLine *e, ...)
 			if (value_locale[i] == '\n')
 				newlines++;
 
+
+		utfclen = malloc(sizeof(int)); malloc_check(utfclen);
+
 		while (c != '\0') {		// handle multiline values
 
 			if (newlines)
@@ -97,28 +103,37 @@ cmd_getnum(EditLine *e, ...)
 				rand_str = get_random_str(space, 0);
 				if (!rand_str)
 					return;
+
 				printf("%s", rand_str);
+
 				free(rand_str); rand_str = NULL;
 			}
 
 			do {
-				c = value_locale[pos++];
+				*utfclen = xmlStrlen(value_locale);
+				c = xmlGetUTF8Char((const unsigned char *)(value_locale + pos), utfclen);	// 'utfclen' gets modified here
+				pos += *utfclen;	// pos + the size of the character in bytes
 				if (c == '\n'  ||  c == '\0')	// don't print the newlines and the NUL
 					break;
 				else {
-					printf("%c", c);
+					printf("%lc", c);
 
 					if (space) {
 						// print random character(s)
 						rand_str = get_random_str(space, 0);
 						if (!rand_str)
 							return;
+
 						printf("%s", rand_str);
+
 						free(rand_str); rand_str = NULL;
 					}
 				}
-				line_len++;	// this is the actual line length
+				line_len += *utfclen;	// this is the actual line length
 			} while (c != '\n'  &&  c != '\0');
+#ifdef _READLINE
+			rl_redisplay();
+#endif
 
 			if (!batchmode) {
 				// after printing a line, wait for user input
@@ -127,8 +142,13 @@ cmd_getnum(EditLine *e, ...)
 					rc != 10  &&  rc != 'f'  &&  rc != 'n'  &&  rc != 'j'  &&  rc != ' ' &&	// newline or 'f' ... display next line
 					rc != 8   &&  rc != 'b'  &&  rc != 'p'  &&  rc != 'k'  &&		// backspace or 'b' ... display previous line
 					(rc < '1'  ||  rc > '9')
-					)
+					) {
+#ifndef _READLINE
 					el_getc(e, &rc);
+#else
+					rc = rl_read_key();
+#endif
+				}
 
 				// erase (overwrite) the written value with spaces
 				erase_len = (space ? line_len + line_len * space + space : line_len) +			// add the random characters too
@@ -187,25 +207,28 @@ cmd_getnum(EditLine *e, ...)
 
 		free(value_locale); value_locale = NULL;
 
+#ifndef _READLINE
 		// re-enable the default prompt
-		if (el_set(e, EL_PROMPT, e_prompt) != 0) {
+		if (el_set(e, EL_PROMPT, prompt_str) != 0) {
 			perror("el_set(EL_PROMPT)");
 		}
 		el_set(e, EL_UNBUFFERED, 0);
-	} else {
+#else
+		rl_deprep_terminal();
+#endif
+	} else
 		puts("invalid index!");
-	}
 } /* cmd_getnum() */
 
 
 char
-get_line(xmlChar *value_locale, int value_len, int *pos, char *c, int idx)
+get_line(xmlChar *value_locale, int value_len, int *pos, int *c, int idx)
 {
 	int	i = 1;	// this counts how many '\n' we've found so far
 
 	// if we want the first line (which can't be identified like the rest
 	// of the lines: by presuming a '\n' character before the line)
-	// just set everything to the beginning, and break; from this switch()
+	// just set everything to the beginning, and return() from this function().
 	if (idx == 1) {
 		*pos = 0;
 		*c = value_locale[*pos];

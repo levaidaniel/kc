@@ -26,26 +26,17 @@
 #include <stdarg.h>
 
 #include "common.h"
+#include "commands.h"
 
 
 void
-cmd_random(EditLine *e, ...)
+cmd_random(char *e_line, command *commands)
 {
-	va_list		ap;
-
-	char		*line = NULL;
 	int		length = 0;
 	char		*rand_str = NULL;
 
 
-	va_start(ap, e);
-
-	line = va_arg(ap, char *);
-	line[strlen(line) - 1] = '\0';		/* remove the newline character from the end */
-
-	va_end(ap);
-
-	if (sscanf(line, "%*s %d", &length) <= 0)
+	if (sscanf(e_line, "%*s %d", &length) <= 0)
 		length = 8;
 
 	if (length > 100  ||  length <= 0) {

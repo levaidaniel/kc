@@ -34,33 +34,16 @@ extern char		dirty;
 
 
 void
-cmd_copy(EditLine *e, ...)
+cmd_copy(char *e_line, command *commands)
 {
-	va_list		ap;
-
-	History		*eh = NULL;
-
 	xmlNodePtr	db_node = NULL, db_node_c = NULL, db_node_prev = NULL;
 	xmlChar		*cname = NULL, *cname_locale = NULL;
 
-	command		*commands = NULL;
-
-	char		*line = NULL, *idx_str = NULL;
+	char		*idx_str = NULL;
 	int		idx = 0;
 
 
-	va_start(ap, e);
-
-	line = va_arg(ap, char *);
-	line[strlen(line) - 1] = '\0';		// remove the newline character from the end
-
-	eh = va_arg(ap, History *);
-	va_arg(ap, BIO *);
-	commands = va_arg(ap, command *);
-
-	va_end(ap);
-
-	strtok(line, " ");				// remove the command name
+	strtok((char *)e_line, " ");				// remove the command name
 	idx_str = strtok(NULL, " ");
 	cname_locale = BAD_CAST strtok(NULL, " ");	// assign the command's parameter
 	if (!cname_locale  ||  !idx_str) {

@@ -32,47 +32,52 @@
 extern xmlDocPtr	db;
 extern char		dirty;
 extern char		batchmode;
+extern BIO		*bio_chain;
+
+#ifndef _READLINE
+extern EditLine		*e;
+extern History		*eh;
+extern HistEvent	eh_ev;
+#endif
 
 
 void
-cmd_quit(EditLine *e, ...)
+cmd_quit(char *e_line, command *commands)
 {
-	va_list		ap;
-
-	History		*eh = NULL;
-
-	BIO		*bio_chain = NULL;
-
-	const char	*e_line = NULL;
+#ifndef _READLINE
 	int		e_count = 0;
+#endif
 
-
-	va_start(ap, e);
-
-	va_arg(ap, char *);	/* ignore the (char *)line parameter */
-	eh = va_arg(ap, History *);
-	bio_chain = va_arg(ap, BIO *);
-
-	va_end(ap);
 
 	if (dirty  &&  !batchmode) {
+#ifndef _READLINE
+		// disable history temporarily
+		if (el_set(e, EL_HIST, history, NULL) != 0) {
+			perror("el_set(EL_HIST)");
+		}
 		// clear the prompt temporarily
-		if (el_set(e, EL_PROMPT, e_prompt_null) != 0) {
+		if (el_set(e, EL_PROMPT, el_prompt_null) != 0) {
 			perror("el_set(EL_PROMPT)");
 		}
 
 		printf("Do you want to write the changes? <yes/no> ");
-		e_line = el_gets(e, &e_count);
+#endif
+
+#ifndef _READLINE
+		e_line = (char *)el_gets(e, &e_count);
+#else
+		e_line = readline("Do you want to write the changes? <yes/no> ");
+#endif
 		if (!e_line) {
 			perror("input");
 			return;
 		}
 
 		if (strncmp(e_line, "yes", 3) == 0)
-			cmd_write(e, e_line, eh, bio_chain);
+			cmd_write(e_line, commands);
 		else
 			puts("Changes were NOT saved.");
 	}
 
-	quit(e, eh, bio_chain, EXIT_SUCCESS);
+	quit(EXIT_SUCCESS);
 } /* cmd_quit() */

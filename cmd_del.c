@@ -34,31 +34,15 @@ extern char		dirty;
 
 
 void
-cmd_del(EditLine *e, ...)
+cmd_del(char *e_line, command *commands)
 {
-	va_list		ap;
-
 	xmlNodePtr	db_node = NULL, db_node_prev = NULL;
 	xmlChar		*key_locale = NULL, *key = NULL;
 
-	char		*line = NULL;
 	int		idx = 0;
 
-	command		*commands = NULL;
 
-
-	va_start(ap, e);
-
-	line = va_arg(ap, char *);
-	line[strlen(line) - 1] = '\0';		/* remove the newline character from the end */
-
-	va_arg(ap, History *);
-	va_arg(ap, BIO *);
-	commands = va_arg(ap, command *);
-
-	va_end(ap);
-
-	if (sscanf(line, "%*s %d", &idx) <= 0) {
+	if (sscanf(e_line, "%*s %d", &idx) <= 0) {
 		puts(commands->usage);
 		return;
 	}

@@ -33,39 +33,22 @@ extern xmlNodePtr	keychain;
 
 
 void
-cmd_search(EditLine *e, ...)
+cmd_search(char *e_line, command *commands)
 {
-	va_list		ap;
-
 	xmlNodePtr	db_node = NULL;
 	xmlChar		*pattern_locale = NULL, *pattern = NULL, *key_locale = NULL, *key = NULL;
 	const xmlChar	*search = NULL;
 
-	command		*commands = NULL;
-
-	char		*line = NULL, *cmd = NULL;
 	char		chain = 0;
 	int		hits = 0, idx = 0;
 
 
-	va_start(ap, e);
-
-	line = va_arg(ap, char *);
-	line[strlen(line) - 1] = '\0';		/* remove the newline character from the end */
-
-	va_arg(ap, History *);
-	va_arg(ap, BIO *);
-	commands = va_arg(ap, command *);
-
-	va_end(ap);
-
-	cmd = strtok(line, " ");
-	if (strcmp(cmd, "csearch") == 0)
+	if (strncmp(e_line, "csearch", 7) == 0)
 		chain = 1;
 	else
 		chain = 0;
 
-	pattern_locale = BAD_CAST strtok(NULL, " ");	/* assign the command's parameter */
+	pattern_locale = BAD_CAST strtok((char *)e_line, " ");	/* assign the command's parameter */
 	if (!pattern_locale) {
 		puts(commands->usage);
 		return;

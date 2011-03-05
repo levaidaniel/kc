@@ -24,25 +24,16 @@
 
 
 #include "common.h"
+#include "commands.h"
 
 
 void
-cmd_clear(EditLine *e, ...)
+cmd_clear(char *e_line, command *commands)
 {
-	va_list		ap;
-
-	char		*line = NULL;
 	int		count = 0, i = 0, j = 0;
 
 
-	va_start(ap, e);
-
-	line = va_arg(ap, char *);
-	line[strlen(line) - 1] = '\0';		/* remove the newline character from the end */
-
-	va_end(ap);
-
-	if (sscanf(line, "%*s %d", &count) <= 0)
+	if (sscanf(e_line, "%*s %d", &count) <= 0)
 		count = 1;
 
 	if (count > 10  ||  count <= 0)

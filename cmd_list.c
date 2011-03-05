@@ -34,23 +34,13 @@ extern xmlNodePtr	keychain;
 
 
 void
-cmd_list(EditLine *e, ...)
+cmd_list(char *e_line, command *commands)
 {
-	va_list		ap;
-
 	xmlNodePtr	db_node = NULL;
 	xmlChar		*key_locale = NULL, *key = NULL;
 
 	int		idx = 0;
 
-
-	va_start(ap, e);
-
-	va_arg(ap, char *);	/* ignore the (char *) line parameter */
-	va_arg(ap, History *);	/* ignore the (History *) parameter */
-	va_arg(ap, BIO *);	/* ignore the (BIO *) parameter */
-
-	va_end(ap);
 
 	db_node = keychain->children;
 

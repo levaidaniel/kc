@@ -31,61 +31,60 @@
 
 extern xmlNodePtr	keychain;
 extern char		dirty;
+extern char		prompt_context[20];
+
+#ifndef _READLINE
+extern EditLine		*e;
+extern History		*eh;
+extern HistEvent	eh_ev;
+#endif
 
 
 void
-cmd_cnew(EditLine *e, ...)
+cmd_cnew(char *e_line, command *commands)
 {
-	va_list		ap;
-
-	History		*eh = NULL;
-
 	xmlNodePtr	db_node = NULL;
 	xmlChar		*cname_locale = NULL, *cname = NULL;
 
-	char		*line = NULL;
+#ifndef _READLINE
 	int		e_count = 0;
-	const char	*e_line = NULL;
+#endif
 
 
-	va_start(ap, e);
-
-	line = va_arg(ap, char *);
-	line[strlen(line) - 1] = '\0';		// remove the newline character from the end
-
-	eh = va_arg(ap, History *);
-	va_end(ap);
-
-	strtok(line, " ");	// remove the command from the line
+	strtok((char *)e_line, " ");	// remove the command from the line
 	cname_locale = BAD_CAST strtok(NULL, " ");	// assign the command's parameter
 	if (!cname_locale) {		// if we didn't get a name as a parameter
+#ifndef _READLINE
 		// disable history temporarily
-		if (el_set(e, EL_HIST, history, NULL) != 0) {
+		if (el_set(e, EL_HIST, eh, NULL) != 0) {
 			perror("el_set(EL_HIST)");
 		}
-		// set the new edit prompt
-		if (el_set(e, EL_CLIENTDATA, "NEW keychain") != 0) {
-			perror("el_set(EL_CLIENTDATA)");
-		}
+#endif
+
+		strlcpy(prompt_context, "NEW keychain", sizeof(prompt_context));
 
 
-		e_line = el_gets(e, &e_count);
+#ifndef _READLINE
+		e_line = (char *)el_gets(e, &e_count);
+
+		e_line[strlen(e_line) - 1] = '\0';	// remove the newline
+#else
+		e_line = readline(prompt_str());
+#endif
 		if (!e_line) {
 			perror("input");
 			return;
 		} else
 			cname_locale = BAD_CAST e_line;
 
-		cname_locale[xmlStrlen(cname_locale) - 1] = '\0';	// remove the newline
-
-		// change back to the default prompt
-		if (el_set(e, EL_CLIENTDATA, "") != 0) {
-			perror("el_set(EL_CLIENTDATA)");
-		}
+#ifndef _READLINE
 		// re-enable history
-		if (el_set(e, EL_HIST, history, eh) != 0) {
+		if (el_set(e, EL_HIST, eh, history) != 0) {
 			perror("el_set(EL_HIST)");
 		}
+#endif
+
+		strlcpy(prompt_context, "", sizeof(prompt_context));
 	}
 
 	cname = convert_utf8(cname_locale, 0);

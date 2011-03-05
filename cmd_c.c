@@ -33,29 +33,13 @@ extern xmlNodePtr	keychain;
 
 
 void
-cmd_c(EditLine *e, ...)
+cmd_c(char *e_line, command *commands)
 {
-	va_list		ap;	
-
 	xmlNodePtr	db_node = NULL;
 	xmlChar		*cname_locale = NULL, *cname = NULL;
 
-	command		*commands = NULL;
 
-	char		*line = NULL;
-
-
-	va_start(ap, e);
-
-	line = va_arg(ap, char *);
-	line[strlen(line) - 1] = '\0';		// remove the newline character from the end
-	va_arg(ap, History *);
-	va_arg(ap, BIO *);
-	commands = va_arg(ap, command *);
-
-	va_end(ap);
-
-	strtok(line, " ");				// remove the command from the line
+	strtok((char *)e_line, " ");				// remove the command from the line
 	cname_locale = BAD_CAST strtok(NULL, " ");	// assign the command's parameter
 	if (!cname_locale) {
 		puts(commands->usage);

@@ -33,28 +33,12 @@ extern xmlDocPtr	db;
 
 
 void
-cmd_export(EditLine *e, ...)
+cmd_export(char *e_line, command *commands)
 {
-	va_list		ap;
-
-	command		*commands = NULL;
-
-	char		*line = NULL;
 	char		*export_filename = NULL;
 
 
-	va_start(ap, e);
-
-	line = va_arg(ap, char *);
-	line[strlen(line) - 1] = '\0';		// remove the newline character from the end
-
-	va_arg(ap, History *);		// ignore the (History *) parameter
-	va_arg(ap, BIO *);		// ignore the (BIO *) parameter
-	commands = va_arg(ap, command *);
-
-	va_end(ap);
-
-	strtok(line, " ");	/* remove the command from the line */
+	strtok((char *)e_line, " ");	/* remove the command from the line */
 	export_filename = strtok(NULL, " ");	/* assign the command's parameter */
 	if (!export_filename) {
 		puts(commands->usage);

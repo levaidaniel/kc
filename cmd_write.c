@@ -26,32 +26,22 @@
 #include <stdarg.h>
 
 #include "common.h"
+#include "commands.h"
 
 
 extern xmlDocPtr	db;
 extern char		dirty;
+extern BIO		*bio_chain;
 
 
 void
-cmd_write(EditLine *e, ...)
+cmd_write(char *e_line, command *commands)
 {
-	va_list			ap;
-
 	xmlSaveCtxtPtr		xml_save = NULL;
 	xmlBufferPtr		xml_buf = NULL;
 
-	BIO			*bio_chain = NULL;
-
 	int			ret = 0;
 
-
-	va_start(ap, e);
-
-	va_arg(ap, char *);		/* ignore the (char *)line parameter */
-	va_arg(ap, History *);		/* ignore the (History *) parameter */
-	bio_chain = va_arg(ap, BIO *);
-
-	va_end(ap);
 
 	xml_buf = xmlBufferCreate();
 	xml_save = xmlSaveToBuffer(xml_buf, "UTF-8", XML_SAVE_FORMAT);

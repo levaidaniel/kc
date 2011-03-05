@@ -24,10 +24,11 @@
 
 
 #include "common.h"
+#include "commands.h"
 
 
 void
-cmd_version(EditLine *e, ...)
+cmd_version(char *e_line, command *commands)
 {
 	printf("%s\n", VERSION);
 } /* cmd_version() */

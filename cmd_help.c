@@ -33,23 +33,12 @@ extern command	*commands_first;
 
 
 void
-cmd_help(EditLine *e, ...)
+cmd_help(char *e_line, command *commands)
 {
-	va_list		ap;
-
-	command		*commands = commands_first;
-
-	char		*line = NULL, *got_command = NULL;
+	char		*got_command = NULL;
 
 
-	va_start(ap, e);
-
-	line = va_arg(ap, char *);
-	line[strlen(line) - 1] = '\0';		/* remove the newline character from the end */
-
-	va_end(ap);
-
-	strtok(line, " ");	/* remove the command from the line */
+	strtok((char *)e_line, " ");	/* remove the command from the line */
 	got_command = strtok(NULL, " ");	/* assign the command's parameter */
 
 	if (got_command) {
@@ -63,6 +52,8 @@ cmd_help(EditLine *e, ...)
 		if (!commands)
 			printf("unknown command: '%s'\n", got_command);
 	} else {
+		commands = commands_first;
+
 		printf("\nCommands:\n\n");
 
 		puts("[Name]     -    [Usage]\n");

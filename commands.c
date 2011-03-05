@@ -29,6 +29,10 @@
 extern xmlNodePtr	keychain;
 extern char		*locale;
 
+#ifdef _READLINE
+xmlChar                 *_rl_helper_var = NULL;
+#endif
+
 
 xmlNodePtr
 find_keychain(xmlChar *cname)
@@ -241,3 +245,11 @@ convert_utf8(char *string, char dir)		// 'dir'=direction, 0: locale=>utf8, 1: ut
 
 	return(BAD_CAST out_str);
 } /* convert_to_utf8() */
+
+
+#ifdef _READLINE
+void _rl_push_buffer(void) {
+	rl_replace_line((const char *)_rl_helper_var, 0);
+	rl_redisplay();
+} /* _rl_push_buffer */
+#endif

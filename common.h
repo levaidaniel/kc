@@ -20,17 +20,26 @@
 #include <openssl/bio.h>
 #include <openssl/evp.h>
 
+#ifndef _READLINE
 #include <histedit.h>
+#else
+#include <readline/readline.h>
+#include <readline/history.h>
+#endif
 
 
-#define	VERSION	"kc 1.0"
+#define	VERSION	"kc 1.5"
 
 
-const char *e_prompt(EditLine *);
-const char *e_prompt_null(EditLine *);
+#ifndef _READLINE
+const char *el_prompt_null(EditLine *);
+const char *prompt_str(EditLine *);
+#else
+const char *prompt_str(void);
+#endif
 int malloc_check(void *);
 char *get_random_str(int, char);
-void quit(EditLine *, History *, BIO *, int);
+void quit(int);
 
 
 char		debug;

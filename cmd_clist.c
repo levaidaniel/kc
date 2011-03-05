@@ -33,7 +33,7 @@ extern xmlNodePtr	keychain;
 
 
 void
-cmd_clist(EditLine *e, ...)
+cmd_clist(char *e_line, command *commands)
 {
 	xmlNodePtr	db_node = NULL;
 	xmlChar		*cname_locale = NULL, *cname = NULL;

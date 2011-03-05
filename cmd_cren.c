@@ -31,37 +31,28 @@
 
 extern xmlNodePtr	keychain;
 extern char		dirty;
+extern char		prompt_context[20];
+extern xmlChar		*_rl_helper_var;
+
+#ifndef _READLINE
+extern EditLine		*e;
+extern History		*eh;
+extern HistEvent	eh_ev;
+#endif
 
 
 void
-cmd_cren(EditLine *e, ...)
+cmd_cren(char *e_line, command *commands)
 {
-	va_list		ap;
-
-	History 	*eh = NULL;
-
 	xmlNodePtr	db_node = NULL;
 	xmlChar		*cname_locale = NULL, *cname = NULL;
 
-	command		*commands = NULL;
-
-	const char	*e_line = NULL;
-	char		*line = NULL;
+#ifndef _READLINE
 	int		e_count = 0;
+#endif
 
 
-	va_start(ap, e);
-
-	line = va_arg(ap, char *);
-	line[strlen(line) - 1] = '\0';		/* remove the newline character from the end */
-
-	eh = va_arg(ap, History *);
-	va_arg(ap, BIO *);
-	commands = va_arg(ap, command *);
-
-	va_end(ap);
-
-	strtok(line, " ");	/* remove the command from the line */
+	strtok((char *)e_line, " ");	/* remove the command from the line */
 	cname_locale = BAD_CAST strtok(NULL, " ");	/* assign the command's parameter */
 	if (!cname_locale) {
 		puts(commands->usage);
@@ -72,31 +63,42 @@ cmd_cren(EditLine *e, ...)
 
 	db_node = find_keychain(cname);
 	if (db_node) {
+#ifndef _READLINE
 		// disable history temporarily
-		if (el_set(e, EL_HIST, history, NULL) != 0) {
+		if (el_set(e, EL_HIST, eh, NULL) != 0) {
 			perror("el_set(EL_HIST)");
 		}
+#endif
 
+		strlcpy(prompt_context, "RENAME keychain", sizeof(prompt_context));
 
-		// set the new edit prompt
-		if (el_set(e, EL_CLIENTDATA, "RENAME keychain") != 0) {
-			perror("el_set(EL_CLIENTDATA)");
-		}
 		// if we edit an existing entry, push the current value to the edit buffer
 		free(cname);
 		cname = xmlGetProp(db_node, BAD_CAST "name");
 		cname_locale = convert_utf8(cname, 1);
-		el_push(e, (const char *)cname_locale);
-		free(cname_locale); cname_locale = NULL;
+#ifdef _READLINE
+		_rl_helper_var = cname_locale;
+#endif
 
-		e_line = el_gets(e, &e_count);
+#ifndef _READLINE
+		el_push(e, (const char *)cname_locale);
+
+		e_line = (char *)el_gets(e, &e_count);
+
+		e_line[strlen(e_line) - 1] = '\0';	// remove the newline
+#else
+		rl_pre_input_hook = (rl_hook_func_t *)_rl_push_buffer;
+		e_line = readline(prompt_str());
+		rl_pre_input_hook = NULL;
+#endif
 		if (!e_line) {
 			perror("input");
 			return;
-		} else
+		} else {
+			free(cname_locale); cname_locale = NULL;
 			cname_locale = BAD_CAST e_line;
+		}
 
-		cname_locale[xmlStrlen(cname_locale) - 1] = '\0';		// remove the newline character from the end
 		cname = convert_utf8(cname_locale, 0);
 
 
@@ -104,14 +106,14 @@ cmd_cren(EditLine *e, ...)
 
 		free(cname);
 
-		// change back to the default prompt
-		if (el_set(e, EL_CLIENTDATA, "") != 0) {
-			perror("el_set(EL_CLIENTDATA)");
-		}
+#ifndef _READLINE
 		// re-enable history
-		if (el_set(e, EL_HIST, history, eh) != 0) {
+		if (el_set(e, EL_HIST, eh, history) != 0) {
 			perror("el_set(EL_HIST)");
 		}
+#endif
+
+		strlcpy(prompt_context, "", sizeof(prompt_context));
 
 		dirty = 1;
 	} else {
