@@ -38,6 +38,8 @@ cmd_help(char *e_line, command *commands)
 	char		*got_command = NULL;
 
 
+	commands = commands_first;
+
 	strtok((char *)e_line, " ");	/* remove the command from the line */
 	got_command = strtok(NULL, " ");	/* assign the command's parameter */
 
@@ -52,8 +54,6 @@ cmd_help(char *e_line, command *commands)
 		if (!commands)
 			printf("unknown command: '%s'\n", got_command);
 	} else {
-		commands = commands_first;
-
 		printf("\nCommands:\n\n");
 
 		puts("[Name]     -    [Usage]\n");
