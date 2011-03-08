@@ -235,7 +235,7 @@ get_line(xmlChar *value_locale, int value_len, int *pos, int *c, int idx)
 		return(*pos);
 	}
 
-	for(*pos=0; *pos < value_len; (*pos)++) {	// search the entire string
+	for (*pos=0; *pos < value_len; (*pos)++) {	// search the entire string
 		if (i < idx) {			// while newline count ('i') is smaller than the line number requested
 			if (value_locale[*pos] == '\n')	// we found a '\n'
 				i++;

@@ -1,2 +1,1 @@
-implement a command completion function for readline too.
 the 'write' command should accept a filename parameter.

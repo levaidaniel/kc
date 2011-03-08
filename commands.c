@@ -248,7 +248,9 @@ convert_utf8(char *string, char dir)		// 'dir'=direction, 0: locale=>utf8, 1: ut
 
 
 #ifdef _READLINE
-void _rl_push_buffer(void) {
+void
+_rl_push_buffer(void)
+{
 	rl_replace_line((const char *)_rl_helper_var, 0);
 	rl_redisplay();
 } /* _rl_push_buffer */

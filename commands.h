@@ -4,9 +4,9 @@
 
 typedef struct command command;
 struct command {
-	char *name;
-	char *usage;
-	char *help;
+	const char *name;
+	const char *usage;
+	const char *help;
 	void (*fn)(char *, command *);
 	struct command *next;
 };

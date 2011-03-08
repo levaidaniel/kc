@@ -43,6 +43,7 @@ void print_bio_chain(BIO *);
 char el_tab_complete(EditLine *, int);
 #else
 char **rl_tab_complete(const char *, int, int);
+char *cmd_generator(const char *, int);
 #endif
 
 
@@ -513,6 +514,8 @@ main(int argc, char *argv[])
 	rl_catch_signals = 1;
 
 	rl_readline_name = "kc";
+
+	rl_attempted_completion_function = rl_tab_complete;
 #endif
 
 	strlcpy(prompt_context, "", sizeof(prompt_context));
@@ -732,46 +735,40 @@ get_random_str(int length, char alnum)
 char
 el_tab_complete(EditLine *e, int ch)
 {
-	char		*line_buf = NULL, *match = NULL, *tmp = NULL;
+	char		*line_buf = NULL, *match = NULL;
 	const LineInfo	*el_lineinfo = NULL;
 	command		*commands = commands_first;
-	int		hits = 0, len = 0;
+	int		hits = 0, match_len = 0, line_buf_len = 0;
 
 
 	el_lineinfo = el_line(e);
 
 	// copy the buffer (ie. line) to our variable 'line_buf',
 	// because el_lineinfo->buffer is not NUL terminated
-	len = el_lineinfo->lastchar - el_lineinfo->buffer;
-	line_buf = malloc(len + 1); malloc_check(line_buf);
-	memcpy(line_buf, el_lineinfo->buffer, len);
-	line_buf[len] = '\0';
+	line_buf_len = el_lineinfo->lastchar - el_lineinfo->buffer;
+	line_buf = malloc(line_buf_len + 1); malloc_check(line_buf);
+	memcpy(line_buf, el_lineinfo->buffer, line_buf_len);
+	line_buf[line_buf_len] = '\0';
 
 
 	// empty buffer (ie. line)
-	if (strlen(line_buf) == 0)
+	if (!line_buf_len)
 		return(CC_CURSOR);
 
 
-	len = 0;
 	// initialize 'match' for use with strlcat()
 	match = calloc(1, 1); malloc_check(match);
-	while(commands) {
-		tmp = strstr(commands->name, line_buf);
-		if (tmp) {
-			if (strcmp(tmp, commands->name) == 0) {		// this verifies that the match is not somewhere inside the command name, but it only matches from the beginning of the command name.
-				hits++;
+	do {
+		if (strncmp(line_buf, commands->name, line_buf_len) == 0) {
+			hits++;
 
-				len += strlen(commands->name) + 1 + 1;
-				match = realloc(match, len); malloc_check(match);
+			match_len += strlen(commands->name) + 1 + 1;
+			match = realloc(match, match_len); malloc_check(match);
 
-				strlcat(match, commands->name, len);
-				strlcat(match, " ", len);
-			}
+			strlcat(match, commands->name, match_len);
+			strlcat(match, " ", match_len);
 		}
-
-		commands = commands->next;	// iterate through the linked list
-	}
+	} while((commands = commands->next));	// iterate through the linked list
 
 	switch (hits) {
 		case 0:
@@ -789,7 +786,39 @@ el_tab_complete(EditLine *e, int ch)
 
 
 	return(CC_CURSOR);
-} /* tab_complete() */
+} /* el_tab_complete() */
+#else
+char **
+rl_tab_complete(const char *text, int start, int end)
+{
+	char	**matches = NULL;
+
+
+	matches = rl_completion_matches(text, cmd_generator);
+
+	return(matches);
+} /* rl_tab_complete() */
+
+char *
+cmd_generator(const char *text, int state)
+{
+	command		*commands = commands_first;
+	int		idx = 0;
+
+
+	 while(commands) {
+		if (idx < state)
+			idx++;
+		else
+			if (strncmp(text, commands->name, strlen(text)) == 0)
+				return(strdup(commands->name));
+
+
+		commands = commands->next;	// iterate through the linked list
+	}
+
+	return(NULL);
+}
 #endif
 
 

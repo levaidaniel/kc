@@ -58,7 +58,7 @@ cmd_help(char *e_line, command *commands)
 
 		puts("[Name]     -    [Usage]\n");
 
-		while(commands) {
+		while (commands) {
 			printf("%-10s - \t%s\n", commands->name, commands->usage);
 
 			commands = commands->next;
