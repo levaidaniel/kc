@@ -134,7 +134,6 @@ cmd_edit(char *e_line, command *commands)
 			value_locale = BAD_CAST e_line;
 		}
 
-		value_locale[xmlStrlen(value_locale) - 1] = '\0';	// remove the newline character from the end
 		value_locale = parse_newlines(value_locale, 0);
 		value = convert_utf8(value_locale, 0);
 		free(value_locale);
