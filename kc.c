@@ -584,8 +584,11 @@ cmd_match(char *e_line)
 		else
 		if (strncmp(e_line, "c/", 2) == 0)
 			str = "c/";
-		else
+		else {
 			str = strtok(e_line, " ");
+			if (!str)	// probably an empty line
+				return;
+		}
 
 		while(commands) {
 			if (strcmp(commands->name, str) == 0)	// find an exact match
