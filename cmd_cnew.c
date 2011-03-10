@@ -67,7 +67,8 @@ cmd_cnew(char *e_line, command *commands)
 #ifndef _READLINE
 		e_line = (char *)el_gets(e, &e_count);
 
-		e_line[strlen(e_line) - 1] = '\0';	// remove the newline
+		if (e_line)
+			e_line[strlen(e_line) - 1] = '\0';	// remove the newline
 #else
 		e_line = readline(prompt_str());
 #endif

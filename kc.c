@@ -529,8 +529,6 @@ main(int argc, char *argv[])
 	do {
 #ifndef _READLINE
 		e_line = (char *)el_gets(e, &e_count);
-
-		e_line[strlen(e_line) - 1] = '\0';		// remove the newline character from the end
 #else
 		e_line = readline(prompt_str());
 #endif
@@ -538,11 +536,19 @@ main(int argc, char *argv[])
 		if (e_line) {
 			if (strlen(e_line) > 0) {
 #ifndef _READLINE
+				e_line[strlen(e_line) - 1] = '\0';		// remove the newline character from the end
 				history(eh, &eh_ev, H_ENTER, e_line);
 #else
 				add_history(e_line);
 #endif
 				cmd_match(e_line);
+			}
+		} else {
+			if (batchmode)
+				quit(EXIT_SUCCESS);
+			else {
+				perror("input");
+				quit(EXIT_FAILURE);
 			}
 		}
 	} while(1);

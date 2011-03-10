@@ -86,7 +86,8 @@ cmd_edit(char *e_line, command *commands)
 
 		e_line = (char *)el_gets(e, &e_count);
 
-		e_line[strlen(e_line) - 1] = '\0';	// remove the newline
+		if (e_line)
+			e_line[strlen(e_line) - 1] = '\0';	// remove the newline
 #else
 		rl_pre_input_hook = (rl_hook_func_t *)_rl_push_buffer;
 		e_line = readline(prompt_str());
@@ -120,7 +121,8 @@ cmd_edit(char *e_line, command *commands)
 
 		e_line = (char *)el_gets(e, &e_count);
 
-		e_line[strlen(e_line) - 1] = '\0';	// remove the newline
+		if (e_line)
+			e_line[strlen(e_line) - 1] = '\0';	// remove the newline
 #else
 		rl_pre_input_hook = (rl_hook_func_t *)_rl_push_buffer;
 		e_line = readline(prompt_str());
