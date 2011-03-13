@@ -95,12 +95,15 @@ cmd_searchre(char *e_line, command *commands)
 	else
 		db_node = keychain->children;
 
+	if (debug)
+		printf("searching for: '%s'\n", pattern);
+
 	while (db_node) {
 		if (db_node->type == XML_ELEMENT_NODE) {	// skip the non element nodes
 			if (chain)
-				key = xmlStrdup(xmlGetProp(db_node, BAD_CAST "name"));
+				key = xmlStrdup(xmlGetProp(db_node, BAD_CAST "name"));	// search for keychains
 			else
-				key = xmlNodeGetContent(db_node->children);
+				key = xmlNodeGetContent(db_node->children);	// search for keys in the current keychain
 
 			if (debug)
 				printf("name=%s", key);
@@ -111,7 +114,7 @@ cmd_searchre(char *e_line, command *commands)
 
 				hits++;
 
-				printf("%d. ", idx);	// prefix the name with the index number 
+				printf("%d. ", idx);	// prefix the name with the index number
 				key_locale = convert_utf8(key, 1);
 				printf("%s\n", key_locale);	// this is the name of the entry
 				free(key_locale); key_locale = NULL;

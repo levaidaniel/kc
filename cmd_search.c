@@ -48,7 +48,8 @@ cmd_search(char *e_line, command *commands)
 	else
 		chain = 0;
 
-	pattern_locale = BAD_CAST strtok((char *)e_line, " ");	/* assign the command's parameter */
+	strtok((char *)e_line, " ");	/* remove the command name */
+	pattern_locale = BAD_CAST strtok(NULL, " ");	/* assign the command's parameter */
 	if (!pattern_locale) {
 		puts(commands->usage);
 		return;
@@ -58,8 +59,11 @@ cmd_search(char *e_line, command *commands)
 
 	if (chain)
 		db_node = keychain->parent->children;
-	else 
+	else
 		db_node = keychain->children;
+
+	if (debug)
+		printf("searching for: '%s'\n", pattern);
 
 	while (db_node) {
 		if (db_node->type == XML_ELEMENT_NODE) {	// skip the non element nodes
@@ -78,9 +82,9 @@ cmd_search(char *e_line, command *commands)
 
 				hits++;
 
-				printf("%d. ", idx);    // prefix the name with the index number
+				printf("%d. ", idx);	// prefix the name with the index number
 				key_locale = convert_utf8(key, 1);
-				printf("%s\n", key_locale);    // this is the name of the entry
+				printf("%s\n", key_locale);	// this is the name of the entry
 				free(key_locale); key_locale = NULL;
 			} else
 				if (debug)
