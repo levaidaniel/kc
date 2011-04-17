@@ -59,7 +59,7 @@ find_keychain(xmlChar *cname)
 					break;
 				}
 			} else {		// if keychain name was given in the parameter
-				if (xmlUTF8Charcmp(xmlGetProp(db_node, BAD_CAST "name"), cname) == 0) {
+				if (xmlStrcmp(xmlGetProp(db_node, BAD_CAST "name"), cname) == 0) {
 					break;
 				}
 			}
