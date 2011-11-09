@@ -550,14 +550,16 @@ void
 cmd_match(char *e_line)
 {
 	int	idx = -1, space = -1;
-	char	*str = NULL, *line = strdup(e_line);
+	char	*str = NULL, *line = NULL;
 	command	*commands = commands_first;
 
+
+	line = strdup(e_line);
 
 	/* special case, if only a number was entered,
 	   we display the appropriate entry, and if there
 	   is another number after it, use it as space for jamming */
-	sscanf(e_line, "%d %d", &idx, &space);
+	sscanf(line, "%d %d", &idx, &space);
 	if (idx >= 0) {
 		if (space >= 0)
 			cmd_getnum(idx, space);
@@ -567,14 +569,14 @@ cmd_match(char *e_line)
 		/* special case, if a '[*]/'([*]slash) or 'c/' is the first character,
 		   then everything that follows is a search pattern (even a space),
 		   so we must not tokenize the line */
-		if (strncmp(e_line, "/", 1) == 0)
+		if (strncmp(line, "/", 1) == 0)
 			str = "/";
-		else if (strncmp(e_line, "*/", 2) == 0)
+		else if (strncmp(line, "*/", 2) == 0)
 			str = "*/";
-		else if (strncmp(e_line, "c/", 2) == 0)
+		else if (strncmp(line, "c/", 2) == 0)
 			str = "c/";
 		else {
-			str = strtok(e_line, " ");
+			str = strtok(line, " ");
 			if (!str)	// probably an empty line
 				return;
 		}
@@ -587,9 +589,9 @@ cmd_match(char *e_line)
 		}
 
 		if (commands)
-			commands->fn(line, commands);	// we call the command's respective function here
+			commands->fn(e_line, commands);	// we call the command's respective function here
 		else
-			printf("unknown command: '%s'\n", e_line);
+			printf("unknown command: '%s'\n", str);
 	}
 
 	free(line); line = NULL;

@@ -169,8 +169,8 @@ cmd_getnum(int idx, int space)
 				}
 
 				// erase (overwrite) the written value with spaces
-				erase_len = line_len + (newlines ? digit_length(idx) + digit_length(newlines + 1) + 4 : 0);	// add the line number prefix too
 				printf("\r");
+				erase_len = line_len + (newlines ? digit_length(idx) + digit_length(newlines + 1) + 4 : 0);	// add the line number prefix too
 				for (i=0; i < erase_len; i++)
 					putchar(' ');
 
@@ -222,6 +222,7 @@ cmd_getnum(int idx, int space)
 			line_len = 0;	// this is the actual line length
 		}
 
+		xmlFree(key); key = NULL;
 		xmlFree(value); value = NULL;
 		free(value_part); value_part = NULL;
 
