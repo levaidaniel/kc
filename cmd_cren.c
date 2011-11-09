@@ -91,7 +91,9 @@ cmd_cren(char *e_line, command *commands)
 #endif
 		if (!e_line) {
 			perror("input");
+#ifndef _READLINE
 			el_reset(e);
+#endif
 			return;
 		} else {
 			cname = BAD_CAST e_line;

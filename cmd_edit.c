@@ -45,7 +45,7 @@ void
 cmd_edit(char *e_line, command *commands)
 {
 	xmlNodePtr	db_node = NULL, db_node_new = NULL;
-	xmlChar		*key = NULL, *value_nl = NULL, *value = NULL;
+	xmlChar		*key = NULL, *value = NULL;
 
 #ifndef _READLINE
 	int		e_count = 0;
@@ -94,26 +94,25 @@ cmd_edit(char *e_line, command *commands)
 #endif
 		if (!e_line) {
 			perror("input");
+#ifndef _READLINE
 			el_reset(e);
+#endif
 			return;
-		} else {
+		} else
 			key = xmlStrdup(BAD_CAST e_line);
-		}
 
 
 		strlcpy(prompt_context, "EDIT value", sizeof(prompt_context));
 
 		// if we edit an existing entry, push the current value to the edit buffer
-		value_nl = xmlGetProp(db_node, BAD_CAST "value");
-		value = parse_newlines(value_nl, 1);
-		xmlFree(value_nl); value_nl = NULL;
+		value = xmlGetProp(db_node, BAD_CAST "value");
 #ifdef _READLINE
 		_rl_helper_var = value;
 #endif
 
 #ifndef _READLINE
 		el_push(e, (const char *)value);
-		free(value); value = NULL;
+		xmlFree(value); value = NULL;
 
 		e_line = (char *)el_gets(e, &e_count);
 
@@ -126,21 +125,20 @@ cmd_edit(char *e_line, command *commands)
 #endif
 		if (!e_line) {
 			perror("input");
+#ifndef _READLINE
 			el_reset(e);
+#endif
 			xmlFree(key); key = NULL;
 			return;
-		} else {
-			value = BAD_CAST e_line;
-		}
-
-		value = parse_newlines(value, 0);
+		} else
+			value = xmlStrdup(BAD_CAST e_line);
 
 
 		db_node_new = xmlNewChild(keychain, NULL, BAD_CAST "key", NULL);
 		xmlNewProp(db_node_new, BAD_CAST "name", key);
 		xmlNewProp(db_node_new, BAD_CAST "value", value);
 		xmlFree(key); key = NULL;
-		free(value); value = NULL;
+		xmlFree(value); value = NULL;
 
 		db_node = xmlReplaceNode(db_node, db_node_new);
 		xmlFreeNode(db_node);

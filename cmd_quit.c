@@ -70,7 +70,9 @@ cmd_quit(char *e_line, command *commands)
 #endif
 		if (!e_line) {
 			perror("input");
+#ifndef _READLINE
 			el_reset(e);
+#endif
 			return;
 		}
 

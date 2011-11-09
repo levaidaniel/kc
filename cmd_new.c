@@ -60,7 +60,7 @@ cmd_new(char *e_line, command *commands)
 
 	strtok((char *)e_line, " ");    // remove the command from the line
 
-	key = BAD_CAST strtok(NULL, " ");      // assign the command's first parameter (name)
+	key = xmlStrdup(BAD_CAST strtok(NULL, " "));      // assign the command's first parameter (name)
 	if (!key) {            // if we didn't get a name as a parameter
 		strlcpy(prompt_context, "NEW key", sizeof(prompt_context));
 
@@ -74,7 +74,10 @@ cmd_new(char *e_line, command *commands)
 #endif
 		if (!e_line) {
 			perror("input");
+#ifndef _READLINE
 			el_reset(e);
+#endif
+			xmlFree(key); key = NULL;
 			return;
 		} else
 			key = xmlStrdup(BAD_CAST e_line);
@@ -83,7 +86,7 @@ cmd_new(char *e_line, command *commands)
 		printf("new key is '%s'\n", key);
 
 
-	value = BAD_CAST strtok(NULL, " ");      // assign the command's second parameter (value)
+	value = xmlStrdup(BAD_CAST strtok(NULL, " "));      // assign the command's second parameter (value)
 	if (!value) {            // if we didn't get a value as a parameter
 		strlcpy(prompt_context, "NEW value", sizeof(prompt_context));
 
@@ -97,15 +100,15 @@ cmd_new(char *e_line, command *commands)
 #endif
 		if (!e_line) {
 			perror("input");
+#ifndef _READLINE
 			el_reset(e);
+#endif
 			xmlFree(key); key = NULL;
+			xmlFree(value); value = NULL;
 			return;
 		} else
-			value = BAD_CAST e_line;
+			value = xmlStrdup(BAD_CAST e_line);
 	}
-
-	value = parse_newlines(value, 0);
-
 	if (debug)
 		printf("new value is '%s'\n", value);
 
@@ -128,9 +131,8 @@ cmd_new(char *e_line, command *commands)
 	db_node = xmlNewChild(keychain, NULL, BAD_CAST "key", NULL);
 	xmlNewProp(db_node, BAD_CAST "name", key);
 	xmlNewProp(db_node, BAD_CAST "value", value);
+	xmlFree(key); key = NULL;
+	xmlFree(value); value = NULL;
 
 	dirty = 1;
-
-	xmlFree(key); key = NULL;
-	free(value); value = NULL;
 } /* cmd_new() */

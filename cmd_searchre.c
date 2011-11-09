@@ -41,7 +41,7 @@ cmd_searchre(char *e_line, command *commands)
 {
 #ifdef	_HAVE_PCRE
 	xmlNodePtr	db_node = NULL, search_keychain = NULL;
-	xmlChar		*pattern = NULL, *key = NULL;
+	xmlChar		*key = NULL;
 
 	pcre		*re = NULL;
 	pcre_extra	*re_study = NULL;
@@ -49,37 +49,43 @@ cmd_searchre(char *e_line, command *commands)
 	int		erroffset = 0;
 	int		ovector[30];
 
+	const char	*pattern = NULL;
+	char		*line = NULL;
 	char		chain = 0, searchall = 0;
 	int		hits = 0, idx = 0;
 
 
-	if (strncmp(e_line, "*", 1) == 0) {
+	line = strdup(e_line);
+
+	if (strncmp(line, "*", 1) == 0) {
 		searchall = 1;
-		e_line++;
+		line++;
 	}
-	if (strncmp(e_line, "c", 1) == 0)
+	if (strncmp(line, "c", 1) == 0)
 		chain = 1;
 
 
 	if (chain)
-		pattern = BAD_CAST e_line + 2;	// remove the 'c/' from the line. the remaining part is the pattern
+		pattern = line + 2;	// remove the 'c/' from the line. the remaining part is the pattern
 	else
-		pattern = BAD_CAST e_line + 1;	// remove the '/'(slash) from the line. the remaining part is the pattern
+		pattern = line + 1;	// remove the '/'(slash) from the line. the remaining part is the pattern
 
 	if (!pattern) {
 		puts(commands->usage);
+		free(line);
 		return;
 	}
 	if (strlen(pattern) <= 0) {
 		puts(commands->usage);
+		free(line);
 		return;
 	}
 
 
-	re = pcre_compile((const char *)pattern, PCRE_UTF8, &error, &erroffset, NULL);
+	re = pcre_compile(pattern, PCRE_UTF8, &error, &erroffset, NULL);
 	if (!re) {
 		printf("error in pattern at %d: (%s)\n", erroffset, error);
-		free(pattern);
+		free(line);
 		return;
 	}
 
@@ -90,6 +96,7 @@ cmd_searchre(char *e_line, command *commands)
 
 		if (!error) {
 			perror("pcre_study()");
+			free(line);
 			return;
 		}
 	}
@@ -153,7 +160,7 @@ cmd_searchre(char *e_line, command *commands)
 	if (!hits)
 		printf("'%s' not found.\n", pattern);
 
-	free(pattern);
+	free(line);
 #else
 	puts("regexp support was not compiled in.");
 #endif

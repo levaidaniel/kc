@@ -535,7 +535,9 @@ main(int argc, char *argv[])
 				quit(EXIT_SUCCESS);
 			else {
 				perror("input");
+#ifndef _READLINE
 				el_reset(e);
+#endif
 				quit(EXIT_FAILURE);
 			}
 		}
