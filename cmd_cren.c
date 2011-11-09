@@ -45,7 +45,7 @@ void
 cmd_cren(char *e_line, command *commands)
 {
 	xmlNodePtr	db_node = NULL;
-	xmlChar		*cname_locale = NULL, *cname = NULL;
+	xmlChar		*cname = NULL;
 
 #ifndef _READLINE
 	int		e_count = 0;
@@ -53,19 +53,17 @@ cmd_cren(char *e_line, command *commands)
 
 
 	strtok((char *)e_line, " ");	/* remove the command from the line */
-	cname_locale = BAD_CAST strtok(NULL, " ");	/* assign the command's parameter */
-	if (!cname_locale) {
+	cname = BAD_CAST strtok(NULL, " ");	/* assign the command's parameter */
+	if (!cname) {
 		puts(commands->usage);
 		return;
 	}
-
-	cname = convert_utf8(cname_locale, 0);
 
 	db_node = find_keychain(cname);
 	if (db_node) {
 #ifndef _READLINE
 		// disable history temporarily
-		if (el_set(e, EL_HIST, eh, NULL) != 0) {
+		if (el_set(e, EL_HIST, history, NULL) != 0) {
 			perror("el_set(EL_HIST)");
 		}
 #endif
@@ -73,15 +71,14 @@ cmd_cren(char *e_line, command *commands)
 		strlcpy(prompt_context, "RENAME keychain", sizeof(prompt_context));
 
 		// if we edit an existing entry, push the current value to the edit buffer
-		free(cname);
 		cname = xmlGetProp(db_node, BAD_CAST "name");
-		cname_locale = convert_utf8(cname, 1);
 #ifdef _READLINE
-		_rl_helper_var = cname_locale;
+		_rl_helper_var = cname;
 #endif
 
 #ifndef _READLINE
-		el_push(e, (const char *)cname_locale);
+		el_push(e, (const char *)cname);
+		xmlFree(cname); cname = NULL;
 
 		e_line = (char *)el_gets(e, &e_count);
 
@@ -94,22 +91,18 @@ cmd_cren(char *e_line, command *commands)
 #endif
 		if (!e_line) {
 			perror("input");
+			el_reset(e);
 			return;
 		} else {
-			free(cname_locale); cname_locale = NULL;
-			cname_locale = BAD_CAST e_line;
+			cname = BAD_CAST e_line;
 		}
-
-		cname = convert_utf8(cname_locale, 0);
 
 
 		xmlSetProp(db_node, BAD_CAST "name", cname);
 
-		free(cname);
-
 #ifndef _READLINE
 		// re-enable history
-		if (el_set(e, EL_HIST, eh, history) != 0) {
+		if (el_set(e, EL_HIST, history, eh) != 0) {
 			perror("el_set(EL_HIST)");
 		}
 #endif
@@ -118,7 +111,6 @@ cmd_cren(char *e_line, command *commands)
 
 		dirty = 1;
 	} else {
-		printf("keychain '%s' not found.\n", cname_locale);
-		free(cname);
+		printf("keychain '%s' not found.\n", cname);
 	}
 } /* cmd_cren() */

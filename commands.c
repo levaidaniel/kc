@@ -27,7 +27,6 @@
 
 
 extern xmlNodePtr	keychain;
-extern char		*locale;
 
 #ifdef _READLINE
 xmlChar                 *_rl_helper_var = NULL;
@@ -172,79 +171,6 @@ digit_length(int idx)
 
 	return(length);
 } /* digit_length() */
-
-
-xmlChar *
-convert_utf8(char *string, char dir)		// 'dir'=direction, 0: locale=>utf8, 1: utf8=>locale
-{
-	iconv_t		iconv_ctx;
-	size_t		conv_bytes = 0;
-	size_t		out_size = 0;
-	size_t		in_left = 0, out_left = 0;
-	char		*out_ptr = NULL, *out_str = NULL, *in_ptr = NULL, *in_str = NULL;
-	int		ret = 0;
-
-
-	if (!string)
-		return(xmlCharStrdup(""));
-
-
-	in_str = strdup(string);
-	in_ptr = in_str;
-
-	if (strcmp(locale, "UTF-8") == 0)	// if there is no need to convert
-		return(BAD_CAST in_str);
-
-
-	if (dir)
-		iconv_ctx = iconv_open(locale, "UTF-8");
-	else
-		iconv_ctx = iconv_open("UTF-8", locale);
-
-	if (iconv_ctx < 0) {
-		perror("character conversion error (iconv_open())");
-		return(BAD_CAST in_str);
-	}
-
-	out_size = strlen(in_str) * 4;		// I don't care about this shitty, f*cked up library
-	out_str = malloc(out_size + 1); malloc_check(out_str);
-	out_ptr = out_str;
-	out_left = out_size;
-	in_left = strlen(in_str);
-	while (in_left != 0) {
-		ret = iconv(iconv_ctx, &in_ptr, &in_left, &out_ptr, &out_left);
-
-		if (ret < 0) {
-			switch (errno) {
-				case E2BIG:
-				case EINVAL:
-				case EILSEQ:
-					// I don't care about this shitty, f*cked up library
-					printf("character conversion error (iconv()): '%s' to 'UTF-8'\n", locale);
-					perror("iconv()");
-					return(BAD_CAST in_str);
-				break;
-				default:
-				break;
-			}
-		}
-	}
-
-	conv_bytes = out_size - out_left;
-	out_str[conv_bytes] = '\0';
-
-	if (debug)
-		printf("string converted to UTF-8 (%zd bytes)\n", conv_bytes);
-
-
-	if (iconv_close(iconv_ctx) != 0) {
-		perror("iconv_close()");
-		return(BAD_CAST in_str);
-	}
-
-
-	return(BAD_CAST out_str);
-} /* convert_to_utf8() */
 
 
 #ifdef _READLINE

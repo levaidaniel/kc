@@ -28,7 +28,7 @@
 #endif
 
 
-#define	VERSION	"kc 1.5"
+#define	VERSION	"kc 2.0"
 
 
 #ifndef _READLINE

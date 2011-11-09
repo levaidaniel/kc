@@ -40,8 +40,8 @@ void
 cmd_searchre(char *e_line, command *commands)
 {
 #ifdef	_HAVE_PCRE
-	xmlNodePtr	db_node = NULL;
-	xmlChar		*pattern_locale = NULL, *key_locale = NULL, *pattern = NULL, *key = NULL;
+	xmlNodePtr	db_node = NULL, search_keychain = NULL;
+	xmlChar		*pattern = NULL, *key = NULL;
 
 	pcre		*re = NULL;
 	pcre_extra	*re_study = NULL;
@@ -49,26 +49,31 @@ cmd_searchre(char *e_line, command *commands)
 	int		erroffset = 0;
 	int		ovector[30];
 
-	char		chain = 0;
+	char		chain = 0, searchall = 0;
 	int		hits = 0, idx = 0;
 
 
-	if (strncmp(e_line, "c/", 2) == 0)
+	if (strncmp(e_line, "*", 1) == 0) {
+		searchall = 1;
+		e_line++;
+	}
+	if (strncmp(e_line, "c", 1) == 0)
 		chain = 1;
-	else
-		chain = 0;
+
 
 	if (chain)
-		pattern_locale = BAD_CAST e_line + 2;	// remove the 'c/' from the line. the remaining part is the pattern
+		pattern = BAD_CAST e_line + 2;	// remove the 'c/' from the line. the remaining part is the pattern
 	else
-		pattern_locale = BAD_CAST e_line + 1;	// remove the '/'(slash) from the line. the remaining part is the pattern
+		pattern = BAD_CAST e_line + 1;	// remove the '/'(slash) from the line. the remaining part is the pattern
 
-	if (!pattern_locale) {
+	if (!pattern) {
 		puts(commands->usage);
 		return;
 	}
-
-	pattern = convert_utf8(pattern_locale, 0);
+	if (strlen(pattern) <= 0) {
+		puts(commands->usage);
+		return;
+	}
 
 
 	re = pcre_compile((const char *)pattern, PCRE_UTF8, &error, &erroffset, NULL);
@@ -90,20 +95,30 @@ cmd_searchre(char *e_line, command *commands)
 	}
 
 
-	if (chain)
-		db_node = keychain->parent->children;
-	else
-		db_node = keychain->children;
+	search_keychain = keychain;
+	while (search_keychain) {
+		if (search_keychain->type != XML_ELEMENT_NODE) {	// skip the non element nodes
+			search_keychain = search_keychain->next;
+			continue;
+		}
 
-	if (debug)
-		printf("searching for: '%s'\n", pattern);
+		/* rewind to the first item, be it a keychain or a key */
+		if (chain)
+			db_node = search_keychain->parent->children;
+		else
+			db_node = search_keychain->children;
 
-	while (db_node) {
-		if (db_node->type == XML_ELEMENT_NODE) {	// skip the non element nodes
-			if (chain)
-				key = xmlStrdup(xmlGetProp(db_node, BAD_CAST "name"));	// search for keychains
-			else
-				key = xmlNodeGetContent(db_node->children);	// search for keys in the current keychain
+		if (debug)
+			printf("searching for: '%s' in '%s' chain\n", pattern, xmlGetProp(search_keychain, BAD_CAST "name"));
+
+		idx = 0;
+		while (db_node) {
+			if (db_node->type != XML_ELEMENT_NODE) {	// skip the non element nodes
+				db_node = db_node->next;
+				continue;
+			}
+
+			key = xmlGetProp(db_node, BAD_CAST "name");
 
 			if (debug)
 				printf("name=%s", key);
@@ -114,24 +129,29 @@ cmd_searchre(char *e_line, command *commands)
 
 				hits++;
 
+				if (searchall)
+					printf("%s%% ", xmlGetProp(search_keychain, BAD_CAST "name"));  // prefix the name with the keychain name
+
 				printf("%d. ", idx);	// prefix the name with the index number
-				key_locale = convert_utf8(key, 1);
-				printf("%s\n", key_locale);	// this is the name of the entry
-				free(key_locale); key_locale = NULL;
+				printf("%s\n", key);	// this is the name of the entry
+				xmlFree(key); key = NULL;
 			} else
 				if (debug)
 					puts("");
 
-			xmlFree(key); key = NULL;
-
 			idx++;
+
+			db_node = db_node->next;
 		}
 
-		db_node = db_node->next;
+		if (searchall)
+			search_keychain = search_keychain->next;
+		else
+			search_keychain = NULL;         /* force the quit from the loop */
 	}
 
 	if (!hits)
-		printf("'%s' not found.\n", pattern_locale);
+		printf("'%s' not found.\n", pattern);
 
 	free(pattern);
 #else

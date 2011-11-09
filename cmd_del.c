@@ -37,7 +37,7 @@ void
 cmd_del(char *e_line, command *commands)
 {
 	xmlNodePtr	db_node = NULL, db_node_prev = NULL;
-	xmlChar		*key_locale = NULL, *key = NULL;
+	xmlChar		*key = NULL;
 
 	int		idx = 0;
 
@@ -53,9 +53,7 @@ cmd_del(char *e_line, command *commands)
 
 	db_node = find_key(idx);
 	if (db_node) {
-		key = xmlNodeGetContent(db_node->children);
-		key_locale = convert_utf8(key, 1);
-		xmlFree(key); key = NULL;
+		key = xmlGetProp(db_node, BAD_CAST "name");
 
 		db_node_prev = db_node->prev;
 		xmlUnlinkNode(db_node_prev);	// remove the adjacent 'text' node, which is the indent and newline
@@ -64,8 +62,8 @@ cmd_del(char *e_line, command *commands)
 		xmlUnlinkNode(db_node);
 		xmlFreeNode(db_node);
 
-		printf("'%s' deleted\n", key_locale);
-		free(key_locale);
+		printf("'%s' deleted\n", key);
+		xmlFree(key); key = NULL;
 
 		dirty = 1;
 	} else

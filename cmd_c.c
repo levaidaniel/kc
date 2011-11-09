@@ -36,23 +36,19 @@ void
 cmd_c(char *e_line, command *commands)
 {
 	xmlNodePtr	db_node = NULL;
-	xmlChar		*cname_locale = NULL, *cname = NULL;
+	xmlChar		*cname = NULL;
 
 
 	strtok((char *)e_line, " ");				// remove the command from the line
-	cname_locale = BAD_CAST strtok(NULL, " ");	// assign the command's parameter
-	if (!cname_locale) {
+	cname = BAD_CAST strtok(NULL, " ");	// assign the command's parameter
+	if (!cname) {
 		puts(commands->usage);
 		return;
 	}
-
-	cname = convert_utf8(cname_locale, 0);
 
 	db_node = find_keychain(cname);
 	if (db_node)
 		keychain = db_node;
 	else
 		puts("keychain not found.");
-
-	free(cname);
 } /* cmd_c() */

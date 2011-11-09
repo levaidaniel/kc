@@ -42,7 +42,6 @@ xmlNodePtr find_keychain(xmlChar *);
 xmlNodePtr find_key(int);
 xmlChar *parse_newlines(xmlChar *, char);
 int digit_length(int);
-xmlChar *convert_utf8(xmlChar *, char);
 void _rl_push_buffer(void);
 
 

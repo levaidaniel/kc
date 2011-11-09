@@ -43,7 +43,7 @@ void
 cmd_cdel(char *e_line, command *commands)
 {
 	xmlNodePtr	db_node = NULL, db_node_tmp = NULL;
-	xmlChar		*cname_locale = NULL, *cname = NULL;
+	xmlChar		*cname = NULL;
 
 #ifndef _READLINE
 	int		e_count = 0;
@@ -51,24 +51,22 @@ cmd_cdel(char *e_line, command *commands)
 
 
 	strtok((char *)e_line, " ");		// remove the command from the line
-	cname_locale = BAD_CAST strtok(NULL, " ");	// assign the command's parameter
-	if (!cname_locale) {
+	cname = BAD_CAST strtok(NULL, " ");	// assign the command's parameter
+	if (!cname) {
 		puts(commands->usage);
 		return;
 	}
 
-	cname = convert_utf8(cname_locale, 0);
 	db_node = find_keychain(cname);
-	free(cname);
 	if (db_node) {
-		if (xmlStrcmp(xmlGetProp(keychain, BAD_CAST "name"),
+		if (xmlUTF8Charcmp(xmlGetProp(keychain, BAD_CAST "name"),
 				   xmlGetProp(db_node, BAD_CAST "name")) == 0) {	// don't allow to delete the current keychain. this saves us trouble.
 
 			puts("Can not delete the current keychain!");
 		} else {
 #ifndef _READLINE
 			// disable history temporarily
-			if (el_set(e, EL_HIST, eh, NULL) != 0) {
+			if (el_set(e, EL_HIST, history, NULL) != 0) {
 				perror("el_set(EL_HIST)");
 			}
 			// clear the prompt temporarily
@@ -77,9 +75,8 @@ cmd_cdel(char *e_line, command *commands)
 			}
 #endif
 			cname = xmlGetProp(db_node, BAD_CAST "name");
-			cname_locale = convert_utf8(cname, 1);
 
-			printf("Do you really want to delete '%s'? <yes/no> ", cname_locale);
+			printf("Do you really want to delete '%s'? <yes/no> ", cname);
 
 #ifdef _READLINE
 			rl_redisplay();
@@ -92,6 +89,7 @@ cmd_cdel(char *e_line, command *commands)
 #endif
 			if (!e_line) {
 				perror("input");
+				el_reset(e);
 				return;
 			}
 
@@ -103,9 +101,9 @@ cmd_cdel(char *e_line, command *commands)
 				xmlUnlinkNode(db_node);
 				xmlFreeNode(db_node);
 
-				printf("'%s' deleted\n", cname_locale);
-				free(cname_locale);
+				printf("'%s' deleted\n", cname);
 			}
+			xmlFree(cname); cname = NULL;
 
 
 #ifndef _READLINE
@@ -114,7 +112,7 @@ cmd_cdel(char *e_line, command *commands)
 				perror("el_set(EL_PROMPT)");
 			}
 			// re-enable history
-			if (el_set(e, EL_HIST, eh, history) != 0) {
+			if (el_set(e, EL_HIST, history, eh) != 0) {
 				perror("el_set(EL_HIST)");
 			}
 #endif
@@ -122,7 +120,6 @@ cmd_cdel(char *e_line, command *commands)
 			dirty = 1;
 		}
 	} else {
-		printf("'%s' keychain not found.\n", cname_locale);
-		free(cname);
+		printf("'%s' keychain not found.\n", cname);
 	}
 } /* cmd_cdel() */

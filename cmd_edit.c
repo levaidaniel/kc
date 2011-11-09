@@ -45,7 +45,7 @@ void
 cmd_edit(char *e_line, command *commands)
 {
 	xmlNodePtr	db_node = NULL, db_node_new = NULL;
-	xmlChar		*key_locale = NULL, *key = NULL, *value_locale = NULL, *value_nl = NULL, *value = NULL;
+	xmlChar		*key = NULL, *value_nl = NULL, *value = NULL;
 
 #ifndef _READLINE
 	int		e_count = 0;
@@ -74,15 +74,14 @@ cmd_edit(char *e_line, command *commands)
 		strlcpy(prompt_context, "EDIT key", sizeof(prompt_context));
 
 		// if we edit an existing entry, push the current value to the edit buffer
-		key = xmlNodeGetContent(db_node->children);
-		key_locale = convert_utf8(key, 1);
-		xmlFree(key); key = NULL;
+		key = xmlGetProp(db_node, BAD_CAST "name");
 #ifdef _READLINE
-		_rl_helper_var = key_locale;
+		_rl_helper_var = key;
 #endif
 
 #ifndef _READLINE
-		el_push(e, (const char *)key_locale);
+		el_push(e, (const char *)key);
+		xmlFree(key); key = NULL;
 
 		e_line = (char *)el_gets(e, &e_count);
 
@@ -95,29 +94,26 @@ cmd_edit(char *e_line, command *commands)
 #endif
 		if (!e_line) {
 			perror("input");
+			el_reset(e);
 			return;
 		} else {
-			free(key_locale); key_locale = NULL;
-			key_locale = BAD_CAST e_line;
+			key = BAD_CAST e_line;
 		}
-
-		key = convert_utf8(key_locale, 0);
 
 
 		strlcpy(prompt_context, "EDIT value", sizeof(prompt_context));
 
 		// if we edit an existing entry, push the current value to the edit buffer
-		value = xmlNodeGetContent(db_node->children->next->children);
-		value_nl = parse_newlines(value, 1);
-		xmlFree(value); value = NULL;
-		value_locale = convert_utf8(value_nl, 1);
-		free(value_nl); value_nl = NULL;
+		value_nl = xmlGetProp(db_node, BAD_CAST "value");
+		value = parse_newlines(value_nl, 1);
+		xmlFree(value_nl); value_nl = NULL;
 #ifdef _READLINE
-		_rl_helper_var = value_locale;
+		_rl_helper_var = value;
 #endif
 
 #ifndef _READLINE
-		el_push(e, (const char *)value_locale);
+		el_push(e, (const char *)value);
+		free(value); value = NULL;
 
 		e_line = (char *)el_gets(e, &e_count);
 
@@ -130,27 +126,23 @@ cmd_edit(char *e_line, command *commands)
 #endif
 		if (!e_line) {
 			perror("input");
+			el_reset(e);
 			return;
 		} else {
-			free(value_locale); value_locale = NULL;
-			value_locale = BAD_CAST e_line;
+			value = BAD_CAST e_line;
 		}
 
-		value_locale = parse_newlines(value_locale, 0);
-		value = convert_utf8(value_locale, 0);
-		free(value_locale);
+		value = parse_newlines(value, 0);
 
 
-		db_node_new = xmlNewNode(NULL, BAD_CAST "key");
-		xmlAddChild(db_node_new, xmlNewText(key));
-		xmlNewTextChild(db_node_new, NULL, BAD_CAST "value", value);
+		db_node_new = xmlNewChild(keychain, NULL, BAD_CAST "key", NULL);
+		xmlNewProp(db_node_new, BAD_CAST "name", key);
+		xmlNewProp(db_node_new, BAD_CAST "value", value);
+		free(value);
 
 		db_node = xmlReplaceNode(db_node, db_node_new);
 		xmlFreeNode(db_node);
 
-
-		free(key);
-		free(value);
 
 #ifndef _READLINE
 		// re-enable history

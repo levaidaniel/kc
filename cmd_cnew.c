@@ -44,7 +44,7 @@ void
 cmd_cnew(char *e_line, command *commands)
 {
 	xmlNodePtr	db_node = NULL;
-	xmlChar		*cname_locale = NULL, *cname = NULL;
+	xmlChar		*cname = NULL;
 
 #ifndef _READLINE
 	int		e_count = 0;
@@ -52,19 +52,16 @@ cmd_cnew(char *e_line, command *commands)
 
 
 	strtok((char *)e_line, " ");	// remove the command from the line
-	cname_locale = BAD_CAST strtok(NULL, " ");	// assign the command's parameter
-	if (!cname_locale) {		// if we didn't get a name as a parameter
-#ifndef _READLINE
-		// disable history temporarily
-		if (el_set(e, EL_HIST, eh, NULL) != 0) {
-			perror("el_set(EL_HIST)");
-		}
-#endif
-
+	cname = BAD_CAST strtok(NULL, " ");	// assign the command's parameter
+	if (!cname) {		// if we didn't get a name as a parameter
 		strlcpy(prompt_context, "NEW keychain", sizeof(prompt_context));
 
-
 #ifndef _READLINE
+		// disable history temporarily
+		if (el_set(e, EL_HIST, history, NULL) != 0) {
+			perror("el_set(EL_HIST)");
+		}
+
 		e_line = (char *)el_gets(e, &e_count);
 
 		if (e_line)
@@ -74,21 +71,20 @@ cmd_cnew(char *e_line, command *commands)
 #endif
 		if (!e_line) {
 			perror("input");
+			el_reset(e);
 			return;
 		} else
-			cname_locale = BAD_CAST e_line;
+			cname = BAD_CAST e_line;
 
 #ifndef _READLINE
 		// re-enable history
-		if (el_set(e, EL_HIST, eh, history) != 0) {
+		if (el_set(e, EL_HIST, history, eh) != 0) {
 			perror("el_set(EL_HIST)");
 		}
 #endif
 
 		strlcpy(prompt_context, "", sizeof(prompt_context));
 	}
-
-	cname = convert_utf8(cname_locale, 0);
 
 	db_node = find_keychain(cname);
 	if (!db_node) {
@@ -108,10 +104,6 @@ cmd_cnew(char *e_line, command *commands)
 
 		dirty = 1;
 	} else {
-		cname_locale = convert_utf8(cname, 1);
-		printf("'%s' already exists!\n", cname_locale);
-		free(cname_locale);
+		printf("'%s' already exists!\n", cname);
 	}
-
-	free(cname);
 } /* cmd_cnew() */

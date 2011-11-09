@@ -31,7 +31,6 @@
 
 extern xmlNodePtr	keychain;
 extern char		dirty;
-extern char		*locale;
 extern char		prompt_context[20];
 
 #ifndef _READLINE
@@ -45,58 +44,65 @@ void
 cmd_new(char *e_line, command *commands)
 {
 	xmlNodePtr	db_node = NULL;
-	xmlChar		*key_locale = NULL, *value_locale = NULL, *key = NULL, *value = NULL;
+	xmlChar		*key = NULL, *value = NULL;
 
 #ifndef _READLINE
 	int		e_count = 0;
 #endif
 
 
-	strlcpy(prompt_context, "NEW key", sizeof(prompt_context));
-
 #ifndef _READLINE
 	// disable history temporarily
 	if (el_set(e, EL_HIST, history, NULL) != 0) {
 		perror("el_set(EL_HIST)");
 	}
-
-	e_line = (char *)el_gets(e, &e_count);
-
-	if (e_line)
-		e_line[strlen(e_line) - 1] = '\0';	// remove the newline
-#else
-	e_line = readline(prompt_str());
 #endif
-	if (!e_line) {
-		perror("input");
-		return;
-	} else
-		key_locale = BAD_CAST e_line;
 
-	key = convert_utf8(key_locale, 0);
+	strtok((char *)e_line, " ");    // remove the command from the line
 
-
-	strlcpy(prompt_context, "NEW value", sizeof(prompt_context));
+	key = BAD_CAST strtok(NULL, " ");      // assign the command's first parameter (name)
+	if (!key) {            // if we didn't get a name as a parameter
+		strlcpy(prompt_context, "NEW key", sizeof(prompt_context));
 
 #ifndef _READLINE
-	e_line = (char *)el_gets(e, &e_count);
+		e_line = (char *)el_gets(e, &e_count);
 
-	if (e_line)
-		e_line[strlen(e_line) - 1] = '\0';	// remove the newline
+		if (e_line)
+			e_line[strlen(e_line) - 1] = '\0';	// remove the newline
 #else
-	e_line = readline(prompt_str());
+		e_line = readline(prompt_str());
 #endif
+		if (!e_line) {
+			perror("input");
+			el_reset(e);
+			return;
+		} else
+			key = BAD_CAST e_line;
+	}
 
-	if (!e_line) {
-		perror("input");
-		free(key);
-		return;
-	} else
-		value_locale = BAD_CAST e_line;
 
-	value_locale = parse_newlines(value_locale, 0);
-	value = convert_utf8(value_locale, 0);
-	free(value_locale);
+	value = BAD_CAST strtok(NULL, " ");      // assign the command's second parameter (value)
+	if (!value) {            // if we didn't get a value as a parameter
+		strlcpy(prompt_context, "NEW value", sizeof(prompt_context));
+
+#ifndef _READLINE
+		e_line = (char *)el_gets(e, &e_count);
+
+		if (e_line)
+			e_line[strlen(e_line) - 1] = '\0';	// remove the newline
+#else
+		e_line = readline(prompt_str());
+#endif
+		if (!e_line) {
+			perror("input");
+			el_reset(e);
+			free(key);
+			return;
+		} else
+			value = BAD_CAST e_line;
+	}
+
+	value = parse_newlines(value, 0);
 
 
 #ifndef _READLINE
@@ -105,6 +111,7 @@ cmd_new(char *e_line, command *commands)
 		perror("el_set(EL_HIST)");
 	}
 #endif
+
 	strlcpy(prompt_context, "", sizeof(prompt_context));
 
 
@@ -114,8 +121,9 @@ cmd_new(char *e_line, command *commands)
 	xmlAddChild(keychain, db_node);
 
 	// add new element
-	db_node = xmlNewTextChild(keychain, NULL, BAD_CAST "key", key);
-	db_node = xmlNewTextChild(db_node, NULL, BAD_CAST "value", value);
+	db_node = xmlNewChild(keychain, NULL, BAD_CAST "key", NULL);
+	xmlNewProp(db_node, BAD_CAST "name", key);
+	xmlNewProp(db_node, BAD_CAST "value", value);
 
 	dirty = 1;
 

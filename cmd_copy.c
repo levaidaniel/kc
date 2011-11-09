@@ -37,7 +37,7 @@ void
 cmd_copy(char *e_line, command *commands)
 {
 	xmlNodePtr	db_node = NULL, db_node_c = NULL, db_node_prev = NULL;
-	xmlChar		*cname = NULL, *cname_locale = NULL;
+	xmlChar		*cname = NULL;
 
 	char		*idx_str = NULL;
 	int		idx = 0;
@@ -45,8 +45,8 @@ cmd_copy(char *e_line, command *commands)
 
 	strtok((char *)e_line, " ");				// remove the command name
 	idx_str = strtok(NULL, " ");
-	cname_locale = BAD_CAST strtok(NULL, " ");	// assign the command's parameter
-	if (!cname_locale  ||  !idx_str) {
+	cname = BAD_CAST strtok(NULL, " ");	// assign the command's parameter
+	if (!cname  ||  !idx_str) {
 		puts(commands->usage);
 		return;
 	}
@@ -60,9 +60,7 @@ cmd_copy(char *e_line, command *commands)
 		return;
 	}
 
-	cname = convert_utf8(cname_locale, 0);
 	db_node_c = find_keychain(cname);
-	free(cname);
 	if (!db_node_c) {
 		puts("keychain not found.");
 		return;

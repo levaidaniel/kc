@@ -36,7 +36,7 @@ void
 cmd_clist(char *e_line, command *commands)
 {
 	xmlNodePtr	db_node = NULL;
-	xmlChar		*cname_locale = NULL, *cname = NULL;
+	xmlChar		*cname = NULL;
 
 	int		idx = 0;
 
@@ -52,16 +52,14 @@ cmd_clist(char *e_line, command *commands)
 				printf("%d. ", idx);
 
 				cname = xmlGetProp(db_node, BAD_CAST "name");
-				cname_locale = convert_utf8(cname, 1);
-				printf("%s\n", cname_locale);
-
-				free(cname_locale); cname_locale = NULL;
+				printf("%s\n", cname);
 
 				idx++;
 			}
 
 			db_node = db_node->next;
 		}
+		xmlFree(cname); cname = NULL;
 	}
 
 	if (debug)

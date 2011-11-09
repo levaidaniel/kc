@@ -57,7 +57,6 @@ xmlNodePtr	keychain = NULL;
 int		db_file = -1;
 
 char		dirty = 0;
-char		*locale = NULL;
 char		batchmode = 0;
 
 #ifndef _READLINE
@@ -364,18 +363,6 @@ main(int argc, char *argv[])
 	BIO_set_cipher(bio_cipher, EVP_aes_256_cbc(), key, iv, 1);
 
 
-	locale = getenv("LANG");
-	if (locale)
-		if (!xmlFindCharEncodingHandler(locale)) {
-			if (debug)
-				puts("falling back to default locale!");
-			locale = "UTF-8";	// the default encoding
-		}
-	if (debug)
-		printf("locale: %s\n", locale);
-
-
-
 	if (pos == 0) {		// empty file?
 		if (debug)
 			puts("empty database file");
@@ -414,9 +401,9 @@ main(int argc, char *argv[])
 		cmd_write(NULL, NULL);
 	} else {
 		if (debug)
-			db = xmlReadMemory(db_buf, pos, NULL, "UTF-8", XML_PARSE_NONET);
+			db = xmlReadMemory(db_buf, pos, NULL, "UTF-8", XML_PARSE_NONET | XML_PARSE_RECOVER);
 		else
-			db = xmlReadMemory(db_buf, pos, NULL, "UTF-8", XML_PARSE_NONET | XML_PARSE_NOERROR | XML_PARSE_NOWARNING);
+			db = xmlReadMemory(db_buf, pos, NULL, "UTF-8", XML_PARSE_NONET | XML_PARSE_NOERROR | XML_PARSE_NOWARNING | XML_PARSE_RECOVER);
 		if (!db) {
 			puts("could not parse XML document!");
 			quit(EXIT_FAILURE);
@@ -548,6 +535,7 @@ main(int argc, char *argv[])
 				quit(EXIT_SUCCESS);
 			else {
 				perror("input");
+				el_reset(e);
 				quit(EXIT_FAILURE);
 			}
 		}
@@ -566,9 +554,9 @@ cmd_match(char *e_line)
 	command	*commands = commands_first;
 
 
-	// special case, if only a number was entered,
-	// we display the appropriate entry, and if there
-	// is another number after it, use it as space for jamming
+	/* special case, if only a number was entered,
+	   we display the appropriate entry, and if there
+	   is another number after it, use it as space for jamming */
 	sscanf(e_line, "%d %d", &idx, &space);
 	if (idx >= 0) {
 		if (space >= 0)
@@ -576,13 +564,14 @@ cmd_match(char *e_line)
 		else
 			cmd_getnum(idx, 0);
 	} else {
-		// special case, if a '/'(slash) or 'c/' is the first character,
-		// then everything that follows is a search pattern (even a space),
-		// so we must not tokenize the line
+		/* special case, if a '[*]/'([*]slash) or 'c/' is the first character,
+		   then everything that follows is a search pattern (even a space),
+		   so we must not tokenize the line */
 		if (strncmp(e_line, "/", 1) == 0)
 			str = "/";
-		else
-		if (strncmp(e_line, "c/", 2) == 0)
+		else if (strncmp(e_line, "*/", 2) == 0)
+			str = "*/";
+		else if (strncmp(e_line, "c/", 2) == 0)
 			str = "c/";
 		else {
 			str = strtok(e_line, " ");
@@ -623,18 +612,16 @@ prompt_str(void)
 {
 	unsigned long	prompt_len = 0;
 	static char	*prompt = NULL;
-	xmlChar		*cname_locale = NULL, *cname = NULL;
+	xmlChar		*cname = NULL;
 
 
 	cname = xmlGetProp(keychain, BAD_CAST "name");
-	cname_locale = convert_utf8(cname, 1);
 
-	prompt_len = xmlStrlen(cname_locale) + 2 + sizeof(prompt_context) + 2 + 1;
+	prompt_len = xmlStrlen(cname) + 2 + sizeof(prompt_context) + 2 + 1;
 	prompt = realloc(prompt, prompt_len); malloc_check(prompt);
 
-	snprintf(prompt, prompt_len, "%s%% %s> ", cname_locale, prompt_context);
-
-	free(cname_locale);
+	snprintf(prompt, prompt_len, "%s%% %s> ", cname, prompt_context);
+	xmlFree(cname); cname = NULL;
 
 	return(prompt);
 } /* prompt_str() */

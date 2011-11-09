@@ -4,7 +4,7 @@ set -e
 
 OPTIONS='HAVE_PCRE=y'
 
-MAKE="make $1"
+MAKE="make $@"
 case "$(uname -s)" in
 	Linux)
 		${MAKE} -f GNUMakefile ${OPTIONS}

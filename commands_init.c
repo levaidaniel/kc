@@ -46,7 +46,7 @@ commands_init(command **commands)
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "new";
-	(*commands)->usage = "new";
+	(*commands)->usage = "new [key name [value name]]";
 	(*commands)->help = "Add a new key to the current keychain.\n\nTo the value field, it is possible to enter multiline values\nby writing '\\n' in place of a needed new line.\nOne can escape this with '\\\\n'.";
 	(*commands)->fn = cmd_new;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
@@ -80,9 +80,23 @@ commands_init(command **commands)
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
+	(*commands)->name = "*search";
+	(*commands)->usage = "*search <search string>";
+	(*commands)->help = "Search for the given string in key names in every keychain.";
+	(*commands)->fn = cmd_search;
+	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
+	(*commands) = (*commands)->next;
+
 	(*commands)->name = "/";
 	(*commands)->usage = "/<search pattern>";
 	(*commands)->help = "Search for the given regular expression in key names in the current keychain.";
+	(*commands)->fn = cmd_searchre;
+	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
+	(*commands) = (*commands)->next;
+
+	(*commands)->name = "*/";
+	(*commands)->usage = "*/<search pattern>";
+	(*commands)->help = "Search for the given regular expression in key names in every keychain.";
 	(*commands)->fn = cmd_searchre;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
@@ -102,7 +116,7 @@ commands_init(command **commands)
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "cnew";
-	(*commands)->usage = "cnew";
+	(*commands)->usage = "cnew [chain name]";
 	(*commands)->help = "Add a new keychain.";
 	(*commands)->fn = cmd_cnew;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);

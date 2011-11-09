@@ -22,7 +22,7 @@ CFLAGS +=	`pkg-config --cflags libpcre` -D_HAVE_PCRE
 .endif
 
 LDADD +=	-lssl -lcrypto
-LDADD +=	-ledit -ltermcap
+LDADD +=	-ledit -lncursesw
 LDADD +=	`pkg-config --libs libxml-2.0`
 .ifdef HAVE_PCRE
 LDADD +=	`pkg-config --libs libpcre`

@@ -37,7 +37,6 @@ void
 cmd_list(char *e_line, command *commands)
 {
 	xmlNodePtr	db_node = NULL;
-	xmlChar		*key_locale = NULL, *key = NULL;
 
 	int		idx = 0;
 
@@ -54,12 +53,7 @@ cmd_list(char *e_line, command *commands)
 			if (db_node->type == XML_ELEMENT_NODE) {	// we only care about ELEMENT nodes
 				printf("%d. ", idx);
 
-				key = xmlNodeGetContent(db_node->children);
-				key_locale = convert_utf8(key, 1);
-				printf("%s\n", key_locale);
-
-				xmlFree(key); key = NULL;
-				free(key_locale); key_locale = NULL;
+				printf("%s\n", xmlGetProp(db_node, BAD_CAST "name"));
 
 				idx++;
 			}

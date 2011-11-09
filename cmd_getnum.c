@@ -24,12 +24,13 @@
 
 
 #include <stdarg.h>
+#include <wctype.h>
 
 #include "common.h"
 #include "commands.h"
 
 
-char get_line(xmlChar *, int, int *, int *, int);
+char get_line(xmlChar *, int, int *, wint_t *, int);
 
 
 extern xmlNodePtr	keychain;
@@ -46,24 +47,21 @@ void
 cmd_getnum(int idx, int space)
 {
 	xmlNodePtr	db_node = NULL;
-	xmlChar		*key_locale = NULL, *value_locale = NULL, *key = NULL, *value = NULL;
+	xmlChar		*key = NULL, *value = NULL, *value_part = NULL;
 
 	int		newlines = 0, i = 0, pos = 0, erase_len = 0, line_len = 0, value_len = 0;
 	int		*utfclen = NULL;
-	int		c = -1;
+	wint_t		c = -1;
+	char		*wc_tmp = NULL;
 	char		rc = 0;
 	char		*rand_str = NULL;
 
 
 	db_node = find_key(idx);
 	if (db_node) {
-		key = xmlNodeGetContent(db_node->children);
-		key_locale = convert_utf8(key, 1);
-		xmlFree(key); key = NULL;
+		key = xmlGetProp(db_node, "name");
 
-		printf("[%s]\n", key_locale);	// print the key
-
-		free(key_locale); key_locale = NULL;
+		printf("[%s]\n", key);	// print the key
 
 #ifndef _READLINE
 		// clear the prompt temporarily
@@ -79,15 +77,13 @@ cmd_getnum(int idx, int space)
 #endif
 
 		idx = 1;
-		value = xmlNodeGetContent(db_node->children->next->children);
-		value_locale = convert_utf8(value, 1);
-		xmlFree(value); value = NULL;
+		value = xmlGetProp(db_node, BAD_CAST "value");
 
-		value_len = xmlStrlen(value_locale);
+		value_len = xmlStrlen(value);
 
 		// count how many lines are in the string
 		for (i=0; i < value_len; i++)
-			if (value_locale[i] == '\n')
+			if (value[i] == '\n')
 				newlines++;
 
 
@@ -98,25 +94,42 @@ cmd_getnum(int idx, int space)
 			if (newlines)
 				printf("[%d/%d] ", idx, newlines + 1);	// if multiline, prefix the line with a line number
 
+			/* count the actual line's length */
+			do {
+				c = value[line_len++];	// this is the actual line length
+			} while (c != '\n'  &&  c != '\0');
+			--line_len;
+			//printf("line_len = %d\n", line_len);
+
+			value_part = realloc(value_part, line_len + 1); malloc_check(value_part);	// this 'part' is exactly one line from the 'value'
+			value_part[0] = '\0';
+			//printf("value_part(init):'%s'\n", value_part);
+
 			if (space) {
 				// print the first random character(s)
 				rand_str = get_random_str(space, 0);
 				if (!rand_str)
 					return;
 
-				printf("%s", rand_str);
+				//printf("%s", rand_str);
+				strlcat(value_part, rand_str, line_len);
+				//printf("value_part:'%s'\n", value_part);
 
 				free(rand_str); rand_str = NULL;
 			}
 
-			do {
-				*utfclen = xmlStrlen(value_locale);
-				c = xmlGetUTF8Char((const unsigned char *)(value_locale + pos), utfclen);	// 'utfclen' gets modified here
-				pos += *utfclen;	// pos + the size of the character in bytes
-				if (c == '\n'  ||  c == '\0')	// don't print the newlines and the NUL
+			wc_tmp = xmlUTF8Strsub(value, pos, 1);
+			while ((strcmp(wc_tmp, "\n") != 0)  &&  (strcmp(wc_tmp, "\0") != 0)) {
+				//xmlFree(wc_tmp); wc_tmp = NULL;
+				wc_tmp = xmlUTF8Strsub(value, pos, 1);
+				pos += strlen(wc_tmp);
+				if ((strcmp(wc_tmp, "\n") == 0)  ||  (strcmp(wc_tmp, "\0") == 0))	// don't print the newlines and the NUL
 					break;
 				else {
-					printf("%lc", c);
+					//printf("%lc", c);
+					//printf("wc_tmp:'%s'\n", wc_tmp);
+					strlcat(value_part, wc_tmp, line_len + 1);
+					//printf("value_part:'%s'\n", value_part);
 
 					if (space) {
 						// print random character(s)
@@ -124,13 +137,15 @@ cmd_getnum(int idx, int space)
 						if (!rand_str)
 							return;
 
-						printf("%s", rand_str);
+						//printf("%s", rand_str);
+						strlcat(value_part, rand_str, line_len + 1);
+						//printf("value_part:'%s'\n", value_part);
 
 						free(rand_str); rand_str = NULL;
 					}
 				}
-				line_len += *utfclen;	// this is the actual line length
-			} while (c != '\n'  &&  c != '\0');
+			}
+			printf("%s", value_part);
 #ifdef _READLINE
 			rl_redisplay();
 #endif
@@ -176,7 +191,7 @@ cmd_getnum(int idx, int space)
 						if (idx - 1 > 0) {	// don't go back, if we are already on the first line
 							idx--;		// 'idx' is the line number we want!
 
-							pos = get_line(value_locale, value_len, &pos, &c, idx);
+							pos = get_line(value, value_len, &pos, &c, idx);
 						} else
 							pos -= line_len + 1;	// rewind back to the current line's start, to display it again
 					break;
@@ -189,10 +204,10 @@ cmd_getnum(int idx, int space)
 						rc -= 48;		// 'idx' is the line number we want and 'rc' is the ascii version of the line number we got
 						if ( rc <= newlines + 1 ) {
 							idx = rc;
-							pos = get_line(value_locale, value_len, &pos, &c, idx);
+							pos = get_line(value, value_len, &pos, &c, idx);
 						} else {
 							pos -= line_len + 1;	// rewind back to the current line's start, to display it again
-							c = value_locale[pos];
+							c = value[pos];
 						}
 					break;
 				}
@@ -205,7 +220,8 @@ cmd_getnum(int idx, int space)
 			line_len = 0;	// this is the actual line length
 		}
 
-		free(value_locale); value_locale = NULL;
+		xmlFree(value); value = NULL;
+		free(value_part); value_part = NULL;
 
 #ifndef _READLINE
 		// re-enable the default prompt
@@ -222,7 +238,7 @@ cmd_getnum(int idx, int space)
 
 
 char
-get_line(xmlChar *value_locale, int value_len, int *pos, int *c, int idx)
+get_line(xmlChar *value, int value_len, int *pos, wint_t *c, int idx)
 {
 	int	i = 1;	// this counts how many '\n' we've found so far
 
@@ -231,19 +247,19 @@ get_line(xmlChar *value_locale, int value_len, int *pos, int *c, int idx)
 	// just set everything to the beginning, and return() from this function().
 	if (idx == 1) {
 		*pos = 0;
-		*c = value_locale[*pos];
+		*c = value[*pos];
 		return(*pos);
 	}
 
 	for (*pos=0; *pos < value_len; (*pos)++) {	// search the entire string
 		if (i < idx) {			// while newline count ('i') is smaller than the line number requested
-			if (value_locale[*pos] == '\n')	// we found a '\n'
+			if (value[*pos] == '\n')	// we found a '\n'
 				i++;
 		} else
 			break;
 	}
 
-	*c = value_locale[*pos];	// set the current character ('c') to the position's character in 'value_locale'
+	*c = value[*pos];	// set the current character ('c') to the position's character in 'value'
 
 	return(*pos);
 } /* get_line() */
