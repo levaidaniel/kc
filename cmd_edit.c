@@ -97,7 +97,7 @@ cmd_edit(char *e_line, command *commands)
 			el_reset(e);
 			return;
 		} else {
-			key = BAD_CAST e_line;
+			key = xmlStrdup(BAD_CAST e_line);
 		}
 
 
@@ -127,6 +127,7 @@ cmd_edit(char *e_line, command *commands)
 		if (!e_line) {
 			perror("input");
 			el_reset(e);
+			xmlFree(key); key = NULL;
 			return;
 		} else {
 			value = BAD_CAST e_line;
@@ -138,7 +139,8 @@ cmd_edit(char *e_line, command *commands)
 		db_node_new = xmlNewChild(keychain, NULL, BAD_CAST "key", NULL);
 		xmlNewProp(db_node_new, BAD_CAST "name", key);
 		xmlNewProp(db_node_new, BAD_CAST "value", value);
-		free(value);
+		xmlFree(key); key = NULL;
+		free(value); value = NULL;
 
 		db_node = xmlReplaceNode(db_node, db_node_new);
 		xmlFreeNode(db_node);

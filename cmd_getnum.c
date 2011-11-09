@@ -51,7 +51,7 @@ cmd_getnum(int idx, int space)
 
 	int		newlines = 0, i = 0, pos = 0, erase_len = 0, line_len = 0, value_len = 0;
 	int		*utfclen = NULL;
-	wint_t		c = -1;
+	int		c = -1;
 	char		*wc_tmp = NULL;
 	char		rc = 0;
 	char		*rand_str = NULL;
@@ -99,37 +99,42 @@ cmd_getnum(int idx, int space)
 				c = value[line_len++];	// this is the actual line length
 			} while (c != '\n'  &&  c != '\0');
 			--line_len;
-			//printf("line_len = %d\n", line_len);
+			if (debug)
+				printf("line_len = %d\n", line_len);
 
 			value_part = realloc(value_part, line_len + 1); malloc_check(value_part);	// this 'part' is exactly one line from the 'value'
 			value_part[0] = '\0';
-			//printf("value_part(init):'%s'\n", value_part);
+			if (debug)
+				printf("value_part(init):'%s'\n", value_part);
 
 			if (space) {
+				/* add the random characters' numbers to the line_len
+				 * because it will be that much longer at the end */
+				line_len += line_len + line_len * space + space;
+
 				// print the first random character(s)
 				rand_str = get_random_str(space, 0);
 				if (!rand_str)
 					return;
 
-				//printf("%s", rand_str);
 				strlcat(value_part, rand_str, line_len);
-				//printf("value_part:'%s'\n", value_part);
 
 				free(rand_str); rand_str = NULL;
 			}
 
 			wc_tmp = xmlUTF8Strsub(value, pos, 1);
 			while ((strcmp(wc_tmp, "\n") != 0)  &&  (strcmp(wc_tmp, "\0") != 0)) {
-				//xmlFree(wc_tmp); wc_tmp = NULL;
+				xmlFree(wc_tmp); wc_tmp = NULL;
 				wc_tmp = xmlUTF8Strsub(value, pos, 1);
 				pos += strlen(wc_tmp);
 				if ((strcmp(wc_tmp, "\n") == 0)  ||  (strcmp(wc_tmp, "\0") == 0))	// don't print the newlines and the NUL
 					break;
 				else {
-					//printf("%lc", c);
-					//printf("wc_tmp:'%s'\n", wc_tmp);
+					if (debug)
+						printf("wc_tmp:'%s'\n", wc_tmp);
 					strlcat(value_part, wc_tmp, line_len + 1);
-					//printf("value_part:'%s'\n", value_part);
+					if (debug)
+						printf("value_part:'%s'\n", value_part);
 
 					if (space) {
 						// print random character(s)
@@ -137,9 +142,7 @@ cmd_getnum(int idx, int space)
 						if (!rand_str)
 							return;
 
-						//printf("%s", rand_str);
 						strlcat(value_part, rand_str, line_len + 1);
-						//printf("value_part:'%s'\n", value_part);
 
 						free(rand_str); rand_str = NULL;
 					}
@@ -166,8 +169,7 @@ cmd_getnum(int idx, int space)
 				}
 
 				// erase (overwrite) the written value with spaces
-				erase_len = (space ? line_len + line_len * space + space : line_len) +			// add the random characters too
-						(newlines ? digit_length(idx) + digit_length(newlines + 1) + 4 : 0);	// add the line number prefix too
+				erase_len = line_len + (newlines ? digit_length(idx) + digit_length(newlines + 1) + 4 : 0);	// add the line number prefix too
 				printf("\r");
 				for (i=0; i < erase_len; i++)
 					putchar(' ');

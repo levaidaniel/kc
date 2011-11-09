@@ -77,8 +77,10 @@ cmd_new(char *e_line, command *commands)
 			el_reset(e);
 			return;
 		} else
-			key = BAD_CAST e_line;
+			key = xmlStrdup(BAD_CAST e_line);
 	}
+	if (debug)
+		printf("new key is '%s'\n", key);
 
 
 	value = BAD_CAST strtok(NULL, " ");      // assign the command's second parameter (value)
@@ -96,7 +98,7 @@ cmd_new(char *e_line, command *commands)
 		if (!e_line) {
 			perror("input");
 			el_reset(e);
-			free(key);
+			xmlFree(key); key = NULL;
 			return;
 		} else
 			value = BAD_CAST e_line;
@@ -104,6 +106,8 @@ cmd_new(char *e_line, command *commands)
 
 	value = parse_newlines(value, 0);
 
+	if (debug)
+		printf("new value is '%s'\n", value);
 
 #ifndef _READLINE
 	// re-enable history
@@ -127,6 +131,6 @@ cmd_new(char *e_line, command *commands)
 
 	dirty = 1;
 
-	free(key);
-	free(value);
+	xmlFree(key); key = NULL;
+	free(value); value = NULL;
 } /* cmd_new() */
