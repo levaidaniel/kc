@@ -139,14 +139,14 @@ main(int argc, char *argv[])
 		}
 
 	if (!db_filename) {
-		// using default database
+		/* using default database */
 
 		env_home = getenv("HOME");
 
 		len = strlen(env_home) + 1 + strlen(default_db_dir) + 1;
 		db_filename = malloc(len); malloc_check(db_filename);
 
-		// default db directory
+		/* default db directory */
 		snprintf(db_filename, len, "%s/%s", env_home, default_db_dir);
 
 		if(stat(db_filename, &st) == 0) {
@@ -164,14 +164,14 @@ main(int argc, char *argv[])
 			}
 		}
 
-		// default db filename
+		/* default db filename */
 		len += 1 + strlen(default_db_filename);
 		db_filename = realloc(db_filename, len); malloc_check(db_filename);
 
 		snprintf(db_filename, len, "%s/%s/%s", env_home, default_db_dir, default_db_filename);
 	}
 
-	if(stat(db_filename, &st) == 0) {	// if db_filename exists
+	if(stat(db_filename, &st) == 0) {	/* if db_filename exists */
 		if(!S_ISLNK(st.st_mode)  &&  !S_ISREG(st.st_mode)) {
 			printf("'%s' is not a regular file or a link!\n", db_filename);
 			quit(EXIT_FAILURE);
@@ -194,8 +194,8 @@ main(int argc, char *argv[])
 	}
 
 	fstat(db_file, &st);
-	if(st.st_size > 0) {	// if db_filename is not empty
-		// read the IV and the salt.
+	if(st.st_size > 0) {	/* if db_filename is not empty */
+		/* read the IV and the salt. */
 
 		rbuf = malloc(17); malloc_check(rbuf);
 
@@ -218,14 +218,14 @@ main(int argc, char *argv[])
 	} else {
 		new_db_file = 1;
 
-		// we'll write the IV and salt later after we got a password
+		/* we'll write the IV and salt later after we got a password */
 
 
 		strlcpy(pass_prompt, "New password: ", 15);
 	}
 
-	if (pass_filename) {	// we were given a password file name
-		// read in the password from the specified file
+	if (pass_filename) {	/* we were given a password file name */
+		/* read in the password from the specified file */
 		pass_file = open(pass_filename, O_RDONLY);
 		if (!pass_file) {
 			perror("password file");
@@ -235,7 +235,7 @@ main(int argc, char *argv[])
 		pass = calloc(1, pass_size); malloc_check(pass);
 		pos = 0;
 		while (ret) {
-			// if we've reached the size of 'pass', grow it
+			/* if we've reached the size of 'pass', grow it */
 			if (pos >= pass_size) {
 				pass_size += 128;
 				pass = realloc(pass, pass_size); malloc_check(pass);
@@ -250,9 +250,9 @@ main(int argc, char *argv[])
 		}
 		pass[pos] = '\0';
 		if (strchr(pass, '\n'))
-			pass[pos - 1] = '\0';		// strip the newline character
+			pass[pos - 1] = '\0';		/* strip the newline character */
 	} else {
-		// ask for the password
+		/* ask for the password */
 
 		pass = malloc(pass_maxlen + 1); malloc_check(pass);
 		readpassphrase(pass_prompt, pass, pass_maxlen + 1, RPP_ECHO_OFF | RPP_REQUIRE_TTY);
@@ -262,14 +262,16 @@ main(int argc, char *argv[])
 		printf("Password: '%s'\n", pass);
 	*/
 
-	// we'll write the IV and salt here, after we got a password,
-	// so when the user interrupts the password prompt, we won't end up
-	// with a messed up db file, which only contains the salt and the IV.
+	/*
+	 * we'll write the IV and salt here, after we got a password,
+	 * so when the user interrupts the password prompt, we won't end up
+	 * with a messed up db file, which only contains the salt and the IV.
+	 */
 	if (new_db_file) {
 		if (debug)
 			puts("generating salt and IV");
 
-		// write the IV and the salt first.
+		/* write the IV and the salt first. */
 		strlcpy((char *)iv, get_random_str(sizeof(iv) - 1, 0), sizeof(iv));
 		write(db_file, iv, sizeof(iv) - 1);
 
@@ -303,10 +305,10 @@ main(int argc, char *argv[])
 	}
 	bio_chain = BIO_push(bio_cipher, bio_chain);
 
-	// generate a proper key for encoding/decoding BIO
+	/* generate a proper key for encoding/decoding BIO */
 	PKCS5_PBKDF2_HMAC_SHA1(pass, strlen(pass), salt, sizeof(salt), 5000, 128, key);
 
-	// turn on decoding
+	/* turn on decoding */
 	BIO_set_cipher(bio_cipher, EVP_aes_256_cbc(), key, iv, 0);
 
 
@@ -318,14 +320,14 @@ main(int argc, char *argv[])
 		print_bio_chain(bio_chain);
 
 
-	// seek after the IV and salt (both 16 bytes)
+	/* seek after the IV and salt (both 16 bytes) */
 	BIO_seek(bio_chain, 32);
 
-	// read in the database file to a buffer
+	/* read in the database file to a buffer */
 	db_buf = calloc(1, db_buf_size); malloc_check(db_buf);
 	pos = 0;
 	while(!BIO_eof(bio_chain)) {
-		// if we've reached the size of 'db_buf', grow it
+		/* if we've reached the size of 'db_buf', grow it */
 		if (pos >= db_buf_size) {
 			db_buf_size += 4096;
 			db_buf = realloc(db_buf, db_buf_size); malloc_check(db_buf);
@@ -359,15 +361,15 @@ main(int argc, char *argv[])
 	}
 
 
-	// turn on encoding
+	/* turn on encoding */
 	BIO_set_cipher(bio_cipher, EVP_aes_256_cbc(), key, iv, 1);
 
 
-	if (pos == 0) {		// empty file?
+	if (pos == 0) {		/* empty file? */
 		if (debug)
 			puts("empty database file");
 
-		// create a new document
+		/* create a new document */
 		db = xmlNewDoc(BAD_CAST "1.0");
 		if (!db) {
 			puts("could not create XML document!");
@@ -376,7 +378,7 @@ main(int argc, char *argv[])
 
 		xmlCreateIntSubset(db, BAD_CAST "kc", NULL, BAD_CAST "kc.dtd");
 
-		db_root = xmlNewNode(NULL, BAD_CAST "kc");	// 'THE' root node
+		db_root = xmlNewNode(NULL, BAD_CAST "kc");	/* 'THE' root node */
 		if (!db_root) {
 			puts("could not create root node!");
 			quit(EXIT_FAILURE);
@@ -386,18 +388,18 @@ main(int argc, char *argv[])
 		db_node = xmlNewText(BAD_CAST "\n  ");
 		xmlAddChild(db_root, db_node);
 
-		keychain = xmlNewNode(NULL, BAD_CAST "keychain");	// the first keychain ...
+		keychain = xmlNewNode(NULL, BAD_CAST "keychain");	/* the first keychain ... */
 		if (!keychain) {
 			puts("could not create default keychain!");
 			quit(EXIT_FAILURE);
 		}
 		xmlAddChild(db_root, keychain);
-		xmlNewProp(keychain, BAD_CAST "name", BAD_CAST "default");	// ... its name is "default"
+		xmlNewProp(keychain, BAD_CAST "name", BAD_CAST "default");	/* ... its name is "default" */
 
 		db_node = xmlNewText(BAD_CAST "\n");
 		xmlAddChild(db_root, db_node);
 
-		// write the initial empty XML doc to the file
+		/* write the initial empty XML doc to the file */
 		cmd_write(NULL, NULL);
 	} else {
 		if (debug)
@@ -428,20 +430,20 @@ main(int argc, char *argv[])
 	free(db_buf); db_buf = NULL;
 
 
-	// init and start the CLI
+	/* init and start the CLI */
 
 	if (!batchmode)
 		signal(SIGINT, SIG_IGN);
 
 #ifndef _READLINE
-	// init editline
+	/* init editline */
 	e = el_init("kc", stdin, stdout, stderr);
 	if (!e) {
 		perror("el_init()");
 		quit(EXIT_FAILURE);
 	}
 
-	// init editline history
+	/* init editline history */
 	eh = history_init();
 	if (!eh) {
 		perror("history_init()");
@@ -454,7 +456,7 @@ main(int argc, char *argv[])
 		fprintf(stderr, "history(H_SETUNIQUE): %s\n", eh_ev.str);
 	}
 
-	// setup editline/history parameters
+	/* setup editline/history parameters */
 	if (el_set(e, EL_PROMPT, prompt_str) != 0) {
 		perror("el_set(EL_PROMPT)");
 	}
@@ -492,7 +494,7 @@ main(int argc, char *argv[])
 		quit(EXIT_FAILURE);
 	}
 #else
-	// init readline
+	/* init readline */
 	if (rl_initialize() != 0) {
 		perror("rl_initialize()");
 		quit(EXIT_FAILURE);
@@ -508,11 +510,11 @@ main(int argc, char *argv[])
 	strlcpy(prompt_context, "", sizeof(prompt_context));
 
 
-	// create the command list
+	/* create the command list */
 	commands_init(&commands_first);
 
 
-	// command loop
+	/* command loop */
 	do {
 #ifndef _READLINE
 		e_line = (char *)el_gets(e, &e_count);
@@ -523,7 +525,7 @@ main(int argc, char *argv[])
 		if (e_line) {
 			if (strlen(e_line) > 0) {
 #ifndef _READLINE
-				e_line[strlen(e_line) - 1] = '\0';		// remove the newline character from the end
+				e_line[strlen(e_line) - 1] = '\0';		/* remove the newline character from the end */
 				history(eh, &eh_ev, H_ENTER, e_line);
 #else
 				add_history(e_line);
@@ -552,7 +554,7 @@ void
 cmd_match(char *e_line)
 {
 	int	idx = -1, space = -1;
-	char	*str = NULL, *line = NULL;
+	char	*line = NULL, *cmd = NULL;
 	command	*commands = commands_first;
 
 
@@ -572,28 +574,28 @@ cmd_match(char *e_line)
 		   then everything that follows is a search pattern (even a space),
 		   so we must not tokenize the line */
 		if (strncmp(line, "/", 1) == 0)
-			str = "/";
+			cmd = "/";
 		else if (strncmp(line, "*/", 2) == 0)
-			str = "*/";
+			cmd = "*/";
 		else if (strncmp(line, "c/", 2) == 0)
-			str = "c/";
+			cmd = "c/";
 		else {
-			str = strtok(line, " ");
-			if (!str)	// probably an empty line
+			cmd = strtok(line, " ");
+			if (!cmd)	/* probably an empty line */
 				return;
 		}
 
 		while(commands) {
-			if (strcmp(commands->name, str) == 0)	// find an exact match
+			if (strcmp(commands->name, cmd) == 0)	/* find an exact match */
 				break;
 
-			commands = commands->next;	// iterate through the linked list
+			commands = commands->next;	/* iterate through the linked list */
 		}
 
 		if (commands)
-			commands->fn(e_line, commands);	// we call the command's respective function here
+			commands->fn(e_line, commands);	/* we call the command's respective function here */
 		else
-			printf("unknown command: '%s'\n", str);
+			printf("unknown command: '%s'\n", cmd);
 	}
 
 	free(line); line = NULL;
@@ -694,7 +696,7 @@ get_random_str(int length, char alnum)
 
 	read(rnd_file, tmp, 1);
 	for (i=0; i < length; i++) {
-		if (alnum)	// only alphanumeric was requested
+		if (alnum)	/* only alphanumeric was requested */
 			while (	(*tmp < 65  ||  *tmp > 90)  &&
 				(*tmp < 97  ||  *tmp > 122)  &&
 				(*tmp < 48  ||  *tmp > 57)) {
@@ -706,7 +708,7 @@ get_random_str(int length, char alnum)
 				}
 			}
 		else
-			// give anything printable
+			/* give anything printable */
 			while (	*tmp < 33  ||  *tmp > 126) {
 
 				ret = read(rnd_file, tmp, 1);
@@ -716,8 +718,8 @@ get_random_str(int length, char alnum)
 				}
 			}
 
-		rnd_str[i] = *tmp;		// store the value
-		*tmp = '\0';		// reset the value
+		rnd_str[i] = *tmp;		/* store the value */
+		*tmp = '\0';		/* reset the value */
 	}
 
 	free(tmp); tmp = NULL;
@@ -743,20 +745,22 @@ el_tab_complete(EditLine *e, int ch)
 
 	el_lineinfo = el_line(e);
 
-	// copy the buffer (ie. line) to our variable 'line_buf',
-	// because el_lineinfo->buffer is not NUL terminated
+	/*
+	 * copy the buffer (ie. line) to our variable 'line_buf',
+	 * because el_lineinfo->buffer is not NUL terminated
+	 */
 	line_buf_len = el_lineinfo->lastchar - el_lineinfo->buffer;
 	line_buf = malloc(line_buf_len + 1); malloc_check(line_buf);
 	memcpy(line_buf, el_lineinfo->buffer, line_buf_len);
 	line_buf[line_buf_len] = '\0';
 
 
-	// empty buffer (ie. line)
+	/* empty buffer (ie. line) */
 	if (!line_buf_len)
 		return(CC_CURSOR);
 
 
-	// initialize 'match' for use with strlcat()
+	/* initialize 'match' for use with strlcat() */
 	match = calloc(1, 1); malloc_check(match);
 	do {
 		if (strncmp(line_buf, commands->name, line_buf_len) == 0) {
@@ -768,16 +772,16 @@ el_tab_complete(EditLine *e, int ch)
 			strlcat(match, commands->name, match_len);
 			strlcat(match, " ", match_len);
 		}
-	} while((commands = commands->next));	// iterate through the linked list
+	} while((commands = commands->next));	/* iterate through the linked list */
 
 	switch (hits) {
 		case 0:
 		break;
 		case 1:
-			el_push(e, match + strlen(line_buf));	// print the commands remaining characters (remaining: the ones without the part (at the beginning) that we've entered already)
+			el_push(e, match + strlen(line_buf));	/* print the commands remaining characters (remaining: the ones without the part (at the beginning) that we've entered already) */
 		break;
 		default:
-			printf("\n%s\n", match);	// more than one match
+			printf("\n%s\n", match);	/* more than one match */
 			el_set(e, EL_REFRESH);
 		break;
 	}
@@ -814,7 +818,7 @@ cmd_generator(const char *text, int state)
 				return(strdup(commands->name));
 
 
-		commands = commands->next;	// iterate through the linked list
+		commands = commands->next;	/* iterate through the linked list */
 	}
 
 	return(NULL);

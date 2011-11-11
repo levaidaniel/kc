@@ -42,7 +42,7 @@ find_keychain(xmlChar *cname)
 	int		idx = -1, i = 0;
 
 
-	// if we got a number
+	/* if we got a number */
 	idx = strtol((const char *)cname, &inv, 10);
 	if (strncmp(inv, "\0", 1) != 0) {
 		idx = -1;
@@ -52,12 +52,12 @@ find_keychain(xmlChar *cname)
 	db_node = keychain->parent->children;
 
 	while (db_node) {
-		if (db_node->type == XML_ELEMENT_NODE) {	// we only care about ELEMENT nodes
-			if (idx >= 0) {		// if an index number was given in the parameter
+		if (db_node->type == XML_ELEMENT_NODE) {	/* we only care about ELEMENT nodes */
+			if (idx >= 0) {		/* if an index number was given in the parameter */
 				if (i++ == idx) {
 					break;
 				}
-			} else {		// if keychain name was given in the parameter
+			} else {		/* if keychain name was given in the parameter */
 				if (xmlStrcmp(xmlGetProp(db_node, BAD_CAST "name"), cname) == 0) {
 					break;
 				}
@@ -82,10 +82,10 @@ find_key(int idx)
 	db_node = keychain->children;
 
 	while (db_node  &&  i < idx) {
-		if (db_node->type == XML_ELEMENT_NODE)	// we only care about ELEMENT nodes
+		if (db_node->type == XML_ELEMENT_NODE)	/* we only care about ELEMENT nodes */
 			i++;
 
-		if (i != idx)	// if we've found it, don't jump to the next sibling
+		if (i != idx)	/* if we've found it, don't jump to the next sibling */
 			db_node = db_node->next;
 	}
 
@@ -94,7 +94,7 @@ find_key(int idx)
 
 
 char *
-parse_newlines(char *line, char dir)		// dir(direction) convert "\n" to '\n' (dir=0), or backwards
+parse_newlines(char *line, char dir)		/* dir(direction): "\n" -> '\n' = 0, '\n' -> "\n" = 1 */
 {
 	char		*ret = NULL;
 	int		nlnum = 0, i = 0, j = 0, ret_len = 0;
@@ -105,21 +105,25 @@ parse_newlines(char *line, char dir)		// dir(direction) convert "\n" to '\n' (di
 
 
 	if (dir) {
-		// count the number of '\n' characters in the string, and use it later to figure how many bytes
-		// will be the new string, with replaced newline characters.
+		/*
+		 * count the number of '\n' characters in the string, and use it later to figure how many bytes
+		 * will be the new string, with replaced newline characters.
+		 */
 		for (i=0; i < strlen(line); i++)
-			if (line[i] == '\n')	// we got a winner...
+			if (line[i] == '\n')	/* we got a winner... */
 				nlnum++;
 
 		ret_len = strlen(line) + nlnum + 1;
 	} else {
-		// count the number of "\n" sequences in the string, and use it later to figure how many bytes
-		// will be the new string, with replaced newline sequences.
+		/*
+		 * count the number of "\n" sequences in the string, and use it later to figure how many bytes
+		 * will be the new string, with replaced newline sequences.
+		 */
 		for (i=0; i < strlen(line); i++)
-			if (line[i] == '\\'  &&  line[i+1] == '\\')	// the "\\n" case. the newline is escaped, so honor it
-				i += 2;					// skip these. don't count them, because they are not newlines
+			if (line[i] == '\\'  &&  line[i+1] == '\\')	/* the "\\n" case. the newline is escaped, so honor it */
+				i += 2;					/* skip these. don't count them, because they are not newlines */
 			else
-			if (line[i] == '\\'  &&  line[i+1] == 'n')	// we got a winner...
+			if (line[i] == '\\'  &&  line[i+1] == 'n')	/* we got a winner... */
 				nlnum++;
 
 		ret_len = strlen(line) - nlnum + 1;
@@ -128,33 +132,33 @@ parse_newlines(char *line, char dir)		// dir(direction) convert "\n" to '\n' (di
 
 
 	if (dir) {
-		// replace the real newline characters with newline sequences ("\n");
+		/* replace the real newline characters with newline sequences ("\n"); */
 		for (i=0; i < strlen(line); i++) {
-			if (line[i] == '\n') {			// we got a winner...
-				ret[j++] = '\\';		// replace with NL character
-				ret[j++] = 'n';			// replace with NL character
+			if (line[i] == '\n') {			/* we got a winner... */
+				ret[j++] = '\\';		/* replace with NL character */
+				ret[j++] = 'n';			/* replace with NL character */
 			} else
-				ret[j++] = line[i];			// anything else will just go into the new string
+				ret[j++] = line[i];			/* anything else will just go into the new string */
 		}
 	} else {
-		// replace the newline sequences with real newline characters ('\n');
+		/* replace the newline sequences with real newline characters ('\n'); */
 		for (i=0; i < strlen(line); i++) {
-			if (line[i] == '\\'  &&  line[i+1] == '\\') {	// the "\\n" case. the newline is escaped, so honor it
-				ret[j++] = line[i];			// copy it as if nothing had happened
+			if (line[i] == '\\'  &&  line[i+1] == '\\') {	/* the "\\n" case. the newline is escaped, so honor it */
+				ret[j++] = line[i];			/* copy it as if nothing had happened */
 				ret[j++] = line[++i];
 			} else
-			if (line[i] == '\\'  &&  line[i+1] == 'n' ) {	// we got a winner...
-				ret[j++] = '\n';			// replace with NL character
-				i++;					// skip the 'n' char from "\n"
+			if (line[i] == '\\'  &&  line[i+1] == 'n' ) {	/* we got a winner... */
+				ret[j++] = '\n';			/* replace with NL character */
+				i++;					/* skip the 'n' char from "\n" */
 			} else
-				ret[j++] = line[i];			// anything else will just go into the new string
+				ret[j++] = line[i];			/* anything else will just go into the new string */
 		}
 	}
 
-	ret[ret_len - 1] = '\0';		// close that new string safe and secure.
+	ret[ret_len - 1] = '\0';		/* close that new string safe and secure. */
 
 
-	return(ret);	// return the result; we've worked on it hard.
+	return(ret);	/* return the result; we've worked on it hard. */
 } /* parse_newlines() */
 
 

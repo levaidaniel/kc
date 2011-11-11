@@ -15,7 +15,7 @@ SRCS +=		cmd_c.c cmd_cdel.c cmd_clist.c cmd_cnew.c cmd_cren.c cmd_del.c \
 		cmd_searchre.c cmd_write.c cmd_version.c cmd_clear.c cmd_copy.c \
 		commands.c commands_init.c
 
-CFLAGS +=	-Wall -g
+CFLAGS +=	-pedantic -Wall -g
 CFLAGS +=	`pkg-config --cflags libxml-2.0`
 .ifdef HAVE_PCRE
 CFLAGS +=	`pkg-config --cflags libpcre` -D_HAVE_PCRE

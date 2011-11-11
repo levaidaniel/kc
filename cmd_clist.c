@@ -48,7 +48,7 @@ cmd_clist(char *e_line, command *commands)
 
 	if (db_node) {
 		while (db_node) {
-			if (db_node->type == XML_ELEMENT_NODE) {	// we only care about ELEMENT nodes
+			if (db_node->type == XML_ELEMENT_NODE) {	/* we only care about ELEMENT nodes */
 				printf("%d. ", idx);
 
 				cname = xmlGetProp(db_node, BAD_CAST "name");

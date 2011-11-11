@@ -37,6 +37,7 @@ void
 cmd_list(char *e_line, command *commands)
 {
 	xmlNodePtr	db_node = NULL;
+	xmlChar		*key = NULL;
 
 	int		idx = 0;
 
@@ -50,10 +51,12 @@ cmd_list(char *e_line, command *commands)
 
 	if (db_node) {
 		while (db_node) {
-			if (db_node->type == XML_ELEMENT_NODE) {	// we only care about ELEMENT nodes
+			if (db_node->type == XML_ELEMENT_NODE) {	/* we only care about ELEMENT nodes */
 				printf("%d. ", idx);
 
-				printf("%s\n", xmlGetProp(db_node, BAD_CAST "name"));
+				key = xmlGetProp(db_node, BAD_CAST "name");
+				printf("%s\n", key);
+				xmlFree(key); key = NULL;
 
 				idx++;
 			}

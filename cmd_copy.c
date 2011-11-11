@@ -43,9 +43,9 @@ cmd_copy(char *e_line, command *commands)
 	int		idx = 0;
 
 
-	strtok((char *)e_line, " ");				// remove the command name
+	strtok(e_line, " ");				/* remove the command name */
 	idx_str = strtok(NULL, " ");
-	cname = BAD_CAST strtok(NULL, " ");	// assign the command's parameter
+	cname = BAD_CAST strtok(NULL, " ");	/* assign the command's parameter */
 	if (!cname  ||  !idx_str) {
 		puts(commands->usage);
 		return;
@@ -71,15 +71,15 @@ cmd_copy(char *e_line, command *commands)
 		puts("invalid index!");
 		return;
 	} else {
-		// unlink from the original keychain
+		/* unlink from the original keychain */
 		db_node_prev = db_node->prev;
-		xmlUnlinkNode(db_node_prev);	// remove the adjacent 'text' node, which is the indent and newline
+		xmlUnlinkNode(db_node_prev);	/* remove the adjacent 'text' node, which is the indent and newline */
 		xmlFreeNode(db_node_prev);
 
 		xmlUnlinkNode(db_node);
 
 
-		// add the entry to the destination keychain
+		/* add the entry to the destination keychain */
 		xmlAddChild(db_node_c, xmlNewText(BAD_CAST "\n    "));
 		xmlAddChild(db_node_c, db_node);
 

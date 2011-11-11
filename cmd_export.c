@@ -38,7 +38,7 @@ cmd_export(char *e_line, command *commands)
 	char		*export_filename = NULL;
 
 
-	strtok((char *)e_line, " ");	/* remove the command from the line */
+	strtok(e_line, " ");	/* remove the command from the line */
 	export_filename = strtok(NULL, " ");	/* assign the command's parameter */
 	if (!export_filename) {
 		puts(commands->usage);

@@ -51,11 +51,11 @@ cmd_quit(char *e_line, command *commands)
 
 	if (dirty  &&  !batchmode) {
 #ifndef _READLINE
-		// disable history
+		/* disable history */
 		if (el_set(e, EL_HIST, history, NULL) != 0) {
 			perror("el_set(EL_HIST)");
 		}
-		// clear the prompt
+		/* clear the prompt */
 		if (el_set(e, EL_PROMPT, el_prompt_null) != 0) {
 			perror("el_set(EL_PROMPT)");
 		}

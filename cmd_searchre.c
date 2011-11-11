@@ -66,9 +66,9 @@ cmd_searchre(char *e_line, command *commands)
 
 
 	if (chain)
-		pattern = line + 2;	// remove the 'c/' from the line. the remaining part is the pattern
+		pattern = line + 2;	/* remove the 'c/' from the line. the remaining part is the pattern */
 	else
-		pattern = line + 1;	// remove the '/'(slash) from the line. the remaining part is the pattern
+		pattern = line + 1;	/* remove the '/'(slash) from the line. the remaining part is the pattern */
 
 	if (!pattern) {
 		puts(commands->usage);
@@ -104,7 +104,7 @@ cmd_searchre(char *e_line, command *commands)
 
 	search_keychain = keychain;
 	while (search_keychain) {
-		if (search_keychain->type != XML_ELEMENT_NODE) {	// skip the non element nodes
+		if (search_keychain->type != XML_ELEMENT_NODE) {	/* skip the non element nodes */
 			search_keychain = search_keychain->next;
 			continue;
 		}
@@ -120,7 +120,7 @@ cmd_searchre(char *e_line, command *commands)
 
 		idx = 0;
 		while (db_node) {
-			if (db_node->type != XML_ELEMENT_NODE) {	// skip the non element nodes
+			if (db_node->type != XML_ELEMENT_NODE) {	/* skip the non element nodes */
 				db_node = db_node->next;
 				continue;
 			}
@@ -137,10 +137,10 @@ cmd_searchre(char *e_line, command *commands)
 				hits++;
 
 				if (searchall)
-					printf("%s%% ", xmlGetProp(search_keychain, BAD_CAST "name"));  // prefix the name with the keychain name
+					printf("%s%% ", xmlGetProp(search_keychain, BAD_CAST "name"));  /* prefix the name with the keychain name */
 
-				printf("%d. ", idx);	// prefix the name with the index number
-				printf("%s\n", key);	// this is the name of the entry
+				printf("%d. ", idx);	/* prefix the name with the index number */
+				printf("%s\n", key);	/* this is the name of the entry */
 				xmlFree(key); key = NULL;
 			} else
 				if (debug)

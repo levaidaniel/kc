@@ -51,13 +51,13 @@ cmd_cnew(char *e_line, command *commands)
 #endif
 
 
-	strtok((char *)e_line, " ");	// remove the command from the line
-	cname = BAD_CAST strtok(NULL, " ");	// assign the command's parameter
-	if (!cname) {		// if we didn't get a name as a parameter
+	strtok(e_line, " ");			/* remove the command from the line */
+	cname = BAD_CAST strtok(NULL, " ");	/* assign the command's parameter */
+	if (!cname) {		/* if we didn't get a name as a parameter */
 		strlcpy(prompt_context, "NEW keychain", sizeof(prompt_context));
 
 #ifndef _READLINE
-		// disable history temporarily
+		/* disable history temporarily */
 		if (el_set(e, EL_HIST, history, NULL) != 0) {
 			perror("el_set(EL_HIST)");
 		}
@@ -65,7 +65,7 @@ cmd_cnew(char *e_line, command *commands)
 		e_line = (char *)el_gets(e, &e_count);
 
 		if (e_line)
-			e_line[strlen(e_line) - 1] = '\0';	// remove the newline
+			e_line[strlen(e_line) - 1] = '\0';	/* remove the newline */
 #else
 		e_line = readline(prompt_str());
 #endif
@@ -79,7 +79,7 @@ cmd_cnew(char *e_line, command *commands)
 			cname = BAD_CAST e_line;
 
 #ifndef _READLINE
-		// re-enable history
+		/* re-enable history */
 		if (el_set(e, EL_HIST, history, eh) != 0) {
 			perror("el_set(EL_HIST)");
 		}
@@ -90,8 +90,8 @@ cmd_cnew(char *e_line, command *commands)
 
 	db_node = find_keychain(cname);
 	if (!db_node) {
-		// XXX reloading a saved document inserts a 'text' element between each visible node (why?)
-		// so we must reproduce this
+		/* XXX reloading a saved document inserts a 'text' element between each visible node (why?)
+		 * so we must reproduce this */
 		db_node = xmlNewText(BAD_CAST "  ");
 		xmlAddChild(keychain->parent, db_node);
 
@@ -99,8 +99,8 @@ cmd_cnew(char *e_line, command *commands)
 		xmlSetProp(db_node, BAD_CAST "name", cname);
 		xmlAddChild(keychain->parent, db_node);
 
-		// XXX reloading a saved document inserts a 'text' element between each visible node (why?)
-		// so we must reproduce this
+		/* XXX reloading a saved document inserts a 'text' element between each visible node (why?)
+		 * so we must reproduce this */
 		db_node = xmlNewText(BAD_CAST "\n");
 		xmlAddChild(keychain->parent, db_node);
 

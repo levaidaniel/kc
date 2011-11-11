@@ -30,7 +30,7 @@
 #include "commands.h"
 
 
-char get_line(xmlChar *, int, int *, wint_t *, int);
+xmlChar *get_line(xmlChar *, int, int);
 
 
 extern xmlNodePtr	keychain;
@@ -47,24 +47,31 @@ void
 cmd_getnum(int idx, int space)
 {
 	xmlNodePtr	db_node = NULL;
-	xmlChar		*key = NULL, *value = NULL, *value_part = NULL;
+	xmlChar		*key = NULL, *value = NULL, *value_nl = NULL, *line = NULL, *line_randomed = NULL, *tmp = NULL;
 
-	int		newlines = 0, i = 0, pos = 0, erase_len = 0, line_len = 0, value_len = 0;
-	int		*utfclen = NULL;
-	int		c = -1;
-	char		*wc_tmp = NULL;
+	int		lines = 0, i = 0, erase_len = 0, value_len = 0, line_len = 0, line_randomed_len = 0;
 	char		rc = 0;
 	char		*rand_str = NULL;
 
 
 	db_node = find_key(idx);
 	if (db_node) {
-		key = xmlGetProp(db_node, "name");
+		key = xmlGetProp(db_node, BAD_CAST "name");
+		value = xmlGetProp(db_node, BAD_CAST "value");
+		value_nl = parse_newlines(value, 0);
+		xmlFree(value); value = NULL;
 
-		printf("[%s]\n", key);	// print the key
+		value_len = xmlStrlen(value_nl);
+
+		/* count how many (new)lines are in the string */
+		for (i=0; i < value_len; i++)
+			if (value_nl[i] == '\n')
+				lines++;
+		lines++;
+
 
 #ifndef _READLINE
-		// clear the prompt temporarily
+		/* clear the prompt temporarily */
 		if (el_set(e, EL_PROMPT, el_prompt_null) != 0) {
 			perror("el_set(EL_PROMPT)");
 		}
@@ -76,158 +83,94 @@ cmd_getnum(int idx, int space)
 		rl_prep_terminal(1);
 #endif
 
-		idx = 1;
-		value = xmlGetProp(db_node, BAD_CAST "value");
+		line_len = 0;
+		idx = 1;	/* from hereafter 'idx' will be our requested line number */
+		while (rc != 'q'  &&  rc != 10) {	/* quit for 'q' or 'Enter' */
+			printf("[%s] ", key);	/* print the key */
 
-		value_len = xmlStrlen(value);
+			/* if multiline, prefix the line with a line number */
+			if (lines > 1)
+				printf("[%d/%d] ", idx, lines);
 
-		// count how many lines are in the string
-		for (i=0; i < value_len; i++)
-			if (value[i] == '\n')
-				newlines++;
+			/* get a line out from the value */
+			line = get_line(value_nl, value_len, idx);
+			line_len = strlen((const char *)line);
 
+			if (space) {	/* if random padding is requested */
+				line_randomed_len = line_len + line_len * space + space + 1;
+				line_randomed = calloc(1, line_randomed_len); malloc_check(line_randomed);
 
-		utfclen = malloc(sizeof(int)); malloc_check(utfclen);
-
-		while (c != '\0') {		// handle multiline values
-
-			if (newlines)
-				printf("[%d/%d] ", idx, newlines + 1);	// if multiline, prefix the line with a line number
-
-			/* count the actual line's length */
-			do {
-				c = value[line_len++];	// this is the actual line length
-			} while (c != '\n'  &&  c != '\0');
-			--line_len;
-			if (debug)
-				printf("line_len = %d\n", line_len);
-
-			value_part = realloc(value_part, line_len + 1); malloc_check(value_part);	// this 'part' is exactly one line from the 'value'
-			value_part[0] = '\0';
-			if (debug)
-				printf("value_part(init):'%s'\n", value_part);
-
-			if (space) {
-				/* add the random characters' numbers to the line_len
-				 * because it will be that much longer at the end */
-				line_len += line_len + line_len * space + space;
-
-				// print the first random character(s)
+				/* begin with the random string */
 				rand_str = get_random_str(space, 0);
 				if (!rand_str)
 					return;
-
-				strlcat(value_part, rand_str, line_len);
-
+				strlcat((char *)line_randomed, rand_str, line_randomed_len);
 				free(rand_str); rand_str = NULL;
-			}
+				for (i=0;i < line_len;i++) {
+					/* append a character from the line */
+					tmp = xmlUTF8Strsub(line, i, 1);
+					strlcat((char *)line_randomed, (const char *)tmp, line_randomed_len);
+					xmlFree(tmp); tmp = NULL;
 
-			wc_tmp = xmlUTF8Strsub(value, pos, 1);
-			while ((strcmp(wc_tmp, "\n") != 0)  &&  (strcmp(wc_tmp, "\0") != 0)) {
-				xmlFree(wc_tmp); wc_tmp = NULL;
-				wc_tmp = xmlUTF8Strsub(value, pos, 1);
-				pos += strlen(wc_tmp);
-				if ((strcmp(wc_tmp, "\n") == 0)  ||  (strcmp(wc_tmp, "\0") == 0))	// don't print the newlines and the NUL
-					break;
-				else {
-					if (debug)
-						printf("wc_tmp:'%s'\n", wc_tmp);
-					strlcat(value_part, wc_tmp, line_len + 1);
-					if (debug)
-						printf("value_part:'%s'\n", value_part);
-
-					if (space) {
-						// print random character(s)
-						rand_str = get_random_str(space, 0);
-						if (!rand_str)
-							return;
-
-						strlcat(value_part, rand_str, line_len + 1);
-
-						free(rand_str); rand_str = NULL;
-					}
+					/* append a random string */
+					rand_str = get_random_str(space, 0);
+					if (!rand_str)
+						return;
+					strlcat((char *)line_randomed, rand_str, line_randomed_len);
+					free(rand_str); rand_str = NULL;
 				}
-			}
-			printf("%s", value_part);
-#ifdef _READLINE
-			rl_redisplay();
-#endif
+				line_randomed[line_randomed_len - 1] = '\0';
 
-			if (!batchmode) {
-				// after printing a line, wait for user input
-				rc = 0;
-				while (	rc != 'q' &&
-					rc != 10  &&  rc != 'f'  &&  rc != 'n'  &&  rc != 'j'  &&  rc != ' ' &&	// newline or 'f' ... display next line
-					rc != 8   &&  rc != 'b'  &&  rc != 'p'  &&  rc != 'k'  &&		// backspace or 'b' ... display previous line
-					(rc < '1'  ||  rc > '9')
-					) {
+				printf("%s", line_randomed);
+			} else {
+				printf("%s", line);
+			}
+			xmlFree(line); line = NULL;
+			free(line_randomed); line_randomed = NULL;
+
 #ifndef _READLINE
-					el_getc(e, &rc);
+			el_getc(e, &rc);
 #else
-					rc = rl_read_key();
+			rc = rl_read_key();
 #endif
-				}
 
-				// erase (overwrite) the written value with spaces
-				printf("\r");
-				erase_len = line_len + (newlines ? digit_length(idx) + digit_length(newlines + 1) + 4 : 0);	// add the line number prefix too
-				for (i=0; i < erase_len; i++)
-					putchar(' ');
-
-				printf("\r");
-
-				switch (rc) {
-					// forward
-					case 10:
-					case 'f':
-					case 'n':
-					case 'j':
-					case ' ':
+			/* this is the prompt, after displaying the value */
+			switch (rc) {
+				/* line forward */
+				case 'f':
+				case 'n':
+				case 'j':
+				case ' ':
+					if (idx < lines)
 						idx++;
 					break;
-					// backward
-					case 8:
-					case 'b':
-					case 'p':
-					case 'k':
-						if (idx - 1 > 0) {	// don't go back, if we are already on the first line
-							idx--;		// 'idx' is the line number we want!
-
-							pos = get_line(value, value_len, &pos, &c, idx);
-						} else
-							pos -= line_len + 1;	// rewind back to the current line's start, to display it again
+				/* line backward */
+				case 'b':
+				case 'p':
+				case 'k':
+					if (idx - 1 > 0)
+						idx--;
 					break;
-					// quit
-					case 'q':
-						c = '\0';	// this is our exit condition
+				default:
 					break;
-					// we got a number (this will be a line number)
-					default:
-						rc -= 48;		// 'idx' is the line number we want and 'rc' is the ascii version of the line number we got
-						if ( rc <= newlines + 1 ) {
-							idx = rc;
-							pos = get_line(value, value_len, &pos, &c, idx);
-						} else {
-							pos -= line_len + 1;	// rewind back to the current line's start, to display it again
-							c = value[pos];
-						}
-					break;
-				}
-			} else {
-				// if we are in batch mode
-				idx++;
-				puts("");
 			}
 
-			line_len = 0;	// this is the actual line length
+			/* erase (overwrite) the previously written value with spaces */
+			printf("\r");
+			erase_len =	strlen((const char *)key) + 3 +						/* add the key + "[" + "]" + " " */
+					(space ? line_len + line_len * space + space : line_len) +	/* add the random chars too */
+					(lines ? digit_length(idx) + digit_length(lines) + 4 : 0);	/* add the line number prefix too */
+			for (i=0; i < erase_len; i++)
+				putchar(' ');
+
+			printf("\r");
 		}
 
 		xmlFree(key); key = NULL;
-		xmlFree(value); value = NULL;
-		free(value_part); value_part = NULL;
+		xmlFree(value_nl); value_nl = NULL;
 
 #ifndef _READLINE
-		// re-enable the default prompt
+		/* re-enable the default prompt */
 		if (el_set(e, EL_PROMPT, prompt_str) != 0) {
 			perror("el_set(EL_PROMPT)");
 		}
@@ -240,29 +183,39 @@ cmd_getnum(int idx, int space)
 } /* cmd_getnum() */
 
 
-char
-get_line(xmlChar *value, int value_len, int *pos, wint_t *c, int idx)
+/*
+ * Get the idx'th line from the value.
+ */
+xmlChar *
+get_line(xmlChar *value_nl, int value_len, int idx)
 {
-	int	i = 1;	// this counts how many '\n' we've found so far
+	xmlChar	*line = NULL;
 
-	// if we want the first line (which can't be identified like the rest
-	// of the lines: by presuming a '\n' character before the line)
-	// just set everything to the beginning, and return() from this function().
-	if (idx == 1) {
-		*pos = 0;
-		*c = value[*pos];
-		return(*pos);
+	int	nl = 1, pos = 0, tmp = 0, line_len = 0;
+
+
+	/* find out the start position (pos) of the requested line number (idx) */
+	for (pos = 0;(pos < value_len)  &&  (idx > nl); pos++) {
+		if (value_nl[pos] == '\n') {	/* we've found a newline */
+			nl++;
+		}
 	}
 
-	for (*pos=0; *pos < value_len; (*pos)++) {	// search the entire string
-		if (i < idx) {			// while newline count ('i') is smaller than the line number requested
-			if (value[*pos] == '\n')	// we found a '\n'
-				i++;
-		} else
-			break;
+	tmp = pos;
+	/* count the requested line length */
+	while (value_nl[pos] != '\n'  &&  value_nl[pos] != '\0') {
+		line_len++;
+		pos++;
 	}
 
-	*c = value[*pos];	// set the current character ('c') to the position's character in 'value'
+	pos = tmp;
+	tmp = 0;
+	line = malloc(line_len + 1); malloc_check(line);
+	/* copy out the requested line */
+	while (value_nl[pos] != '\n'  &&  value_nl[pos] != '\0'  &&  tmp < line_len) {
+		line[tmp++] = value_nl[pos++];
+	}
+	line[line_len] = '\0';
 
-	return(*pos);
+	return(line);
 } /* get_line() */

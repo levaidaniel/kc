@@ -46,7 +46,7 @@ commands_init(command **commands)
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "new";
-	(*commands)->usage = "new [key name [value name]]";
+	(*commands)->usage = "new [key name]";
 	(*commands)->help = "Add a new key to the current keychain.\n\nTo the value field, it is possible to enter multiline values\nby writing '\\n' in place of a needed new line.\nOne can escape this with '\\\\n'.";
 	(*commands)->fn = cmd_new;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);

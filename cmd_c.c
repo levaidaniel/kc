@@ -39,8 +39,8 @@ cmd_c(char *e_line, command *commands)
 	xmlChar		*cname = NULL;
 
 
-	strtok((char *)e_line, " ");				// remove the command from the line
-	cname = BAD_CAST strtok(NULL, " ");	// assign the command's parameter
+	strtok(e_line, " ");				/* remove the command from the line */
+	cname = BAD_CAST strtok(NULL, " ");		/* assign the command's parameter */
 	if (!cname) {
 		puts(commands->usage);
 		return;

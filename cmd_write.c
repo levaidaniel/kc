@@ -53,8 +53,8 @@ cmd_write(char *e_line, command *commands)
 			printf("xml_buf->content:\n'%s'\n", xmlBufferContent(xml_buf));
 		xmlSaveClose(xml_save);
 
-		BIO_reset(bio_chain);		// we must reset the cipher BIO to work after subsequent calls to cmd_write()
-		BIO_seek(bio_chain, 32);	// seek after the IV and salt (both 16 bytes)
+		BIO_reset(bio_chain);		/* we must reset the cipher BIO to work after subsequent calls to cmd_write() */
+		BIO_seek(bio_chain, 32);	/* seek after the IV and salt (both 16 bytes) */
 
 		ret = BIO_write(bio_chain, xml_buf->content, xml_buf->use);
 		if (debug)

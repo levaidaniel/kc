@@ -56,7 +56,7 @@ cmd_del(char *e_line, command *commands)
 		key = xmlGetProp(db_node, BAD_CAST "name");
 
 		db_node_prev = db_node->prev;
-		xmlUnlinkNode(db_node_prev);	// remove the adjacent 'text' node, which is the indent and newline
+		xmlUnlinkNode(db_node_prev);	/* remove the adjacent 'text' node, which is the indent and newline */
 		xmlFreeNode(db_node_prev);
 
 		xmlUnlinkNode(db_node);

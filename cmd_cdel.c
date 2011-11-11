@@ -50,8 +50,8 @@ cmd_cdel(char *e_line, command *commands)
 #endif
 
 
-	strtok((char *)e_line, " ");		// remove the command from the line
-	cname = BAD_CAST strtok(NULL, " ");	// assign the command's parameter
+	strtok(e_line, " ");		/* remove the command from the line */
+	cname = BAD_CAST strtok(NULL, " ");	/* assign the command's parameter */
 	if (!cname) {
 		puts(commands->usage);
 		return;
@@ -60,16 +60,16 @@ cmd_cdel(char *e_line, command *commands)
 	db_node = find_keychain(cname);
 	if (db_node) {
 		if (xmlUTF8Charcmp(xmlGetProp(keychain, BAD_CAST "name"),
-				   xmlGetProp(db_node, BAD_CAST "name")) == 0) {	// don't allow to delete the current keychain. this saves us trouble.
+				   xmlGetProp(db_node, BAD_CAST "name")) == 0) {	/* don't allow to delete the current keychain. this saves us trouble. */
 
 			puts("Can not delete the current keychain!");
 		} else {
 #ifndef _READLINE
-			// disable history temporarily
+			/* disable history temporarily */
 			if (el_set(e, EL_HIST, history, NULL) != 0) {
 				perror("el_set(EL_HIST)");
 			}
-			// clear the prompt temporarily
+			/* clear the prompt temporarily */
 			if (el_set(e, EL_PROMPT, el_prompt_null) != 0) {
 				perror("el_set(EL_PROMPT)");
 			}
@@ -109,11 +109,11 @@ cmd_cdel(char *e_line, command *commands)
 
 
 #ifndef _READLINE
-			// re-enable the default prompt
+			/* re-enable the default prompt */
 			if (el_set(e, EL_PROMPT, prompt_str) != 0) {
 				perror("el_set(EL_PROMPT)");
 			}
-			// re-enable history
+			/* re-enable history */
 			if (el_set(e, EL_HIST, history, eh) != 0) {
 				perror("el_set(EL_HIST)");
 			}
@@ -124,4 +124,5 @@ cmd_cdel(char *e_line, command *commands)
 	} else {
 		printf("'%s' keychain not found.\n", cname);
 	}
+
 } /* cmd_cdel() */

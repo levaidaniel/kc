@@ -52,7 +52,7 @@ cmd_cren(char *e_line, command *commands)
 #endif
 
 
-	strtok((char *)e_line, " ");	/* remove the command from the line */
+	strtok(e_line, " ");	/* remove the command from the line */
 	cname = BAD_CAST strtok(NULL, " ");	/* assign the command's parameter */
 	if (!cname) {
 		puts(commands->usage);
@@ -62,7 +62,7 @@ cmd_cren(char *e_line, command *commands)
 	db_node = find_keychain(cname);
 	if (db_node) {
 #ifndef _READLINE
-		// disable history temporarily
+		/* disable history temporarily */
 		if (el_set(e, EL_HIST, history, NULL) != 0) {
 			perror("el_set(EL_HIST)");
 		}
@@ -70,7 +70,7 @@ cmd_cren(char *e_line, command *commands)
 
 		strlcpy(prompt_context, "RENAME keychain", sizeof(prompt_context));
 
-		// if we edit an existing entry, push the current value to the edit buffer
+		/* if we edit an existing entry, push the current value to the edit buffer */
 		cname = xmlGetProp(db_node, BAD_CAST "name");
 #ifdef _READLINE
 		_rl_helper_var = cname;
@@ -83,7 +83,7 @@ cmd_cren(char *e_line, command *commands)
 		e_line = (char *)el_gets(e, &e_count);
 
 		if (e_line)
-			e_line[strlen(e_line) - 1] = '\0';	// remove the newline
+			e_line[strlen(e_line) - 1] = '\0';	/* remove the newline */
 #else
 		rl_pre_input_hook = (rl_hook_func_t *)_rl_push_buffer;
 		e_line = readline(prompt_str());
@@ -103,7 +103,7 @@ cmd_cren(char *e_line, command *commands)
 		xmlSetProp(db_node, BAD_CAST "name", cname);
 
 #ifndef _READLINE
-		// re-enable history
+		/* re-enable history */
 		if (el_set(e, EL_HIST, history, eh) != 0) {
 			perror("el_set(EL_HIST)");
 		}

@@ -40,7 +40,7 @@ cmd_help(char *e_line, command *commands)
 
 	commands = commands_first;
 
-	strtok((char *)e_line, " ");	/* remove the command from the line */
+	strtok(e_line, " ");		/* remove the command from the line */
 	got_command = strtok(NULL, " ");	/* assign the command's parameter */
 
 	if (got_command) {

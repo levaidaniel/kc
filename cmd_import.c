@@ -43,7 +43,7 @@ cmd_import(char *e_line, command *commands)
 	char		*import_filename = NULL;
 
 
-	strtok((char *)e_line, " ");	/* remove the command from the line */
+	strtok(e_line, " ");		/* remove the command from the line */
 	import_filename = strtok(NULL, " ");	/* assign the command's parameter */
 	if (!import_filename) {
 		puts(commands->usage);

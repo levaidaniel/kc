@@ -14,7 +14,7 @@ OBJS +=		cmd_c.o cmd_cdel.o cmd_clist.o cmd_cnew.o cmd_cren.o cmd_del.o \
 		cmd_searchre.o cmd_write.o cmd_version.o cmd_clear.o cmd_copy.o \
 		commands.o commands_init.o
 
-CFLAGS +=	-Wall -g
+CFLAGS +=	-pedantic -Wextra -Wall -g
 CFLAGS +=	-D_LINUX -D_READLINE
 CFLAGS +=	`pkg-config --cflags libssl`
 CFLAGS +=	`pkg-config --cflags libbsd`

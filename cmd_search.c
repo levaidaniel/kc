@@ -44,7 +44,7 @@ cmd_search(char *e_line, command *commands)
 	int		hits = 0, idx = 0;
 
 
-	cmd = strtok((char *)e_line, " ");		/* get the command name */
+	cmd = strtok(e_line, " ");		/* get the command name */
 	if (strncmp(cmd, "*", 1) == 0) {
 		searchall = 1;
 		cmd++;
@@ -97,10 +97,10 @@ cmd_search(char *e_line, command *commands)
 				hits++;
 
 				if (searchall)
-					printf("%s%% ", xmlGetProp(search_keychain, BAD_CAST "name"));	// prefix the name with the keychain name
+					printf("%s%% ", xmlGetProp(search_keychain, BAD_CAST "name"));	/* prefix the name with the keychain name */
 
-				printf("%d. ", idx);	// prefix the name with the index number
-				printf("%s\n", key);	// this is the name of the entry
+				printf("%d. ", idx);	/* prefix the name with the index number */
+				printf("%s\n", key);	/* this is the name of the entry */
 				xmlFree(key); key = NULL;
 			} else
 				if (debug)
@@ -119,6 +119,4 @@ cmd_search(char *e_line, command *commands)
 
 	if (!hits)
 		printf("'%s' not found.\n", pattern);
-
-	free(pattern);
 } /* cmd_search() */

@@ -52,23 +52,22 @@ cmd_new(char *e_line, command *commands)
 
 
 #ifndef _READLINE
-	// disable history temporarily
+	/* disable history temporarily */
 	if (el_set(e, EL_HIST, history, NULL) != 0) {
 		perror("el_set(EL_HIST)");
 	}
 #endif
 
-	strtok((char *)e_line, " ");    // remove the command from the line
-
-	key = xmlStrdup(BAD_CAST strtok(NULL, " "));      // assign the command's first parameter (name)
-	if (!key) {            // if we didn't get a name as a parameter
+	strtok(e_line, " ");				/* remove the command from the line */
+	key = xmlStrdup(BAD_CAST strtok(NULL, " "));	/* assign the command's first parameter (name) */
+	if (!key) {					/* if we didn't get a name as a parameter */
 		strlcpy(prompt_context, "NEW key", sizeof(prompt_context));
 
 #ifndef _READLINE
 		e_line = (char *)el_gets(e, &e_count);
 
 		if (e_line)
-			e_line[strlen(e_line) - 1] = '\0';	// remove the newline
+			e_line[strlen(e_line) - 1] = '\0';	/* remove the newline */
 #else
 		e_line = readline(prompt_str());
 #endif
@@ -76,8 +75,8 @@ cmd_new(char *e_line, command *commands)
 			perror("input");
 #ifndef _READLINE
 			el_reset(e);
-#endif
 			xmlFree(key); key = NULL;
+#endif
 			return;
 		} else
 			key = xmlStrdup(BAD_CAST e_line);
@@ -86,34 +85,31 @@ cmd_new(char *e_line, command *commands)
 		printf("new key is '%s'\n", key);
 
 
-	value = xmlStrdup(BAD_CAST strtok(NULL, " "));      // assign the command's second parameter (value)
-	if (!value) {            // if we didn't get a value as a parameter
-		strlcpy(prompt_context, "NEW value", sizeof(prompt_context));
+	strlcpy(prompt_context, "NEW value", sizeof(prompt_context));
 
 #ifndef _READLINE
-		e_line = (char *)el_gets(e, &e_count);
+	e_line = (char *)el_gets(e, &e_count);
 
-		if (e_line)
-			e_line[strlen(e_line) - 1] = '\0';	// remove the newline
+	if (e_line)
+		e_line[strlen(e_line) - 1] = '\0';	/* remove the newline */
 #else
-		e_line = readline(prompt_str());
+	e_line = readline(prompt_str());
 #endif
-		if (!e_line) {
-			perror("input");
+	if (!e_line) {
+		perror("input");
 #ifndef _READLINE
-			el_reset(e);
+		el_reset(e);
+		xmlFree(key); key = NULL;
 #endif
-			xmlFree(key); key = NULL;
-			xmlFree(value); value = NULL;
-			return;
-		} else
-			value = xmlStrdup(BAD_CAST e_line);
-	}
+		return;
+	} else
+		value = xmlStrdup(BAD_CAST e_line);
+
 	if (debug)
 		printf("new value is '%s'\n", value);
 
 #ifndef _READLINE
-	// re-enable history
+	/* re-enable history */
 	if (el_set(e, EL_HIST, history, eh) != 0) {
 		perror("el_set(EL_HIST)");
 	}
@@ -122,12 +118,12 @@ cmd_new(char *e_line, command *commands)
 	strlcpy(prompt_context, "", sizeof(prompt_context));
 
 
-	// XXX reloading a saved document inserts a 'text' element between each visible node (why?)
-	// so we must reproduce this
+	/* XXX reloading a saved document inserts a 'text' element between each visible node (why?)
+	 * so we must reproduce this */
 	db_node = xmlNewText(BAD_CAST "\n    ");
 	xmlAddChild(keychain, db_node);
 
-	// add new element
+	/* add new element */
 	db_node = xmlNewChild(keychain, NULL, BAD_CAST "key", NULL);
 	xmlNewProp(db_node, BAD_CAST "name", key);
 	xmlNewProp(db_node, BAD_CAST "value", value);
