@@ -125,16 +125,31 @@ cmd_getnum(int idx, int space)
 			} else {
 				printf("%s", line);
 			}
+#ifdef _READLINE		
+			rl_redisplay();		
+#endif
 			xmlFree(line); line = NULL;
 			free(line_randomed); line_randomed = NULL;
 
+			/* this is the prompt, after displaying the value */
 #ifndef _READLINE
 			el_getc(e, &rc);
 #else
 			rc = rl_read_key();
 #endif
 
-			/* this is the prompt, after displaying the value */
+			/* erase (overwrite) the previously written value with spaces */
+			printf("\r");
+			erase_len =	strlen((const char *)key) + 3 +					/* add the key + "[" + "]" + " " */
+					(space ? line_len + line_len * space + space : line_len) +	/* add the random chars too */
+					(lines > 1 ? digit_length(idx) + digit_length(lines) + 4 : 0);	/* add the line number prefix too + "[" + "/" + "]" + " "  */
+			for (i=0; i < erase_len; i++)
+				putchar(' ');
+
+			printf("\r");
+
+
+			/* process the keypress */
 			switch (rc) {
 				/* line forward */
 				case 'f':
@@ -151,19 +166,21 @@ cmd_getnum(int idx, int space)
 					if (idx - 1 > 0)
 						idx--;
 					break;
+				/* jump to the requested line */
+				case '1':
+				case '2':
+				case '3':
+				case '4':
+				case '5':
+				case '6':
+				case '7':
+				case '8':
+				case '9':
+					idx = rc - 48;
+					break;
 				default:
 					break;
 			}
-
-			/* erase (overwrite) the previously written value with spaces */
-			printf("\r");
-			erase_len =	strlen((const char *)key) + 3 +						/* add the key + "[" + "]" + " " */
-					(space ? line_len + line_len * space + space : line_len) +	/* add the random chars too */
-					(lines ? digit_length(idx) + digit_length(lines) + 4 : 0);	/* add the line number prefix too */
-			for (i=0; i < erase_len; i++)
-				putchar(' ');
-
-			printf("\r");
 		}
 
 		xmlFree(key); key = NULL;
