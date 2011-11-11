@@ -81,7 +81,8 @@ main(int argc, char *argv[])
 	BIO		*bio_b64 = NULL;
 	char		*db_buf = NULL;
 	ssize_t		ret = -1;
-	size_t		db_buf_size = 4096, pos = 0;
+	size_t		db_buf_size = 4096;
+	unsigned int	pos = 0;
 	unsigned char	key[128];
 	char		*pass = NULL;
 	const unsigned char	salt[17];
@@ -352,7 +353,7 @@ main(int argc, char *argv[])
 	}
 
 	if (debug)
-		printf("read %zd bytes\n", pos);
+		printf("read %d bytes\n", pos);
 
 
 	if (!BIO_get_cipher_status(bio_chain)  &&  pos > 0) {
