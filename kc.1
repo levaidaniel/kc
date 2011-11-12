@@ -26,7 +26,8 @@
 .Sh SYNOPSIS
 .Nm kc
 .Op Fl k Ar database file
-.Op Fl b Ar password file
+.Op Fl b
+.Op Fl p Ar password file
 .Op Fl v
 .Op Fl h
 .Sh DESCRIPTION
@@ -38,7 +39,9 @@ utility is a console based keychain application, using an encrypted XML database
 .It Cm -k
 Specify a non-default database file. The default is ~/.kc/default.
 .It Cm -b
-Batch mode. Read password from the specified password file, and listen on standard input for commands.
+Batch mode. Disable some features to enable commands from standard input.
+.It Cm -p
+Read password from password file.
 .It Cm -v
 Display version.
 .It Cm -h

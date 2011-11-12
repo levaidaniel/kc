@@ -123,9 +123,10 @@ main(int argc, char *argv[])
 				exit(EXIT_SUCCESS);
 			break;
 			case 'h':
-				printf(	"%s\n\n%s [-k database file] [-b password file] [-v] [-h]\n"
+				printf(	"%s\n\n%s [-k database file] [-b] [-p password file] [-v] [-h]\n"
 					"-k: specify a non-default database file\n"
-					"-b: batch mode. read password from password file, and listen on stdin for commands.\n"
+					"-b: batch mode: disable some features to enable commands from stdin.\n"
+					"-p: read password from password file.\n"
 					"-v: version\n"
 					"-h: this help\n", VERSION, argv[0]);
 				exit(EXIT_SUCCESS);
@@ -134,7 +135,7 @@ main(int argc, char *argv[])
 				debug = 1;
 			break;
 			default:
-				printf("%s [-k database file] [-b password file] [-v] [-h]\n", argv[0]);
+				printf("%s [-k database file] [-b] [-p password file] [-v] [-h]\n", argv[0]);
 				exit(EXIT_SUCCESS);
 			break;
 		}
@@ -242,7 +243,7 @@ main(int argc, char *argv[])
 				pass = realloc(pass, pass_size); malloc_check(pass);
 			}
 
-			ret = read(pass_file, pass, pass_size);
+			ret = read(pass_file, pass + pos, pass_size - pos);
 			if (ret < 0) {
 				perror("read(password file)");
 				break;
@@ -250,7 +251,7 @@ main(int argc, char *argv[])
 				pos += ret;
 		}
 		pass[pos] = '\0';
-		if (strchr(pass, '\n'))
+		if (strrchr(pass, '\n'))
 			pass[pos - 1] = '\0';		/* strip the newline character */
 	} else {
 		/* ask for the password */
