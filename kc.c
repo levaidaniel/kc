@@ -534,15 +534,8 @@ main(int argc, char *argv[])
 				cmd_match(e_line);
 			}
 		} else {
-			if (batchmode)
-				quit(EXIT_SUCCESS);
-			else {
-				perror("input");
-#ifndef _READLINE
-				el_reset(e);
-#endif
-				quit(EXIT_FAILURE);
-			}
+			el_reset(e);
+			quit(EXIT_SUCCESS);
 		}
 	} while(1);
 
