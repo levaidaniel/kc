@@ -176,7 +176,9 @@ cmd_getnum(int idx, int space)
 				case '7':
 				case '8':
 				case '9':
-					idx = rc - 48;
+					if (idx - 1 > 0  &&  idx < lines) {
+						idx = rc - 48;
+					}
 					break;
 				default:
 					break;
