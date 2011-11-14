@@ -148,7 +148,7 @@ main(int argc, char *argv[])
 		len = strlen(env_home) + 1 + strlen(default_db_dir) + 1;
 		db_filename = malloc(len); malloc_check(db_filename);
 
-		/* default db directory */
+		/* default db directory (create it, if it doesn't exist) */
 		snprintf(db_filename, len, "%s/%s", env_home, default_db_dir);
 
 		if(stat(db_filename, &st) == 0) {
@@ -158,7 +158,7 @@ main(int argc, char *argv[])
 			}
 		} else {
 			if (debug)
-				printf("creating '%s'\n", db_filename);
+				printf("creating '%s' directory\n", db_filename);
 
 			if(mkdir(db_filename, 0777) != 0) {
 				printf("could not create '%s': %s\n", db_filename, strerror(errno));
@@ -179,24 +179,13 @@ main(int argc, char *argv[])
 			quit(EXIT_FAILURE);
 		}
 		printf("Opening '%s'\n", db_filename);
-	} else
-		printf("Creating '%s'\n", db_filename);
 
-	db_file = open(db_filename, O_RDWR | O_CREAT, 0600);
-	if (db_file < 0) {
-		printf("error opening '%s'\n", db_filename);
-		perror("open()");
-		quit(EXIT_FAILURE);
-	}
+		db_file = open(db_filename, O_RDONLY);
+		if (db_file < 0) {
+			perror("open(database file)");
+			quit(EXIT_FAILURE);
+		}
 
-	if (flock(db_file, LOCK_NB | LOCK_EX) < 0) {
-		perror("could not lock database file");
-		puts("Maybe another instance is using that database?");
-		quit(EXIT_FAILURE);
-	}
-
-	fstat(db_file, &st);
-	if(st.st_size > 0) {	/* if db_filename is not empty */
 		/* read the IV and the salt. */
 
 		rbuf = malloc(17); malloc_check(rbuf);
@@ -215,22 +204,44 @@ main(int argc, char *argv[])
 
 		free(rbuf);
 
-
 		strlcpy(pass_prompt, "Password: ", 15);
 	} else {
-		new_db_file = 1;
+		printf("Creating '%s'\n", db_filename);
 
-		/* we'll write the IV and salt later after we got a password */
+		db_file = open(db_filename, O_RDWR | O_CREAT, 0600);
+		if (db_file < 0) {
+			perror("open(database file)");
+			quit(EXIT_FAILURE);
+		}
 
+		if (debug)
+			puts("generating salt and IV");
+
+		/* generate the IV and the salt. */
+
+		strlcpy((char *)iv, get_random_str(sizeof(iv) - 1, 0), sizeof(iv));
+		strlcpy((char *)salt, get_random_str(sizeof(salt) - 1, 0), sizeof(salt));
+
+		if (debug)
+			printf("iv='%s'\nsalt='%s'\n", iv, salt);
 
 		strlcpy(pass_prompt, "New password: ", 15);
 	}
 
+	if (flock(db_file, LOCK_NB | LOCK_EX) < 0) {
+		perror("could not lock database file");
+		puts("Maybe another instance is using that database?");
+		quit(EXIT_FAILURE);
+	}
+
 	if (pass_filename) {	/* we were given a password file name */
+		if (debug)
+			puts("opening password file");
+
 		/* read in the password from the specified file */
 		pass_file = open(pass_filename, O_RDONLY);
-		if (!pass_file) {
-			perror("password file");
+		if (pass_file < 0) {
+			perror("open(password file)");
 			quit(EXIT_FAILURE);
 		}
 
@@ -253,9 +264,12 @@ main(int argc, char *argv[])
 		pass[pos] = '\0';
 		if (strrchr(pass, '\n'))
 			pass[pos - 1] = '\0';		/* strip the newline character */
+
+		close(pass_file);
+		if (debug)
+			puts("closed password file");
 	} else {
 		/* ask for the password */
-
 		pass = malloc(pass_maxlen + 1); malloc_check(pass);
 		readpassphrase(pass_prompt, pass, pass_maxlen + 1, RPP_ECHO_OFF | RPP_REQUIRE_TTY);
 	}
@@ -269,20 +283,8 @@ main(int argc, char *argv[])
 	 * so when the user interrupts the password prompt, we won't end up
 	 * with a messed up db file, which only contains the salt and the IV.
 	 */
-	if (new_db_file) {
-		if (debug)
-			puts("generating salt and IV");
-
-		/* write the IV and the salt first. */
-		strlcpy((char *)iv, get_random_str(sizeof(iv) - 1, 0), sizeof(iv));
-		write(db_file, iv, sizeof(iv) - 1);
-
-		strlcpy((char *)salt, get_random_str(sizeof(salt) - 1, 0), sizeof(salt));
-		write(db_file, salt, sizeof(salt) - 1);
-	}
-
-	if (debug)
-		printf("iv='%s'\nsalt='%s'\n", iv, salt);
+	write(db_file, iv, sizeof(iv) - 1);
+	write(db_file, salt, sizeof(salt) - 1);
 
 
 	bio_file = BIO_new_file(db_filename, "r+");
@@ -535,7 +537,9 @@ main(int argc, char *argv[])
 				cmd_match(e_line);
 			}
 		} else {
+#ifndef _READLINE
 			el_reset(e);
+#endif
 			quit(EXIT_SUCCESS);
 		}
 	} while(1);
