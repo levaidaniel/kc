@@ -98,7 +98,6 @@ main(int argc, char *argv[])
 	const char	*default_db_dir = ".kc";
 	const char	*default_db_filename = "default";
 	char		*db_filename = NULL;
-	char		new_db_file = 0;
 	char		*env_home = NULL;
 
 	xmlNodePtr	db_root = NULL, db_node = NULL;
