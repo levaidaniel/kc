@@ -228,8 +228,10 @@ main(int argc, char *argv[])
 	}
 
 	if (flock(db_file, LOCK_NB | LOCK_EX) < 0) {
-		perror("could not lock database file");
-		puts("Maybe another instance is using that database?");
+		if (debug)
+			puts("flock(database file)");
+
+		puts("Could not lock the database file!\nMaybe another instance is using that database?");
 		quit(EXIT_FAILURE);
 	}
 
