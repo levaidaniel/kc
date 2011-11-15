@@ -67,7 +67,7 @@ cmd_help(char *e_line, command *commands)
 		printf("%-10s - \t%s\n", "<number>", "<number> [space]");
 		puts("Entering only a number in the command line will display the entry with the given index. You can quit from the display with 'q'.");
 		puts("By specifying another number after the index, that many random characters will be inserted between the value's characters.");
-		puts("You can navigate through a multiline value's lines with keys j/k, n/p, f/b, <SPACE>, <ENTER>, <BACKSPACE>.");
+		puts("You can navigate through a multiline value's lines with keys j/k, n/p, f/b, +/-, <SPACE>, <ENTER>, <BACKSPACE>.");
 
 		puts("\nFor a command's description, use 'help <command name>'.");
 	}
