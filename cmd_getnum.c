@@ -85,7 +85,7 @@ cmd_getnum(int idx, int space)
 
 		line_len = 0;
 		idx = 1;	/* from hereafter 'idx' will be our requested line number */
-		while (rc != 'q'  &&  rc != 10) {	/* quit for 'q' or 'Enter' */
+		while (rc != 'q') {	/* quit for 'q' or 'Enter' */
 			printf("[%s] ", key);	/* print the key */
 
 			/* if multiline, prefix the line with a line number */
@@ -155,7 +155,9 @@ cmd_getnum(int idx, int space)
 				case 'f':
 				case 'n':
 				case 'j':
+				case '+':
 				case ' ':
+				case 10:
 					if (idx < lines)
 						idx++;
 					break;
@@ -163,6 +165,8 @@ cmd_getnum(int idx, int space)
 				case 'b':
 				case 'p':
 				case 'k':
+				case '-':
+				case 8:
 					if (idx - 1 > 0)
 						idx--;
 					break;
