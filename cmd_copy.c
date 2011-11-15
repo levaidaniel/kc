@@ -34,41 +34,50 @@ extern char		dirty;
 
 
 void
-cmd_copy(char *e_line, command *commands)
+cmd_copy(const char *e_line, command *commands)
 {
 	xmlNodePtr	db_node = NULL, db_node_c = NULL, db_node_prev = NULL;
 	xmlChar		*cname = NULL;
+
+	char		*line = NULL;
 
 	char		*idx_str = NULL;
 	int		idx = 0;
 
 
-	strtok(e_line, " ");				/* remove the command name */
+	line = strdup(e_line);
+
+	strtok(line, " ");				/* remove the command name */
 	idx_str = strtok(NULL, " ");
 	cname = BAD_CAST strtok(NULL, " ");	/* assign the command's parameter */
 	if (!cname  ||  !idx_str) {
 		puts(commands->usage);
+		free(line); line = NULL;
 		return;
 	}
 
 	if (sscanf(idx_str, "%d", &idx) <= 0) {
 		puts(commands->usage);
+		free(line); line = NULL;
 		return;
 	}
 	if (idx < 0) {
 		puts(commands->usage);
+		free(line); line = NULL;
 		return;
 	}
 
 	db_node_c = find_keychain(cname);
 	if (!db_node_c) {
 		puts("keychain not found.");
+		free(line); line = NULL;
 		return;
 	}
 
 	db_node = find_key(idx);
 	if (!db_node) {
 		puts("invalid index!");
+		free(line); line = NULL;
 		return;
 	} else {
 		/* unlink from the original keychain */
@@ -85,4 +94,6 @@ cmd_copy(char *e_line, command *commands)
 
 		dirty = 1;
 	}
+
+	free(line); line = NULL;
 } /* cmd_copy() */

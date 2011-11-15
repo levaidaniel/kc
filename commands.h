@@ -7,41 +7,41 @@ struct command {
 	const char *name;
 	const char *usage;
 	const char *help;
-	void (*fn)(char *, command *);
+	void (*fn)(const char *, command *);
 	struct command *next;
 };
 
 
 void commands_init(command **);
 
-void cmd_match(char *);
+void cmd_match(const char *);
 
-void cmd_quit(char *, command *);
-void cmd_list(char *, command *);
-void cmd_cnew(char *, command *);
-void cmd_cdel(char *, command *);
-void cmd_cren(char *, command *);
-void cmd_clist(char *, command *);
-void cmd_c(char *, command *);
-void cmd_search(char *, command *);
-void cmd_searchre(char *, command *);
-void cmd_getnum(int, int);
-void cmd_new(char *, command *);
-void cmd_edit(char *, command *);
-void cmd_copy(char *, command *);
-void cmd_del(char *, command *);
-void cmd_write(char *, command *);
-void cmd_export(char *, command *);
-void cmd_import(char *, command *);
-void cmd_random(char *, command *);
-void cmd_clear(char *, command *);
-void cmd_version(char *, command *);
-void cmd_help(char *, command *);
+void cmd_quit(const char *, command *);
+void cmd_list(const char *, command *);
+void cmd_cnew(const char *, command *);
+void cmd_cdel(const char *, command *);
+void cmd_cren(const char *, command *);
+void cmd_clist(const char *, command *);
+void cmd_c(const char *, command *);
+void cmd_search(const char *, command *);
+void cmd_searchre(const char *, command *);
+void cmd_getnum(int, size_t);
+void cmd_new(const char *, command *);
+void cmd_edit(const char *, command *);
+void cmd_copy(const char *, command *);
+void cmd_del(const char *, command *);
+void cmd_write(const char *, command *);
+void cmd_export(const char *, command *);
+void cmd_import(const char *, command *);
+void cmd_random(const char *, command *);
+void cmd_clear(const char *, command *);
+void cmd_version(const char *, command *);
+void cmd_help(const char *, command *);
 
 xmlNodePtr find_keychain(xmlChar *);
 xmlNodePtr find_key(int);
 xmlChar *parse_newlines(xmlChar *, char);
-int digit_length(int);
+size_t digit_length(int);
 void _rl_push_buffer(void);
 
 

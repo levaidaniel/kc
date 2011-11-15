@@ -40,24 +40,30 @@ extern HistEvent	eh_ev;
 
 
 void
-cmd_cdel(char *e_line, command *commands)
+cmd_cdel(const char *e_line, command *commands)
 {
 	xmlNodePtr	db_node = NULL, db_node_tmp = NULL;
 	xmlChar		*cname = NULL;
+
+	char		*line = NULL;
 
 #ifndef _READLINE
 	int		e_count = 0;
 #endif
 
 
-	strtok(e_line, " ");		/* remove the command from the line */
+	line = strdup(e_line);
+
+	strtok(line, " ");		/* remove the command from the line */
 	cname = BAD_CAST strtok(NULL, " ");	/* assign the command's parameter */
 	if (!cname) {
 		puts(commands->usage);
+		free(line); line = NULL;
 		return;
 	}
 
 	db_node = find_keychain(cname);
+	free(line); line = NULL;
 	if (db_node) {
 		if (xmlUTF8Charcmp(xmlGetProp(keychain, BAD_CAST "name"),
 				   xmlGetProp(db_node, BAD_CAST "name")) == 0) {	/* don't allow to delete the current keychain. this saves us trouble. */
@@ -83,7 +89,7 @@ cmd_cdel(char *e_line, command *commands)
 #endif
 
 #ifndef _READLINE
-			e_line = (char *)el_gets(e, &e_count);
+			e_line = el_gets(e, &e_count);
 #else
 			e_line = readline("");
 #endif

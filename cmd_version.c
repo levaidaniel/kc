@@ -28,7 +28,7 @@
 
 
 void
-cmd_version(char *e_line, command *commands)
+cmd_version(const char *e_line, command *commands)
 {
 	printf("%s\n", VERSION);
 } /* cmd_version() */

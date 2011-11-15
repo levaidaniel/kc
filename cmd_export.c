@@ -33,18 +33,25 @@ extern xmlDocPtr	db;
 
 
 void
-cmd_export(char *e_line, command *commands)
+cmd_export(const char *e_line, command *commands)
 {
 	char		*export_filename = NULL;
 
+	char		*line = NULL;
 
-	strtok(e_line, " ");	/* remove the command from the line */
+
+	line = strdup(e_line);
+
+	strtok(line, " ");			/* remove the command from the line */
 	export_filename = strtok(NULL, " ");	/* assign the command's parameter */
 	if (!export_filename) {
 		puts(commands->usage);
+		free(line); line = NULL;
 		return;
 	}
 
 	if (xmlSaveFormatFileEnc(export_filename, db, "UTF-8", XML_SAVE_FORMAT) <= 0)
 		printf("failed to export to '%s'.\n", export_filename);
+
+	free(line); line = NULL;
 } /* cmd_export() */

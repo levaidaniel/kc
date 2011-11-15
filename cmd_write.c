@@ -35,7 +35,7 @@ extern BIO		*bio_chain;
 
 
 void
-cmd_write(char *e_line, command *commands)
+cmd_write(const char *e_line, command *commands)
 {
 	xmlSaveCtxtPtr		xml_save = NULL;
 	xmlBufferPtr		xml_buf = NULL;
@@ -56,7 +56,7 @@ cmd_write(char *e_line, command *commands)
 		BIO_reset(bio_chain);		/* we must reset the cipher BIO to work after subsequent calls to cmd_write() */
 		BIO_seek(bio_chain, 32);	/* seek after the IV and salt (both 16 bytes) */
 
-		ret = BIO_write(bio_chain, xml_buf->content, xml_buf->use);
+		ret = BIO_write(bio_chain, xml_buf->content, (int)xml_buf->use);
 		if (debug)
 			printf("wrote %d bytes\n", ret);
 		switch (ret) {

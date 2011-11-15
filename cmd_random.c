@@ -30,7 +30,7 @@
 
 
 void
-cmd_random(char *e_line, command *commands)
+cmd_random(const char *e_line, command *commands)
 {
 	int		length = 0;
 	char		*rand_str = NULL;
@@ -44,7 +44,7 @@ cmd_random(char *e_line, command *commands)
 		return;
 	}
 
-	rand_str = get_random_str(length, 1);
+	rand_str = get_random_str((size_t)length, 1);
 	if (!rand_str)
 		return;
 	printf("%s\n", rand_str);

@@ -34,7 +34,7 @@ extern char		dirty;
 
 
 void
-cmd_del(char *e_line, command *commands)
+cmd_del(const char *e_line, command *commands)
 {
 	xmlNodePtr	db_node = NULL, db_node_prev = NULL;
 	xmlChar		*key = NULL;

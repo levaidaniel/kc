@@ -33,16 +33,21 @@ extern xmlNodePtr	keychain;
 
 
 void
-cmd_c(char *e_line, command *commands)
+cmd_c(const char *e_line, command *commands)
 {
 	xmlNodePtr	db_node = NULL;
 	xmlChar		*cname = NULL;
 
+	char		*line = NULL;
 
-	strtok(e_line, " ");				/* remove the command from the line */
+
+	line = strdup(e_line);
+
+	strtok(line, " ");				/* remove the command from the line */
 	cname = BAD_CAST strtok(NULL, " ");		/* assign the command's parameter */
 	if (!cname) {
 		puts(commands->usage);
+		free(line); line = NULL;
 		return;
 	}
 
@@ -51,4 +56,6 @@ cmd_c(char *e_line, command *commands)
 		keychain = db_node;
 	else
 		puts("keychain not found.");
+
+	free(line); line = NULL;
 } /* cmd_c() */

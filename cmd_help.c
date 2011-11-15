@@ -33,14 +33,18 @@ extern command	*commands_first;
 
 
 void
-cmd_help(char *e_line, command *commands)
+cmd_help(const char *e_line, command *commands)
 {
 	char		*got_command = NULL;
+
+	char		*line = NULL;
 
 
 	commands = commands_first;
 
-	strtok(e_line, " ");		/* remove the command from the line */
+	line = strdup(e_line);
+
+	strtok(line, " ");			/* remove the command from the line */
 	got_command = strtok(NULL, " ");	/* assign the command's parameter */
 
 	if (got_command) {
@@ -71,4 +75,6 @@ cmd_help(char *e_line, command *commands)
 
 		puts("\nFor a command's description, use 'help <command name>'.");
 	}
+
+	free(line); line = NULL;
 } /* cmd_help() */

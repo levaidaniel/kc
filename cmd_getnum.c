@@ -44,12 +44,13 @@ extern HistEvent	eh_ev;
 
 
 void
-cmd_getnum(int idx, int space)
+cmd_getnum(int idx, size_t space)
 {
 	xmlNodePtr	db_node = NULL;
 	xmlChar		*key = NULL, *value = NULL, *value_nl = NULL, *line = NULL, *line_randomed = NULL, *tmp = NULL;
 
-	int		lines = 0, i = 0, erase_len = 0, value_len = 0, line_len = 0, line_randomed_len = 0;
+	int		lines = 0, i = 0, value_len = 0;
+	size_t		line_len = 0, line_randomed_len = 0, erase_len = 0;
 	char		rc = 0;
 	char		*rand_str = NULL;
 
@@ -106,7 +107,7 @@ cmd_getnum(int idx, int space)
 					return;
 				strlcat((char *)line_randomed, rand_str, line_randomed_len);
 				free(rand_str); rand_str = NULL;
-				for (i=0;i < line_len;i++) {
+				for (i=0;i < (int)line_len;i++) {
 					/* append a character from the line */
 					tmp = xmlUTF8Strsub(line, i, 1);
 					strlcat((char *)line_randomed, (const char *)tmp, line_randomed_len);
@@ -119,7 +120,7 @@ cmd_getnum(int idx, int space)
 					strlcat((char *)line_randomed, rand_str, line_randomed_len);
 					free(rand_str); rand_str = NULL;
 				}
-				line_randomed[line_randomed_len - 1] = '\0';
+				line_randomed[(long)(line_randomed_len - 1)] = '\0';
 
 				printf("%s", line_randomed);
 			} else {
@@ -143,7 +144,7 @@ cmd_getnum(int idx, int space)
 			erase_len =	strlen((const char *)key) + 3 +					/* add the key + "[" + "]" + " " */
 					(space ? line_len + line_len * space + space : line_len) +	/* add the random chars too */
 					(lines > 1 ? digit_length(idx) + digit_length(lines) + 4 : 0);	/* add the line number prefix too + "[" + "/" + "]" + " "  */
-			for (i=0; i < erase_len; i++)
+			for (i=0; i < (int)erase_len; i++)
 				putchar(' ');
 
 			printf("\r");
@@ -214,7 +215,8 @@ get_line(xmlChar *value_nl, int value_len, int idx)
 {
 	xmlChar	*line = NULL;
 
-	int	nl = 1, pos = 0, tmp = 0, line_len = 0;
+	int	nl = 1, pos = 0, tmp = 0;
+	size_t	line_len = 0;
 
 
 	/* find out the start position (pos) of the requested line number (idx) */
@@ -235,10 +237,10 @@ get_line(xmlChar *value_nl, int value_len, int idx)
 	tmp = 0;
 	line = malloc(line_len + 1); malloc_check(line);
 	/* copy out the requested line */
-	while (value_nl[pos] != '\n'  &&  value_nl[pos] != '\0'  &&  tmp < line_len) {
+	while (value_nl[pos] != '\n'  &&  value_nl[pos] != '\0'  &&  tmp < (int)line_len) {
 		line[tmp++] = value_nl[pos++];
 	}
-	line[line_len] = '\0';
+	line[(long)line_len] = '\0';
 
 	return(line);
 } /* get_line() */

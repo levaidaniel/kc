@@ -41,10 +41,12 @@ extern HistEvent	eh_ev;
 
 
 void
-cmd_new(char *e_line, command *commands)
+cmd_new(const char *e_line, command *commands)
 {
 	xmlNodePtr	db_node = NULL;
 	xmlChar		*key = NULL, *value = NULL;
+
+	char		*line = NULL;
 
 #ifndef _READLINE
 	int		e_count = 0;
@@ -58,28 +60,29 @@ cmd_new(char *e_line, command *commands)
 	}
 #endif
 
-	strtok(e_line, " ");				/* remove the command from the line */
+	line = strdup(e_line);
+
+	strtok(line, " ");				/* remove the command from the line */
 	key = xmlStrdup(BAD_CAST strtok(NULL, " "));	/* assign the command's first parameter (name) */
+	free(line); line = NULL;
 	if (!key) {					/* if we didn't get a name as a parameter */
 		strlcpy(prompt_context, "NEW key", sizeof(prompt_context));
 
 #ifndef _READLINE
-		e_line = (char *)el_gets(e, &e_count);
-
-		if (e_line)
-			e_line[strlen(e_line) - 1] = '\0';	/* remove the newline */
+		e_line = el_gets(e, &e_count);
 #else
 		e_line = readline(prompt_str());
 #endif
-		if (!e_line) {
+		if (e_line) {
+			key = xmlStrdup(BAD_CAST e_line);
+			key[xmlStrlen(key) - 1] = '\0';	/* remove the newline */
+		} else {
 			perror("input");
 #ifndef _READLINE
 			el_reset(e);
-			xmlFree(key); key = NULL;
 #endif
 			return;
-		} else
-			key = xmlStrdup(BAD_CAST e_line);
+		}
 	}
 	if (debug)
 		printf("new key is '%s'\n", key);
@@ -88,23 +91,21 @@ cmd_new(char *e_line, command *commands)
 	strlcpy(prompt_context, "NEW value", sizeof(prompt_context));
 
 #ifndef _READLINE
-	e_line = (char *)el_gets(e, &e_count);
-
-	if (e_line)
-		e_line[strlen(e_line) - 1] = '\0';	/* remove the newline */
+	e_line = el_gets(e, &e_count);
 #else
 	e_line = readline(prompt_str());
 #endif
-	if (!e_line) {
+	if (e_line) {
+		value = xmlStrdup(BAD_CAST e_line);
+		value[xmlStrlen(value) - 1] = '\0';	/* remove the newline */
+	} else {
 		perror("input");
 #ifndef _READLINE
 		el_reset(e);
 		xmlFree(key); key = NULL;
 #endif
 		return;
-	} else
-		value = xmlStrdup(BAD_CAST e_line);
-
+	}
 	if (debug)
 		printf("new value is '%s'\n", value);
 

@@ -42,10 +42,12 @@ extern HistEvent	eh_ev;
 
 
 void
-cmd_edit(char *e_line, command *commands)
+cmd_edit(const char *e_line, command *commands)
 {
 	xmlNodePtr	db_node = NULL, db_node_new = NULL;
 	xmlChar		*key = NULL, *value = NULL;
+
+	char		*line = NULL;
 
 #ifndef _READLINE
 	int		e_count = 0;
@@ -83,23 +85,26 @@ cmd_edit(char *e_line, command *commands)
 		el_push(e, (const char *)key);
 		xmlFree(key); key = NULL;
 
-		e_line = (char *)el_gets(e, &e_count);
-
-		if (e_line)
-			e_line[strlen(e_line) - 1] = '\0';	/* remove the newline */
+		e_line = el_gets(e, &e_count);
 #else
 		rl_pre_input_hook = (rl_hook_func_t *)_rl_push_buffer;
 		e_line = readline(prompt_str());
 		rl_pre_input_hook = NULL;
 #endif
-		if (!e_line) {
+		if (e_line) {
+			line = strdup(e_line);
+#ifndef _READLINE
+			line[(long)(strlen(line) - 1)] = '\0';	/* remove the newline */
+#endif
+			key = xmlStrdup(BAD_CAST line);
+			free(line); line = NULL;
+		} else {
 			perror("input");
 #ifndef _READLINE
 			el_reset(e);
 #endif
 			return;
-		} else
-			key = xmlStrdup(BAD_CAST e_line);
+		}
 
 
 		strlcpy(prompt_context, "EDIT value", sizeof(prompt_context));
@@ -114,24 +119,27 @@ cmd_edit(char *e_line, command *commands)
 		el_push(e, (const char *)value);
 		xmlFree(value); value = NULL;
 
-		e_line = (char *)el_gets(e, &e_count);
-
-		if (e_line)
-			e_line[strlen(e_line) - 1] = '\0';	/* remove the newline */
+		e_line = el_gets(e, &e_count);
 #else
 		rl_pre_input_hook = (rl_hook_func_t *)_rl_push_buffer;
 		e_line = readline(prompt_str());
 		rl_pre_input_hook = NULL;
 #endif
-		if (!e_line) {
+		if (e_line) {
+			line = strdup(e_line);
+#ifndef _READLINE
+			line[(long)(strlen(line) - 1)] = '\0';	/* remove the newline */
+#endif
+			value = xmlStrdup(BAD_CAST line);
+			free(line); line = NULL;
+		} else {
 			perror("input");
 #ifndef _READLINE
 			el_reset(e);
 #endif
 			xmlFree(key); key = NULL;
 			return;
-		} else
-			value = xmlStrdup(BAD_CAST e_line);
+		}
 
 
 		db_node_new = xmlNewChild(keychain, NULL, BAD_CAST "key", NULL);

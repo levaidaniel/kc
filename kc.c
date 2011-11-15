@@ -74,7 +74,8 @@ main(int argc, char *argv[])
 #ifndef _READLINE
 	int		e_count = 0;
 #endif
-	char		*e_line = NULL;
+	const char	*e_line = NULL;
+	char		*line = NULL;
 
 	BIO		*bio_file = NULL;
 	BIO		*bio_cipher = NULL;
@@ -521,25 +522,26 @@ main(int argc, char *argv[])
 
 	/* command loop */
 #ifndef _READLINE
-	e_line = strdup(el_gets(e, &e_count));
+	e_line = el_gets(e, &e_count);
 #else
 	e_line = readline(prompt_str());
 #endif
-	 while(e_line) {
+	while(e_line) {
 		if (strlen(e_line) > 0) {
+			line = strdup(e_line);
 #ifndef _READLINE
-			e_line[(long)(strlen(e_line) - 1)] = '\0';		/* remove the newline character from the end */
-			history(eh, &eh_ev, H_ENTER, e_line);
+			line[(long)(strlen(line) - 1)] = '\0';		/* remove the newline character from the end */
+			history(eh, &eh_ev, H_ENTER, line);
 #else
-			add_history(e_line);
+			add_history(line);
 #endif
-			cmd_match(e_line);
+			cmd_match(line);
 
-			free(e_line); e_line = NULL;
+			free(line); line = NULL;
 		}
 
 #ifndef _READLINE
-		e_line = strdup(el_gets(e, &e_count));
+		e_line = el_gets(e, &e_count);
 #else
 		e_line = readline(prompt_str());
 #endif
@@ -556,14 +558,17 @@ main(int argc, char *argv[])
 
 
 void
-cmd_match(char *e_line)
+cmd_match(const char *e_line)
 {
 	int	idx = -1, space = -1;
 	char	*line = NULL, *cmd = NULL;
 	command	*commands = commands_first;
 
 
-	line = strdup(e_line);
+	if (e_line)
+		line = strdup(e_line);
+	else
+		return;
 
 	/* special case, if only a number was entered,
 	   we display the appropriate entry, and if there
@@ -571,7 +576,7 @@ cmd_match(char *e_line)
 	sscanf(line, "%d %d", &idx, &space);
 	if (idx >= 0) {
 		if (space >= 0)
-			cmd_getnum(idx, space);
+			cmd_getnum(idx, (size_t)space);
 		else
 			cmd_getnum(idx, 0);
 	} else {
@@ -671,7 +676,7 @@ print_bio_chain(BIO *bio_chain)
 
 
 char *
-get_random_str(int length, char alnum)
+get_random_str(size_t length, char alnum)
 {
 	int		i = 0;
 	int		rnd_file = -1;
@@ -697,7 +702,7 @@ get_random_str(int length, char alnum)
 	tmp = malloc(1); malloc_check(tmp);
 
 	read(rnd_file, tmp, 1);
-	for (i=0; i < length; i++) {
+	for (i=0; i < (int)length; i++) {
 		if (alnum)	/* only alphanumeric was requested */
 			while (	(*tmp < 65  ||  *tmp > 90)  &&
 				(*tmp < 97  ||  *tmp > 122)  &&
@@ -726,7 +731,7 @@ get_random_str(int length, char alnum)
 
 	free(tmp); tmp = NULL;
 
-	rnd_str[length] = '\0';
+	rnd_str[(long)length] = '\0';
 
 	close(rnd_file);
 

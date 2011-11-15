@@ -37,7 +37,7 @@ extern xmlNodePtr	keychain;
 
 
 void
-cmd_searchre(char *e_line, command *commands)
+cmd_searchre(const char *e_line, command *commands)
 {
 #ifdef	_HAVE_PCRE
 	xmlNodePtr	db_node = NULL, search_keychain = NULL;
@@ -72,12 +72,12 @@ cmd_searchre(char *e_line, command *commands)
 
 	if (!pattern) {
 		puts(commands->usage);
-		free(line);
+		free(line); line = NULL;
 		return;
 	}
-	if (strlen(pattern) <= 0) {
+	if (strlen(pattern) == 0) {
 		puts(commands->usage);
-		free(line);
+		free(line); line = NULL;
 		return;
 	}
 
@@ -85,7 +85,7 @@ cmd_searchre(char *e_line, command *commands)
 	re = pcre_compile(pattern, PCRE_UTF8, &error, &erroffset, NULL);
 	if (!re) {
 		printf("error in pattern at %d: (%s)\n", erroffset, error);
-		free(line);
+		free(line); line = NULL;
 		return;
 	}
 
@@ -96,7 +96,7 @@ cmd_searchre(char *e_line, command *commands)
 
 		if (!error) {
 			perror("pcre_study()");
-			free(line);
+			free(line); line = NULL;
 			return;
 		}
 	}
@@ -160,7 +160,7 @@ cmd_searchre(char *e_line, command *commands)
 	if (!hits)
 		printf("'%s' not found.\n", pattern);
 
-	free(line);
+	free(line); line = NULL;
 #else
 	puts("regexp support was not compiled in.");
 #endif

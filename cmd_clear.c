@@ -28,7 +28,7 @@
 
 
 void
-cmd_clear(char *e_line, command *commands)
+cmd_clear(const char *e_line, command *commands)
 {
 	int		count = 0, i = 0, j = 0;
 

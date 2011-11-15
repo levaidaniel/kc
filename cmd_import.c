@@ -35,18 +35,23 @@ extern char		dirty;
 
 
 void
-cmd_import(char *e_line, command *commands)
+cmd_import(const char *e_line, command *commands)
 {
 	xmlDocPtr	db_new = NULL;
 	xmlNodePtr	db_root = NULL;
 
 	char		*import_filename = NULL;
 
+	char		*line = NULL;
 
-	strtok(e_line, " ");		/* remove the command from the line */
+
+	line = strdup(e_line);
+
+	strtok(line, " ");			/* remove the command from the line */
 	import_filename = strtok(NULL, " ");	/* assign the command's parameter */
 	if (!import_filename) {
 		puts(commands->usage);
+		free(line); line = NULL;
 		return;
 	}
 
@@ -63,4 +68,6 @@ cmd_import(char *e_line, command *commands)
 		dirty = 1;
 	} else
 		printf("failed to import from '%s'.\n", import_filename);
+
+	free(line); line = NULL;
 } /* cmd_import() */

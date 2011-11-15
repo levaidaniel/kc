@@ -33,7 +33,7 @@ extern xmlNodePtr	keychain;
 
 
 void
-cmd_search(char *e_line, command *commands)
+cmd_search(const char *e_line, command *commands)
 {
 	xmlNodePtr	db_node = NULL, search_keychain = NULL;
 	xmlChar		*pattern = NULL, *key = NULL;
@@ -43,8 +43,12 @@ cmd_search(char *e_line, command *commands)
 	char		chain = 0, searchall = 0;
 	int		hits = 0, idx = 0;
 
+	char		*line = NULL;
 
-	cmd = strtok(e_line, " ");		/* get the command name */
+
+	line = strdup(e_line);
+
+	cmd = strtok(line, " ");		/* get the command name */
 	if (strncmp(cmd, "*", 1) == 0) {
 		searchall = 1;
 		cmd++;
@@ -57,6 +61,7 @@ cmd_search(char *e_line, command *commands)
 	pattern = BAD_CAST strtok(NULL, " ");	/* assign the command's parameter */
 	if (!pattern) {
 		puts(commands->usage);
+		free(line); line = NULL;
 		return;
 	}
 
@@ -119,4 +124,6 @@ cmd_search(char *e_line, command *commands)
 
 	if (!hits)
 		printf("'%s' not found.\n", pattern);
+
+	free(line); line = NULL;
 } /* cmd_search() */

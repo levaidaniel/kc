@@ -41,18 +41,21 @@ extern HistEvent	eh_ev;
 
 
 void
-cmd_cnew(char *e_line, command *commands)
+cmd_cnew(const char *e_line, command *commands)
 {
 	xmlNodePtr	db_node = NULL;
 	xmlChar		*cname = NULL;
 
+	char		*line = NULL;
 #ifndef _READLINE
 	int		e_count = 0;
 #endif
 
+	line = strdup(e_line);
 
-	strtok(e_line, " ");			/* remove the command from the line */
+	strtok(line, " ");			/* remove the command from the line */
 	cname = BAD_CAST strtok(NULL, " ");	/* assign the command's parameter */
+	free(line); line = NULL;
 	if (!cname) {		/* if we didn't get a name as a parameter */
 		strlcpy(prompt_context, "NEW keychain", sizeof(prompt_context));
 
@@ -62,21 +65,25 @@ cmd_cnew(char *e_line, command *commands)
 			perror("el_set(EL_HIST)");
 		}
 
-		e_line = (char *)el_gets(e, &e_count);
+		e_line = el_gets(e, &e_count);
 
-		if (e_line)
-			e_line[strlen(e_line) - 1] = '\0';	/* remove the newline */
 #else
 		e_line = readline(prompt_str());
 #endif
-		if (!e_line) {
+		if (e_line) {
+			line = strdup(e_line);
+#ifndef _READLINE
+			line[(long)(strlen(line) - 1)] = '\0';		/* remove the newline */
+#endif
+		} else {
 			perror("input");
 #ifndef _READLINE
 			el_reset(e);
 #endif
 			return;
-		} else
-			cname = BAD_CAST e_line;
+		}
+
+		cname = BAD_CAST line;
 
 #ifndef _READLINE
 		/* re-enable history */
@@ -108,4 +115,6 @@ cmd_cnew(char *e_line, command *commands)
 	} else {
 		printf("'%s' already exists!\n", cname);
 	}
+
+	free(line); line = NULL;
 } /* cmd_cnew() */

@@ -34,7 +34,7 @@ extern xmlNodePtr	keychain;
 
 
 void
-cmd_list(char *e_line, command *commands)
+cmd_list(const char *e_line, command *commands)
 {
 	xmlNodePtr	db_node = NULL;
 	xmlChar		*key = NULL;

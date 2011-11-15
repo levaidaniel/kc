@@ -42,24 +42,30 @@ extern HistEvent	eh_ev;
 
 
 void
-cmd_cren(char *e_line, command *commands)
+cmd_cren(const char *e_line, command *commands)
 {
 	xmlNodePtr	db_node = NULL;
 	xmlChar		*cname = NULL;
+
+	char		*line = NULL;
 
 #ifndef _READLINE
 	int		e_count = 0;
 #endif
 
 
-	strtok(e_line, " ");	/* remove the command from the line */
+	line = strdup(e_line);
+
+	strtok(line, " ");	/* remove the command from the line */
 	cname = BAD_CAST strtok(NULL, " ");	/* assign the command's parameter */
 	if (!cname) {
 		puts(commands->usage);
+		free(line); line = NULL;
 		return;
 	}
 
 	db_node = find_keychain(cname);
+	free(line); line = NULL;
 	if (db_node) {
 #ifndef _READLINE
 		/* disable history temporarily */
@@ -80,23 +86,24 @@ cmd_cren(char *e_line, command *commands)
 		el_push(e, (const char *)cname);
 		xmlFree(cname); cname = NULL;
 
-		e_line = (char *)el_gets(e, &e_count);
-
-		if (e_line)
-			e_line[strlen(e_line) - 1] = '\0';	/* remove the newline */
+		e_line = el_gets(e, &e_count);
 #else
 		rl_pre_input_hook = (rl_hook_func_t *)_rl_push_buffer;
 		e_line = readline(prompt_str());
 		rl_pre_input_hook = NULL;
 #endif
-		if (!e_line) {
+		if (e_line) {
+			line = strdup(e_line);
+#ifndef _READLINE
+			line[(long)(strlen(line) - 1)] = '\0';	/* remove the newline */
+#endif
+			cname = BAD_CAST line;
+		} else {
 			perror("input");
 #ifndef _READLINE
 			el_reset(e);
 #endif
 			return;
-		} else {
-			cname = BAD_CAST e_line;
 		}
 
 
@@ -115,4 +122,6 @@ cmd_cren(char *e_line, command *commands)
 	} else {
 		printf("keychain '%s' not found.\n", cname);
 	}
+
+	free(line); line = NULL;
 } /* cmd_cren() */

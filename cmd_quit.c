@@ -42,7 +42,7 @@ extern HistEvent	eh_ev;
 
 
 void
-cmd_quit(char *e_line, command *commands)
+cmd_quit(const char *e_line, command *commands)
 {
 #ifndef _READLINE
 	int		e_count = 0;
@@ -64,7 +64,7 @@ cmd_quit(char *e_line, command *commands)
 #endif
 
 #ifndef _READLINE
-		e_line = (char *)el_gets(e, &e_count);
+		e_line = el_gets(e, &e_count);
 #else
 		e_line = readline("Do you want to write the changes? <yes/no> ");
 #endif
