@@ -40,7 +40,7 @@
 
 void print_bio_chain(BIO *);
 #ifndef _READLINE
-char el_tab_complete(EditLine *, int);
+char el_tab_complete(EditLine *);
 #else
 char **rl_tab_complete(const char *, int, int);
 char *cmd_generator(const char *, int);
@@ -85,10 +85,9 @@ main(int argc, char *argv[])
 	unsigned int	pos = 0;
 	unsigned char	key[128];
 	char		*pass = NULL;
-	const unsigned char	salt[17];
-	const unsigned char	iv[17];
+	unsigned char	salt[17], iv[17];
 	void		*rbuf = NULL;
-	int		pass_maxlen = 64;
+	size_t		pass_maxlen = 64;
 	char		pass_prompt[15];
 	char		*pass_filename = NULL;
 	int		pass_file = -1;
@@ -102,7 +101,8 @@ main(int argc, char *argv[])
 
 	xmlNodePtr	db_root = NULL, db_node = NULL;
 
-	int		c = 0, len = 0;
+	int		c = 0;
+	size_t		len = 0;
 
 
 	debug = 0;
@@ -193,13 +193,13 @@ main(int argc, char *argv[])
 		if (ret < 0)
 			perror("read(database file)");
 		else
-			strlcpy((char *)iv, (char *)rbuf, sizeof(iv));
+			strlcpy((char *)iv, (const char *)rbuf, sizeof(iv));
 
 		ret = read(db_file, rbuf, 16);
 		if (ret < 0)
 			perror("read(database file)");
 		else
-			strlcpy((char *)salt, (char *)rbuf, sizeof(salt));
+			strlcpy((char *)salt, (const char *)rbuf, sizeof(salt));
 
 		free(rbuf);
 
@@ -260,7 +260,7 @@ main(int argc, char *argv[])
 				perror("read(password file)");
 				break;
 			} else
-				pos += ret;
+				pos += (unsigned int)ret;
 		}
 		pass[pos] = '\0';
 		if (strrchr(pass, '\n'))
@@ -311,7 +311,7 @@ main(int argc, char *argv[])
 	bio_chain = BIO_push(bio_cipher, bio_chain);
 
 	/* generate a proper key for encoding/decoding BIO */
-	PKCS5_PBKDF2_HMAC_SHA1(pass, strlen(pass), salt, sizeof(salt), 5000, 128, key);
+	PKCS5_PBKDF2_HMAC_SHA1(pass, (int)strlen(pass), salt, sizeof(salt), 5000, 128, key);
 
 	/* turn on decoding */
 	BIO_set_cipher(bio_cipher, EVP_aes_256_cbc(), key, iv, 0);
@@ -338,8 +338,8 @@ main(int argc, char *argv[])
 			db_buf = realloc(db_buf, db_buf_size); malloc_check(db_buf);
 		}
 
-		ret = BIO_read(bio_chain, db_buf + pos, db_buf_size - pos);
-		pos += ret;
+		ret = BIO_read(bio_chain, db_buf + pos, (int)(db_buf_size - pos));
+		pos += (unsigned int)ret;
 		switch (ret) {
 			case 0:
 			break;
@@ -408,9 +408,9 @@ main(int argc, char *argv[])
 		cmd_write(NULL, NULL);
 	} else {
 		if (debug)
-			db = xmlReadMemory(db_buf, pos, NULL, "UTF-8", XML_PARSE_NONET | XML_PARSE_RECOVER);
+			db = xmlReadMemory(db_buf, (int)pos, NULL, "UTF-8", XML_PARSE_NONET | XML_PARSE_RECOVER);
 		else
-			db = xmlReadMemory(db_buf, pos, NULL, "UTF-8", XML_PARSE_NONET | XML_PARSE_NOERROR | XML_PARSE_NOWARNING | XML_PARSE_RECOVER);
+			db = xmlReadMemory(db_buf, (int)pos, NULL, "UTF-8", XML_PARSE_NONET | XML_PARSE_NOERROR | XML_PARSE_NOWARNING | XML_PARSE_RECOVER);
 		if (!db) {
 			puts("could not parse XML document!");
 			quit(EXIT_FAILURE);
@@ -520,30 +520,35 @@ main(int argc, char *argv[])
 
 
 	/* command loop */
-	do {
 #ifndef _READLINE
-		e_line = (char *)el_gets(e, &e_count);
+	e_line = strdup(el_gets(e, &e_count));
+#else
+	e_line = readline(prompt_str());
+#endif
+	 while(e_line) {
+		if (strlen(e_line) > 0) {
+#ifndef _READLINE
+			e_line[(long)(strlen(e_line) - 1)] = '\0';		/* remove the newline character from the end */
+			history(eh, &eh_ev, H_ENTER, e_line);
+#else
+			add_history(e_line);
+#endif
+			cmd_match(e_line);
+
+			free(e_line); e_line = NULL;
+		}
+
+#ifndef _READLINE
+		e_line = strdup(el_gets(e, &e_count));
 #else
 		e_line = readline(prompt_str());
 #endif
+	}
 
-		if (e_line) {
-			if (strlen(e_line) > 0) {
 #ifndef _READLINE
-				e_line[strlen(e_line) - 1] = '\0';		/* remove the newline character from the end */
-				history(eh, &eh_ev, H_ENTER, e_line);
-#else
-				add_history(e_line);
+	el_reset(e);
 #endif
-				cmd_match(e_line);
-			}
-		} else {
-#ifndef _READLINE
-			el_reset(e);
-#endif
-			quit(EXIT_SUCCESS);
-		}
-	} while(1);
+	quit(EXIT_SUCCESS);
 
 
 	return(0);
@@ -604,26 +609,23 @@ cmd_match(char *e_line)
 
 #ifndef _READLINE
 const char *
-el_prompt_null(EditLine *e)
+el_prompt_null(void)
 {
 	return("");
 }
+#endif
 
 const char *
-prompt_str(EditLine *e)
-#else
-const char *
 prompt_str(void)
-#endif
 {
-	unsigned long	prompt_len = 0;
+	size_t		prompt_len = 0;
 	static char	*prompt = NULL;
 	xmlChar		*cname = NULL;
 
 
 	cname = xmlGetProp(keychain, BAD_CAST "name");
 
-	prompt_len = xmlStrlen(cname) + 2 + sizeof(prompt_context) + 2 + 1;
+	prompt_len = (size_t)xmlStrlen(cname) + 2 + sizeof(prompt_context) + 2 + 1;
 	prompt = realloc(prompt, prompt_len); malloc_check(prompt);
 
 	snprintf(prompt, prompt_len, "%s%% %s> ", cname, prompt_context);
@@ -691,7 +693,7 @@ get_random_str(int length, char alnum)
 	}
 
 
-	rnd_str = malloc(length + 1); malloc_check(rnd_str);
+	rnd_str = malloc((size_t)length + 1); malloc_check(rnd_str);
 	tmp = malloc(1); malloc_check(tmp);
 
 	read(rnd_file, tmp, 1);
@@ -735,12 +737,14 @@ get_random_str(int length, char alnum)
 
 #ifndef _READLINE
 char
-el_tab_complete(EditLine *e, int ch)
+el_tab_complete(EditLine *e)
 {
 	char		*line_buf = NULL, *match = NULL;
 	const LineInfo	*el_lineinfo = NULL;
 	command		*commands = commands_first;
-	int		hits = 0, match_len = 0, line_buf_len = 0;
+	int		hits = 0;
+	size_t		match_len = 0;
+	long		line_buf_len = 0;
 
 
 	el_lineinfo = el_line(e);
@@ -750,8 +754,8 @@ el_tab_complete(EditLine *e, int ch)
 	 * because el_lineinfo->buffer is not NUL terminated
 	 */
 	line_buf_len = el_lineinfo->lastchar - el_lineinfo->buffer;
-	line_buf = malloc(line_buf_len + 1); malloc_check(line_buf);
-	memcpy(line_buf, el_lineinfo->buffer, line_buf_len);
+	line_buf = malloc((size_t)line_buf_len + 1); malloc_check(line_buf);
+	memcpy(line_buf, el_lineinfo->buffer, (size_t)line_buf_len);
 	line_buf[line_buf_len] = '\0';
 
 
@@ -763,7 +767,7 @@ el_tab_complete(EditLine *e, int ch)
 	/* initialize 'match' for use with strlcat() */
 	match = calloc(1, 1); malloc_check(match);
 	do {
-		if (strncmp(line_buf, commands->name, line_buf_len) == 0) {
+		if (strncmp(line_buf, commands->name, (size_t)line_buf_len) == 0) {
 			hits++;
 
 			match_len += strlen(commands->name) + 1 + 1;
@@ -778,7 +782,7 @@ el_tab_complete(EditLine *e, int ch)
 		case 0:
 		break;
 		case 1:
-			el_push(e, match + strlen(line_buf));	/* print the commands remaining characters (remaining: the ones without the part (at the beginning) that we've entered already) */
+			el_push(e, match + (int)strlen(line_buf));	/* print the commands remaining characters (remaining: the ones without the part (at the beginning) that we've entered already) */
 		break;
 		default:
 			printf("\n%s\n", match);	/* more than one match */

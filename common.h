@@ -32,11 +32,9 @@
 
 
 #ifndef _READLINE
-const char *el_prompt_null(EditLine *);
-const char *prompt_str(EditLine *);
-#else
-const char *prompt_str(void);
+const char *el_prompt_null(void);
 #endif
+const char *prompt_str(void);
 int malloc_check(void *);
 char *get_random_str(int, char);
 void quit(int);
