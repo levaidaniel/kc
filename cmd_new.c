@@ -75,7 +75,9 @@ cmd_new(const char *e_line, command *commands)
 #endif
 		if (e_line) {
 			key = xmlStrdup(BAD_CAST e_line);
+#ifndef _READLINE
 			key[xmlStrlen(key) - 1] = '\0';	/* remove the newline */
+#endif
 		} else {
 			perror("input");
 #ifndef _READLINE
@@ -97,7 +99,9 @@ cmd_new(const char *e_line, command *commands)
 #endif
 	if (e_line) {
 		value = xmlStrdup(BAD_CAST e_line);
+#ifndef _READLINE
 		value[xmlStrlen(value) - 1] = '\0';	/* remove the newline */
+#endif
 	} else {
 		perror("input");
 #ifndef _READLINE
