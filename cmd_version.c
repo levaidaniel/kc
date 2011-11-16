@@ -31,4 +31,7 @@ void
 cmd_version(const char *e_line, command *commands)
 {
 	printf("%s\n", VERSION);
+	puts("kc was written by Daniel LEVAI <leva@ecentrum.hu>");
+	puts("Source, information, bugs:");
+	puts("http://keychain.googlecode.com");
 } /* cmd_version() */
