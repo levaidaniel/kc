@@ -99,17 +99,18 @@ cmd_cnew(const char *e_line, command *commands)
 	if (!db_node) {
 		/* XXX reloading a saved document inserts a 'text' element between each visible node (why?)
 		 * so we must reproduce this */
-		db_node = xmlNewText(BAD_CAST "  ");
-		xmlAddChild(keychain->parent, db_node);
+		xmlAddChild(keychain->parent, xmlNewText(BAD_CAST "\t"));
 
 		db_node = xmlNewNode(NULL, BAD_CAST "keychain");
 		xmlSetProp(db_node, BAD_CAST "name", cname);
 		xmlAddChild(keychain->parent, db_node);
 
+		/* make the XML document prettttyyy */
+		xmlAddChild(db_node, xmlNewText(BAD_CAST "\n\t"));
+
 		/* XXX reloading a saved document inserts a 'text' element between each visible node (why?)
 		 * so we must reproduce this */
-		db_node = xmlNewText(BAD_CAST "\n");
-		xmlAddChild(keychain->parent, db_node);
+		xmlAddChild(keychain->parent, xmlNewText(BAD_CAST "\n"));
 
 		dirty = 1;
 	} else {

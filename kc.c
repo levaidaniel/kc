@@ -100,7 +100,7 @@ main(int argc, char *argv[])
 	char		*db_filename = NULL;
 	char		*env_home = NULL;
 
-	xmlNodePtr	db_root = NULL, db_node = NULL;
+	xmlNodePtr	db_root = NULL;
 
 	int		c = 0;
 	size_t		len = 0;
@@ -420,8 +420,7 @@ main(int argc, char *argv[])
 		}
 		xmlDocSetRootElement(db, db_root);
 
-		db_node = xmlNewText(BAD_CAST "\n  ");
-		xmlAddChild(db_root, db_node);
+		xmlAddChild(db_root, xmlNewText(BAD_CAST "\n\t"));
 
 		keychain = xmlNewNode(NULL, BAD_CAST "keychain");	/* the first keychain ... */
 		if (!keychain) {
@@ -431,8 +430,9 @@ main(int argc, char *argv[])
 		xmlAddChild(db_root, keychain);
 		xmlNewProp(keychain, BAD_CAST "name", BAD_CAST "default");	/* ... its name is "default" */
 
-		db_node = xmlNewText(BAD_CAST "\n");
-		xmlAddChild(db_root, db_node);
+		xmlAddChild(keychain, xmlNewText(BAD_CAST "\n\t"));
+
+		xmlAddChild(db_root, xmlNewText(BAD_CAST "\n"));
 
 		/* write the initial empty XML doc to the file */
 		cmd_write(NULL, NULL);
@@ -556,7 +556,7 @@ main(int argc, char *argv[])
 #else
 	e_line = readline(prompt_str());
 #endif
-	while(e_line) {
+	while (e_line) {
 		if (strlen(e_line) > 0) {
 			line = strdup(e_line);
 #ifndef _READLINE

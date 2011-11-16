@@ -89,8 +89,14 @@ cmd_copy(const char *e_line, command *commands)
 
 
 		/* add the entry to the destination keychain */
-		xmlAddChild(db_node_c, xmlNewText(BAD_CAST "\n    "));
+		/* make the XML document prettttyyy */
+		xmlAddChild(db_node_c, xmlNewText(BAD_CAST "\t"));
+
 		xmlAddChild(db_node_c, db_node);
+
+		/* make the XML document prettttyyy */
+		xmlAddChild(db_node_c, xmlNewText(BAD_CAST "\n\t"));
+
 
 		dirty = 1;
 	}

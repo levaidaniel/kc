@@ -125,8 +125,7 @@ cmd_new(const char *e_line, command *commands)
 
 	/* XXX reloading a saved document inserts a 'text' element between each visible node (why?)
 	 * so we must reproduce this */
-	db_node = xmlNewText(BAD_CAST "\n    ");
-	xmlAddChild(keychain, db_node);
+	xmlAddChild(keychain, xmlNewText(BAD_CAST "\t"));
 
 	/* add new element */
 	db_node = xmlNewChild(keychain, NULL, BAD_CAST "key", NULL);
@@ -134,6 +133,9 @@ cmd_new(const char *e_line, command *commands)
 	xmlNewProp(db_node, BAD_CAST "value", value);
 	xmlFree(key); key = NULL;
 	xmlFree(value); value = NULL;
+
+	/* make the XML document prettttyyy */
+	xmlAddChild(keychain, xmlNewText(BAD_CAST "\n\t"));
 
 	dirty = 1;
 } /* cmd_new() */

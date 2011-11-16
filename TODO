@@ -1,0 +1,2 @@
+copy should only copy and not unlink
+move should unlink too, but it should be the same function (cmd_copy()) that is being called.

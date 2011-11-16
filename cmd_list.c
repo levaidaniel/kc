@@ -63,8 +63,10 @@ cmd_list(const char *e_line, command *commands)
 
 			db_node = db_node->next;
 		}
-	} else
-		puts("empty keychain.");
+
+		if (idx == 0)
+			puts("empty keychain.");
+	}
 
 	if (debug)
 		printf("#END\n");
