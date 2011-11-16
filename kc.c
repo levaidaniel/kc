@@ -449,7 +449,10 @@ main(int argc, char *argv[])
 		db_root = xmlDocGetRootElement(db);
 		if (!db_root) {
 			puts("Could not find root node!");
-			puts("If you have specified 'cfb128' or 'ofb' for chipher mode, this could also mean that either you have entered a wrong password for the database or specified a cipher mode other than the database was encrypted with!");
+			puts("If you have specified 'cfb128' or 'ofb' for chipher mode, this could\n"
+				"also mean that either you have entered a wrong password for the\n"
+				"database or specified a cipher mode other than the database was\n"
+				"encrypted with!");
 			quit(EXIT_FAILURE);
 		}
 		if (!db_root->children) {
@@ -870,9 +873,9 @@ void
 version(void)
 {
 	printf("%s\n", VERSION);
-	puts("kc was written by Daniel LEVAI <leva@ecentrum.hu>");
-	puts("Source, information, bugs:");
-	puts("http://keychain.googlecode.com");
+	puts("kc was written by Daniel LEVAI <leva@ecentrum.hu>\n"
+		"Source, information, bugs:\n"
+		"http://keychain.googlecode.com");
 } /* help */
 
 void

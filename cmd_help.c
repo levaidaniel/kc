@@ -58,22 +58,22 @@ cmd_help(const char *e_line, command *commands)
 		if (!commands)
 			printf("unknown command: '%s'\n", got_command);
 	} else {
-		printf("\nCommands:\n\n");
-
-		puts("[Name]     -    [Usage]\n");
+		puts("\nCommands:\n"
+			"[Name]     -    [Usage]\n");
 
 		while (commands) {
 			printf("%-10s - \t%s\n", commands->name, commands->usage);
 
 			commands = commands->next;
 		}
-		puts("");
-		printf("%-10s - \t%s\n", "<number>", "<number> [space]");
-		puts("Entering only a number in the command line will display the entry with the given index. You can quit from the display with 'q'.");
-		puts("By specifying another number after the index, that many random characters will be inserted between the value's characters.");
-		puts("You can navigate through a multiline value's lines with keys j/k, n/p, f/b, +/-, <SPACE>, <ENTER>, <BACKSPACE>.");
-
-		puts("\nFor a command's description, use 'help <command name>'.");
+		printf("\n%-10s - \t<number> [space]\n", "<number>");
+		puts("\nEntering only a number in the command line will display the entry with\n"
+			"the given index. You can quit from the display with 'q'.\n"
+			"\nBy specifying another number (space) after the index, that many random\n"
+			"characters will be inserted between the value's characters.\n"
+			"\nYou can navigate through a multiline value's lines with keys j/k, n/p,\n"
+			"f/b, +/-, <SPACE>, <ENTER>, <BACKSPACE>.\n"
+			"\nFor a command's description, use 'help <command name>'.");
 	}
 
 	free(line); line = NULL;

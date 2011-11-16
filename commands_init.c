@@ -201,7 +201,7 @@ commands_init(command **commands)
 
 	(*commands)->name = "help";
 	(*commands)->usage = "help [command]";
-	(*commands)->help = "Command list. If a command name is given as parameter, describe it.";
+	(*commands)->help = "Command list. If a command name is given as a parameter, describe it.";
 	(*commands)->fn = cmd_help;
 
 	(*commands)->next = NULL;

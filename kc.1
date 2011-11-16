@@ -35,24 +35,116 @@
 The
 .Nm
 utility is a console based username and password management application using an encrypted XML document as its database.
-.Sh PARAMETERS
-.Bl -tag -offset ||| -width |
-.It Cm -k
-Specify a non-default database file. The default is ~/.kc/default.
-.It Cm -p
-Read password from file.
-.It Cm -m
-Cipher mode to use. You can choose from 'cbc' (the default), 'cfb128' or 'ofb'.
-.It Cm -b
-Batch mode. Disable some features to enable commands from standard input.
-.It Cm -v
-Display version.
-.It Cm -h
-Display help.
-.El
+.Pp
+A database file can contain multiple keychains, and keychains in turn can contain multiple keys (usernames if you like) and values (passwords if you like).
 .Pp
 After starting
 .Nm
 the
 .Cm help
-command shows the available commands, and usage information for them. The CLI supports tab-completion for commands.
+command shows the available commands, and usage information for them.
+.Pp
+The CLI supports tab-completion for commands.
+.Sh PARAMETERS
+.Bl -tag -offset ||| -width |
+.It Fl k
+Specify a non-default database file. The default is ~/.kc/default.
+.It Fl p
+Read password from file.
+.It Fl m
+Cipher mode to use. You can choose from 'cbc' (the default), 'cfb128' or 'ofb'.
+.It Fl b
+Batch mode. Disable some features to enable commands from standard input.
+.It Fl v
+Display version.
+.It Fl h
+Display help.
+.El
+.Sh COMMANDS
+.Bl -tag -offset ||| -width |
+.It Cm new Op name
+Create a new key in the current keychain. If
+.Ar name
+is specified it will be the key's name, otherwise prompt for that too.
+.It Cm list
+List the keys in the current keychain. Every key gets prefixed by its index number.
+.It Cm edit Ar index
+Edit a key in the current keychain.
+.Ar index
+is the key's index number in the current keychain.
+.It Cm search Ar string
+Search for
+.Ar string
+in key names in the current keychain.
+If the
+.Cm search
+command is prefixed by a '*' (eg.: *search) then search in every keychain in the current database.
+.It Cm / Ar pattern
+Search for
+.Ar pattern
+regular expression in key names in the current keychain.
+If the
+.Cm /
+command is prefixed by a '*' (eg.: */) then search in every keychain in the current database.
+.It Cm c Ar keychain
+Change the current keychain.
+.Ar keychain
+can be an index number or the keychain's name.
+.It Cm cdel Ar keychain
+Delete a keychain.
+.Ar keychain
+can be an index number or the keychain's name.
+.It Cm clear Op count
+Emulate a screen clearing. Scrolls 50 lines by default, which can be multiplied by
+.Ar count
+times if specified.
+.It Cm clist
+List keychains in the current database. Every keychain gets prefixed by its index number.
+.It Cm cnew Op name
+Create a new keychain. If
+.Ar name
+is not given then prompt for one.
+.It Cm copy Ar index Ar keychain
+Copy a key in the current keychain to another keychain.
+.Ar index
+is the key's index to copy and
+.Ar keychain
+is the destination keychain's index number or name.
+.It Cm cren Ar keychain
+Rename a keychain.
+.Ar keychain
+can be an index number or the keychain's name.
+.It Cm del Ar index
+Delete a key from the current keychain.
+.Ar index
+is the key's index number in the current keychain.
+.It Cm export Ar filename
+Export the current database to the XML file named
+.Ar filename
+.It Cm help Op command
+Print application help or describe a
+.Ar command
+.It Cm import Ar filename
+Import a database from the XML file named
+.Ar filename
+It must be a properly
+.Cm exported 
+XML document.
+.Em NOTE
+that the current database will be overwritten if saved.
+.It Cm quit
+Quit the program. If the database is modified, then ask if it should be saved.
+.It Cm random Op length
+Print a random character with
+.Ar length
+length. The default
+.Ar length
+is 8.
+.It Cm version
+Display the program version.
+.It Cm write
+Save the current database.
+.El
+.Sh AUTHOR
+.Nm
+was written by Daniel LEVAI <leva@ecentrum.hu>.
