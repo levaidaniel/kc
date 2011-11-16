@@ -785,6 +785,7 @@ el_tab_complete(EditLine *e)
 
 	switch (hits) {
 		case 0:
+			printf("\a");			/* no match */
 		break;
 		case 1:
 			el_push(e, match + (int)strlen(line_buf));	/* print the command's remaining characters (remaining: the ones without the part (at the beginning) that we've entered already) */
