@@ -26,8 +26,9 @@
 .Sh SYNOPSIS
 .Nm kc
 .Op Fl k Ar database file
-.Op Fl b
 .Op Fl p Ar password file
+.Op Fl m Ar cipher mode
+.Op Fl b
 .Op Fl v
 .Op Fl h
 .Sh DESCRIPTION
@@ -38,10 +39,12 @@ utility is a console based keychain application, using an encrypted XML database
 .Bl -tag -offset ||| -width |
 .It Cm -k
 Specify a non-default database file. The default is ~/.kc/default.
-.It Cm -b
-Batch mode. Disable some features to enable commands from standard input.
 .It Cm -p
 Read password from password file.
+.It Cm -m
+Cipher mode to use. You can choose from 'cbc' (the default), 'cfb128' or 'ofb'.
+.It Cm -b
+Batch mode. Disable some features to enable commands from standard input.
 .It Cm -v
 Display version.
 .It Cm -h

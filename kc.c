@@ -56,8 +56,7 @@ xmlNodePtr	keychain = NULL;
 
 int		db_file = -1;
 
-char		dirty = 0;
-char		batchmode = 0;
+char		dirty = 0, batchmode = 0;
 
 #ifndef _READLINE
 	EditLine	*e = NULL;
@@ -93,6 +92,7 @@ main(int argc, char *argv[])
 	char		*pass_filename = NULL;
 	int		pass_file = -1;
 	size_t		pass_size = 128;
+	char		*cipher_mode = "cbc";
 
 	struct stat	st;
 	const char	*default_db_dir = ".kc";
@@ -107,28 +107,33 @@ main(int argc, char *argv[])
 
 
 	debug = 0;
-	while ((c = getopt(argc, argv, "k:bp:vhd")) != -1)
+	while ((c = getopt(argc, argv, "k:p:m:bvhd")) != -1)
 		switch (c) {
 			case 'k':
 				db_filename = optarg;
 			break;
-			case 'b':
-				batchmode = 1;
-			break;
 			case 'p':
 				pass_filename = optarg;
 			break;
+			case 'm':
+				cipher_mode = optarg;
+			break;
+			case 'b':
+				batchmode = 1;
+			break;
 			case 'v':
-				printf("%s\n", VERSION);
+				version();
 				exit(EXIT_SUCCESS);
 			break;
 			case 'h':
-				printf(	"%s\n\n%s [-k database file] [-b] [-p password file] [-v] [-h]\n"
+				printf(	"%s [-k database file] [-p password file] [-m cipher mode] [-b] [-v] [-h] [-d]\n"
 					"-k: specify a non-default database file\n"
-					"-b: batch mode: disable some features to enable commands from stdin.\n"
 					"-p: read password from password file.\n"
+					"-m: cipher mode to use: cbc (default), cfb128, ofb.\n"
+					"-b: batch mode: disable some features to enable commands from stdin.\n"
 					"-v: version\n"
-					"-h: this help\n", VERSION, argv[0]);
+					"-h: this help\n"
+					"-d: show some debug output\n", argv[0]);
 				exit(EXIT_SUCCESS);
 			break;
 			case 'd':
@@ -161,7 +166,7 @@ main(int argc, char *argv[])
 				printf("creating '%s' directory\n", db_filename);
 
 			if(mkdir(db_filename, 0777) != 0) {
-				printf("could not create '%s': %s\n", db_filename, strerror(errno));
+				printf("Could not create '%s': %s\n", db_filename, strerror(errno));
 				quit(EXIT_FAILURE);
 			}
 		}
@@ -315,7 +320,19 @@ main(int argc, char *argv[])
 	PKCS5_PBKDF2_HMAC_SHA1(pass, (int)strlen(pass), salt, sizeof(salt), 5000, 128, key);
 
 	/* turn on decoding */
-	BIO_set_cipher(bio_cipher, EVP_aes_256_cbc(), key, iv, 0);
+	if (strcmp(cipher_mode, "cfb128") == 0) {
+		if (debug)
+			printf("using cipher mode: %s\n", cipher_mode);
+		BIO_set_cipher(bio_cipher, EVP_aes_256_cfb128(), key, iv, 0);
+	} else if (strcmp(cipher_mode, "ofb") == 0) {
+		if (debug)
+			printf("using cipher mode: %s\n", cipher_mode);
+		BIO_set_cipher(bio_cipher, EVP_aes_256_ofb(), key, iv, 0);
+	} else {	/* the default is CBC */
+		if (debug)
+			printf("using default cipher mode: %s\n", cipher_mode);
+		BIO_set_cipher(bio_cipher, EVP_aes_256_cbc(), key, iv, 0);
+	}
 
 
 	memset(pass, '\0', pass_maxlen);
@@ -361,14 +378,26 @@ main(int argc, char *argv[])
 		printf("read %d bytes\n", pos);
 
 
-	if (!BIO_get_cipher_status(bio_chain)  &&  pos > 0) {
+	if (BIO_get_cipher_status(bio_chain) == 0  &&  pos > 0) {
 		puts("Failed to decrypt database file!");
 		quit(EXIT_FAILURE);
 	}
 
 
 	/* turn on encoding */
-	BIO_set_cipher(bio_cipher, EVP_aes_256_cbc(), key, iv, 1);
+	if (strcmp(cipher_mode, "cfb128") == 0) {
+		if (debug)
+			printf("using cipher mode: %s\n", cipher_mode);
+		BIO_set_cipher(bio_cipher, EVP_aes_256_cfb128(), key, iv, 1);
+	} else if (strcmp(cipher_mode, "ofb") == 0) {
+		if (debug)
+			printf("using cipher mode: %s\n", cipher_mode);
+		BIO_set_cipher(bio_cipher, EVP_aes_256_ofb(), key, iv, 1);
+	} else {	/* the default is CBC */
+		if (debug)
+			printf("using default cipher mode: %s\n", cipher_mode);
+		BIO_set_cipher(bio_cipher, EVP_aes_256_cbc(), key, iv, 1);
+	}
 
 
 	if (pos == 0) {		/* empty file? */
@@ -378,7 +407,7 @@ main(int argc, char *argv[])
 		/* create a new document */
 		db = xmlNewDoc(BAD_CAST "1.0");
 		if (!db) {
-			puts("could not create XML document!");
+			puts("Could not create XML document!");
 			quit(EXIT_FAILURE);
 		}
 
@@ -386,7 +415,7 @@ main(int argc, char *argv[])
 
 		db_root = xmlNewNode(NULL, BAD_CAST "kc");	/* 'THE' root node */
 		if (!db_root) {
-			puts("could not create root node!");
+			puts("Could not create root node!");
 			quit(EXIT_FAILURE);
 		}
 		xmlDocSetRootElement(db, db_root);
@@ -396,7 +425,7 @@ main(int argc, char *argv[])
 
 		keychain = xmlNewNode(NULL, BAD_CAST "keychain");	/* the first keychain ... */
 		if (!keychain) {
-			puts("could not create default keychain!");
+			puts("Could not create default keychain!");
 			quit(EXIT_FAILURE);
 		}
 		xmlAddChild(db_root, keychain);
@@ -413,23 +442,24 @@ main(int argc, char *argv[])
 		else
 			db = xmlReadMemory(db_buf, (int)pos, NULL, "UTF-8", XML_PARSE_NONET | XML_PARSE_NOERROR | XML_PARSE_NOWARNING | XML_PARSE_RECOVER);
 		if (!db) {
-			puts("could not parse XML document!");
+			puts("Could not parse XML document!");
 			quit(EXIT_FAILURE);
 		}
 
 		db_root = xmlDocGetRootElement(db);
 		if (!db_root) {
-			puts("could not find root node!");
+			puts("Could not find root node!");
+			puts("If you have specified 'cfb128' or 'ofb' for chipher mode, this could also mean that either you have entered a wrong password for the database or specified a cipher mode other than the database was encrypted with!");
 			quit(EXIT_FAILURE);
 		}
 		if (!db_root->children) {
-			puts("could not find first keychain!");
+			puts("Could not find first keychain!");
 			quit(EXIT_FAILURE);
 		}
 
 		keychain = db_root->children->next;
 		if (!keychain) {
-			puts("could not find first keychain!");
+			puts("Could not find first keychain!");
 			quit(EXIT_FAILURE);
 		}
 	}
@@ -835,6 +865,15 @@ cmd_generator(const char *text, int state)
 }
 #endif
 
+
+void
+version(void)
+{
+	printf("%s\n", VERSION);
+	puts("kc was written by Daniel LEVAI <leva@ecentrum.hu>");
+	puts("Source, information, bugs:");
+	puts("http://keychain.googlecode.com");
+} /* help */
 
 void
 quit(int retval)
