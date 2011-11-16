@@ -40,7 +40,7 @@
 
 void print_bio_chain(BIO *);
 #ifndef _READLINE
-char el_tab_complete(EditLine *);
+unsigned char el_tab_complete(EditLine *);
 #else
 char **rl_tab_complete(const char *, int, int);
 char *cmd_generator(const char *, int);
@@ -741,7 +741,7 @@ get_random_str(size_t length, char alnum)
 
 
 #ifndef _READLINE
-char
+unsigned char
 el_tab_complete(EditLine *e)
 {
 	char		*line_buf = NULL, *match = NULL;
@@ -787,7 +787,7 @@ el_tab_complete(EditLine *e)
 		case 0:
 		break;
 		case 1:
-			el_push(e, match + (int)strlen(line_buf));	/* print the commands remaining characters (remaining: the ones without the part (at the beginning) that we've entered already) */
+			el_push(e, match + (int)strlen(line_buf));	/* print the command's remaining characters (remaining: the ones without the part (at the beginning) that we've entered already) */
 		break;
 		default:
 			printf("\n%s\n", match);	/* more than one match */
@@ -798,7 +798,7 @@ el_tab_complete(EditLine *e)
 	free(match);
 
 
-	return(CC_CURSOR);
+	return(CC_REDISPLAY);
 } /* el_tab_complete() */
 #else
 char **
