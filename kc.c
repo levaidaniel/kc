@@ -126,21 +126,21 @@ main(int argc, char *argv[])
 				exit(EXIT_SUCCESS);
 			break;
 			case 'h':
-				printf(	"%s [-k database file] [-p password file] [-m cipher mode] [-b] [-v] [-h] [-d]\n"
+				printf(	"%s %s\n"
 					"-k: specify a non-default database file\n"
-					"-p: read password from password file.\n"
+					"-p: read password from file.\n"
 					"-m: cipher mode to use: cbc (default), cfb128, ofb.\n"
 					"-b: batch mode: disable some features to enable commands from stdin.\n"
 					"-v: version\n"
 					"-h: this help\n"
-					"-d: show some debug output\n", argv[0]);
+					"-d: show some debug output\n", argv[0], USAGE);
 				exit(EXIT_SUCCESS);
 			break;
 			case 'd':
 				debug = 1;
 			break;
 			default:
-				printf("%s [-k database file] [-b] [-p password file] [-v] [-h]\n", argv[0]);
+				printf(	"%s %s\n", argv[0], USAGE);
 				exit(EXIT_SUCCESS);
 			break;
 		}

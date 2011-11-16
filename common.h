@@ -28,6 +28,8 @@
 #endif
 
 
+#define	USAGE	"[-k database file] [-p password file] [-m cipher mode] [-b] [-v] [-h] [-d]"
+
 #define	VERSION	"kc 2.0.1"
 
 
