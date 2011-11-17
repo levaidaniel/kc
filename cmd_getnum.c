@@ -87,6 +87,9 @@ cmd_getnum(int idx, size_t space)
 		line_len = 0;
 		idx = 1;	/* from hereafter 'idx' will be our requested line number */
 		while (rc != 'q') {	/* quit for 'q' or 'Enter' */
+			if (batchmode)
+				puts("");
+
 			printf("[%s] ", key);	/* print the key */
 
 			/* if multiline, prefix the line with a line number */
@@ -132,61 +135,66 @@ cmd_getnum(int idx, size_t space)
 			xmlFree(line); line = NULL;
 			free(line_randomed); line_randomed = NULL;
 
-			/* this is the prompt, after displaying the value */
+			if (batchmode) {
+				rc = 'q';
+				puts("");
+			} else {
+				/* this is the prompt, after displaying the value */
 #ifndef _READLINE
-			el_getc(e, &rc);
+				el_getc(e, &rc);
 #else
-			rc = rl_read_key();
+				rc = rl_read_key();
 #endif
 
-			/* erase (overwrite) the previously written value with spaces */
-			printf("\r");
-			erase_len =	strlen((const char *)key) + 3 +					/* add the key + "[" + "]" + " " */
-					(space ? line_len + line_len * space + space : line_len) +	/* add the random chars too */
-					(lines > 1 ? digit_length(idx) + digit_length(lines) + 4 : 0);	/* add the line number prefix too + "[" + "/" + "]" + " "  */
-			for (i=0; i < (int)erase_len; i++)
-				putchar(' ');
+				/* erase (overwrite) the previously written value with spaces */
+				printf("\r");
+				erase_len =	strlen((const char *)key) + 3 +					/* add the key + "[" + "]" + " " */
+						(space ? line_len + line_len * space + space : line_len) +	/* add the random chars too */
+						(lines > 1 ? digit_length(idx) + digit_length(lines) + 4 : 0);	/* add the line number prefix too + "[" + "/" + "]" + " "  */
+				for (i=0; i < (int)erase_len; i++)
+					putchar(' ');
 
-			printf("\r");
+				printf("\r");
 
 
-			/* process the keypress */
-			switch (rc) {
-				/* line forward */
-				case 'f':
-				case 'n':
-				case 'j':
-				case '+':
-				case ' ':
-				case 10:
-					if (idx < lines)
-						idx++;
-					break;
-				/* line backward */
-				case 'b':
-				case 'p':
-				case 'k':
-				case '-':
-				case 8:
-					if (idx - 1 > 0)
-						idx--;
-					break;
-				/* jump to the requested line */
-				case '1':
-				case '2':
-				case '3':
-				case '4':
-				case '5':
-				case '6':
-				case '7':
-				case '8':
-				case '9':
-					if (idx - 1 > 0  &&  idx < lines) {
-						idx = rc - 48;
-					}
-					break;
-				default:
-					break;
+				/* process the keypress */
+				switch (rc) {
+					/* line forward */
+					case 'f':
+					case 'n':
+					case 'j':
+					case '+':
+					case ' ':
+					case 10:
+						if (idx < lines)
+							idx++;
+						break;
+					/* line backward */
+					case 'b':
+					case 'p':
+					case 'k':
+					case '-':
+					case 8:
+						if (idx - 1 > 0)
+							idx--;
+						break;
+					/* jump to the requested line */
+					case '1':
+					case '2':
+					case '3':
+					case '4':
+					case '5':
+					case '6':
+					case '7':
+					case '8':
+					case '9':
+						if (idx - 1 > 0  &&  idx < lines) {
+							idx = rc - 48;
+						}
+						break;
+					default:
+						break;
+				}
 			}
 		}
 

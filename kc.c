@@ -554,31 +554,26 @@ main(int argc, char *argv[])
 
 
 	/* command loop */
-#ifndef _READLINE
-	e_line = el_gets(e, &e_count);
-#else
-	e_line = readline(prompt_str());
-#endif
-	while (e_line) {
-		if (strlen(e_line) > 0) {
-			line = strdup(e_line);
-#ifndef _READLINE
-			line[(long)(strlen(line) - 1)] = '\0';		/* remove the newline character from the end */
-			history(eh, &eh_ev, H_ENTER, line);
-#else
-			add_history(line);
-#endif
-			cmd_match(line);
-
-			free(line); line = NULL;
-		}
-
+	do {
 #ifndef _READLINE
 		e_line = el_gets(e, &e_count);
 #else
 		e_line = readline(prompt_str());
 #endif
-	}
+		if (e_line)
+			if (strlen(e_line) > 0) {
+				line = strdup(e_line);
+#ifndef _READLINE
+				line[(long)(strlen(line) - 1)] = '\0';		/* remove the newline character from the end */
+				history(eh, &eh_ev, H_ENTER, line);
+#else
+				add_history(line);
+#endif
+				cmd_match(line);
+
+				free(line); line = NULL;
+			}
+	} while (e_line);
 
 	cmd_quit(NULL, NULL);
 
