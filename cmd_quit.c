@@ -77,7 +77,7 @@ cmd_quit(const char *e_line, command *commands)
 		}
 
 		if (strncmp(e_line, "yes", 3) == 0)
-			cmd_write(e_line, commands);
+			cmd_write(NULL, NULL);
 		else
 			puts("Changes were NOT saved.");
 	}

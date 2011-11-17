@@ -580,10 +580,7 @@ main(int argc, char *argv[])
 #endif
 	}
 
-#ifndef _READLINE
-	el_reset(e);
-#endif
-	quit(EXIT_SUCCESS);
+	cmd_quit(NULL, NULL);
 
 
 	return(0);
