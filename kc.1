@@ -65,7 +65,7 @@ Display help.
 .It Cm new Op name
 Create a new key in the current keychain. If
 .Ar name
-is specified it will be the key's name, otherwise prompt for that too.
+is specified it will be the key's name, otherwise prompt for that too. It is possible to enter multiline values by writing '\\n' in place of a desired new line. One can escape this with '\\\\n'.
 .It Cm list
 List the keys in the current keychain. Every key gets prefixed by its index number.
 .It Cm edit Ar index
@@ -86,6 +86,14 @@ regular expression in key names in the current keychain.
 If the
 .Cm /
 command is prefixed by a '*' (eg.: */) then search in every keychain in the current database.
+.It Cm csearch Ar string
+Search for
+.Ar string
+in keychain names in the current database.
+.It Cm c/ Ar pattern
+Search for
+.Ar pattern
+regular expression in keychain names in the current database.
 .It Cm c Ar keychain
 Change the current keychain.
 .Ar keychain
@@ -118,7 +126,7 @@ can be an index number or the keychain's name.
 Delete a key from the current keychain.
 .Ar index
 is the key's index number in the current keychain.
-.It Cm export Ar filename
+.It Cm xport Ar filename
 Export the current database to the XML file named
 .Ar filename
 .It Cm help Op command
@@ -128,7 +136,7 @@ Print application help or describe a
 Import a database from the XML file named
 .Ar filename
 It must be a properly
-.Cm exported 
+.Cm exported
 XML document.
 .Em NOTE
 that the current database will be overwritten if saved.

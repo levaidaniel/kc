@@ -40,168 +40,168 @@ commands_init(command **commands)
 
 	(*commands)->name = "list";
 	(*commands)->usage = "list";
-	(*commands)->help = "List all keys in the current keychain.";
+	(*commands)->help = "List the keys in the current keychain. Every key gets prefixed by\nits index number.";
 	(*commands)->fn = cmd_list;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "new";
-	(*commands)->usage = "new [key name]";
-	(*commands)->help = "Add a new key to the current keychain.\n\nTo the value field, it is possible to enter multiline values\nby writing '\\n' in place of a needed new line.\nOne can escape this with '\\\\n'.";
+	(*commands)->usage = "new [name]";
+	(*commands)->help = "Create a new key in the current keychain. If 'name' is specified it\nwill be the key's name, otherwise prompt for that too. It is\npossible to enter multiline values by writing '\\n' in place of a\ndesired new line. One can escape this with '\\\\n'.";
 	(*commands)->fn = cmd_new;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "edit";
 	(*commands)->usage = "edit <index>";
-	(*commands)->help = "Edit the given key in the current keychain.";
+	(*commands)->help = "Edit a key in the current keychain. 'index' is the key's index\nnumber in the current keychain.";
 	(*commands)->fn = cmd_edit;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "copy";
-	(*commands)->usage = "copy <index> <destination keychain's name or index>";
-	(*commands)->help = "Copy the given key in the current keychain to the destination keychain.";
+	(*commands)->usage = "copy <index> <keychain>";
+	(*commands)->help = "Copy a key in the current keychain to another keychain. 'index' is\nthe key's index to copy and 'keychain' is the destination keychain's\nindex number or name.";
 	(*commands)->fn = cmd_copy;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "del";
 	(*commands)->usage = "del <index>";
-	(*commands)->help = "Delete the given key from the current keychain.";
+	(*commands)->help = "Delete a key from the current keychain. 'index' is the key's index\nnumber in the current keychain.";
 	(*commands)->fn = cmd_del;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "search";
-	(*commands)->usage = "search <search string>";
-	(*commands)->help = "Search for the given string in key names in the current keychain.";
+	(*commands)->usage = "search <string>";
+	(*commands)->help = "Search for 'string' in key names in the current keychain. If the\nsearch command is prefixed by a '*' (eg.: *search) then search in\nevery keychain in the current database.";
 	(*commands)->fn = cmd_search;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "*search";
-	(*commands)->usage = "*search <search string>";
-	(*commands)->help = "Search for the given string in key names in every keychain.";
+	(*commands)->usage = "*search <string>";
+	(*commands)->help = "Search for 'string' in key names in every keychain.";
 	(*commands)->fn = cmd_search;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "/";
-	(*commands)->usage = "/<search pattern>";
-	(*commands)->help = "Search for the given regular expression in key names in the current keychain.";
+	(*commands)->usage = "/<pattern>";
+	(*commands)->help = "Search for 'pattern' regular expression in key names in the current\nkeychain. If the / command is prefixed by a '*' (eg.: */) then\nsearch in every keychain in the current database.";
 	(*commands)->fn = cmd_searchre;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "*/";
-	(*commands)->usage = "*/<search pattern>";
-	(*commands)->help = "Search for the given regular expression in key names in every keychain.";
+	(*commands)->usage = "*/<pattern>";
+	(*commands)->help = "Search for 'pattern' in key names in every keychain.";
 	(*commands)->fn = cmd_searchre;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "clist";
 	(*commands)->usage = "clist";
-	(*commands)->help = "List all keychains.";
+	(*commands)->help = "List keychains in the current database. Every keychain gets\nprefixed by its index number.";
 	(*commands)->fn = cmd_clist;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "c";
-	(*commands)->usage = "c <keychain's name or index>";
-	(*commands)->help = "Set the given keychain as the current keychain.";
+	(*commands)->usage = "c <keychain>";
+	(*commands)->help = "Change the current keychain. 'keychain' can be an index number or\nthe keychain's name.";
 	(*commands)->fn = cmd_c;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "cnew";
-	(*commands)->usage = "cnew [chain name]";
-	(*commands)->help = "Add a new keychain.";
+	(*commands)->usage = "cnew [name]";
+	(*commands)->help = "Create a new keychain. If 'name' is not given then prompt for one.";
 	(*commands)->fn = cmd_cnew;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "cren";
-	(*commands)->usage = "cren <keychain's name or index>";
-	(*commands)->help = "Rename the given keychain.";
+	(*commands)->usage = "cren <keychain>";
+	(*commands)->help = "Rename a keychain. 'keychain' can be an index number or the\nkeychain's name.";
 	(*commands)->fn = cmd_cren;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "cdel";
-	(*commands)->usage = "cdel <keychain's name or index>";
-	(*commands)->help = "Delete the given keychain.";
+	(*commands)->usage = "cdel <keychain>";
+	(*commands)->help = "Delete a keychain. 'keychain' can be an index number or the\nkeychain's name.";
 	(*commands)->fn = cmd_cdel;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "csearch";
-	(*commands)->usage = "csearch <search string>";
-	(*commands)->help = "Search for the given string in keychain names.";
+	(*commands)->usage = "csearch <string>";
+	(*commands)->help = "Search for 'string' in keychain names in the current database.";
 	(*commands)->fn = cmd_search;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "c/";
-	(*commands)->usage = "c/<search pattern>";
-	(*commands)->help = "Search for the given regular expression in keychain names.";
+	(*commands)->usage = "c/<pattern>";
+	(*commands)->help = "Search for 'pattern' regular expression in keychain names in the\ncurrent database.";
 	(*commands)->fn = cmd_searchre;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "write";
 	(*commands)->usage = "write";
-	(*commands)->help = "Write out the current state of database to the database file.";
+	(*commands)->help = "Save the current database.";
 	(*commands)->fn = cmd_write;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "xport";
 	(*commands)->usage = "xport <filename>";
-	(*commands)->help = "Export the current state of database to the given file in UTF-8 encoded *clear text* XML format.";
+	(*commands)->help = "Export the current database to the XML file named 'filename'.";
 	(*commands)->fn = cmd_export;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "import";
 	(*commands)->usage = "import <filename>";
-	(*commands)->help = "Import the specified UTF-8 encoded XML file, overwriting the currently used database.\nYou must 'write' the changes, if you want to save it to the currently opened database file.";
+	(*commands)->help = "Import a database from the XML file named 'filename' It must be a\nproperly exported XML document. NOTE that the current database\nwill be overwritten if saved.";
 	(*commands)->fn = cmd_import;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "random";
 	(*commands)->usage = "random [length]";
-	(*commands)->help = "Generate a random alphanumeric string with the given length. Default is 8.";
+	(*commands)->help = "Print a random character with 'length' length. The default 'length' is\n8.";
 	(*commands)->fn = cmd_random;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "clear";
 	(*commands)->usage = "clear [count]";
-	(*commands)->help = "Emulate a screen clearing.\nScrolls 50 lines by default, which can be multiplied by 'count' times if specified.";
+	(*commands)->help = "Emulate a screen clearing. Scrolls 50 lines by default, which can\nbe multiplied by 'count' times if specified.";
 	(*commands)->fn = cmd_clear;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "quit";
 	(*commands)->usage = "quit";
-	(*commands)->help = "Quit from program. Will ask if there are any unwritten changes.";
+	(*commands)->help = "Quit the program. If the database is modified, then ask if it\nshould be saved.";
 	(*commands)->fn = cmd_quit;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "version";
 	(*commands)->usage = "version";
-	(*commands)->help = "Display program version.";
+	(*commands)->help = "Display the program version.";
 	(*commands)->fn = cmd_version;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "help";
 	(*commands)->usage = "help [command]";
-	(*commands)->help = "Command list. If a command name is given as a parameter, describe it.";
+	(*commands)->help = "Print application help or describe a 'command'.";
 	(*commands)->fn = cmd_help;
 
 	(*commands)->next = NULL;

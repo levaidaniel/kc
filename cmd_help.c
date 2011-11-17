@@ -50,6 +50,7 @@ cmd_help(const char *e_line, command *commands)
 	if (got_command) {
 		while (commands) {
 			if (strcmp(commands->name, got_command) == 0) {
+				printf("%s\n\n", commands->usage);
 				printf("%s\n", commands->help);
 				break;
 			}
