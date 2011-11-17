@@ -50,25 +50,28 @@ cmd_searchre(const char *e_line, command *commands)
 	int		ovector[30];
 
 	const char	*pattern = NULL;
-	char		*line = NULL;
+	char		*cmd = NULL;
 	char		chain = 0, searchall = 0;
 	int		hits = 0, idx = 0;
+
+	char		*line = NULL;
 
 
 	line = strdup(e_line);
 
-	if (strncmp(line, "*", 1) == 0) {
+	cmd = strtok(line, " ");		/* get the command name */
+	if (strncmp(cmd, "*", 1) == 0) {
 		searchall = 1;
-		line++;
+		cmd++;
 	}
-	if (strncmp(line, "c", 1) == 0)
+	if (strncmp(cmd, "c", 1) == 0)
 		chain = 1;
 
 
 	if (chain)
-		pattern = line + 2;	/* remove the 'c/' from the line. the remaining part is the pattern */
+		pattern = cmd + 2;	/* remove the 'c/' from the cmd. the remaining part is the pattern */
 	else
-		pattern = line + 1;	/* remove the '/'(slash) from the line. the remaining part is the pattern */
+		pattern = cmd + 1;	/* remove the '/'(slash) from the cmd. the remaining part is the pattern */
 
 	if (!pattern) {
 		puts(commands->usage);
@@ -102,7 +105,11 @@ cmd_searchre(const char *e_line, command *commands)
 	}
 
 
-	search_keychain = keychain;
+	if (searchall)
+		/* if *search'ing, start from the first keychain */
+		search_keychain = keychain->parent->children;
+	else
+		search_keychain = keychain;
 	while (search_keychain) {
 		if (search_keychain->type != XML_ELEMENT_NODE) {	/* skip the non element nodes */
 			search_keychain = search_keychain->next;
@@ -137,7 +144,7 @@ cmd_searchre(const char *e_line, command *commands)
 				hits++;
 
 				if (searchall)
-					printf("%s%% ", xmlGetProp(search_keychain, BAD_CAST "name"));  /* prefix the name with the keychain name */
+					printf("%s%% ", xmlGetProp(search_keychain, BAD_CAST "name"));	/* prefix the name with the keychain name */
 
 				printf("%d. ", idx);	/* prefix the name with the index number */
 				printf("%s\n", key);	/* this is the name of the entry */
@@ -154,7 +161,7 @@ cmd_searchre(const char *e_line, command *commands)
 		if (searchall)
 			search_keychain = search_keychain->next;
 		else
-			search_keychain = NULL;         /* force the quit from the loop */
+			search_keychain = NULL;		/* force the quit from the loop */
 	}
 
 	if (!hits)

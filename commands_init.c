@@ -66,6 +66,13 @@ commands_init(command **commands)
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
+	(*commands)->name = "move";
+	(*commands)->usage = "move <index> <keychain>";
+	(*commands)->help = "Move a key in the current keychain to another keychain. 'index' is\nthe key's index to move and 'keychain' is the destination keychain's\nindex number or name.";
+	(*commands)->fn = cmd_copy;
+	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
+	(*commands) = (*commands)->next;
+
 	(*commands)->name = "del";
 	(*commands)->usage = "del <index>";
 	(*commands)->help = "Delete a key from the current keychain. 'index' is the key's index\nnumber in the current keychain.";

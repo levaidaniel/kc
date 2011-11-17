@@ -53,11 +53,10 @@ cmd_search(const char *e_line, command *commands)
 		searchall = 1;
 		cmd++;
 	}
-
 	if (strncmp(cmd, "c", 1) == 0)
 		chain = 1;
 
-	
+
 	pattern = BAD_CAST strtok(NULL, " ");	/* assign the command's parameter */
 	if (!pattern) {
 		puts(commands->usage);
@@ -66,7 +65,11 @@ cmd_search(const char *e_line, command *commands)
 	}
 
 
-	search_keychain = keychain;
+	if (searchall)
+		/* if *search'ing, start from the first keychain */
+		search_keychain = keychain->parent->children;
+	else
+		search_keychain = keychain;
 	while (search_keychain) {
 		if (search_keychain->type != XML_ELEMENT_NODE) {	/* skip the non element nodes */
 			search_keychain = search_keychain->next;
