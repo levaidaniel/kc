@@ -41,7 +41,7 @@ cmd_copy(const char *e_line, command *commands)
 
 	char		*line = NULL;
 
-	char		*cmd = NULL, *idx_str = NULL, unlink = 0;
+	char		*cmd = NULL, *idx_str = NULL, move = 0;
 	int		idx = 0;
 
 
@@ -49,7 +49,7 @@ cmd_copy(const char *e_line, command *commands)
 
 	cmd = strtok(line, " ");		/* get the command name */
 	if (strcmp(cmd, "move") == 0)
-		unlink = 1;
+		move = 1;
 
 	idx_str = strtok(NULL, " ");
 	cname = BAD_CAST strtok(NULL, " ");	/* assign the command's parameter */
@@ -83,7 +83,7 @@ cmd_copy(const char *e_line, command *commands)
 		free(line); line = NULL;
 		return;
 	} else {
-		if (unlink) {	/* unlink from the source keychain */
+		if (move) {	/* unlink from the source keychain */
 			/* remove the adjacent 'text' node, which is the indent and newline */
 			db_node_prev = db_node->prev;
 			xmlUnlinkNode(db_node_prev);
