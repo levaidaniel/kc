@@ -44,19 +44,24 @@ cmd_list(const char *e_line, command *commands)
 	char		*line = NULL;
 
 
-	line = strdup(e_line);
-
-	strtok(line, " ");				/* remove the command from the line */
-	cname = BAD_CAST strtok(NULL, " ");		/* assign the command's parameter */
-	if (cname)
-		list_keychain = find_keychain(cname);
-	else
-		list_keychain = keychain;
-
 	if (debug) {
 		xmlSaveFormatFileEnc("-", db, "UTF-8", XML_SAVE_FORMAT);
 		printf("#BEGIN\n");
 	}
+
+	line = strdup(e_line);
+
+	strtok(line, " ");				/* remove the command from the line */
+	cname = BAD_CAST strtok(NULL, " ");		/* assign the command's parameter */
+	if (cname) {
+		list_keychain = find_keychain(cname);	/* list the specified keychain */
+		if (!list_keychain) {
+			puts("keychain not found.");
+			free(line); line = NULL;
+			return;
+		}
+	} else
+		list_keychain = keychain;		/* list the current keychain */
 
 	db_node = list_keychain->children;
 	while (db_node) {
@@ -71,6 +76,8 @@ cmd_list(const char *e_line, command *commands)
 
 	if (idx == 0)
 		puts("empty keychain.");
+
+	free(line); line = NULL;
 
 	if (debug)
 		printf("#END\n");
