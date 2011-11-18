@@ -820,8 +820,10 @@ el_tab_complete(EditLine *e)
 			match_len += strlen(commands->name) + 1 + 1;
 			match = realloc(match, match_len); malloc_check(match);
 
+			if (hits > 1)	/* don't prefix the first match with a space */
+				strlcat(match, " ", match_len);
+
 			strlcat(match, commands->name, match_len);
-			strlcat(match, " ", match_len);
 		}
 	} while((commands = commands->next));	/* iterate through the linked list */
 
@@ -838,8 +840,10 @@ el_tab_complete(EditLine *e)
 				match_len += strlen((char *)cname) + 1 + 1;
 				match = realloc(match, match_len); malloc_check(match);
 
+				if (hits > 1)	/* don't prefix the first match with a space */
+					strlcat(match, " ", match_len);
+
 				strlcat(match, (char *)cname, match_len);
-				strlcat(match, " ", match_len);
 			}
 
 			xmlFree(cname); cname = NULL;
@@ -854,7 +858,8 @@ el_tab_complete(EditLine *e)
 			printf("\a");			/* no match */
 		break;
 		case 1:
-			el_push(e, match + (int)word_len);	/* print the command's remaining characters (remaining: the ones without the part (at the beginning) that we've entered already) */
+			el_push(e, match + (int)word_len);	/* print the word's remaining characters (remaining: the ones without the part (at the beginning) that we've entered already) */
+			el_push(e, " ");			/* put a space after the completed word */
 		break;
 		default:
 			printf("\n%s\n", match);	/* more than one match */
