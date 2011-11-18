@@ -42,31 +42,25 @@ cmd_list(const char *e_line, command *commands)
 	int		idx = 0;
 
 
-	db_node = keychain->children;
-
 	if (debug) {
 		xmlSaveFormatFileEnc("-", db, "UTF-8", XML_SAVE_FORMAT);
 		printf("#BEGIN\n");
 	}
 
-	if (db_node) {
-		while (db_node) {
-			if (db_node->type == XML_ELEMENT_NODE) {	/* we only care about ELEMENT nodes */
-				printf("%d. ", idx);
+	db_node = keychain->children;
 
-				key = xmlGetProp(db_node, BAD_CAST "name");
-				printf("%s\n", key);
-				xmlFree(key); key = NULL;
-
-				idx++;
-			}
-
-			db_node = db_node->next;
+	while (db_node) {
+		if (db_node->type == XML_ELEMENT_NODE) {	/* we only care about ELEMENT nodes */
+			key = xmlGetProp(db_node, BAD_CAST "name");
+			printf("%d. %s\n", idx++, key);
+			xmlFree(key); key = NULL;
 		}
 
-		if (idx == 0)
-			puts("empty keychain.");
+		db_node = db_node->next;
 	}
+
+	if (idx == 0)
+		puts("empty keychain.");
 
 	if (debug)
 		printf("#END\n");

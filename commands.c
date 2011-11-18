@@ -34,9 +34,10 @@ xmlChar                 *_rl_helper_var = NULL;
 
 
 xmlNodePtr
-find_keychain(xmlChar *cname)
+find_keychain(xmlChar *cname_find)
 {
 	xmlNodePtr	db_node = NULL;
+	xmlChar		*cname = NULL;
 
 	char		*inv = NULL;
 	int		i = 0;
@@ -44,7 +45,7 @@ find_keychain(xmlChar *cname)
 
 
 	/* if we got a number */
-	idx = strtol((const char *)cname, &inv, 10);
+	idx = strtol((const char *)cname_find, &inv, 10);
 	if (strncmp(inv, "\0", 1) != 0) {
 		idx = -1;
 	}
@@ -53,16 +54,22 @@ find_keychain(xmlChar *cname)
 	db_node = keychain->parent->children;
 
 	while (db_node) {
-		if (db_node->type == XML_ELEMENT_NODE) {	/* we only care about ELEMENT nodes */
-			if (idx >= 0) {		/* if an index number was given in the parameter */
-				if (i++ == idx) {
-					break;
-				}
-			} else {		/* if keychain name was given in the parameter */
-				if (xmlStrcmp(xmlGetProp(db_node, BAD_CAST "name"), cname) == 0) {
-					break;
-				}
+		if (db_node->type != XML_ELEMENT_NODE) {	/* we only care about ELEMENT nodes */
+			db_node = db_node->next;
+			continue;
+		}
+
+		if (idx >= 0) {		/* if an index number was given in the parameter */
+			if (i++ == idx) {
+				break;
 			}
+		} else {		/* if keychain name was given in the parameter */
+			cname = xmlGetProp(db_node, BAD_CAST "name");
+			if (xmlStrcmp(cname, cname_find) == 0) {
+				xmlFree(cname); cname = NULL;
+				break;
+			}
+			xmlFree(cname); cname = NULL;
 		}
 
 		db_node = db_node->next;

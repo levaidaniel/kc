@@ -769,11 +769,14 @@ get_random_str(size_t length, char alnum)
 unsigned char
 el_tab_complete(EditLine *e)
 {
-	char		*line_buf = NULL, *match = NULL;
+	xmlNodePtr	db_node = NULL;
+	xmlChar		*cname = NULL;
+
+	char		*line_buf = NULL, *match = NULL, *word_next = NULL, *word = NULL;
 	const LineInfo	*el_lineinfo = NULL;
 	command		*commands = commands_first;
 	int		hits = 0;
-	size_t		match_len = 0;
+	size_t		match_len = 0, word_len = 0;
 	long		line_buf_len = 0;
 
 
@@ -788,16 +791,30 @@ el_tab_complete(EditLine *e)
 	memcpy(line_buf, el_lineinfo->buffer, (size_t)line_buf_len);
 	line_buf[line_buf_len] = '\0';
 
-
 	/* empty buffer (ie. line) */
 	if (!line_buf_len)
 		return(CC_CURSOR);
 
 
+	/*
+	 * 'word' is the last word from 'line_buf'.
+	 * 'line_buf' is the whole line entered so far to the edit buffer.
+	 * we want to complete only the last word from the edit buffer.
+	 */
+	word_next = strtok(line_buf, " ");
+	while (word_next) {
+		word = word_next;
+		word_next = strtok(NULL, " ");
+	}
+	word_len = strlen(word);
+
+
 	/* initialize 'match' for use with strlcat() */
 	match = calloc(1, 1); malloc_check(match);
+
+	/* search for a command name */
 	do {
-		if (strncmp(line_buf, commands->name, (size_t)line_buf_len) == 0) {
+		if (strncmp(word, commands->name, word_len) == 0) {
 			hits++;
 
 			match_len += strlen(commands->name) + 1 + 1;
@@ -808,12 +825,36 @@ el_tab_complete(EditLine *e)
 		}
 	} while((commands = commands->next));	/* iterate through the linked list */
 
+	/* search for a keychain name */
+	db_node = keychain->parent->children;
+
+	while (db_node) {
+		if (db_node->type == XML_ELEMENT_NODE) {        /* we only care about ELEMENT nodes */
+			cname = xmlGetProp(db_node, BAD_CAST "name");
+
+			if (strncmp(word, (char *)cname, word_len) == 0) {
+				hits++;
+
+				match_len += strlen((char *)cname) + 1 + 1;
+				match = realloc(match, match_len); malloc_check(match);
+
+				strlcat(match, (char *)cname, match_len);
+				strlcat(match, " ", match_len);
+			}
+
+			xmlFree(cname); cname = NULL;
+		}
+
+		db_node = db_node->next;
+	}
+
+
 	switch (hits) {
 		case 0:
 			printf("\a");			/* no match */
 		break;
 		case 1:
-			el_push(e, match + (int)strlen(line_buf));	/* print the command's remaining characters (remaining: the ones without the part (at the beginning) that we've entered already) */
+			el_push(e, match + (int)word_len);	/* print the command's remaining characters (remaining: the ones without the part (at the beginning) that we've entered already) */
 		break;
 		default:
 			printf("\n%s\n", match);	/* more than one match */

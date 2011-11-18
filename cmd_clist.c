@@ -46,20 +46,14 @@ cmd_clist(const char *e_line, command *commands)
 	if (debug)
 		printf("#BEGIN\n");
 
-	if (db_node) {
-		while (db_node) {
-			if (db_node->type == XML_ELEMENT_NODE) {	/* we only care about ELEMENT nodes */
-				printf("%d. ", idx);
-
-				cname = xmlGetProp(db_node, BAD_CAST "name");
-				printf("%s\n", cname);
-
-				idx++;
-			}
-
-			db_node = db_node->next;
+	while (db_node) {
+		if (db_node->type == XML_ELEMENT_NODE) {	/* we only care about ELEMENT nodes */
+			cname = xmlGetProp(db_node, BAD_CAST "name");
+			printf("%d. %s\n", idx++, cname);
+			xmlFree(cname); cname = NULL;
 		}
-		xmlFree(cname); cname = NULL;
+
+		db_node = db_node->next;
 	}
 
 	if (debug)
