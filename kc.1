@@ -71,8 +71,12 @@ Show some debug output.
 Create a new key in the current keychain. If
 .Ar name
 is specified it will be the key's name, otherwise prompt for that too. It is possible to enter multiline values by writing '\\n' in place of a desired new line. One can escape this with '\\\\n'.
-.It Cm list
-List the keys in the current keychain. Every key gets prefixed by its index number.
+.It Cm list Op keychain
+List the keys in the current keychain or if specified, in the keychain named
+.Ar keychain .
+Every key gets prefixed by its index number.
+.Ar keychain
+can be an index number or the keychain's name.
 .It Cm edit Ar index
 Edit a key in the current keychain.
 .Ar index
@@ -133,10 +137,10 @@ Delete a key from the current keychain.
 is the key's index number in the current keychain.
 .It Cm xport Ar filename
 Export the current database to the XML file named
-.Ar filename
+.Ar filename .
 .It Cm help Op command
 Print application help or describe a
-.Ar command
+.Ar command .
 .It Cm import Ar filename
 Import a database from the XML file named
 .Ar filename

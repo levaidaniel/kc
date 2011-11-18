@@ -36,19 +36,29 @@ extern xmlNodePtr	keychain;
 void
 cmd_list(const char *e_line, command *commands)
 {
-	xmlNodePtr	db_node = NULL;
-	xmlChar		*key = NULL;
+	xmlNodePtr	db_node = NULL, list_keychain = NULL;
+	xmlChar		*key = NULL, *cname = NULL;
 
 	int		idx = 0;
 
+	char		*line = NULL;
+
+
+	line = strdup(e_line);
+
+	strtok(line, " ");				/* remove the command from the line */
+	cname = BAD_CAST strtok(NULL, " ");		/* assign the command's parameter */
+	if (cname)
+		list_keychain = find_keychain(cname);
+	else
+		list_keychain = keychain;
 
 	if (debug) {
 		xmlSaveFormatFileEnc("-", db, "UTF-8", XML_SAVE_FORMAT);
 		printf("#BEGIN\n");
 	}
 
-	db_node = keychain->children;
-
+	db_node = list_keychain->children;
 	while (db_node) {
 		if (db_node->type == XML_ELEMENT_NODE) {	/* we only care about ELEMENT nodes */
 			key = xmlGetProp(db_node, BAD_CAST "name");
