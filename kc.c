@@ -882,11 +882,15 @@ rl_tab_complete(const char *text, int start, int end)
 char *
 cmd_generator(const char *text, int state)
 {
+	xmlNodePtr	db_node = NULL;
+	xmlChar		*cname = NULL;
+
 	command		*commands = commands_first;
 	int		idx = 0;
 
 
-	 while(commands) {
+	/* search for a command name */
+	while (commands) {
 		if (idx < state)
 			idx++;
 		else
@@ -895,6 +899,26 @@ cmd_generator(const char *text, int state)
 
 
 		commands = commands->next;	/* iterate through the linked list */
+	}
+
+	/* search for a keychain name */
+	db_node = keychain->parent->children;
+
+	while (db_node) {
+		if (db_node->type == XML_ELEMENT_NODE) {        /* we only care about ELEMENT nodes */
+			if (idx < state)
+				idx++;
+			else {
+				cname = xmlGetProp(db_node, BAD_CAST "name");
+
+				if (strncmp(text, (char *)cname, strlen(text)) == 0)
+					return((char *)cname);
+
+				xmlFree(cname); cname = NULL;
+			}
+		}
+
+		db_node = db_node->next;
 	}
 
 	return(NULL);
