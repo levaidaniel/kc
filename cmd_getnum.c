@@ -150,7 +150,7 @@ cmd_getnum(int idx, size_t space)
 				printf("\r");
 				erase_len =	strlen((const char *)key) + 3 +					/* add the key + "[" + "]" + " " */
 						(space ? line_len + line_len * space + space : line_len) +	/* add the random chars too */
-						(lines > 1 ? digit_length(idx) + digit_length(lines) + 4 : 0);	/* add the line number prefix too + "[" + "/" + "]" + " "  */
+						(lines > 1 ? digit_length(idx) + digit_length(lines) + 4 : 0);	/* add the line number prefix too + "[" + "/" + "]" + " " */
 				for (i=0; i < (int)erase_len; i++)
 					putchar(' ');
 

@@ -595,9 +595,11 @@ cmd_match(const char *e_line)
 	else
 		return;
 
-	/* special case, if only a number was entered,
-	   we display the appropriate entry, and if there
-	   is another number after it, use it as space for jamming */
+	/*
+	 * special case, if only a number was entered,
+	 * we display the appropriate entry, and if there
+	 * is another number after it, use it as space for jamming
+	 */
 	sscanf(line, "%d %d", &idx, &space);
 	if (idx >= 0) {
 		if (space >= 0)
@@ -605,9 +607,11 @@ cmd_match(const char *e_line)
 		else
 			cmd_getnum(idx, 0);
 	} else {
-		/* special case, if a '[*]/'([*]slash) or 'c/' is the first character,
-		   then everything that follows is a search pattern (even a space),
-		   so we must not tokenize the line */
+		/*
+		 * special case, if a '[*]/'([*]slash) or 'c/' is the first character,
+		 * then everything that follows is a search pattern (even a space),
+		 * so we must not tokenize the line
+		 */
 		if (strncmp(line, "/", 1) == 0)
 			cmd = "/";
 		else if (strncmp(line, "*/", 2) == 0)
@@ -829,9 +833,8 @@ el_tab_complete(EditLine *e)
 
 	/* search for a keychain name */
 	db_node = keychain->parent->children;
-
 	while (db_node) {
-		if (db_node->type == XML_ELEMENT_NODE) {        /* we only care about ELEMENT nodes */
+		if (db_node->type == XML_ELEMENT_NODE) {	/* we only care about ELEMENT nodes */
 			cname = xmlGetProp(db_node, BAD_CAST "name");
 
 			if (strncmp(word, (char *)cname, word_len) == 0) {
@@ -908,9 +911,8 @@ cmd_generator(const char *text, int state)
 
 	/* search for a keychain name */
 	db_node = keychain->parent->children;
-
 	while (db_node) {
-		if (db_node->type == XML_ELEMENT_NODE) {        /* we only care about ELEMENT nodes */
+		if (db_node->type == XML_ELEMENT_NODE) {	/* we only care about ELEMENT nodes */
 			if (idx < state)
 				idx++;
 			else {

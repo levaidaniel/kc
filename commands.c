@@ -29,7 +29,7 @@
 extern xmlNodePtr	keychain;
 
 #ifdef _READLINE
-xmlChar                 *_rl_helper_var = NULL;
+xmlChar			*_rl_helper_var = NULL;
 #endif
 
 

@@ -65,8 +65,8 @@ cmd_cdel(const char *e_line, command *commands)
 	db_node = find_keychain(cname);
 	free(line); line = NULL;
 	if (db_node) {
-		if (xmlUTF8Charcmp(xmlGetProp(keychain, BAD_CAST "name"),
-				   xmlGetProp(db_node, BAD_CAST "name")) == 0) {	/* don't allow to delete the current keychain. this saves us trouble. */
+		if (	xmlUTF8Charcmp(xmlGetProp(keychain, BAD_CAST "name"),
+			xmlGetProp(db_node, BAD_CAST "name")) == 0) {	/* don't allow to delete the current keychain. this saves us trouble. */
 
 			puts("Can not delete the current keychain!");
 		} else {
