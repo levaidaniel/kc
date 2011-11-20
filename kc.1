@@ -17,7 +17,7 @@
 .\"ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 .\"(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 .\"SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-.Dd $Mdocdate: Nov 18 2011 $
+.Dd Nov 20 2011
 .Dt KC 1
 .Os
 .Sh NAME
@@ -46,7 +46,7 @@ the
 command shows the available commands, and usage information for them.
 .Pp
 The CLI supports tab-completion for commands.
-.Sh PARAMETERS
+.Ss PARAMETERS
 .Bl -tag -offset ||| -width |
 .It Fl k
 Specify a non-default database file. The default is ~/.kc/default.
@@ -65,12 +65,15 @@ Display help.
 .It Fl d
 Show some debug output.
 .El
-.Sh COMMANDS
+.Ss COMMANDS
 .Bl -tag -offset ||| -width |
 .It Cm new Op name
 Create a new key in the current keychain. If
 .Ar name
-is specified it will be the key's name, otherwise prompt for that too. It is possible to enter multiline values by writing '\\n' in place of a desired new line. One can escape this with '\\\\n'.
+is specified it will be the key's name, otherwise prompt for that too. It is possible to enter multiline values by writing
+.Ql \en
+in place of a desired new line. One can escape this with
+.Ql \e\en .
 .It Cm list Op keychain
 List the keys in the current keychain or if specified, in the keychain named
 .Ar keychain .
@@ -164,4 +167,6 @@ Save the current database.
 .El
 .Sh AUTHOR
 .Nm
-was written by Daniel LEVAI <leva@ecentrum.hu>.
+was written by
+.An Daniel LEVAI
+<leva@ecentrum.hu>.
