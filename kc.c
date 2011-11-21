@@ -590,7 +590,7 @@ main(int argc, char *argv[])
 
 	cmd_quit(NULL, NULL);
 
-
+	/* NOTREACHED */
 	return(0);
 } /* main() */
 
