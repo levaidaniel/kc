@@ -84,7 +84,7 @@ main(int argc, char *argv[])
 	size_t		db_buf_size = 4096;
 	unsigned int	pos = 0;
 	unsigned char	key[128];
-	char		*pass = NULL;
+	char		*pass = NULL, *rand_str = NULL;
 	unsigned char	salt[17], iv[17];
 	void		*rbuf = NULL;
 	size_t		pass_maxlen = 64;
@@ -224,8 +224,21 @@ main(int argc, char *argv[])
 
 		/* generate the IV and the salt. */
 
-		strlcpy((char *)iv, get_random_str(sizeof(iv) - 1, 0), sizeof(iv));
-		strlcpy((char *)salt, get_random_str(sizeof(salt) - 1, 0), sizeof(salt));
+		rand_str = get_random_str(sizeof(iv) - 1, 0);
+		if (!rand_str) {
+			puts("IV generation failure!");
+			quit(EXIT_FAILURE);
+		}
+		strlcpy((char *)iv, rand_str, sizeof(iv));
+		free(rand_str);
+
+		rand_str = get_random_str(sizeof(salt) - 1, 0);
+		if (!rand_str) {
+			puts("Salt generation failure!");
+			quit(EXIT_FAILURE);
+		}
+		strlcpy((char *)salt, rand_str, sizeof(salt));
+		free(rand_str);
 
 		if (debug)
 			printf("iv='%s'\nsalt='%s'\n", iv, salt);
