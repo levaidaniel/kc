@@ -48,12 +48,19 @@ command shows the available commands, and usage information for them.
 The CLI supports tab-completion for commands.
 .Ss PARAMETERS
 .Bl -tag -offset ||| -width |
-.It Fl k
-Specify a non-default database file. The default is ~/.kc/default.
-.It Fl p
-Read password from file.
-.It Fl m
-Cipher mode to use. You can choose from 'cbc' (the default), 'cfb128' or 'ofb'. If you use 'cfb128' or 'ofb', there is no specific sign if you enter a wrong password during opening a database; in this case the database would seem to be corrupt after decrypting, and
+.It Fl k Ar file
+Use
+.Ar file
+as database. The default is ~/.kc/default.
+.It Fl p Ar file
+Read password from
+.Ar file .
+.It Fl m Ar mode
+Cipher mode to use.
+.Ar mode
+can be one of 'cbc' (the default), 'cfb128' or 'ofb'.
+.Em NOTE :
+If you use 'cfb128' or 'ofb', there is no specific sign if you enter a wrong password during opening a database; in this case the database would seem to be corrupt after decrypting, and
 .Nm
 will not be able to open it.
 .It Fl b
@@ -138,20 +145,27 @@ can be an index number or the keychain's name.
 Delete a key from the current keychain.
 .Ar index
 is the key's index number in the current keychain.
-.It Cm xport Ar filename
-Export the current database to the XML file named
-.Ar filename .
 .It Cm help Op command
 Print application help or describe a
 .Ar command .
-.It Cm import Ar filename
-Import a database from the XML file named
+.It Cm xport Ar filename
+Export the current database as an XML file named
+.Ar filename .
+(see command
+.Cm import )
+.Em NOTE :
+the created XML file will be plain text, and any existing files named
 .Ar filename
-It must be a properly
-.Cm exported
-XML document.
-.Em NOTE
-that the current database will be overwritten if saved.
+will be overwritten.
+.It Cm import Ar filename
+Import a database from
+.Ar filename .
+It must be a properly formatted
+.Nm
+database. (see command
+.Cm xport )
+.Em NOTE :
+The current database will be overwritten if saved.
 .It Cm quit
 Quit the program. If the database is modified, then ask if it should be saved.
 .It Cm random Op length
