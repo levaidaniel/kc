@@ -789,7 +789,7 @@ el_tab_complete(EditLine *e)
 	xmlNodePtr	db_node = NULL;
 	xmlChar		*cname = NULL;
 
-	char		*line_buf = NULL, *match = NULL, *word_next = NULL, *word = NULL;
+	char		*line_buf = NULL, *line_buf_copy = NULL, *match = NULL, *word_next = NULL, *word = NULL;
 	const LineInfo	*el_lineinfo = NULL;
 	command		*commands = commands_first;
 	int		hits = 0;
@@ -818,54 +818,67 @@ el_tab_complete(EditLine *e)
 	 * 'line_buf' is the whole line entered so far to the edit buffer.
 	 * we want to complete only the last word from the edit buffer.
 	 */
-	word_next = strtok(line_buf, " ");
+	line_buf_copy = strdup(line_buf);	/* strtok() modifies its given string */
+	word_next = strtok(line_buf_copy, " ");
 	while (word_next) {
 		word = word_next;
 		word_next = strtok(NULL, " ");
 	}
+	/* nothing in the 'line_buf', other than space(s) */
+	if (!word)
+		return(CC_CURSOR);
+
 	word_len = strlen(word);
 
 
 	/* initialize 'match' for use with strlcat() */
 	match = calloc(1, 1); malloc_check(match);
 
-	/* search for a command name */
-	do {
-		if (strncmp(word, commands->name, word_len) == 0) {
-			hits++;
-
-			match_len += strlen(commands->name) + 1 + 1;
-			match = realloc(match, match_len); malloc_check(match);
-
-			if (hits > 1)	/* don't prefix the first match with a space */
-				strlcat(match, " ", match_len);
-
-			strlcat(match, commands->name, match_len);
-		}
-	} while((commands = commands->next));	/* iterate through the linked list */
-
-	/* search for a keychain name */
-	db_node = keychain->parent->children;
-	while (db_node) {
-		if (db_node->type == XML_ELEMENT_NODE) {	/* we only care about ELEMENT nodes */
-			cname = xmlGetProp(db_node, BAD_CAST "name");
-
-			if (strncmp(word, (char *)cname, word_len) == 0) {
+	/*
+	 * Basically, the first word will only be completed to a command.
+	 * The second (or any additional) word will be completed to a command only if the first word was 'help' (because help [command] shows the help for command),
+	 * or (if the first word is something other than 'help') it will be completed to a keychain name (to serve as a parameter for the previously completed command).
+	 */
+	if (!strchr(line_buf, ' ')  ||  (strncmp(line_buf, "help ", 5) == 0))	/* only search for a command name if this is not an already completed command (ie. there is no space in the line), OR if the already completed command is 'help' */
+		/* search for a command name */
+		do {
+			if (strncmp(word, commands->name, word_len) == 0) {
 				hits++;
 
-				match_len += strlen((char *)cname) + 1 + 1;
+				match_len += strlen(commands->name) + 1 + 1;
 				match = realloc(match, match_len); malloc_check(match);
 
 				if (hits > 1)	/* don't prefix the first match with a space */
 					strlcat(match, " ", match_len);
 
-				strlcat(match, (char *)cname, match_len);
+				strlcat(match, commands->name, match_len);
+			}
+		} while((commands = commands->next));	/* iterate through the linked list */
+
+	if (strchr(line_buf, ' ')  &&  (strncmp(line_buf, "help ", 5) != 0)) {	/* only search for a keychain name if this is an already completed command (ie. there is space(s) in the line), AND it's not the 'help' command that has been completed previously */
+		/* search for a keychain name */
+		db_node = keychain->parent->children;
+		while (db_node) {
+			if (db_node->type == XML_ELEMENT_NODE) {	/* we only care about ELEMENT nodes */
+				cname = xmlGetProp(db_node, BAD_CAST "name");
+
+				if (strncmp(word, (char *)cname, word_len) == 0) {
+					hits++;
+
+					match_len += strlen((char *)cname) + 1 + 1;
+					match = realloc(match, match_len); malloc_check(match);
+
+					if (hits > 1)	/* don't prefix the first match with a space */
+						strlcat(match, " ", match_len);
+
+					strlcat(match, (char *)cname, match_len);
+				}
+
+				xmlFree(cname); cname = NULL;
 			}
 
-			xmlFree(cname); cname = NULL;
+			db_node = db_node->next;
 		}
-
-		db_node = db_node->next;
 	}
 
 
@@ -875,7 +888,8 @@ el_tab_complete(EditLine *e)
 		break;
 		case 1:
 			el_push(e, match + (int)word_len);	/* print the word's remaining characters (remaining: the ones without the part (at the beginning) that we've entered already) */
-			el_push(e, " ");			/* put a space after the completed word */
+			if (line_buf[line_buf_len - 1] != ' ')	/* if this is not an already completed word (ie. there is no space at the end), then ... */
+				el_push(e, " ");		/* ... put a space after the completed word */
 		break;
 		default:
 			printf("\n%s\n", match);	/* more than one match */
@@ -883,6 +897,7 @@ el_tab_complete(EditLine *e)
 		break;
 	}
 	free(line_buf);
+	free(line_buf_copy);
 	free(match);
 
 
