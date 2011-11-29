@@ -17,7 +17,7 @@
 .\"ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 .\"(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 .\"SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-.Dd Nov 24, 2011
+.Dd Nov 29, 2011
 .Dt KC 1
 .Os
 .Sh NAME
@@ -46,6 +46,13 @@ the
 command shows the available commands, and usage information for them.
 .Pp
 The CLI supports tab-completion for commands.
+.Pp
+.Em NOTE :
+Currently there is no character set conversion taking place in the program. You either input UTF-8 and be ready to display it, or you don't input anything other than US-ASCII. You would still be able to read the database after non UTF-8 (eg. latin2) input, but not in the way you would expect it. You can "repair" such databases, by exporting (see the
+.Cm xport
+command below), converting the plain text XML file to UTF-8, then importing the database. (see the
+.Cm import
+command below).
 .Ss PARAMETERS
 .Bl -tag -offset ||| -width |
 .It Fl k Ar file
