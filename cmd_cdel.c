@@ -94,9 +94,17 @@ cmd_cdel(const char *e_line, command *commands)
 			e_line = readline("");
 #endif
 			if (!e_line) {
-				perror("input");
 #ifndef _READLINE
 				el_reset(e);
+
+				/* re-enable the default prompt */
+				if (el_set(e, EL_PROMPT, prompt_str) != 0) {
+					perror("el_set(EL_PROMPT)");
+				}
+				/* re-enable history */
+				if (el_set(e, EL_HIST, history, eh) != 0) {
+					perror("el_set(EL_HIST)");
+				}
 #endif
 				return;
 			}

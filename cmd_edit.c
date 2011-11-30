@@ -99,10 +99,16 @@ cmd_edit(const char *e_line, command *commands)
 			key = xmlStrdup(BAD_CAST line);
 			free(line); line = NULL;
 		} else {
-			perror("input");
 #ifndef _READLINE
 			el_reset(e);
+
+			/* re-enable history */
+			if (el_set(e, EL_HIST, history, eh) != 0) {
+				perror("el_set(EL_HIST)");
+			}
 #endif
+			strlcpy(prompt_context, "", sizeof(prompt_context));
+
 			return;
 		}
 
@@ -133,10 +139,16 @@ cmd_edit(const char *e_line, command *commands)
 			value = xmlStrdup(BAD_CAST line);
 			free(line); line = NULL;
 		} else {
-			perror("input");
 #ifndef _READLINE
 			el_reset(e);
+
+			/* re-enable history */
+			if (el_set(e, EL_HIST, history, eh) != 0) {
+				perror("el_set(EL_HIST)");
+			}
 #endif
+			strlcpy(prompt_context, "", sizeof(prompt_context));
+
 			xmlFree(key); key = NULL;
 			return;
 		}

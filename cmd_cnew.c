@@ -76,10 +76,16 @@ cmd_cnew(const char *e_line, command *commands)
 			line[(long)(strlen(line) - 1)] = '\0';		/* remove the newline */
 #endif
 		} else {
-			perror("input");
 #ifndef _READLINE
 			el_reset(e);
+
+			/* re-enable history */
+			if (el_set(e, EL_HIST, history, eh) != 0) {
+				perror("el_set(EL_HIST)");
+			}
 #endif
+			strlcpy(prompt_context, "", sizeof(prompt_context));
+
 			return;
 		}
 

@@ -99,10 +99,16 @@ cmd_cren(const char *e_line, command *commands)
 #endif
 			cname = BAD_CAST line;
 		} else {
-			perror("input");
 #ifndef _READLINE
 			el_reset(e);
+
+			/* re-enable history */
+			if (el_set(e, EL_HIST, history, eh) != 0) {
+				perror("el_set(EL_HIST)");
+			}
 #endif
+			strlcpy(prompt_context, "", sizeof(prompt_context));
+
 			return;
 		}
 
