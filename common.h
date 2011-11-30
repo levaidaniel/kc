@@ -30,7 +30,7 @@
 
 #define	USAGE	"[-k database file] [-p password file] [-m cipher mode] [-b] [-v] [-h] [-d]"
 
-#define	VERSION	"kc 2.1.1"
+#define	VERSION	"kc 2.1.2"
 
 
 #ifndef _READLINE
