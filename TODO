@@ -1,0 +1,1 @@
++ list [count], only display 'count' number of entries, then wait for a keypress
