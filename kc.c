@@ -81,7 +81,7 @@ main(int argc, char *argv[])
 	BIO		*bio_b64 = NULL;
 	char		*db_buf = NULL;
 	ssize_t		ret = -1;
-	size_t		db_buf_size = 4096;
+	size_t		db_buf_size = 1024;
 	unsigned int	pos = 0;
 	unsigned char	key[128];
 	char		*pass = NULL, *rand_str = NULL;
@@ -178,6 +178,54 @@ main(int argc, char *argv[])
 		snprintf(db_filename, len, "%s/%s/%s", env_home, default_db_dir, default_db_filename);
 	}
 
+	if (pass_filename) {	/* we were given a password file name */
+		if (debug)
+			puts("opening password file");
+
+		/* read in the password from the specified file */
+		pass_file = open(pass_filename, O_RDONLY);
+		if (pass_file < 0) {
+			perror("open(password file)");
+			quit(EXIT_FAILURE);
+		}
+
+		pass = calloc(1, pass_size); malloc_check(pass);
+		pos = 0;
+		while (ret) {
+			/* if we've reached the size of 'pass', grow it */
+			if (pos >= pass_size) {
+				pass_size += 128;
+				pass = realloc(pass, pass_size); malloc_check(pass);
+			}
+
+			ret = read(pass_file, pass + pos, pass_size - pos);
+			if (ret < 0) {
+				perror("read(password file)");
+				break;
+			} else
+				pos += (unsigned int)ret;
+		}
+		pass[pos] = '\0';
+		if (strrchr(pass, '\n'))
+			pass[pos - 1] = '\0';		/* strip the newline character */
+
+		if (close(pass_file) < 0)
+			perror("close(password file)");
+	} else {
+		if(stat(db_filename, &st) == 0) /* if db_filename exists */
+			strlcpy(pass_prompt, "Password: ", 15);
+		else
+			strlcpy(pass_prompt, "New password: ", 15);
+
+		/* ask for the password */
+		pass = malloc(pass_maxlen + 1); malloc_check(pass);
+		readpassphrase(pass_prompt, pass, pass_maxlen + 1, RPP_ECHO_OFF | RPP_REQUIRE_TTY);
+	}
+	/*
+	if (debug)
+		printf("Password: '%s'\n", pass);
+	*/
+
 	if(stat(db_filename, &st) == 0) {	/* if db_filename exists */
 		if(!S_ISLNK(st.st_mode)  &&  !S_ISREG(st.st_mode)) {
 			printf("'%s' is not a regular file or a link!\n", db_filename);
@@ -185,7 +233,7 @@ main(int argc, char *argv[])
 		}
 		printf("Opening '%s'\n", db_filename);
 
-		db_file = open(db_filename, O_RDONLY);
+		db_file = open(db_filename, O_RDWR);
 		if (db_file < 0) {
 			perror("open(database file)");
 			quit(EXIT_FAILURE);
@@ -208,8 +256,6 @@ main(int argc, char *argv[])
 			strlcpy((char *)salt, (const char *)rbuf, sizeof(salt));
 
 		free(rbuf);
-
-		strlcpy(pass_prompt, "Password: ", 15);
 	} else {
 		printf("Creating '%s'\n", db_filename);
 
@@ -243,8 +289,10 @@ main(int argc, char *argv[])
 		if (debug)
 			printf("iv='%s'\nsalt='%s'\n", iv, salt);
 
-		strlcpy(pass_prompt, "New password: ", 15);
+		write(db_file, iv, sizeof(iv) - 1);
+		write(db_file, salt, sizeof(salt) - 1);
 	}
+
 
 	if (flock(db_file, LOCK_NB | LOCK_EX) < 0) {
 		if (debug)
@@ -253,58 +301,6 @@ main(int argc, char *argv[])
 		puts("Could not lock the database file!\nMaybe another instance is using that database?");
 		quit(EXIT_FAILURE);
 	}
-
-	if (pass_filename) {	/* we were given a password file name */
-		if (debug)
-			puts("opening password file");
-
-		/* read in the password from the specified file */
-		pass_file = open(pass_filename, O_RDONLY);
-		if (pass_file < 0) {
-			perror("open(password file)");
-			quit(EXIT_FAILURE);
-		}
-
-		pass = calloc(1, pass_size); malloc_check(pass);
-		pos = 0;
-		while (ret) {
-			/* if we've reached the size of 'pass', grow it */
-			if (pos >= pass_size) {
-				pass_size += 128;
-				pass = realloc(pass, pass_size); malloc_check(pass);
-			}
-
-			ret = read(pass_file, pass + pos, pass_size - pos);
-			if (ret < 0) {
-				perror("read(password file)");
-				break;
-			} else
-				pos += (unsigned int)ret;
-		}
-		pass[pos] = '\0';
-		if (strrchr(pass, '\n'))
-			pass[pos - 1] = '\0';		/* strip the newline character */
-
-		close(pass_file);
-		if (debug)
-			puts("closed password file");
-	} else {
-		/* ask for the password */
-		pass = malloc(pass_maxlen + 1); malloc_check(pass);
-		readpassphrase(pass_prompt, pass, pass_maxlen + 1, RPP_ECHO_OFF | RPP_REQUIRE_TTY);
-	}
-	/*
-	if (debug)
-		printf("Password: '%s'\n", pass);
-	*/
-
-	/*
-	 * we'll write the IV and salt here, after we got a password,
-	 * so when the user interrupts the password prompt, we won't end up
-	 * with a messed up db file, which only contains the salt and the IV.
-	 */
-	write(db_file, iv, sizeof(iv) - 1);
-	write(db_file, salt, sizeof(salt) - 1);
 
 
 	bio_file = BIO_new_file(db_filename, "r+");
@@ -362,30 +358,53 @@ main(int argc, char *argv[])
 	/* read in the database file to a buffer */
 	db_buf = calloc(1, db_buf_size); malloc_check(db_buf);
 	pos = 0;
-	while(!BIO_eof(bio_chain)) {
+	do {
 		/* if we've reached the size of 'db_buf', grow it */
-		if (pos >= db_buf_size) {
-			db_buf_size += 4096;
+		if (db_buf_size <= pos) {
+			db_buf_size += 1024;
 			db_buf = realloc(db_buf, db_buf_size); malloc_check(db_buf);
 		}
 
 		ret = BIO_read(bio_chain, db_buf + pos, (int)(db_buf_size - pos));
-		pos += (unsigned int)ret;
+		if (debug)
+			printf("BIO_read(): %d\n", (unsigned int)ret);
 		switch (ret) {
 			case 0:
+				if (BIO_should_retry(bio_chain)) {
+					if (debug)
+						puts("read delay");
+
+					sleep(1);
+					continue;
+				}
 			break;
 			case -1:
-				perror("read()");
-				quit(EXIT_FAILURE);
+				if (BIO_should_retry(bio_chain)) {
+					if (debug)
+						puts("read delay");
+
+					sleep(1);
+					continue;
+				} else {
+					if (debug)
+						perror("BIO_read() error (don't retry)");
+
+					puts("There was an error while trying to read the database!");
+				}
 			break;
 			case -2:
 				if (debug)
 					perror("unsupported operation");
+
+				puts("There was an error while trying to read the database!");
 			break;
 			default:
+				pos += (unsigned int)ret;
+				if (debug)
+					printf("pos: %d\n", pos);
 			break;
 		}
-	}
+	} while (ret > 0);
 
 	if (debug)
 		printf("read %d bytes\n", pos);

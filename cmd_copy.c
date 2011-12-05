@@ -91,6 +91,7 @@ cmd_copy(const char *e_line, command *commands)
 
 			/* remove the node itself */
 			xmlUnlinkNode(db_node);
+			xmlFreeNode(db_node);
 		}
 
 		/* add the new entry to the destination keychain */

@@ -47,6 +47,7 @@ cmd_quit(const char *e_line, command *commands)
 #ifndef _READLINE
 	int		e_count = 0;
 #endif
+	char		*line = NULL;
 
 
 	if (dirty  &&  !batchmode) {
@@ -59,32 +60,45 @@ cmd_quit(const char *e_line, command *commands)
 		if (el_set(e, EL_PROMPT, el_prompt_null) != 0) {
 			perror("el_set(EL_PROMPT)");
 		}
-
-		printf("Do you want to write the changes? <yes/no> ");
 #endif
 
+		do {
 #ifndef _READLINE
-		e_line = el_gets(e, &e_count);
+			printf("Do you want to write the changes? <yes/no> ");
+			e_line = el_gets(e, &e_count);
 #else
-		e_line = readline("Do you want to write the changes? <yes/no> ");
+			e_line = readline("Do you want to write the changes? <yes/no> ");
 #endif
-		if (!e_line) {
+			if (!e_line) {
 #ifndef _READLINE
-			el_reset(e);
+				el_reset(e);
 
-			/* re-enable the default prompt */
-			if (el_set(e, EL_PROMPT, prompt_str) != 0) {
-				perror("el_set(EL_PROMPT)");
-			}
-			/* re-enable history */
-			if (el_set(e, EL_HIST, history, eh) != 0) {
-				perror("el_set(EL_HIST)");
-			}
+				/* re-enable the default prompt */
+				if (el_set(e, EL_PROMPT, prompt_str) != 0) {
+					perror("el_set(EL_PROMPT)");
+				}
+				/* re-enable history */
+				if (el_set(e, EL_HIST, history, eh) != 0) {
+					perror("el_set(EL_HIST)");
+				}
 #endif
-			return;
-		}
+				return;
+			}
 
-		if (strncmp(e_line, "yes", 3) == 0)
+			line = strdup(e_line);
+
+#ifndef _READLINE
+			line[(long)(strlen(line) - 1)] = '\0';	/* remove the newline */
+#endif
+
+		} while (	strcasecmp(line, "yes") != 0  &&
+				strcasecmp(line, "y") != 0  &&
+				strcasecmp(line, "no") != 0  &&
+				strcasecmp(line, "n") != 0);
+
+		if (	strcasecmp(line, "yes") == 0  ||
+			strcasecmp(line, "y") == 0)
+
 			cmd_write(NULL, NULL);
 		else
 			puts("Changes were NOT saved.");

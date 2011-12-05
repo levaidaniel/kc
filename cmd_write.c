@@ -33,6 +33,7 @@ extern xmlDocPtr	db;
 extern char		dirty;
 extern BIO		*bio_chain;
 
+extern int		db_file;
 
 void
 cmd_write(const char *e_line, command *commands)
@@ -40,7 +41,7 @@ cmd_write(const char *e_line, command *commands)
 	xmlSaveCtxtPtr		xml_save = NULL;
 	xmlBufferPtr		xml_buf = NULL;
 
-	int			ret = 0;
+	int			ret = 0, remaining = 0;
 
 
 	xml_buf = xmlBufferCreate();
@@ -50,32 +51,74 @@ cmd_write(const char *e_line, command *commands)
 		xmlSaveDoc(xml_save, db);
 		xmlSaveFlush(xml_save);
 		if (debug)
-			printf("xml_buf->content:\n'%s'\n", xmlBufferContent(xml_buf));
+			printf("xml_buf content:\n'%s'(%d)\n", xmlBufferContent(xml_buf), (int)xmlBufferLength(xml_buf));
 		xmlSaveClose(xml_save);
 
 		BIO_reset(bio_chain);		/* we must reset the cipher BIO to work after subsequent calls to cmd_write() */
 		BIO_seek(bio_chain, 32);	/* seek after the IV and salt (both 16 bytes) */
 
-		ret = BIO_write(bio_chain, xml_buf->content, (int)xml_buf->use);
-		if (debug)
-			printf("wrote %d bytes\n", ret);
-		switch (ret) {
-			case -2:
-				if (debug)
-					puts("unsupported operation!");
-			break;
+		remaining = xmlBufferLength(xml_buf);
+		while (remaining > 0) {
+			ret = BIO_write(bio_chain, xmlBufferContent(xml_buf), remaining);
+
+			if (ret <= 0) {
+				if (BIO_should_retry(bio_chain)) {
+					if (debug)
+						puts("write delay");
+
+					sleep(1);
+					continue;
+				} else {
+					if (debug)
+						puts("BIO_write() error (don't retry)");
+
+					puts("There was an error while trying to save the XML document!");
+
+					break;
+				}
+			}
+
+			remaining -= ret;
+
+			if (debug) {
+				printf("wrote: %d\n", ret);
+				printf("remaining: %d\n", remaining);
+			}
 		}
 
 		do {
-			BIO_flush(bio_chain);
-			if (debug)
-				puts("flushed bio_chain");
-		} while(BIO_wpending(bio_chain));
+			if (BIO_flush(bio_chain) == 1) {
+				if (debug)
+					puts("flushed bio_chain");
+			} else {
+				if (BIO_should_retry(bio_chain)) {
+					if (debug)
+						puts("flush delay");
+
+					sleep(1);
+					continue;
+				} else {
+					if (debug)
+						puts("BIO_should_retry() is false");
+
+					puts("There was an error while trying to save the XML document!");
+
+					break;
+				}
+			}
+		} while(BIO_wpending(bio_chain) > 0);
+
+		ftruncate(db_file, BIO_tell(bio_chain));
+		if (debug)
+			printf("db_file size -> %d\n", BIO_tell(bio_chain));
 
 		xmlBufferFree(xml_buf);
 
 		dirty = 0;
 	} else {
-		puts("XML save error");
+		if (debug)
+			puts("xmlSaveToBuffer() error");
+
+		puts("There was an error while trying to save the XML document!");
 	}
 } /* cmd_write() */
