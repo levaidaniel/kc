@@ -7,7 +7,7 @@ if [ ! -f common.h ];then
 	exit 1;
 fi
 
-VERSION=$(fgrep VERSION common.h |cut -f3 |cut -d' ' -f2 |tr -d '"')
+VERSION=$(fgrep VERSION common.h |cut -f3 |tr -d '"')
 
 rm -Rf ../kc-"${VERSION}"
 svn export . ../kc-"${VERSION}"

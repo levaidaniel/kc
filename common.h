@@ -28,9 +28,9 @@
 #endif
 
 
+#define	NAME	"kc"
+#define	VERSION	"2.1.3"
 #define	USAGE	"[-k database file] [-p password file] [-m cipher mode] [-b] [-v] [-h] [-d]"
-
-#define	VERSION	"kc 2.1.3"
 
 
 #ifndef _READLINE
