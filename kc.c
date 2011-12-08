@@ -56,7 +56,7 @@ xmlNodePtr	keychain = NULL;
 
 int		db_file = -1;
 
-char		dirty = 0, batchmode = 0;
+unsigned char	dirty = 0, batchmode = 0, readonly = 0;
 
 #ifndef _READLINE
 	EditLine	*e = NULL;
@@ -107,10 +107,13 @@ main(int argc, char *argv[])
 
 
 	debug = 0;
-	while ((c = getopt(argc, argv, "k:p:m:bvhd")) != -1)
+	while ((c = getopt(argc, argv, "k:rp:m:bvhd")) != -1)
 		switch (c) {
 			case 'k':
 				db_filename = optarg;
+			break;
+			case 'r':
+				readonly = 1;
 			break;
 			case 'p':
 				pass_filename = optarg;
@@ -128,6 +131,7 @@ main(int argc, char *argv[])
 			case 'h':
 				printf(	"%s %s\n"
 					"-k: specify a non-default database file\n"
+					"-r: open database read-only\n"
 					"-p: read password from file.\n"
 					"-m: cipher mode to use: cbc (default), cfb128, ofb.\n"
 					"-b: batch mode: disable some features to enable commands from stdin.\n"
@@ -294,13 +298,14 @@ main(int argc, char *argv[])
 	}
 
 
-	if (flock(db_file, LOCK_NB | LOCK_EX) < 0) {
-		if (debug)
-			puts("flock(database file)");
+	if (readonly == 0)
+		if (flock(db_file, LOCK_NB | LOCK_EX) < 0) {
+			if (debug)
+				puts("flock(database file)");
 
-		puts("Could not lock the database file!\nMaybe another instance is using that database?");
-		quit(EXIT_FAILURE);
-	}
+			puts("Could not lock the database file!\nMaybe another instance is using that database?");
+			quit(EXIT_FAILURE);
+		}
 
 
 	bio_file = BIO_new_file(db_filename, "r+");
@@ -584,6 +589,8 @@ main(int argc, char *argv[])
 	/* create the command list */
 	commands_init(&commands_first);
 
+	if (readonly == 1)
+		puts("Database is read-only!");
 
 	/* command loop */
 	do {
@@ -694,7 +701,7 @@ prompt_str(void)
 	prompt_len = (size_t)xmlStrlen(cname) + 2 + sizeof(prompt_context) + 2 + 1;
 	prompt = realloc(prompt, prompt_len); malloc_check(prompt);
 
-	snprintf(prompt, prompt_len, "%s%% %s> ", cname, prompt_context);
+	snprintf(prompt, prompt_len, "%s%% %s%c ", cname, prompt_context, (readonly == 0 ? '>':'|'));
 	xmlFree(cname); cname = NULL;
 
 	return(prompt);
@@ -734,71 +741,6 @@ print_bio_chain(BIO *bio_chain)
 	}
 	puts("");
 } /* print_bio_chain */
-
-
-char *
-get_random_str(size_t length, char alnum)
-{
-	int		i = 0;
-	int		rnd_file = -1;
-#ifndef _LINUX
-	char		*rnd_dev = "/dev/random";
-#else
-	char		*rnd_dev = "/dev/urandom";
-#endif
-	char		*tmp = NULL;
-	ssize_t		ret = -1;
-	char		*rnd_str = NULL;
-
-
-	rnd_file = open(rnd_dev, O_RDONLY);
-	if (rnd_file < 0) {
-		printf("Error opening %s!", rnd_dev);
-		perror("open()");
-		return(NULL);
-	}
-
-
-	rnd_str = malloc((size_t)length + 1); malloc_check(rnd_str);
-	tmp = malloc(1); malloc_check(tmp);
-
-	read(rnd_file, tmp, 1);
-	for (i=0; i < (int)length; i++) {
-		if (alnum)	/* only alphanumeric was requested */
-			while (	(*tmp < 65  ||  *tmp > 90)  &&
-				(*tmp < 97  ||  *tmp > 122)  &&
-				(*tmp < 48  ||  *tmp > 57)) {
-
-				ret = read(rnd_file, tmp, 1);
-				if (ret < 0) {
-					perror("read(random device)");
-					return(NULL);
-				}
-			}
-		else
-			/* give anything printable */
-			while (	*tmp < 33  ||  *tmp > 126) {
-
-				ret = read(rnd_file, tmp, 1);
-				if (ret < 0) {
-					perror("read(random device)");
-					return(NULL);
-				}
-			}
-
-		rnd_str[i] = *tmp;		/* store the value */
-		*tmp = '\0';		/* reset the value */
-	}
-
-	free(tmp); tmp = NULL;
-
-	rnd_str[(long)length] = '\0';
-
-	close(rnd_file);
-
-
-	return(rnd_str);
-} /* get_random_str() */
 
 
 #ifndef _READLINE

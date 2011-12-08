@@ -23,6 +23,8 @@
 */
 
 
+#include <fcntl.h>
+
 #include "common.h"
 
 
@@ -194,3 +196,68 @@ _rl_push_buffer(void)
 	rl_redisplay();
 } /* _rl_push_buffer */
 #endif
+
+
+char *
+get_random_str(size_t length, char alnum)
+{
+        int		i = 0;
+        int		rnd_file = -1;
+ #ifndef _LINUX
+        char		*rnd_dev = "/dev/random";
+ #else
+        char		*rnd_dev = "/dev/urandom";
+ #endif
+        char		*tmp = NULL;
+        ssize_t		ret = -1;
+        char		*rnd_str = NULL;
+ 
+ 
+	rnd_file = open(rnd_dev, O_RDONLY);
+	if (rnd_file < 0) {
+		printf("Error opening %s!", rnd_dev);
+		perror("open()");
+		return(NULL);
+	}
+
+
+	rnd_str = malloc((size_t)length + 1); malloc_check(rnd_str);
+	tmp = malloc(1); malloc_check(tmp);
+
+	read(rnd_file, tmp, 1);
+	for (i=0; i < (int)length; i++) {
+		if (alnum)      /* only alphanumeric was requested */
+			while ( (*tmp < 65  ||  *tmp > 90)  &&
+				(*tmp < 97  ||  *tmp > 122)  &&
+				(*tmp < 48  ||  *tmp > 57)) {
+
+				ret = read(rnd_file, tmp, 1);
+				if (ret < 0) {
+					perror("read(random device)");
+					return(NULL);
+				}
+			}
+		else
+			/* give anything printable */
+			while (*tmp < 33  ||  *tmp > 126) {
+
+				ret = read(rnd_file, tmp, 1);
+				if (ret < 0) {
+					perror("read(random device)");
+					return(NULL);
+				}
+			}
+
+		rnd_str[i] = *tmp;              /* store the value */
+		*tmp = '\0';            /* reset the value */
+	}
+
+	free(tmp); tmp = NULL;
+
+	rnd_str[(long)length] = '\0';
+
+	close(rnd_file);
+
+
+	return(rnd_str);
+} /* get_random_str() */
