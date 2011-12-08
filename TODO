@@ -1,2 +1,0 @@
-+ read-only open of database if the db is already locked.
-+ list [count], only display 'count' number of entries, then wait for a keypress
