@@ -2,12 +2,15 @@
 set -e
 
 
+OPTIONS='install'
+
+MAKE="make $@"
 case "$(uname -s)" in
 	Linux)
-		make -f GNUMakefile install
+		${MAKE} -f GNUMakefile ${OPTIONS}
 	;;
 	*BSD)
-		make -f Makefile install
+		${MAKE} -f Makefile ${OPTIONS}
 	;;
 	*)
 		echo "unknown system."
