@@ -44,7 +44,7 @@ cmd_list(const char *e_line, command *commands)
 	char		*line = NULL;
 
 
-	if (debug) {
+	if (getenv("KC_DEBUG")) {
 		xmlSaveFormatFileEnc("-", db, "UTF-8", XML_SAVE_FORMAT);
 		printf("#BEGIN\n");
 	}
@@ -79,6 +79,6 @@ cmd_list(const char *e_line, command *commands)
 
 	free(line); line = NULL;
 
-	if (debug)
+	if (getenv("KC_DEBUG"))
 		printf("#END\n");
 } /* cmd_list() */

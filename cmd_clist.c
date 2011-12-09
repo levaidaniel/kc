@@ -43,7 +43,7 @@ cmd_clist(const char *e_line, command *commands)
 
 	db_node = keychain->parent->children;
 
-	if (debug)
+	if (getenv("KC_DEBUG"))
 		printf("#BEGIN\n");
 
 	while (db_node) {
@@ -56,6 +56,6 @@ cmd_clist(const char *e_line, command *commands)
 		db_node = db_node->next;
 	}
 
-	if (debug)
+	if (getenv("KC_DEBUG"))
 		printf("#END\n");
 } /* cmd_clist() */

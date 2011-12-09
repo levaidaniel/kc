@@ -94,7 +94,7 @@ cmd_searchre(const char *e_line, command *commands)
 
 	re_study = pcre_study(re, 0, &error);
 	if (!re_study) {
-		if (debug)
+		if (getenv("KC_DEBUG"))
 			puts("pcre_study(): could not optimize regexp");
 
 		if (!error) {
@@ -122,7 +122,7 @@ cmd_searchre(const char *e_line, command *commands)
 		else
 			db_node = search_keychain->children;
 
-		if (debug)
+		if (getenv("KC_DEBUG"))
 			printf("searching for: '%s' in '%s' chain\n", pattern, xmlGetProp(search_keychain, BAD_CAST "name"));
 
 		idx = 0;
@@ -134,11 +134,11 @@ cmd_searchre(const char *e_line, command *commands)
 
 			key = xmlGetProp(db_node, BAD_CAST "name");
 
-			if (debug)
+			if (getenv("KC_DEBUG"))
 				printf("name=%s", key);
 
 			if (pcre_exec(re, re_study, (const char *)key, xmlStrlen(key), 0, 0, ovector, 30) >= 0) {
-				if (debug)
+				if (getenv("KC_DEBUG"))
 					printf(" <=== hit\n");
 
 				hits++;
@@ -150,7 +150,7 @@ cmd_searchre(const char *e_line, command *commands)
 				printf("%s\n", key);	/* this is the name of the entry */
 				xmlFree(key); key = NULL;
 			} else
-				if (debug)
+				if (getenv("KC_DEBUG"))
 					puts("");
 
 			idx++;

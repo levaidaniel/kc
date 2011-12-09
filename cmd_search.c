@@ -82,7 +82,7 @@ cmd_search(const char *e_line, command *commands)
 		else
 			db_node = search_keychain->children;
 
-		if (debug)
+		if (getenv("KC_DEBUG"))
 			printf("searching for: '%s' in '%s' chain\n", pattern, xmlGetProp(search_keychain, BAD_CAST "name"));
 
 		idx = 0;
@@ -94,12 +94,12 @@ cmd_search(const char *e_line, command *commands)
 
 			key = xmlGetProp(db_node, BAD_CAST "name");
 
-			if (debug)
+			if (getenv("KC_DEBUG"))
 				printf("name=%s", key);
 
 			search = xmlStrstr(key, pattern);
 			if (search) {
-				if (debug)
+				if (getenv("KC_DEBUG"))
 					printf(" <=== hit\n");
 
 				hits++;
@@ -111,7 +111,7 @@ cmd_search(const char *e_line, command *commands)
 				printf("%s\n", key);	/* this is the name of the entry */
 				xmlFree(key); key = NULL;
 			} else
-				if (debug)
+				if (getenv("KC_DEBUG"))
 					puts("");
 
 			idx++;

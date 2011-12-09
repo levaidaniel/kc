@@ -50,7 +50,7 @@ cmd_write(const char *e_line, command *commands)
 	if (xml_save) {
 		xmlSaveDoc(xml_save, db);
 		xmlSaveFlush(xml_save);
-		if (debug)
+		if (getenv("KC_DEBUG"))
 			printf("xml_buf content:\n'%s'(%d)\n", xmlBufferContent(xml_buf), (int)xmlBufferLength(xml_buf));
 		xmlSaveClose(xml_save);
 
@@ -63,13 +63,13 @@ cmd_write(const char *e_line, command *commands)
 
 			if (ret <= 0) {
 				if (BIO_should_retry(bio_chain)) {
-					if (debug)
+					if (getenv("KC_DEBUG"))
 						puts("write delay");
 
 					sleep(1);
 					continue;
 				} else {
-					if (debug)
+					if (getenv("KC_DEBUG"))
 						puts("BIO_write() error (don't retry)");
 
 					puts("There was an error while trying to save the XML document!");
@@ -80,7 +80,7 @@ cmd_write(const char *e_line, command *commands)
 
 			remaining -= ret;
 
-			if (debug) {
+			if (getenv("KC_DEBUG")) {
 				printf("wrote: %d\n", ret);
 				printf("remaining: %d\n", remaining);
 			}
@@ -88,17 +88,17 @@ cmd_write(const char *e_line, command *commands)
 
 		do {
 			if (BIO_flush(bio_chain) == 1) {
-				if (debug)
+				if (getenv("KC_DEBUG"))
 					puts("flushed bio_chain");
 			} else {
 				if (BIO_should_retry(bio_chain)) {
-					if (debug)
+					if (getenv("KC_DEBUG"))
 						puts("flush delay");
 
 					sleep(1);
 					continue;
 				} else {
-					if (debug)
+					if (getenv("KC_DEBUG"))
 						puts("BIO_should_retry() is false");
 
 					puts("There was an error while trying to save the XML document!");
@@ -109,14 +109,14 @@ cmd_write(const char *e_line, command *commands)
 		} while(BIO_wpending(bio_chain) > 0);
 
 		ftruncate(db_file, BIO_tell(bio_chain));
-		if (debug)
+		if (getenv("KC_DEBUG"))
 			printf("db_file size -> %d\n", BIO_tell(bio_chain));
 
 		xmlBufferFree(xml_buf);
 
 		dirty = 0;
 	} else {
-		if (debug)
+		if (getenv("KC_DEBUG"))
 			puts("xmlSaveToBuffer() error");
 
 		puts("There was an error while trying to save the XML document!");

@@ -92,7 +92,7 @@ cmd_new(const char *e_line, command *commands)
 			return;
 		}
 	}
-	if (debug)
+	if (getenv("KC_DEBUG"))
 		printf("new key is '%s'\n", key);
 
 
@@ -123,7 +123,7 @@ cmd_new(const char *e_line, command *commands)
 
 		return;
 	}
-	if (debug)
+	if (getenv("KC_DEBUG"))
 		printf("new value is '%s'\n", value);
 
 #ifndef _READLINE

@@ -106,8 +106,7 @@ main(int argc, char *argv[])
 	size_t		len = 0;
 
 
-	debug = 0;
-	while ((c = getopt(argc, argv, "k:rp:m:bvhd")) != -1)
+	while ((c = getopt(argc, argv, "k:rp:m:bvh")) != -1)
 		switch (c) {
 			case 'k':
 				db_filename = optarg;
@@ -136,12 +135,8 @@ main(int argc, char *argv[])
 					"-m: cipher mode to use: cbc (default), cfb128, ofb.\n"
 					"-b: batch mode: disable some features to enable commands from stdin.\n"
 					"-v: version\n"
-					"-h: this help\n"
-					"-d: show some debug output\n", argv[0], USAGE);
+					"-h: this help\n", argv[0], USAGE);
 				exit(EXIT_SUCCESS);
-			break;
-			case 'd':
-				debug = 1;
 			break;
 			default:
 				printf(	"%s %s\n", argv[0], USAGE);
@@ -166,7 +161,7 @@ main(int argc, char *argv[])
 				quit(EXIT_FAILURE);
 			}
 		} else {
-			if (debug)
+			if (getenv("KC_DEBUG"))
 				printf("creating '%s' directory\n", db_filename);
 
 			if(mkdir(db_filename, 0777) != 0) {
@@ -183,7 +178,7 @@ main(int argc, char *argv[])
 	}
 
 	if (pass_filename) {	/* we were given a password file name */
-		if (debug)
+		if (getenv("KC_DEBUG"))
 			puts("opening password file");
 
 		/* read in the password from the specified file */
@@ -226,7 +221,7 @@ main(int argc, char *argv[])
 		readpassphrase(pass_prompt, pass, pass_maxlen + 1, RPP_ECHO_OFF | RPP_REQUIRE_TTY);
 	}
 	/*
-	if (debug)
+	if (getenv("KC_DEBUG"))
 		printf("Password: '%s'\n", pass);
 	*/
 
@@ -269,7 +264,7 @@ main(int argc, char *argv[])
 			quit(EXIT_FAILURE);
 		}
 
-		if (debug)
+		if (getenv("KC_DEBUG"))
 			puts("generating salt and IV");
 
 		/* generate the IV and the salt. */
@@ -290,7 +285,7 @@ main(int argc, char *argv[])
 		strlcpy((char *)salt, rand_str, sizeof(salt));
 		free(rand_str);
 
-		if (debug)
+		if (getenv("KC_DEBUG"))
 			printf("iv='%s'\nsalt='%s'\n", iv, salt);
 
 		write(db_file, iv, sizeof(iv) - 1);
@@ -300,7 +295,7 @@ main(int argc, char *argv[])
 
 	if (readonly == 0)
 		if (flock(db_file, LOCK_NB | LOCK_EX) < 0) {
-			if (debug)
+			if (getenv("KC_DEBUG"))
 				puts("flock(database file)");
 
 			puts("Could not lock the database file!\nMaybe another instance is using that database?");
@@ -335,15 +330,15 @@ main(int argc, char *argv[])
 
 	/* turn on decoding */
 	if (strcmp(cipher_mode, "cfb128") == 0) {
-		if (debug)
+		if (getenv("KC_DEBUG"))
 			printf("using cipher mode: %s\n", cipher_mode);
 		BIO_set_cipher(bio_cipher, EVP_aes_256_cfb128(), key, iv, 0);
 	} else if (strcmp(cipher_mode, "ofb") == 0) {
-		if (debug)
+		if (getenv("KC_DEBUG"))
 			printf("using cipher mode: %s\n", cipher_mode);
 		BIO_set_cipher(bio_cipher, EVP_aes_256_ofb(), key, iv, 0);
 	} else {	/* the default is CBC */
-		if (debug)
+		if (getenv("KC_DEBUG"))
 			printf("using default cipher mode: %s\n", cipher_mode);
 		BIO_set_cipher(bio_cipher, EVP_aes_256_cbc(), key, iv, 0);
 	}
@@ -353,7 +348,7 @@ main(int argc, char *argv[])
 	free(pass); pass = NULL;
 
 
-	if (debug)
+	if (getenv("KC_DEBUG"))
 		print_bio_chain(bio_chain);
 
 
@@ -371,12 +366,12 @@ main(int argc, char *argv[])
 		}
 
 		ret = BIO_read(bio_chain, db_buf + pos, (int)(db_buf_size - pos));
-		if (debug)
+		if (getenv("KC_DEBUG"))
 			printf("BIO_read(): %d\n", (unsigned int)ret);
 		switch (ret) {
 			case 0:
 				if (BIO_should_retry(bio_chain)) {
-					if (debug)
+					if (getenv("KC_DEBUG"))
 						puts("read delay");
 
 					sleep(1);
@@ -385,33 +380,33 @@ main(int argc, char *argv[])
 			break;
 			case -1:
 				if (BIO_should_retry(bio_chain)) {
-					if (debug)
+					if (getenv("KC_DEBUG"))
 						puts("read delay");
 
 					sleep(1);
 					continue;
 				} else {
-					if (debug)
+					if (getenv("KC_DEBUG"))
 						perror("BIO_read() error (don't retry)");
 
 					puts("There was an error while trying to read the database!");
 				}
 			break;
 			case -2:
-				if (debug)
+				if (getenv("KC_DEBUG"))
 					perror("unsupported operation");
 
 				puts("There was an error while trying to read the database!");
 			break;
 			default:
 				pos += (unsigned int)ret;
-				if (debug)
+				if (getenv("KC_DEBUG"))
 					printf("pos: %d\n", pos);
 			break;
 		}
 	} while (ret > 0);
 
-	if (debug)
+	if (getenv("KC_DEBUG"))
 		printf("read %d bytes\n", pos);
 
 
@@ -423,22 +418,22 @@ main(int argc, char *argv[])
 
 	/* turn on encoding */
 	if (strcmp(cipher_mode, "cfb128") == 0) {
-		if (debug)
+		if (getenv("KC_DEBUG"))
 			printf("using cipher mode: %s\n", cipher_mode);
 		BIO_set_cipher(bio_cipher, EVP_aes_256_cfb128(), key, iv, 1);
 	} else if (strcmp(cipher_mode, "ofb") == 0) {
-		if (debug)
+		if (getenv("KC_DEBUG"))
 			printf("using cipher mode: %s\n", cipher_mode);
 		BIO_set_cipher(bio_cipher, EVP_aes_256_ofb(), key, iv, 1);
 	} else {	/* the default is CBC */
-		if (debug)
+		if (getenv("KC_DEBUG"))
 			printf("using default cipher mode: %s\n", cipher_mode);
 		BIO_set_cipher(bio_cipher, EVP_aes_256_cbc(), key, iv, 1);
 	}
 
 
 	if (pos == 0) {		/* empty file? */
-		if (debug)
+		if (getenv("KC_DEBUG"))
 			puts("empty database file");
 
 		/* create a new document */
@@ -474,7 +469,7 @@ main(int argc, char *argv[])
 		/* write the initial empty XML doc to the file */
 		cmd_write(NULL, NULL);
 	} else {
-		if (debug)
+		if (getenv("KC_DEBUG"))
 			db = xmlReadMemory(db_buf, (int)pos, NULL, "UTF-8", XML_PARSE_NONET | XML_PARSE_RECOVER);
 		else
 			db = xmlReadMemory(db_buf, (int)pos, NULL, "UTF-8", XML_PARSE_NONET | XML_PARSE_NOERROR | XML_PARSE_NOWARNING | XML_PARSE_RECOVER);
@@ -934,31 +929,33 @@ version(void)
 void
 quit(int retval)
 {
+	if (getenv("KC_DEBUG"))
+		puts("exiting...");
+
 	if (bio_chain) {
 		BIO_free_all(bio_chain);
-		if (debug)
+		if (getenv("KC_DEBUG"))
 			puts("closed bio_chain");
 	}
 
 	if (db_file) {
-		close(db_file);
-		if (debug)
-			puts("closed database file");
+		if (close(db_file) == 0) {
+			if (getenv("KC_DEBUG"))
+				puts("closed database file");
+		} else
+			perror("close(database file)");
 	}
-
-	if (debug)
-		puts("exiting...");
 
 #ifndef _READLINE
 	if (eh) {
 		history_end(eh);
-		if (debug)
+		if (getenv("KC_DEBUG"))
 			puts("closed editline history");
 	}
 
 	if (e) {
 		el_end(e);
-		if (debug)
+		if (getenv("KC_DEBUG"))
 			puts("closed editline");
 	}
 #endif

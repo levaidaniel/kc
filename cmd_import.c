@@ -55,8 +55,8 @@ cmd_import(const char *e_line, command *commands)
 		return;
 	}
 
-	if (debug)
-		db_new = xmlReadFile(import_filename, "UTF-8", XML_PARSE_NONET);
+	if (getenv("KC_DEBUG"))
+		db_new = xmlReadFile(import_filename, "UTF-8", XML_PARSE_NONET | XML_PARSE_RECOVER);
 	else
 		db_new = xmlReadFile(import_filename, "UTF-8", XML_PARSE_NONET | XML_PARSE_NOERROR | XML_PARSE_NOWARNING | XML_PARSE_RECOVER);
 	if (db_new) {

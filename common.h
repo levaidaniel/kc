@@ -30,7 +30,7 @@
 
 #define	NAME	"kc"
 #define	VERSION	"2.1.3"
-#define	USAGE	"[-k database file] [-r] [-p password file] [-m cipher mode] [-b] [-v] [-h] [-d]"
+#define	USAGE	"[-k database file] [-r] [-p password file] [-m cipher mode] [-b] [-v] [-h]"
 
 
 #ifndef _READLINE
@@ -41,9 +41,6 @@ int malloc_check(void *);
 char *get_random_str(size_t, char);
 void version(void);
 void quit(int);
-
-
-char		debug;
 
 
 #endif
