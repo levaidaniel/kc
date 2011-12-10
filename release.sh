@@ -12,5 +12,5 @@ VERSION=$(fgrep VERSION common.h |cut -f3 |tr -d '"')
 rm -Rf ../kc-"${VERSION}"
 svn export . ../kc-"${VERSION}"
 cd ..
-tar -zcf kc-"${VERSION}".tar.gz ./kc-"${VERSION}"
+tar -vzcf kc-"${VERSION}".tar.gz ./kc-"${VERSION}"
 rm -Rf ./kc-"${VERSION}"
