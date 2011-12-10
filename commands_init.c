@@ -62,6 +62,12 @@ commands_init(command **commands)
 		(*commands)->fn = cmd_copy;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
+		(*commands)->name = "cp";
+		(*commands)->usage = "cp <index> <keychain>";
+		(*commands)->help = "Alias of 'copy'.\nCopy a key in the current keychain to another keychain. 'index' is\nthe key's index to copy and 'keychain' is the destination keychain's\nindex number or name.";
+		(*commands)->fn = cmd_copy;
+		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
+		(*commands) = (*commands)->next;
 
 		(*commands)->name = "move";
 		(*commands)->usage = "move <index> <keychain>";
@@ -69,10 +75,22 @@ commands_init(command **commands)
 		(*commands)->fn = cmd_copy;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
+		(*commands)->name = "mv";
+		(*commands)->usage = "mv <index> <keychain>";
+		(*commands)->help = "Alias of 'move'.\nMove a key in the current keychain to another keychain. 'index' is\nthe key's index to move and 'keychain' is the destination keychain's\nindex number or name.";
+		(*commands)->fn = cmd_copy;
+		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
+		(*commands) = (*commands)->next;
 
 		(*commands)->name = "del";
 		(*commands)->usage = "del <index>";
 		(*commands)->help = "Delete a key from the current keychain. 'index' is the key's index\nnumber in the current keychain.";
+		(*commands)->fn = cmd_del;
+		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
+		(*commands) = (*commands)->next;
+		(*commands)->name = "rm";
+		(*commands)->usage = "rm <index>";
+		(*commands)->help = "Alias of 'del'.\nDelete a key from the current keychain. 'index' is the key's index\nnumber in the current keychain.";
 		(*commands)->fn = cmd_del;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
@@ -104,6 +122,12 @@ commands_init(command **commands)
 		(*commands)->fn = cmd_write;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
+		(*commands)->name = "save";
+		(*commands)->usage = "save";
+		(*commands)->help = "Alias of 'write'.\nSave the current database.";
+		(*commands)->fn = cmd_write;
+		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
+		(*commands) = (*commands)->next;
 
 		(*commands)->name = "import";
 		(*commands)->usage = "import <filename>";
@@ -116,6 +140,12 @@ commands_init(command **commands)
 	(*commands)->name = "list";
 	(*commands)->usage = "list [keychain]";
 	(*commands)->help = "List the keys in the current keychain or if specified, in the\nkeychain named 'keychain'. Every key gets prefixed by its index\nnumber. 'keychain' can be an index number or the keychain's name.";
+	(*commands)->fn = cmd_list;
+	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
+	(*commands) = (*commands)->next;
+	(*commands)->name = "ls";
+	(*commands)->usage = "ls [keychain]";
+	(*commands)->help = "Alias of 'list'.\nList the keys in the current keychain or if specified, in the\nkeychain named 'keychain'. Every key gets prefixed by its index\nnumber. 'keychain' can be an index number or the keychain's name.";
 	(*commands)->fn = cmd_list;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
@@ -200,6 +230,12 @@ commands_init(command **commands)
 	(*commands)->name = "quit";
 	(*commands)->usage = "quit";
 	(*commands)->help = "Quit the program. If the database is modified, then ask if it\nshould be saved.";
+	(*commands)->fn = cmd_quit;
+	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
+	(*commands) = (*commands)->next;
+	(*commands)->name = "exit";
+	(*commands)->usage = "exit";
+	(*commands)->help = "Alias of 'quit'.\nQuit the program. If the database is modified, then ask if it\nshould be saved.";
 	(*commands)->fn = cmd_quit;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;

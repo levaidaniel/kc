@@ -92,6 +92,8 @@ List the keys in the current keychain or if specified, in the keychain named
 Every key gets prefixed by its index number.
 .Ar keychain
 can be an index number or the keychain's name.
+.It Cm ls Op keychain
+Alias of 'list'.
 .It Cm edit Ar index
 Edit a key in the current keychain.
 .Ar index
@@ -142,6 +144,16 @@ Copy a key in the current keychain to another keychain.
 is the key's index to copy and
 .Ar keychain
 is the destination keychain's index number or name.
+.It Cm cp Ar index Ar keychain
+Alias of 'copy'.
+.It Cm move Ar index Ar keychain
+Move a key in the current keychain to another keychain.
+.Ar index
+is the key's index to move and
+.Ar keychain
+is the destination keychain's index number or name.
+.It Cm mv Ar index Ar keychain
+Alias of 'move'.
 .It Cm cren Ar keychain
 Rename a keychain.
 .Ar keychain
@@ -150,6 +162,8 @@ can be an index number or the keychain's name.
 Delete a key from the current keychain.
 .Ar index
 is the key's index number in the current keychain.
+.It Cm rm Ar index
+Alias of 'del'.
 .It Cm help Op command
 Print application help or describe a
 .Ar command .
@@ -173,6 +187,8 @@ database. (see command
 The current database will be overwritten if saved.
 .It Cm quit
 Quit the program. If the database is modified, then ask if it should be saved.
+.It Cm exit
+Alias of 'quit'.
 .It Cm random Op length
 Print a random string with
 .Ar length
@@ -183,6 +199,8 @@ is 8.
 Display the program version.
 .It Cm write
 Save the current database.
+.It Cm save
+Alias of 'write'.
 .El
 .Sh AUTHOR
 .Nm
