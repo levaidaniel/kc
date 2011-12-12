@@ -36,7 +36,7 @@ extern char		dirty;
 void
 cmd_copy(const char *e_line, command *commands)
 {
-	xmlNodePtr	db_node = NULL, db_node_c = NULL, db_node_prev = NULL;
+	xmlNodePtr	db_node = NULL, db_node_new = NULL, db_node_c = NULL, db_node_prev = NULL;
 	xmlChar		*cname = NULL;
 
 	char		*line = NULL;
@@ -48,7 +48,8 @@ cmd_copy(const char *e_line, command *commands)
 	line = strdup(e_line);
 
 	cmd = strtok(line, " ");		/* get the command name */
-	if (strcmp(cmd, "move") == 0)
+	if (	strcmp(cmd, "move") == 0  ||
+		strcmp(cmd, "mv") == 0)
 		move = 1;
 
 	idx_str = strtok(NULL, " ");
@@ -83,24 +84,27 @@ cmd_copy(const char *e_line, command *commands)
 		free(line); line = NULL;
 		return;
 	} else {
+		/* duplicate the db_node which is to be copied */
+		db_node_new = xmlCopyNode(db_node, 2);
+		if (!db_node_new) {
+			puts("xmlCopyNode() error!");
+			free(line); line = NULL;
+			return;
+		}
+
 		if (move) {	/* unlink from the source keychain */
 			/* remove the adjacent 'text' node, which is the indent and newline */
 			db_node_prev = db_node->prev;
 			xmlUnlinkNode(db_node_prev);
 			xmlFreeNode(db_node_prev);
 
-			/* remove the node itself */
-			xmlUnlinkNode(db_node);
+			xmlUnlinkNode(db_node);	/* remove the node itself */
 		}
 
 		/* add the new entry to the destination keychain */
-		/* make the XML document prettttyyy */
-		xmlAddChild(db_node_c, xmlNewText(BAD_CAST "\t"));
-
-		xmlAddChild(db_node_c, db_node);
-
-		/* make the XML document prettttyyy */
-		xmlAddChild(db_node_c, xmlNewText(BAD_CAST "\n\t"));
+		xmlAddChild(db_node_c, xmlNewText(BAD_CAST "\t"));	/* make the XML document prettttyyy */
+		xmlAddChild(db_node_c, db_node_new);
+		xmlAddChild(db_node_c, xmlNewText(BAD_CAST "\n\t"));	/* make the XML document prettttyyy */
 
 
 		dirty = 1;
