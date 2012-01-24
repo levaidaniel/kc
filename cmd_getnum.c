@@ -84,7 +84,6 @@ cmd_getnum(int idx, size_t space)
 		rl_prep_terminal(1);
 #endif
 
-		line_len = 0;
 		idx = 1;	/* from hereafter 'idx' will be our requested line number */
 		while (rc != 'q') {	/* quit for 'q' or 'Enter' */
 			if (batchmode)
