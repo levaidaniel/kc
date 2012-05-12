@@ -48,7 +48,7 @@ command shows the available commands, and usage information for them.
 The CLI supports tab-completion for commands and keychains.
 .Pp
 .Em NOTE :
-Currently there is no character set conversion taking place in the program. You either input UTF-8 and be ready to display it, or you don't input anything other than US-ASCII. You would still be able to read the database after non UTF-8 (eg. latin2) input, but not in the way you would expect it. You can "repair" such databases, by exporting (see the
+Currently there is no character set conversion taking place in the program. You either input UTF-8 and be ready to display it, or you don't input anything other than US-ASCII. You would still be able to read the database after not UTF-8 nor US-ASCII (eg.: latin2) input, but not in the way you would expect it. You can "repair" such databases, by exporting (see the
 .Cm xport
 command below), converting the plain text XML file to UTF-8, then importing the database. (see the
 .Cm import
@@ -65,11 +65,9 @@ Read password from
 .It Fl m Ar mode
 Cipher mode to use.
 .Ar mode
-can be one of 'cbc' (the default), 'cfb128' or 'ofb'.
-.Em NOTE :
-If you use 'cfb128' or 'ofb', there is no specific sign if you enter a wrong password during the opening of a database; in this case the database would seem to be corrupt after decrypting, and
-.Nm
-will not be able to open it.
+can be one of 'cbc' (the default), 'cfb128' or 'ofb'. More information is in the
+.Em CIPHERS
+section.
 .It Fl b
 Batch mode. Disable some features to enable commands from standard input.
 .It Fl v
@@ -79,6 +77,8 @@ Display help.
 .El
 .Ss COMMANDS
 .Bl -tag -offset ||| -width |
+.Pp
+These commands can be used in the CLI:
 .It Cm new Op name
 Create a new key in the current keychain. If
 .Ar name
@@ -202,6 +202,15 @@ Save the current database.
 .It Cm save
 Alias of 'write'.
 .El
+.Ss CIPHERS
+All ciphers use 128 bit keys, generated with a KDF (key-derivation function) from the supplied password, an IV (initialization vector) and a salt. Both the IV and the salt are 128 bits long and read from the host's specific random device (/dev/urandom on Linux and /dev/random on everything else).
+.Sh CAVEATS
+.Pp
+If you use 'cfb128' or 'ofb' for cipher, there is no specific sign if you enter a wrong password during the opening of a database; in this case the database would seem to be corrupt after decrypting, and
+.Nm
+will not be able to open it.
+.Pp
+There is no character conversion taking place for the input fields.
 .Sh AUTHOR
 .Nm
 was written by
