@@ -108,11 +108,18 @@ cmd_write(const char *e_line, command *commands)
 			}
 		} while(BIO_wpending(bio_chain) > 0);
 
-		ftruncate(db_file, BIO_tell(bio_chain));
+		if (ftruncate(db_file, BIO_tell(bio_chain)) != 0) {
+			puts("There was an error while trying to save the XML document!");
+			if (getenv("KC_DEBUG"))
+				perror("db file truncate");
+		}
+
 		if (getenv("KC_DEBUG"))
 			printf("db_file size -> %d\n", BIO_tell(bio_chain));
 
 		xmlBufferFree(xml_buf);
+
+		puts("Save OK");
 
 		dirty = 0;
 	} else {
