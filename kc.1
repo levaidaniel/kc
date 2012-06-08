@@ -26,12 +26,12 @@
 .Sh SYNOPSIS
 .Nm kc
 .Op Fl k Ar database file
+.Op Fl r
 .Op Fl p Ar password file
 .Op Fl m Ar cipher mode
 .Op Fl b
 .Op Fl v
 .Op Fl h
-.Op Fl d
 .Sh DESCRIPTION
 The
 .Nm
@@ -59,6 +59,10 @@ command below).
 Use
 .Ar file
 as database. The default is ~/.kc/default.
+.It Fl r
+Open the database in read only mode.
+.Nm
+will not try to lock the database file, and commands which could modify the database will not be available.
 .It Fl p Ar file
 Read password from
 .Ar file .
