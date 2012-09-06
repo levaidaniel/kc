@@ -46,7 +46,6 @@ cmd_cnew(const char *e_line, command *commands)
 	xmlNodePtr	db_node = NULL;
 	xmlChar		*cname = NULL;
 
-	char		*param = NULL;
 	char		*line = NULL;
 #ifndef _READLINE
 	int		e_count = 0;
@@ -54,10 +53,10 @@ cmd_cnew(const char *e_line, command *commands)
 
 	line = strdup(e_line);
 
-	strtok(line, " ");			/* remove the command from the line */
-	param = strtok(NULL, " ");		/* assign the command's parameter */
+	strtok(line, " ");				/* remove the command from the line */
+	cname = xmlStrdup(BAD_CAST strtok(NULL, " "));	/* assign the command's first parameter (name) */
 	free(line); line = NULL;
-	if (!param) {		/* if we didn't get a name as a parameter */
+	if (!cname) {					/* if we didn't get a name as a parameter */
 		strlcpy(prompt_context, "NEW keychain", sizeof(prompt_context));
 
 #ifndef _READLINE
@@ -67,14 +66,13 @@ cmd_cnew(const char *e_line, command *commands)
 		}
 
 		e_line = el_gets(e, &e_count);
-
 #else
 		e_line = readline(prompt_str());
 #endif
 		if (e_line) {
-			cname = BAD_CAST strdup(e_line);
+			cname = xmlStrdup(BAD_CAST e_line);
 #ifndef _READLINE
-			cname[(long)(strlen(cname) - 1)] = '\0';		/* remove the newline */
+			cname[xmlStrlen(cname) - 1] = '\0'; /* remove the newline */
 #endif
 		} else {
 #ifndef _READLINE
@@ -98,8 +96,6 @@ cmd_cnew(const char *e_line, command *commands)
 #endif
 
 		strlcpy(prompt_context, "", sizeof(prompt_context));
-	} else {
-		cname = BAD_CAST strdup(param);
 	}
 
 	db_node = find_keychain(cname);
@@ -124,5 +120,5 @@ cmd_cnew(const char *e_line, command *commands)
 		printf("'%s' already exists!\n", cname);
 	}
 
-	free(cname); cname = NULL;
+	xmlFree(cname); cname = NULL;
 } /* cmd_cnew() */
