@@ -29,7 +29,7 @@
 
 
 #define	NAME	"kc"
-#define	VERSION	"2.1.5"
+#define	VERSION	"2.1.6"
 #define	USAGE	"[-k database file] [-r] [-p password file] [-m cipher mode] [-b] [-v] [-h]"
 
 
