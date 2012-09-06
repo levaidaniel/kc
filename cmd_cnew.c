@@ -99,6 +99,8 @@ cmd_cnew(const char *e_line, command *commands)
 #endif
 
 		strlcpy(prompt_context, "", sizeof(prompt_context));
+	} else {
+		line = strdup(cname);
 	}
 
 	db_node = find_keychain(cname);
