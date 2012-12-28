@@ -38,7 +38,6 @@ const char *el_prompt_null(void);
 #endif
 const char *prompt_str(void);
 int malloc_check(void *);
-char *get_random_str(size_t, char);
 void version(void);
 void quit(int);
 

@@ -43,7 +43,7 @@ void
 cmd_new(const char *e_line, command *commands)
 {
 	xmlNodePtr	db_node = NULL;
-	xmlChar		*key = NULL, *value = NULL;
+	xmlChar		*key = NULL, *value_rR = NULL, *value = NULL;
 
 	char		*line = NULL;
 
@@ -103,9 +103,9 @@ cmd_new(const char *e_line, command *commands)
 	e_line = readline(prompt_str());
 #endif
 	if (e_line) {
-		value = xmlStrdup(BAD_CAST e_line);
+		value_rR = xmlStrdup(BAD_CAST e_line);
 #ifndef _READLINE
-		value[xmlStrlen(value) - 1] = '\0';	/* remove the newline */
+		value_rR[xmlStrlen(value_rR) - 1] = '\0';	/* remove the newline */
 #endif
 	} else {
 #ifndef _READLINE
@@ -122,6 +122,8 @@ cmd_new(const char *e_line, command *commands)
 
 		return;
 	}
+	value = parse_randoms(value_rR);
+
 	if (getenv("KC_DEBUG"))
 		printf("new value is '%s'\n", value);
 
@@ -144,6 +146,7 @@ cmd_new(const char *e_line, command *commands)
 	xmlNewProp(db_node, BAD_CAST "name", key);
 	xmlNewProp(db_node, BAD_CAST "value", value);
 	xmlFree(key); key = NULL;
+	xmlFree(value_rR); value_rR = NULL;
 	xmlFree(value); value = NULL;
 
 	/* make the XML document prettttyyy */

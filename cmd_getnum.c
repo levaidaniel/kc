@@ -278,12 +278,14 @@ parse_newlines(xmlChar *line, char dir)		/* dir(direction): "\n" -> '\n' = 0, '\
 		 * count the number of "\n" sequences in the string, and use it later to figure how many bytes
 		 * will be the new string, with replaced newline sequences.
 		 */
-		for (i=0; i < (int)xmlStrlen(line); i++)
-			if (line[i] == '\\'  &&  line[i+1] == '\\')	/* the "\\n" case. the newline is escaped, so honor it */
-				i += 2;					/* skip these. don't count them, because they are not newlines */
-			else
-			if (line[i] == '\\'  &&  line[i+1] == 'n')	/* we got a winner... */
-				nlnum++;
+		for (i=0; i < (int)xmlStrlen(line); i++) {
+			if (line[i] == '\\') {	/* got an escape character, we better examine it... */
+				if (line[i+1] == '\\')	/* the "\\n" case. the newline is escaped, so honor it */
+					i += 2;		/* skip these. don't count them, because they are not newlines */
+				else if (line[i+1] == 'n')	/* we got a winner... */
+					nlnum++;
+			}
+		}
 
 		ret_len = xmlStrlen(line) - nlnum + 1;
 	}
@@ -302,20 +304,22 @@ parse_newlines(xmlChar *line, char dir)		/* dir(direction): "\n" -> '\n' = 0, '\
 	} else {
 		/* replace the newline sequences with real newline characters ('\n'); */
 		for (i=0; i < (int)xmlStrlen(line); i++) {
-			if (line[i] == '\\'  &&  line[i+1] == '\\') {	/* the "\\n" case. the newline is escaped, so honor it */
-				ret[j++] = line[i];			/* copy it as if nothing had happened */
-				ret[j++] = line[++i];
+			if (line[i] == '\\') {	/* got an escape character, we better examine it... */
+				if (line[i+1] == '\\') {	/* the "\\n" case. the newline is escaped, so honor it */
+					ret[j++] = line[i];	/* copy it as if nothing had happened */
+					ret[j++] = line[++i];
+				} else if (line[i+1] == 'n') {	/* we got a winner... */
+					ret[j++] = '\n';	/* replace with NL character */
+					i++;			/* skip the 'n' char from "\n" */
+				} else
+					ret[j++] = line[i];	/* anything else will just go into the new string */
 			} else
-			if (line[i] == '\\'  &&  line[i+1] == 'n' ) {	/* we got a winner... */
-				ret[j++] = '\n';			/* replace with NL character */
-				i++;					/* skip the 'n' char from "\n" */
-			} else
-				ret[j++] = line[i];			/* anything else will just go into the new string */
+				ret[j++] = line[i];		/* anything else will just go into the new string */
 		}
 	}
 
 	ret[(long)(ret_len - 1)] = '\0';		/* close that new string safe and secure. */
 
 
-	return(ret);	/* return the result; we've worked on it hard. */
+	return(ret);	/* return the result; we've worked hard on it. */
 } /* parse_newlines() */

@@ -44,7 +44,7 @@ void
 cmd_edit(const char *e_line, command *commands)
 {
 	xmlNodePtr	db_node = NULL, db_node_new = NULL;
-	xmlChar		*key = NULL, *value = NULL;
+	xmlChar		*key = NULL, *value_rR = NULL, *value = NULL;
 
 	char		*line = NULL;
 
@@ -135,7 +135,7 @@ cmd_edit(const char *e_line, command *commands)
 #ifndef _READLINE
 			line[(long)(strlen(line) - 1)] = '\0';	/* remove the newline */
 #endif
-			value = xmlStrdup(BAD_CAST line);
+			value_rR = xmlStrdup(BAD_CAST line);
 			free(line); line = NULL;
 		} else {
 #ifndef _READLINE
@@ -151,12 +151,13 @@ cmd_edit(const char *e_line, command *commands)
 			xmlFree(key); key = NULL;
 			return;
 		}
-
+		value = parse_randoms(value_rR);
 
 		db_node_new = xmlNewChild(keychain, NULL, BAD_CAST "key", NULL);
 		xmlNewProp(db_node_new, BAD_CAST "name", key);
 		xmlNewProp(db_node_new, BAD_CAST "value", value);
 		xmlFree(key); key = NULL;
+		xmlFree(value_rR); value_rR = NULL;
 		xmlFree(value); value = NULL;
 
 		db_node = xmlReplaceNode(db_node, db_node_new);

@@ -191,3 +191,83 @@ get_random_str(size_t length, char alnum)
 
 	return(rnd_str);
 } /* get_random_str() */
+
+
+xmlChar *
+parse_randoms(xmlChar *line)
+{
+	xmlChar		*ret = NULL;
+	char		*rand_str = NULL;
+	int		i = 0, j = 0;
+	size_t		ret_len = 0;
+
+
+	if (!line)
+		return(xmlStrdup(BAD_CAST ""));
+
+
+	/*
+	 * count the number of "\r" and "\R" sequences in the string, and use it later to figure how many bytes
+	 * will be the new string, with replaced random sequences.
+	 */
+	for (i=0; i < (int)xmlStrlen(line); i++) {
+		if (line[i] == '\\') {		/* the "\\r" or "\\R" case. the sequence is escaped, so honor it */
+			if (line[i+1] == '\\') {		/* the "\\r" or "\\R" case. the sequence is escaped, so honor it */
+				i += 2;
+				ret_len += 3;
+			} else if (line[i+1] == 'r'  ||  line[i+1] == 'a') {		/* we got a winner... "\r" and "\a" is equal to 2 random characters */
+				i++;
+				ret_len += 2;
+			} else if (line[i+1] == 'R'  ||  line[i+1] == 'A') {		/* we got a winner... "\R" and "\A" is equal to 4 random characters */
+				i++;
+				ret_len += 4;
+			} else
+				ret_len++;						/* anything else will just go into the new string */
+		} else
+			ret_len++;						/* anything else will just go into the new string */
+	}
+	ret_len++;	/* take the closing NUL into account */
+	ret = malloc(ret_len); malloc_check(ret);
+
+
+	/* replace the random sequences with real random characters */
+	for (i=0; i < (int)xmlStrlen(line); i++) {
+		if (line[i] == '\\') {	/* got an escape character, we better examine it... */
+			if (line[i+1] == '\\') {	/* the "\\r" or "\\R" case. the sequence is escaped, so honor it */
+				ret[j++] = line[i];	/* copy it as if nothing had happened */
+				ret[j++] = line[++i];
+			} else if (	(line[i+1] == 'r'  ||  line[i+1] == 'a')  ||
+					(line[i+1] == 'R'  ||  line[i+1] == 'A')) {	/* we got a winner... "\r" and "\a" is equal to 2, and "\R" and "\A" is equal to 4 random characters */
+
+				/* replace with random characters */
+
+				if (line[i+1] == 'r'  ||  line[i+1] == 'R')
+					rand_str = get_random_str(4, 0);
+				else if (line[i+1] == 'a'  ||  line[i+1] == 'A')	/* generate only alphanumeric characters */
+					rand_str = get_random_str(4, 1);
+
+				if (rand_str) {
+					ret[j++] = rand_str[0];
+					ret[j++] = rand_str[1];
+
+					if (line[i+1] == 'R'  ||  line[i+1] == 'A') {
+						ret[j++] = rand_str[2];
+						ret[j++] = rand_str[3];
+					}
+
+					free(rand_str);
+				} else
+					puts("Random number generation failure!");
+
+				i++;			/* skip the 'r' or 'R' char from "\r" or "\R" */
+			} else
+				ret[j++] = line[i];	/* anything else will just go into the new string */
+		} else
+			ret[j++] = line[i];		/* anything else will just go into the new string */
+	}
+
+	ret[(long)(ret_len - 1)] = '\0';	/* close that new string safe and secure. */
+
+
+	return(ret);	/* return the result; we've worked hard on it. */
+} /* parse_randoms() */

@@ -43,6 +43,8 @@ xmlNodePtr find_keychain(xmlChar *);
 xmlNodePtr find_key(int);
 size_t digit_length(int);
 void _rl_push_buffer(void);
+char *get_random_str(size_t, char);
+xmlChar *parse_randoms(xmlChar *);
 
 
 #endif
