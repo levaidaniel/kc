@@ -190,6 +190,19 @@ commands_init(command **commands)
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
+	(*commands)->name = "quit";
+	(*commands)->usage = "quit";
+	(*commands)->help = "Quit the program. If the database is modified, then ask if it\nshould be saved.";
+	(*commands)->fn = cmd_quit;
+	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
+	(*commands) = (*commands)->next;
+	(*commands)->name = "exit";
+	(*commands)->usage = "exit";
+	(*commands)->help = "Alias of 'quit'.\nQuit the program. If the database is modified, then ask if it\nshould be saved.";
+	(*commands)->fn = cmd_quit;
+	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
+	(*commands) = (*commands)->next;
+
 	(*commands)->name = "random";
 	(*commands)->usage = "random [length]";
 	(*commands)->help = "Print a random string with 'length' length. The default 'length' is\n8.";
@@ -208,19 +221,6 @@ commands_init(command **commands)
 	(*commands)->usage = "*search <string>";
 	(*commands)->help = "Search for 'string' in key names in every keychain.";
 	(*commands)->fn = cmd_search;
-	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
-	(*commands) = (*commands)->next;
-
-	(*commands)->name = "quit";
-	(*commands)->usage = "quit";
-	(*commands)->help = "Quit the program. If the database is modified, then ask if it\nshould be saved.";
-	(*commands)->fn = cmd_quit;
-	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
-	(*commands) = (*commands)->next;
-	(*commands)->name = "exit";
-	(*commands)->usage = "exit";
-	(*commands)->help = "Alias of 'quit'.\nQuit the program. If the database is modified, then ask if it\nshould be saved.";
-	(*commands)->fn = cmd_quit;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
