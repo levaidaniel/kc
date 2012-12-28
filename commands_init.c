@@ -200,7 +200,7 @@ commands_init(command **commands)
 
 	(*commands)->name = "passwd";
 	(*commands)->usage = "passwd";
-	(*commands)->help = "Change the current database's password.";
+	(*commands)->help = "Change the current database's password. All changes will be written immediately.";
 	(*commands)->fn = cmd_passwd;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;

@@ -80,7 +80,6 @@ Display version.
 Display help.
 .El
 .Ss COMMANDS
-.Pp
 These commands can be used in the CLI:
 .Bl -tag -offset ||| -width |
 .It Cm new Op name
@@ -168,6 +167,8 @@ Delete a key from the current keychain.
 is the key's index number in the current keychain.
 .It Cm rm Ar index
 Alias of 'del'.
+.It Cm passwd
+Change the current database's password. All changes will be written immediately.
 .It Cm help Op command
 Print application help or describe a
 .Ar command .
@@ -209,7 +210,6 @@ Alias of 'write'.
 .Ss CIPHERS
 All ciphers use 128 bit keys, generated with a KDF (key-derivation function) from the supplied password, an IV (initialization vector) and a salt. Both the IV and the salt are 128 bits long and read from the host's specific random device (/dev/urandom on Linux and /dev/random on everything else).
 .Sh CAVEATS
-.Pp
 If you use 'cfb128' or 'ofb' for cipher, there is no specific sign if you enter a wrong password during the opening of a database; in this case the database would seem to be corrupt after decrypting, and
 .Nm
 will not be able to open it.
