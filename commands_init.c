@@ -176,6 +176,8 @@ commands_init(command **commands)
 	(*commands)->usage = "help [command]";
 	(*commands)->help = "Print application help or describe a 'command'.";
 	(*commands)->fn = cmd_help;
+	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
+	(*commands) = (*commands)->next;
 
 	(*commands)->name = "list";
 	(*commands)->usage = "list [keychain]";
