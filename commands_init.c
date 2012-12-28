@@ -192,6 +192,13 @@ commands_init(command **commands)
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
+	(*commands)->name = "passwd";
+	(*commands)->usage = "passwd [password]";
+	(*commands)->help = "Change the current database's password.\nPassword can be supplied after the command, or else it will be asked for.";
+	(*commands)->fn = cmd_passwd;
+	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
+	(*commands) = (*commands)->next;
+
 	(*commands)->name = "quit";
 	(*commands)->usage = "quit";
 	(*commands)->help = "Quit the program. If the database is modified, then ask if it\nshould be saved.";
@@ -251,8 +258,6 @@ commands_init(command **commands)
 	(*commands)->usage = "*/<pattern>";
 	(*commands)->help = "Search for 'pattern' in key names in every keychain.";
 	(*commands)->fn = cmd_searchre;
-	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
-	(*commands) = (*commands)->next;
 
 	(*commands)->next = NULL;
 

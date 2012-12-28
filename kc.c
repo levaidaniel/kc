@@ -59,12 +59,14 @@ int		db_file = -1;
 unsigned char	dirty = 0, batchmode = 0, readonly = 0;
 
 #ifndef _READLINE
-	EditLine	*e = NULL;
-	History		*eh = NULL;
-	HistEvent	eh_ev;
+EditLine	*e = NULL;
+History		*eh = NULL;
+HistEvent	eh_ev;
 #endif
 
-char prompt_context[20];
+char		prompt_context[20];
+
+size_t		pass_maxlen = 64;
 
 
 int
@@ -87,7 +89,6 @@ main(int argc, char *argv[])
 	char		*pass = NULL, *rand_str = NULL;
 	unsigned char	salt[17], iv[17];
 	void		*rbuf = NULL;
-	size_t		pass_maxlen = 64;
 	char		pass_prompt[15];
 	char		*pass_filename = NULL;
 	int		pass_file = -1;
