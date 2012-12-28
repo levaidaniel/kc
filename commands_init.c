@@ -164,6 +164,12 @@ commands_init(command **commands)
 	(*commands)->fn = cmd_clist;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
+	(*commands)->name = "cls";
+	(*commands)->usage = "cls";
+	(*commands)->help = "Alias of 'clist'.\nList keychains in the current database. Every keychain gets\nprefixed by its index number.";
+	(*commands)->fn = cmd_clist;
+	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
+	(*commands) = (*commands)->next;
 
 	(*commands)->name = "csearch";
 	(*commands)->usage = "csearch <string>";
