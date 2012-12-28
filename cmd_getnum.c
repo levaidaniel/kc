@@ -31,6 +31,7 @@
 
 
 xmlChar *get_line(xmlChar *, int, int);
+xmlChar *parse_newlines(xmlChar *, char);
 
 
 extern char		batchmode;
@@ -82,7 +83,7 @@ cmd_getnum(int idx, size_t space)
 #endif
 
 		idx = 1;	/* from hereafter 'idx' will be our requested line number */
-		while (rc != 'q') {	/* quit for 'q' or 'Enter' */
+		while (rc != 'q') {	/* quit for 'q' */
 			if (batchmode)
 				puts("");
 
@@ -248,3 +249,73 @@ get_line(xmlChar *value_nl, int value_len, int idx)
 
 	return(line);
 } /* get_line() */
+
+
+xmlChar *
+parse_newlines(xmlChar *line, char dir)		/* dir(direction): "\n" -> '\n' = 0, '\n' -> "\n" = 1 */
+{
+	xmlChar		*ret = NULL;
+	int		i = 0, j = 0;
+	size_t		nlnum = 0, ret_len = 0;
+
+
+	if (!line)
+		return(xmlStrdup(BAD_CAST ""));
+
+
+	if (dir) {
+		/*
+		 * count the number of '\n' characters in the string, and use it later to figure how many bytes
+		 * will be the new string, with replaced newline characters.
+		 */
+		for (i=0; i < (int)xmlStrlen(line); i++)
+			if (line[i] == '\n')	/* we got a winner... */
+				nlnum++;
+
+		ret_len = xmlStrlen(line) + nlnum + 1;
+	} else {
+		/*
+		 * count the number of "\n" sequences in the string, and use it later to figure how many bytes
+		 * will be the new string, with replaced newline sequences.
+		 */
+		for (i=0; i < (int)xmlStrlen(line); i++)
+			if (line[i] == '\\'  &&  line[i+1] == '\\')	/* the "\\n" case. the newline is escaped, so honor it */
+				i += 2;					/* skip these. don't count them, because they are not newlines */
+			else
+			if (line[i] == '\\'  &&  line[i+1] == 'n')	/* we got a winner... */
+				nlnum++;
+
+		ret_len = xmlStrlen(line) - nlnum + 1;
+	}
+	ret = malloc(ret_len); malloc_check(ret);
+
+
+	if (dir) {
+		/* replace the real newline characters with newline sequences ("\n"); */
+		for (i=0; i < (int)xmlStrlen(line); i++) {
+			if (line[i] == '\n') {			/* we got a winner... */
+				ret[j++] = '\\';		/* replace with NL character */
+				ret[j++] = 'n';			/* replace with NL character */
+			} else
+				ret[j++] = line[i];			/* anything else will just go into the new string */
+		}
+	} else {
+		/* replace the newline sequences with real newline characters ('\n'); */
+		for (i=0; i < (int)xmlStrlen(line); i++) {
+			if (line[i] == '\\'  &&  line[i+1] == '\\') {	/* the "\\n" case. the newline is escaped, so honor it */
+				ret[j++] = line[i];			/* copy it as if nothing had happened */
+				ret[j++] = line[++i];
+			} else
+			if (line[i] == '\\'  &&  line[i+1] == 'n' ) {	/* we got a winner... */
+				ret[j++] = '\n';			/* replace with NL character */
+				i++;					/* skip the 'n' char from "\n" */
+			} else
+				ret[j++] = line[i];			/* anything else will just go into the new string */
+		}
+	}
+
+	ret[(long)(ret_len - 1)] = '\0';		/* close that new string safe and secure. */
+
+
+	return(ret);	/* return the result; we've worked on it hard. */
+} /* parse_newlines() */

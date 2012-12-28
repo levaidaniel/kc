@@ -41,7 +41,6 @@ void cmd_write(const char *, command *);
 
 xmlNodePtr find_keychain(xmlChar *);
 xmlNodePtr find_key(int);
-xmlChar *parse_newlines(xmlChar *, char);
 size_t digit_length(int);
 void _rl_push_buffer(void);
 
