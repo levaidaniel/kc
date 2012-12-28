@@ -33,13 +33,10 @@
 xmlChar *get_line(xmlChar *, int, int);
 
 
-extern xmlNodePtr	keychain;
 extern char		batchmode;
 
 #ifndef _READLINE
 extern EditLine		*e;
-extern History		*eh;
-extern HistEvent	eh_ev;
 #endif
 
 

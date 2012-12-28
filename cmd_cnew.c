@@ -36,7 +36,6 @@ extern char		prompt_context[20];
 #ifndef _READLINE
 extern EditLine		*e;
 extern History		*eh;
-extern HistEvent	eh_ev;
 #endif
 
 

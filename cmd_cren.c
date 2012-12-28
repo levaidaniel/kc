@@ -37,7 +37,6 @@ extern xmlChar		*_rl_helper_var;
 #ifndef _READLINE
 extern EditLine		*e;
 extern History		*eh;
-extern HistEvent	eh_ev;
 #endif
 
 

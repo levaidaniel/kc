@@ -29,15 +29,12 @@
 #include "commands.h"
 
 
-extern xmlDocPtr	db;
 extern char		dirty;
 extern char		batchmode;
-extern BIO		*bio_chain;
 
 #ifndef _READLINE
 extern EditLine		*e;
 extern History		*eh;
-extern HistEvent	eh_ev;
 #endif
 
 
