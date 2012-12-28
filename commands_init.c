@@ -193,8 +193,8 @@ commands_init(command **commands)
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "passwd";
-	(*commands)->usage = "passwd [password]";
-	(*commands)->help = "Change the current database's password.\nPassword can be supplied after the command, or else it will be asked for.";
+	(*commands)->usage = "passwd";
+	(*commands)->help = "Change the current database's password.";
 	(*commands)->fn = cmd_passwd;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;

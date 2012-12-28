@@ -37,29 +37,83 @@
 #endif
 
 
-extern char		dirty;
+extern BIO		*bio_cipher;
 extern size_t		pass_maxlen;
+extern int		db_file;
+extern char		*cipher_mode;
 
 
 void
 cmd_passwd(const char *e_line, command *commands)
 {
-	char		*pass = NULL;
-	char		pass_prompt[15];
-	char		*line = NULL;
+	unsigned char	key[128];
+	char		*pass = NULL, *rand_str = NULL;
+	unsigned char	salt[17], iv[17];
 
 
-	line = strdup(e_line);
+	/* ask for the new password */
+	pass = malloc(pass_maxlen + 1); malloc_check(pass);
+	readpassphrase("New password: ", pass, pass_maxlen + 1, RPP_ECHO_OFF | RPP_REQUIRE_TTY);
 
-	strtok(line, " ");			/* remove the command from the line */
-	pass = strtok(NULL, " ");		/* assign the command's first parameter (password) */
-	free(line); line = NULL;
-	if (!pass) {				/* if we didn't get a password as a parameter */
-		/* ask for the new password */
-		strlcpy(pass_prompt, "New password: ", 15);
-		pass = malloc(pass_maxlen + 1); malloc_check(pass);
-		readpassphrase(pass_prompt, pass, pass_maxlen + 1, RPP_ECHO_OFF | RPP_REQUIRE_TTY);
+
+	/* regenerate the IV and the salt. */
+	if (getenv("KC_DEBUG"))
+		puts("regenerating salt and IV");
+
+	rand_str = get_random_str(sizeof(iv) - 1, 0);
+	if (!rand_str) {
+		puts("IV generation failure!");
+		return;
+	}
+	strlcpy((char *)iv, rand_str, sizeof(iv));
+	free(rand_str);
+
+	rand_str = get_random_str(sizeof(salt) - 1, 0);
+	if (!rand_str) {
+		puts("Salt generation failure!");
+		return;
+	}
+	strlcpy((char *)salt, rand_str, sizeof(salt));
+	free(rand_str);
+
+	if (getenv("KC_DEBUG"))
+		printf("iv='%s'\nsalt='%s'\n", iv, salt);
+
+	/* regenerate the key for encoding with the new salt value */
+	PKCS5_PBKDF2_HMAC_SHA1(pass, (int)strlen(pass), salt, sizeof(salt), 5000, 128, key);
+
+	memset(pass, '\0', pass_maxlen);
+	free(pass); pass = NULL;
+
+
+	/* reconfigure encoding with the newly generated key and IV */
+	if (strcmp(cipher_mode, "cfb128") == 0) {
+		if (getenv("KC_DEBUG"))
+			printf("using cipher mode: %s\n", cipher_mode);
+		BIO_set_cipher(bio_cipher, EVP_aes_256_cfb128(), key, iv, 1);
+	} else if (strcmp(cipher_mode, "ofb") == 0) {
+		if (getenv("KC_DEBUG"))
+			printf("using cipher mode: %s\n", cipher_mode);
+		BIO_set_cipher(bio_cipher, EVP_aes_256_ofb(), key, iv, 1);
+	} else {	/* the default is CBC */
+		if (getenv("KC_DEBUG"))
+			printf("using default cipher mode: %s\n", cipher_mode);
+		BIO_set_cipher(bio_cipher, EVP_aes_256_cbc(), key, iv, 1);
 	}
 
-	dirty = 1;
+
+	/* save the database with the new encryption parameters */
+	if (ftruncate(db_file, 0) != 0) {
+		puts("There was an error while trying to save the XML document!");
+		if (getenv("KC_DEBUG"))
+			perror("db file truncate");
+
+		return;
+	}
+	lseek(db_file, 0, SEEK_SET);
+
+	write(db_file, iv, sizeof(iv) - 1);
+	write(db_file, salt, sizeof(salt) - 1);
+
+	cmd_write(NULL, NULL);
 } /* cmd_passwd() */

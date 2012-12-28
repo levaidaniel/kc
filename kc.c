@@ -48,6 +48,9 @@ char *cmd_generator(const char *, int);
 
 
 BIO		*bio_chain = NULL;
+BIO		*bio_cipher = NULL;
+
+char		*cipher_mode = "cbc";
 
 command		*commands_first = NULL;
 
@@ -79,7 +82,6 @@ main(int argc, char *argv[])
 	char		*line = NULL;
 
 	BIO		*bio_file = NULL;
-	BIO		*bio_cipher = NULL;
 	BIO		*bio_b64 = NULL;
 	char		*db_buf = NULL;
 	ssize_t		ret = -1;
@@ -93,7 +95,6 @@ main(int argc, char *argv[])
 	char		*pass_filename = NULL;
 	int		pass_file = -1;
 	size_t		pass_size = 128;
-	char		*cipher_mode = "cbc";
 
 	struct stat	st;
 	const char	*default_db_dir = ".kc";
@@ -265,10 +266,9 @@ main(int argc, char *argv[])
 			quit(EXIT_FAILURE);
 		}
 
+		/* generate the IV and the salt. */
 		if (getenv("KC_DEBUG"))
 			puts("generating salt and IV");
-
-		/* generate the IV and the salt. */
 
 		rand_str = get_random_str(sizeof(iv) - 1, 0);
 		if (!rand_str) {
@@ -329,6 +329,10 @@ main(int argc, char *argv[])
 	/* generate a proper key for encoding/decoding BIO */
 	PKCS5_PBKDF2_HMAC_SHA1(pass, (int)strlen(pass), salt, sizeof(salt), 5000, 128, key);
 
+	memset(pass, '\0', pass_maxlen);
+	free(pass); pass = NULL;
+
+
 	/* turn on decoding */
 	if (strcmp(cipher_mode, "cfb128") == 0) {
 		if (getenv("KC_DEBUG"))
@@ -343,10 +347,6 @@ main(int argc, char *argv[])
 			printf("using default cipher mode: %s\n", cipher_mode);
 		BIO_set_cipher(bio_cipher, EVP_aes_256_cbc(), key, iv, 0);
 	}
-
-
-	memset(pass, '\0', pass_maxlen);
-	free(pass); pass = NULL;
 
 
 	if (getenv("KC_DEBUG"))
