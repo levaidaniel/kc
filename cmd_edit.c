@@ -46,8 +46,6 @@ cmd_edit(const char *e_line, command *commands)
 	xmlNodePtr	db_node = NULL, db_node_new = NULL;
 	xmlChar		*key = NULL, *value_rR = NULL, *value = NULL;
 
-	char		*line = NULL;
-
 #ifndef _READLINE
 	int		e_count = 0;
 #endif
@@ -91,12 +89,10 @@ cmd_edit(const char *e_line, command *commands)
 		rl_pre_input_hook = NULL;
 #endif
 		if (e_line) {
-			line = strdup(e_line);
+			key = xmlStrdup(BAD_CAST e_line);
 #ifndef _READLINE
-			line[(long)(strlen(line) - 1)] = '\0';	/* remove the newline */
+			key[xmlStrlen(key) - 1] = '\0';	/* remove the newline */
 #endif
-			key = xmlStrdup(BAD_CAST line);
-			free(line); line = NULL;
 		} else {
 #ifndef _READLINE
 			el_reset(e);
@@ -131,12 +127,10 @@ cmd_edit(const char *e_line, command *commands)
 		rl_pre_input_hook = NULL;
 #endif
 		if (e_line) {
-			line = strdup(e_line);
+			value_rR = xmlStrdup(BAD_CAST e_line);
 #ifndef _READLINE
-			line[(long)(strlen(line) - 1)] = '\0';	/* remove the newline */
+			value_rR[xmlStrlen(value_rR) - 1] = '\0';	/* remove the newline */
 #endif
-			value_rR = xmlStrdup(BAD_CAST line);
-			free(line); line = NULL;
 		} else {
 #ifndef _READLINE
 			el_reset(e);

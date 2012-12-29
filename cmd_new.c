@@ -115,11 +115,10 @@ cmd_new(const char *e_line, command *commands)
 		if (el_set(e, EL_HIST, history, eh) != 0) {
 			perror("el_set(EL_HIST)");
 		}
-
-		xmlFree(key); key = NULL;
 #endif
 		strlcpy(prompt_context, "", sizeof(prompt_context));
 
+		xmlFree(key); key = NULL;
 		return;
 	}
 	value = parse_randoms(value_rR);
