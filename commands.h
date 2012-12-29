@@ -39,12 +39,13 @@ void cmd_searchre(const char *, command *);
 void cmd_version(const char *, command *);
 void cmd_write(const char *, command *);
 
-xmlNodePtr find_keychain(xmlChar *);
-xmlNodePtr find_key(int);
-size_t digit_length(int);
-void _rl_push_buffer(void);
-char *get_random_str(size_t, char);
-xmlChar *parse_randoms(xmlChar *);
+xmlNodePtr	find_keychain(xmlChar *);
+xmlNodePtr	find_key(int);
+size_t		digit_length(int);
+void		_rl_push_buffer(void);
+char		*get_random_str(size_t, char);
+xmlChar		*parse_randoms(xmlChar *);
+char		password_read(char **);
 
 
 #endif

@@ -32,6 +32,7 @@
 #define	VERSION	"2.2.0"
 #define	USAGE	"[-k database file] [-r] [-p password file] [-m cipher mode] [-b] [-v] [-h]"
 
+#define	PASSWORD_MAXLEN	64
 
 #ifndef _READLINE
 const char *el_prompt_null(void);

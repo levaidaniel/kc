@@ -57,7 +57,7 @@ command		*commands_first = NULL;
 xmlDocPtr	db = NULL;
 xmlNodePtr	keychain = NULL;
 
-int		db_file = -1;
+int		db_file = 0;
 
 unsigned char	dirty = 0, batchmode = 0, readonly = 0;
 
@@ -68,8 +68,6 @@ HistEvent	eh_ev;
 #endif
 
 char		prompt_context[20];
-
-size_t		pass_maxlen = 64;
 
 
 int
@@ -88,7 +86,7 @@ main(int argc, char *argv[])
 	size_t		db_buf_size = 1024;
 	unsigned int	pos = 0;
 	unsigned char	key[128];
-	char		*pass1 = NULL, *pass2 = NULL, *rand_str = NULL;
+	char		*pass = NULL, *rand_str = NULL;
 	unsigned char	salt[17], iv[17];
 	void		*rbuf = NULL;
 	char		*pass_filename = NULL;
@@ -189,54 +187,42 @@ main(int argc, char *argv[])
 			quit(EXIT_FAILURE);
 		}
 
-		pass1 = calloc(1, pass_size); malloc_check(pass1);
+		pass = calloc(1, pass_size); malloc_check(pass);
 		pos = 0;
 		while (ret) {
-			/* if we've reached the size of 'pass1', grow it */
+			/* if we've reached the size of 'pass', grow it */
 			if (pos >= pass_size) {
 				pass_size += 128;
-				pass1 = realloc(pass1, pass_size); malloc_check(pass1);
+				pass = realloc(pass, pass_size); malloc_check(pass);
 			}
 
-			ret = read(pass_file, pass1 + pos, pass_size - pos);
+			ret = read(pass_file, pass + pos, pass_size - pos);
 			if (ret < 0) {
 				perror("read(password file)");
 				break;
 			} else
 				pos += (unsigned int)ret;
 		}
-		pass1[pos] = '\0';
-		if (strrchr(pass1, '\n'))
-			pass1[pos - 1] = '\0';		/* strip the newline character */
+		pass[pos] = '\0';
+		if (strrchr(pass, '\n'))
+			pass[pos - 1] = '\0';		/* strip the newline character */
 
 		if (close(pass_file) < 0)
 			perror("close(password file)");
 	} else {
 		if(stat(db_filename, &st) == 0) {	/* if db_filename exists */
 			/* ask for the password */
-			pass1 = malloc(pass_maxlen + 1); malloc_check(pass1);
-			readpassphrase("Password: ", pass1, pass_maxlen + 1, RPP_ECHO_OFF | RPP_REQUIRE_TTY);
-		} else {
-			/* ask for the password twice, until they match */
+			pass = malloc(PASSWORD_MAXLEN + 1); malloc_check(pass);
+			readpassphrase("Password: ", pass, PASSWORD_MAXLEN + 1, RPP_ECHO_OFF | RPP_REQUIRE_TTY);
+		} else
+			/* ask for the new password */
 			do {
-				pass1 = malloc(pass_maxlen + 1); malloc_check(pass1);
-				readpassphrase("New password: ", pass1, pass_maxlen + 1, RPP_ECHO_OFF | RPP_REQUIRE_TTY);
+				ret = (ssize_t)password_read(&pass);
+			} while (ret == -1);
 
-				pass2 = malloc(pass_maxlen + 1); malloc_check(pass2);
-				readpassphrase("New password again: ", pass2, pass_maxlen + 1, RPP_ECHO_OFF | RPP_REQUIRE_TTY);
-
-				if (strcmp(pass1, pass2) == 0)
-					break;
-				else
-					puts("Passwords mismatch!");
-			} while (1);
-		}
-
+			if (ret == 0)
+				quit(EXIT_FAILURE);
 	}
-	/*
-	if (getenv("KC_DEBUG"))
-		printf("Password: '%s'\n", pass1);
-	*/
 
 	if(stat(db_filename, &st) == 0) {	/* if db_filename exists */
 		if(!S_ISLNK(st.st_mode)  &&  !S_ISREG(st.st_mode)) {
@@ -338,14 +324,11 @@ main(int argc, char *argv[])
 	bio_chain = BIO_push(bio_cipher, bio_chain);
 
 	/* generate a proper key for encoding/decoding BIO */
-	PKCS5_PBKDF2_HMAC_SHA1(pass1, (int)strlen(pass1), salt, sizeof(salt), 5000, 128, key);
+	PKCS5_PBKDF2_HMAC_SHA1(pass, (int)strlen(pass), salt, sizeof(salt), 5000, 128, key);
 
-	if (pass1)
-		memset(pass1, '\0', pass_maxlen);
-	if (pass2)
-		memset(pass2, '\0', pass_maxlen);
-	free(pass1); pass1 = NULL;
-	free(pass2); pass2 = NULL;
+	if (pass)
+		memset(pass, '\0', PASSWORD_MAXLEN);
+	free(pass); pass = NULL;
 
 
 	/* turn on decoding */

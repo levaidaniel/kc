@@ -23,7 +23,13 @@
 */
 
 
+#ifndef _LINUX
 #include <fcntl.h>
+#include <readpassphrase.h>
+#else
+#include <sys/file.h>
+#include <bsd/readpassphrase.h>
+#endif
 
 #include "common.h"
 
@@ -271,3 +277,46 @@ parse_randoms(xmlChar *line)
 
 	return(ret);	/* return the result; we've worked hard on it. */
 } /* parse_randoms() */
+
+
+char
+password_read(char **pass1)
+{
+	/*
+	 * returns:
+	 * -1 mismatch
+	 *  0 cancel
+	 *  1 ok
+	 */
+
+	char	*pass2 = NULL;
+
+
+	*pass1 = malloc(PASSWORD_MAXLEN + 1); malloc_check(*pass1);
+	readpassphrase("New password (empty to cancel): ", *pass1, PASSWORD_MAXLEN + 1, RPP_ECHO_OFF | RPP_REQUIRE_TTY);
+	if (!strlen(*pass1)) {
+		free(*pass1); *pass1 = NULL;
+		puts("canceled.");
+		return(0);
+	}
+
+	pass2 = malloc(PASSWORD_MAXLEN + 1); malloc_check(pass2);
+	readpassphrase("New password again (empty to cancel): ", pass2, PASSWORD_MAXLEN + 1, RPP_ECHO_OFF | RPP_REQUIRE_TTY);
+	if (!strlen(pass2)) {
+		free(*pass1); *pass1 = NULL;
+		free(pass2); pass2 = NULL;
+		puts("canceled.");
+		return(0);
+	}
+
+	if (strcmp(*pass1, pass2) != 0) {
+		free(*pass1); *pass1 = NULL;
+		free(pass2); pass2 = NULL;
+		puts("Passwords mismatch.");
+		return(-1);
+	}
+
+	free(pass2); pass2 = NULL;
+
+	return(1);
+} /* password_read() */
