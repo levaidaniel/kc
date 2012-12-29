@@ -35,12 +35,12 @@
 #define	PASSWORD_MAXLEN	64
 
 #ifndef _READLINE
-const char *el_prompt_null(void);
+const char	*el_prompt_null(void);
 #endif
-const char *prompt_str(void);
-int malloc_check(void *);
-void version(void);
-void quit(int);
+const char	*prompt_str(void);
+int		malloc_check(void *);
+void		version(void);
+void		quit(int);
 
 
 #endif
