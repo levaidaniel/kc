@@ -11,7 +11,7 @@ Improvements:
 - Introduce a new command 'passwd' that can be used to change the current database's password.
 - add an alias for 'clist': 'cls'
 - Introduce a new utility, which can (hopefully) convert pwsafe databases to kc XML databases.
-- man page updates
+- man page and documentation updates
 - new feature to the 'new' and 'edit' commands:
   Now the escape sequences \r, \R, \a, \A can be used
   to request random characters in the value input. (sort

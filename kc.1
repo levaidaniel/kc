@@ -17,7 +17,7 @@
 .\"ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 .\"(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 .\"SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-.Dd Dec 28, 2012
+.Dd Dec 29, 2012
 .Dt KC 1
 .Os
 .Sh NAME
@@ -89,36 +89,19 @@ Display help.
 These commands can be used in the CLI:
 .Bl -tag -offset ||| -width |
 .It Cm new Op name
-Create a new key in the current keychain. If
+Create a new key with a value in the current keychain. Both key and value will be prompted for, except when
 .Ar name
-is specified it will be the key's name, otherwise prompt for that too.
+is specified; then it will be used as the key's name.
 .Pp
-It is possible to enter multiline values by writing
-.Ql \en
-in place of a desired new line. One can escape this with
-.Ql \e\en .
+Character sequences can be used in values:
 .Pp
-The
-.Ql \er ,
-.Ql \eR ,
-.Ql \ea
-and
-.Ql \eA
-escape sequences can be used in values to request random characters in place of them.
-.Ql \er
-and
-.Ql \eR
-will be replaced with 2 and 4 (respectively) random printable characters.
-.Ql \ea
-and
-.Ql \eA
-will be replaced with 2 and 4 (respectively) random alpha-numeric characters. Escaping can be achieved with the same technique as with
-.Ql \en
-(eg.:
-.Ql \e\ea
-).
+"\en" - create a new line, and make the result a multi-line value.
 .Pp
-Every escape sequence can be used in values regardless of its order or count.
+"\er", "\eR" - these will be replaced with 2 and 4 (respectively) random printable characters.
+.Pp
+"\ea", "\eA" - these will be replaced with 2 and 4 (respectively) random alpha-numeric characters.
+.Pp
+Every character sequence can be used in values regardless of its order or count, and can be escaped using double backslashes (eg.: "\e\ea").
 .It Cm list Op keychain
 List the keys in the current keychain or if specified, in the keychain named
 .Ar keychain .
@@ -126,13 +109,14 @@ Every key gets prefixed by its index number.
 .Ar keychain
 can be an index number or the keychain's name.
 .It Cm ls Op keychain
-Alias of 'list'.
+Alias of
+.Cm list .
 .It Cm edit Ar index
 Edit a key in the current keychain.
 .Ar index
 is the key's index number in the current keychain.
 .Pp
-New line and random character escape sequence rules in values apply to this command also. See command
+Character sequence rules in values apply to this command also. See command
 .Cm new
 for more information about this.
 .It Cm search Ar string
@@ -172,7 +156,8 @@ times if specified.
 .It Cm clist
 List keychains in the current database. Every keychain gets prefixed by its index number.
 .It Cm cls
-Alias of 'clist'.
+Alias of
+.Cm clist .
 .It Cm cnew Op name
 Create a new keychain. If
 .Ar name
@@ -184,7 +169,8 @@ is the key's index to copy and
 .Ar keychain
 is the destination keychain's index number or name.
 .It Cm cp Ar index Ar keychain
-Alias of 'copy'.
+Alias of
+.Cm copy .
 .It Cm move Ar index Ar keychain
 Move a key in the current keychain to another keychain.
 .Ar index
@@ -192,7 +178,8 @@ is the key's index to move and
 .Ar keychain
 is the destination keychain's index number or name.
 .It Cm mv Ar index Ar keychain
-Alias of 'move'.
+Alias of
+.Cm move .
 .It Cm cren Ar keychain
 Rename a keychain.
 .Ar keychain
@@ -202,7 +189,8 @@ Delete a key from the current keychain.
 .Ar index
 is the key's index number in the current keychain.
 .It Cm rm Ar index
-Alias of 'del'.
+Alias of
+.Cm del .
 .It Cm passwd
 Change the current database's password. All changes will be written immediately.
 .It Cm help Op command
@@ -218,18 +206,19 @@ the created XML file will be plain text, and any existing files named
 .Ar filename
 will be overwritten.
 .It Cm import Ar filename
-Import a database from
+Import a database from the XML file named
 .Ar filename .
 It must be a properly formatted
 .Nm
-database. (see command
+XML database. (see command
 .Cm xport )
 .Em NOTE :
 The current database will be overwritten if saved.
 .It Cm quit
-Quit the program. If the database is modified, then ask if it should be saved.
+Quit the program. If the database has been modified, then ask if it should be saved.
 .It Cm exit
-Alias of 'quit'.
+Alias of
+.Cm quit .
 .It Cm random Op length
 Print a random string with
 .Ar length
@@ -241,7 +230,8 @@ Display the program version.
 .It Cm write
 Save the current database.
 .It Cm save
-Alias of 'write'.
+Alias of
+.Cm write .
 .El
 .Ss CIPHERS
 All ciphers use 128 bit keys, generated with a KDF (key-derivation function) from the supplied password, an IV (initialization vector) and a salt. Both the IV and the salt are 128 bits long and read from the host's specific random device (/dev/urandom on Linux and /dev/random on everything else).
