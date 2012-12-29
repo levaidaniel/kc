@@ -47,14 +47,34 @@ void
 cmd_passwd(const char *e_line, command *commands)
 {
 	unsigned char	key[128];
-	char		*pass = NULL, *rand_str = NULL;
+	char		*pass1 = NULL, *pass2 = NULL, *rand_str = NULL;
 	unsigned char	salt[17], iv[17];
 
 
 	/* ask for the new password */
-	pass = malloc(pass_maxlen + 1); malloc_check(pass);
-	readpassphrase("New password: ", pass, pass_maxlen + 1, RPP_ECHO_OFF | RPP_REQUIRE_TTY);
+	pass1 = malloc(pass_maxlen + 1); malloc_check(pass1);
+	readpassphrase("New password (empty to cancel): ", pass1, pass_maxlen + 1, RPP_ECHO_OFF | RPP_REQUIRE_TTY);
+	if (!strlen(pass1)) {
+		free(pass1); pass1 = NULL;
+		puts("canceled.");
+		return;
+	}
 
+	pass2 = malloc(pass_maxlen + 1); malloc_check(pass2);
+	readpassphrase("New password again (empty to cancel): ", pass2, pass_maxlen + 1, RPP_ECHO_OFF | RPP_REQUIRE_TTY);
+	if (!strlen(pass2)) {
+		free(pass1); pass1 = NULL;
+		free(pass2); pass2 = NULL;
+		puts("canceled.");
+		return;
+	}
+
+	if (strcmp(pass1, pass2) != 0) {
+		free(pass1); pass1 = NULL;
+		free(pass2); pass2 = NULL;
+		puts("Passwords mismatch.");
+		return;
+	}
 
 	/* regenerate the IV and the salt. */
 	if (getenv("KC_DEBUG"))
@@ -80,10 +100,12 @@ cmd_passwd(const char *e_line, command *commands)
 		printf("iv='%s'\nsalt='%s'\n", iv, salt);
 
 	/* regenerate the key for encoding with the new salt value */
-	PKCS5_PBKDF2_HMAC_SHA1(pass, (int)strlen(pass), salt, sizeof(salt), 5000, 128, key);
+	PKCS5_PBKDF2_HMAC_SHA1(pass1, (int)strlen(pass1), salt, sizeof(salt), 5000, 128, key);
 
-	memset(pass, '\0', pass_maxlen);
-	free(pass); pass = NULL;
+	memset(pass1, '\0', pass_maxlen);
+	memset(pass2, '\0', pass_maxlen);
+	free(pass1); pass1 = NULL;
+	free(pass2); pass2 = NULL;
 
 
 	/* reconfigure encoding with the newly generated key and IV */
