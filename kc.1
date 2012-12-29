@@ -91,10 +91,34 @@ These commands can be used in the CLI:
 .It Cm new Op name
 Create a new key in the current keychain. If
 .Ar name
-is specified it will be the key's name, otherwise prompt for that too. It is possible to enter multiline values by writing
+is specified it will be the key's name, otherwise prompt for that too.
+.Pp
+It is possible to enter multiline values by writing
 .Ql \en
 in place of a desired new line. One can escape this with
 .Ql \e\en .
+.Pp
+The
+.Ql \er ,
+.Ql \eR ,
+.Ql \ea
+and
+.Ql \eA
+escape sequences can be used in values to request random characters in place of them.
+.Ql \er
+and
+.Ql \eR
+will be replaced with 2 and 4 (respectively) random printable characters.
+.Ql \ea
+and
+.Ql \eA
+will be replaced with 2 and 4 (respectively) random alpha-numeric characters. Escaping can be achieved with the same technique as with
+.Ql \en
+(eg.:
+.Ql \e\ea
+).
+.Pp
+Every escape sequence can be used in values regardless of its order or count.
 .It Cm list Op keychain
 List the keys in the current keychain or if specified, in the keychain named
 .Ar keychain .
@@ -107,6 +131,10 @@ Alias of 'list'.
 Edit a key in the current keychain.
 .Ar index
 is the key's index number in the current keychain.
+.Pp
+New line and random character escape sequence rules in values apply to this command also. See command
+.Cm new
+for more information about this.
 .It Cm search Ar string
 Search for
 .Ar string
@@ -143,6 +171,8 @@ Emulate a screen clearing. Scrolls 50 lines by default, which can be multiplied 
 times if specified.
 .It Cm clist
 List keychains in the current database. Every keychain gets prefixed by its index number.
+.It Cm cls
+Alias of 'clist'.
 .It Cm cnew Op name
 Create a new keychain. If
 .Ar name
