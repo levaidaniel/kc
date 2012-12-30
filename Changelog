@@ -9,6 +9,7 @@ Bug fixes:
 
 Improvements:
 - Introduce a new command 'passwd' that can be used to change the current database's password.
+- New passwords are asked twice for confirmation.
 - add an alias for 'clist': 'cls'
 - Introduce a new utility, which can (hopefully) convert pwsafe databases to kc XML databases.
 - man page and documentation updates
