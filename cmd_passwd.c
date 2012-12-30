@@ -37,13 +37,6 @@
 #endif
 
 
-extern BIO		*bio_cipher;
-extern char		*cipher_mode;
-extern int		db_file;
-
-extern unsigned char	salt[17], iv[17], key[128];
-
-
 void
 cmd_passwd(const char *e_line, command *commands)
 {
@@ -64,21 +57,7 @@ cmd_passwd(const char *e_line, command *commands)
 		memset(pass, '\0', PASSWORD_MAXLEN);
 	free(pass); pass = NULL;
 
-
-	/* reconfigure encoding with the newly generated key and IV */
-	if (strcmp(cipher_mode, "cfb128") == 0) {
-		if (getenv("KC_DEBUG"))
-			printf("using cipher mode: %s\n", cipher_mode);
-		BIO_set_cipher(bio_cipher, EVP_aes_256_cfb128(), key, iv, 1);
-	} else if (strcmp(cipher_mode, "ofb") == 0) {
-		if (getenv("KC_DEBUG"))
-			printf("using cipher mode: %s\n", cipher_mode);
-		BIO_set_cipher(bio_cipher, EVP_aes_256_ofb(), key, iv, 1);
-	} else {	/* the default is CBC */
-		if (getenv("KC_DEBUG"))
-			printf("using default cipher mode: %s\n", cipher_mode);
-		BIO_set_cipher(bio_cipher, EVP_aes_256_cbc(), key, iv, 1);
-	}
+	kc_set_cipher(1);
 
 	cmd_write(NULL, NULL);
 } /* cmd_passwd() */

@@ -312,19 +312,7 @@ main(int argc, char *argv[])
 
 
 	/* turn on decoding */
-	if (strcmp(cipher_mode, "cfb128") == 0) {
-		if (getenv("KC_DEBUG"))
-			printf("using cipher mode: %s\n", cipher_mode);
-		BIO_set_cipher(bio_cipher, EVP_aes_256_cfb128(), key, iv, 0);
-	} else if (strcmp(cipher_mode, "ofb") == 0) {
-		if (getenv("KC_DEBUG"))
-			printf("using cipher mode: %s\n", cipher_mode);
-		BIO_set_cipher(bio_cipher, EVP_aes_256_ofb(), key, iv, 0);
-	} else {	/* the default is CBC */
-		if (getenv("KC_DEBUG"))
-			printf("using default cipher mode: %s\n", cipher_mode);
-		BIO_set_cipher(bio_cipher, EVP_aes_256_cbc(), key, iv, 0);
-	}
+	kc_set_cipher(0);
 
 
 	if (getenv("KC_DEBUG"))
@@ -396,19 +384,7 @@ main(int argc, char *argv[])
 
 
 	/* turn on encoding */
-	if (strcmp(cipher_mode, "cfb128") == 0) {
-		if (getenv("KC_DEBUG"))
-			printf("using cipher mode: %s\n", cipher_mode);
-		BIO_set_cipher(bio_cipher, EVP_aes_256_cfb128(), key, iv, 1);
-	} else if (strcmp(cipher_mode, "ofb") == 0) {
-		if (getenv("KC_DEBUG"))
-			printf("using cipher mode: %s\n", cipher_mode);
-		BIO_set_cipher(bio_cipher, EVP_aes_256_ofb(), key, iv, 1);
-	} else {	/* the default is CBC */
-		if (getenv("KC_DEBUG"))
-			printf("using default cipher mode: %s\n", cipher_mode);
-		BIO_set_cipher(bio_cipher, EVP_aes_256_cbc(), key, iv, 1);
-	}
+	kc_set_cipher(1);
 
 
 	if (pos == 0) {		/* empty file? */

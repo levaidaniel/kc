@@ -47,6 +47,7 @@ char		*get_random_str(size_t, char);
 xmlChar		*parse_randoms(xmlChar *);
 char		password_read(char **);
 void		kc_gen_crypt_params(int, char *);
+void		kc_set_cipher(int);
 
 
 #endif

@@ -36,6 +36,9 @@
 
 extern xmlNodePtr	keychain;
 
+extern BIO		*bio_cipher;
+extern char		*cipher_mode;
+
 extern unsigned char	salt[17], iv[17], key[128];
 
 #ifdef _READLINE
@@ -364,3 +367,23 @@ kc_gen_crypt_params(int flags, char *pass)
 		PKCS5_PBKDF2_HMAC_SHA1(pass, (int)strlen(pass), salt, sizeof(salt), 5000, 128, key);
 	}
 } /* generate_iv_salt_key() */
+
+
+void
+kc_set_cipher(int enc)
+{
+	/* reconfigure encoding with the newly generated key and IV */
+	if (strcmp(cipher_mode, "cfb128") == 0) {
+		if (getenv("KC_DEBUG"))
+			printf("using cipher mode: %s\n", cipher_mode);
+		BIO_set_cipher(bio_cipher, EVP_aes_256_cfb128(), key, iv, enc);
+	} else if (strcmp(cipher_mode, "ofb") == 0) {
+		if (getenv("KC_DEBUG"))
+			printf("using cipher mode: %s\n", cipher_mode);
+		BIO_set_cipher(bio_cipher, EVP_aes_256_ofb(), key, iv, enc);
+	} else {	/* the default is CBC */
+		if (getenv("KC_DEBUG"))
+			printf("using default cipher mode: %s\n", cipher_mode);
+		BIO_set_cipher(bio_cipher, EVP_aes_256_cbc(), key, iv, enc);
+	}
+} /* kc_set_cipher() */
