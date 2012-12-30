@@ -330,8 +330,6 @@ kc_gen_crypt_params(int flags, char *pass)
 	char	*rand_str = NULL;
 
 
-	printf("flags: %d\n", flags);
-	printf("FLAGS: %d %d %d\n", KC_GENERATE_IV, KC_GENERATE_SALT, KC_GENERATE_KEY);
 	if ((flags & KC_GENERATE_IV)) {
 		rand_str = get_random_str(sizeof(iv) - 1, 0);
 		if (!rand_str) {
