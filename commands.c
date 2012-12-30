@@ -36,6 +36,8 @@
 
 extern xmlNodePtr	keychain;
 
+extern unsigned char	salt[17], iv[17], key[128];
+
 #ifdef _READLINE
 xmlChar			*_rl_helper_var = NULL;
 #endif
@@ -320,3 +322,47 @@ password_read(char **pass1)
 
 	return(1);
 } /* password_read() */
+
+
+void
+kc_gen_crypt_params(int flags, char *pass) 
+{
+	char	*rand_str = NULL;
+
+
+	printf("flags: %d\n", flags);
+	printf("FLAGS: %d %d %d\n", KC_GENERATE_IV, KC_GENERATE_SALT, KC_GENERATE_KEY);
+	if ((flags & KC_GENERATE_IV)) {
+		rand_str = get_random_str(sizeof(iv) - 1, 0);
+		if (!rand_str) {
+			puts("IV generation failure!");
+			return;
+		}
+		strlcpy((char *)iv, rand_str, sizeof(iv));
+		free(rand_str);
+
+		if (getenv("KC_DEBUG"))
+			printf("iv='%s'\n", iv);
+	}
+
+	if ((flags & KC_GENERATE_SALT)) {
+		rand_str = get_random_str(sizeof(salt) - 1, 0);
+		if (!rand_str) {
+			puts("Salt generation failure!");
+			return;
+		}
+		strlcpy((char *)salt, rand_str, sizeof(salt));
+		free(rand_str);
+
+		if (getenv("KC_DEBUG"))
+			printf("salt='%s'\n", salt);
+	}
+
+	if ((flags & KC_GENERATE_KEY)) {
+		if (getenv("KC_DEBUG"))
+			printf("generating new key from pass and salt.\n");
+
+		/* generate a proper key for encoding/decoding BIO */
+		PKCS5_PBKDF2_HMAC_SHA1(pass, (int)strlen(pass), salt, sizeof(salt), 5000, 128, key);
+	}
+} /* generate_iv_salt_key() */

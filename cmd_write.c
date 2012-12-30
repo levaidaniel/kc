@@ -30,10 +30,15 @@
 
 
 extern xmlDocPtr	db;
-extern char		dirty;
+
 extern BIO		*bio_chain;
 
 extern int		db_file;
+
+extern char		dirty;
+
+extern unsigned char	salt[17], iv[17];
+
 
 void
 cmd_write(const char *e_line, command *commands)
@@ -54,8 +59,25 @@ cmd_write(const char *e_line, command *commands)
 			printf("xml_buf content:\n'%s'(%d)\n", xmlBufferContent(xml_buf), (int)xmlBufferLength(xml_buf));
 		xmlSaveClose(xml_save);
 
+
+		/* rewrite the database */
+		if (ftruncate(db_file, 0) != 0) {
+			puts("There was an error while trying to save the XML document!");
+			if (getenv("KC_DEBUG"))
+				perror("db file truncate");
+
+			return;
+		}
+		lseek(db_file, 0, SEEK_SET);
+
+		/* write the IV and salt first */
+		write(db_file, iv, sizeof(iv) - 1);
+		write(db_file, salt, sizeof(salt) - 1);
+
+
 		BIO_reset(bio_chain);		/* we must reset the cipher BIO to work after subsequent calls to cmd_write() */
-		BIO_seek(bio_chain, 32);	/* seek after the IV and salt (both 16 bytes) */
+
+		BIO_seek(bio_chain, sizeof(iv) - 1 + sizeof(salt) - 1);	/* seek after the IV and salt */
 
 		remaining = xmlBufferLength(xml_buf);
 		while (remaining > 0) {
@@ -107,12 +129,6 @@ cmd_write(const char *e_line, command *commands)
 				}
 			}
 		} while(BIO_wpending(bio_chain) > 0);
-
-		if (ftruncate(db_file, BIO_tell(bio_chain)) != 0) {
-			puts("There was an error while trying to save the XML document!");
-			if (getenv("KC_DEBUG"))
-				perror("db file truncate");
-		}
 
 		if (getenv("KC_DEBUG"))
 			printf("db_file size -> %d\n", BIO_tell(bio_chain));

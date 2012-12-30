@@ -34,6 +34,12 @@
 
 #define	PASSWORD_MAXLEN	64
 
+enum {
+	KC_GENERATE_IV = 1,
+	KC_GENERATE_SALT = 1 << 1,
+	KC_GENERATE_KEY = 1 << 2
+};
+
 #ifndef _READLINE
 const char	*el_prompt_null(void);
 #endif

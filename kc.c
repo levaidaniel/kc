@@ -52,6 +52,8 @@ BIO		*bio_cipher = NULL;
 
 char		*cipher_mode = "cbc";
 
+unsigned char	salt[17], iv[17], key[128];
+
 command		*commands_first = NULL;
 
 xmlDocPtr	db = NULL;
@@ -85,9 +87,7 @@ main(int argc, char *argv[])
 	ssize_t		ret = -1;
 	size_t		db_buf_size = 1024;
 	unsigned int	pos = 0;
-	unsigned char	key[128];
-	char		*pass = NULL, *rand_str = NULL;
-	unsigned char	salt[17], iv[17];
+	char		*pass = NULL;
 	void		*rbuf = NULL;
 	char		*pass_filename = NULL;
 	int		pass_file = -1;
@@ -237,23 +237,30 @@ main(int argc, char *argv[])
 			quit(EXIT_FAILURE);
 		}
 
-		/* read the IV and the salt. */
+		/* read the IV */
+		rbuf = malloc(sizeof(iv)); malloc_check(rbuf);
 
-		rbuf = malloc(17); malloc_check(rbuf);
-
-		ret = read(db_file, rbuf, 16);
+		ret = read(db_file, rbuf, sizeof(iv) - 1);
 		if (ret < 0)
 			perror("read(database file)");
 		else
 			strlcpy((char *)iv, (const char *)rbuf, sizeof(iv));
 
-		ret = read(db_file, rbuf, 16);
+		free(rbuf); rbuf = NULL;
+
+		/* read the salt */
+		rbuf = malloc(sizeof(salt)); malloc_check(rbuf);
+
+		ret = read(db_file, rbuf, sizeof(salt) - 1);
 		if (ret < 0)
 			perror("read(database file)");
 		else
 			strlcpy((char *)salt, (const char *)rbuf, sizeof(salt));
 
-		free(rbuf);
+		free(rbuf); rbuf = NULL;
+
+
+		kc_gen_crypt_params(KC_GENERATE_KEY, pass);
 	} else {
 		printf("Creating '%s'\n", db_filename);
 
@@ -263,32 +270,12 @@ main(int argc, char *argv[])
 			quit(EXIT_FAILURE);
 		}
 
-		/* generate the IV and the salt. */
-		if (getenv("KC_DEBUG"))
-			puts("generating salt and IV");
-
-		rand_str = get_random_str(sizeof(iv) - 1, 0);
-		if (!rand_str) {
-			puts("IV generation failure!");
-			quit(EXIT_FAILURE);
-		}
-		strlcpy((char *)iv, rand_str, sizeof(iv));
-		free(rand_str);
-
-		rand_str = get_random_str(sizeof(salt) - 1, 0);
-		if (!rand_str) {
-			puts("Salt generation failure!");
-			quit(EXIT_FAILURE);
-		}
-		strlcpy((char *)salt, rand_str, sizeof(salt));
-		free(rand_str);
-
-		if (getenv("KC_DEBUG"))
-			printf("iv='%s'\nsalt='%s'\n", iv, salt);
-
-		write(db_file, iv, sizeof(iv) - 1);
-		write(db_file, salt, sizeof(salt) - 1);
+		kc_gen_crypt_params(KC_GENERATE_IV | KC_GENERATE_SALT | KC_GENERATE_KEY, pass);
 	}
+
+	if (pass)
+		memset(pass, '\0', PASSWORD_MAXLEN);
+	free(pass); pass = NULL;
 
 
 	if (readonly == 0)
@@ -323,13 +310,6 @@ main(int argc, char *argv[])
 	}
 	bio_chain = BIO_push(bio_cipher, bio_chain);
 
-	/* generate a proper key for encoding/decoding BIO */
-	PKCS5_PBKDF2_HMAC_SHA1(pass, (int)strlen(pass), salt, sizeof(salt), 5000, 128, key);
-
-	if (pass)
-		memset(pass, '\0', PASSWORD_MAXLEN);
-	free(pass); pass = NULL;
-
 
 	/* turn on decoding */
 	if (strcmp(cipher_mode, "cfb128") == 0) {
@@ -351,8 +331,8 @@ main(int argc, char *argv[])
 		print_bio_chain(bio_chain);
 
 
-	/* seek after the IV and salt (both 16 bytes) */
-	BIO_seek(bio_chain, 32);
+	/* seek after the IV and salt */
+	BIO_seek(bio_chain, sizeof(iv) - 1 + sizeof(salt) - 1);
 
 	/* read in the database file to a buffer */
 	db_buf = calloc(1, db_buf_size); malloc_check(db_buf);

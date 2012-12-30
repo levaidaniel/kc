@@ -38,17 +38,17 @@
 
 
 extern BIO		*bio_cipher;
-extern int		db_file;
 extern char		*cipher_mode;
+extern int		db_file;
+
+extern unsigned char	salt[17], iv[17], key[128];
 
 
 void
 cmd_passwd(const char *e_line, command *commands)
 {
-	unsigned char	key[128];
-	char		*pass = NULL, *rand_str = NULL;
+	char		*pass = NULL;
 	char		ret = -1;
-	unsigned char	salt[17], iv[17];
 
 
 	/* ask for the new password */
@@ -58,31 +58,7 @@ cmd_passwd(const char *e_line, command *commands)
 	if (ret == 0)	/* canceled */
 		return;
 
-	/* regenerate the IV and the salt. */
-	if (getenv("KC_DEBUG"))
-		puts("regenerating salt and IV");
-
-	rand_str = get_random_str(sizeof(iv) - 1, 0);
-	if (!rand_str) {
-		puts("IV generation failure!");
-		return;
-	}
-	strlcpy((char *)iv, rand_str, sizeof(iv));
-	free(rand_str);
-
-	rand_str = get_random_str(sizeof(salt) - 1, 0);
-	if (!rand_str) {
-		puts("Salt generation failure!");
-		return;
-	}
-	strlcpy((char *)salt, rand_str, sizeof(salt));
-	free(rand_str);
-
-	if (getenv("KC_DEBUG"))
-		printf("iv='%s'\nsalt='%s'\n", iv, salt);
-
-	/* regenerate the key for encoding with the new salt value */
-	PKCS5_PBKDF2_HMAC_SHA1(pass, (int)strlen(pass), salt, sizeof(salt), 5000, 128, key);
+	kc_gen_crypt_params(KC_GENERATE_IV | KC_GENERATE_SALT | KC_GENERATE_KEY, pass);
 
 	if (pass)
 		memset(pass, '\0', PASSWORD_MAXLEN);
@@ -103,20 +79,6 @@ cmd_passwd(const char *e_line, command *commands)
 			printf("using default cipher mode: %s\n", cipher_mode);
 		BIO_set_cipher(bio_cipher, EVP_aes_256_cbc(), key, iv, 1);
 	}
-
-
-	/* save the database with the new encryption parameters */
-	if (ftruncate(db_file, 0) != 0) {
-		puts("There was an error while trying to save the XML document!");
-		if (getenv("KC_DEBUG"))
-			perror("db file truncate");
-
-		return;
-	}
-	lseek(db_file, 0, SEEK_SET);
-
-	write(db_file, iv, sizeof(iv) - 1);
-	write(db_file, salt, sizeof(salt) - 1);
 
 	cmd_write(NULL, NULL);
 } /* cmd_passwd() */
