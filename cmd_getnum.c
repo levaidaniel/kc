@@ -23,15 +23,13 @@
 */
 
 
-#include <stdarg.h>
-#include <wctype.h>
-
 #include "common.h"
 #include "commands.h"
 
 
-xmlChar *get_line(xmlChar *, int, int);
-xmlChar *parse_newlines(xmlChar *, char);
+xmlChar	*get_line(xmlChar *, int, int);
+xmlChar	*parse_newlines(xmlChar *, char);
+size_t	digit_length(int);
 
 
 extern char		batchmode;
@@ -323,3 +321,18 @@ parse_newlines(xmlChar *line, char dir)		/* dir(direction): "\n" -> '\n' = 0, '\
 
 	return(ret);	/* return the result; we've worked hard on it. */
 } /* parse_newlines() */
+
+
+size_t
+digit_length(int idx)
+{
+	size_t	length = 1;
+
+
+	while ((idx / 10) != 0) {
+		idx /= 10;
+		length++;
+	}
+
+	return(length);
+} /* digit_length() */

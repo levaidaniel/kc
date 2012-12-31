@@ -23,8 +23,6 @@
 */
 
 
-#include <stdarg.h>
-
 #ifdef	_HAVE_PCRE
 #include <pcre.h>
 #endif

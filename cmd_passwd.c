@@ -23,18 +23,8 @@
 */
 
 
-#include <stdarg.h>
-
 #include "common.h"
 #include "commands.h"
-
-#ifndef _LINUX
-#include <fcntl.h>
-#include <readpassphrase.h>
-#else
-#include <sys/file.h>
-#include <bsd/readpassphrase.h>
-#endif
 
 
 void

@@ -114,21 +114,6 @@ find_key(int idx)
 } /* find_key */
 
 
-size_t
-digit_length(int idx)
-{
-	size_t	length = 1;
-
-
-	while ((idx / 10) != 0) {
-		idx /= 10;
-		length++;
-	}
-
-	return(length);
-} /* digit_length() */
-
-
 #ifdef _READLINE
 void
 _rl_push_buffer(void)
