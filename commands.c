@@ -41,6 +41,8 @@ extern char		*cipher_mode;
 
 extern unsigned char	salt[17], iv[17], key[128];
 
+extern char		batchmode;
+
 #ifdef _READLINE
 xmlChar			*_rl_helper_var = NULL;
 #endif
@@ -270,7 +272,7 @@ parse_randoms(xmlChar *line)
 
 
 char
-password_read(char **pass1)
+password_read(char **pass1, char new)
 {
 	/*
 	 * returns:
@@ -280,33 +282,48 @@ password_read(char **pass1)
 	 */
 
 	char	*pass2 = NULL;
+	int	rpp_flags = 0;
+
+
+	rpp_flags = RPP_ECHO_OFF;
+	if (batchmode)
+		rpp_flags |= RPP_STDIN;
+	else
+		rpp_flags |= RPP_REQUIRE_TTY;
 
 
 	*pass1 = malloc(PASSWORD_MAXLEN + 1); malloc_check(*pass1);
-	readpassphrase("New password (empty to cancel): ", *pass1, PASSWORD_MAXLEN + 1, RPP_ECHO_OFF | RPP_REQUIRE_TTY);
-	if (!strlen(*pass1)) {
-		free(*pass1); *pass1 = NULL;
-		puts("canceled.");
-		return(0);
-	}
 
-	pass2 = malloc(PASSWORD_MAXLEN + 1); malloc_check(pass2);
-	readpassphrase("New password again (empty to cancel): ", pass2, PASSWORD_MAXLEN + 1, RPP_ECHO_OFF | RPP_REQUIRE_TTY);
-	if (!strlen(pass2)) {
-		free(*pass1); *pass1 = NULL;
+	if (new)
+		readpassphrase("New password (empty to cancel): ", *pass1, PASSWORD_MAXLEN + 1, rpp_flags);
+	else
+		readpassphrase("Password: ", *pass1, PASSWORD_MAXLEN + 1, rpp_flags);
+
+	if (new) {
+		if (!strlen(*pass1)) {
+			free(*pass1); *pass1 = NULL;
+			puts("canceled.");
+			return(0);
+		}
+
+		pass2 = malloc(PASSWORD_MAXLEN + 1); malloc_check(pass2);
+		readpassphrase("New password again (empty to cancel): ", pass2, PASSWORD_MAXLEN + 1, rpp_flags);
+		if (!strlen(pass2)) {
+			free(*pass1); *pass1 = NULL;
+			free(pass2); pass2 = NULL;
+			puts("canceled.");
+			return(0);
+		}
+
+		if (strcmp(*pass1, pass2) != 0) {
+			free(*pass1); *pass1 = NULL;
+			free(pass2); pass2 = NULL;
+			puts("Passwords mismatch.");
+			return(-1);
+		}
+
 		free(pass2); pass2 = NULL;
-		puts("canceled.");
-		return(0);
 	}
-
-	if (strcmp(*pass1, pass2) != 0) {
-		free(*pass1); *pass1 = NULL;
-		free(pass2); pass2 = NULL;
-		puts("Passwords mismatch.");
-		return(-1);
-	}
-
-	free(pass2); pass2 = NULL;
 
 	return(1);
 } /* password_read() */

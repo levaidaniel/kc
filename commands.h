@@ -44,7 +44,7 @@ xmlNodePtr	find_key(int);
 void		_rl_push_buffer(void);
 char		*get_random_str(size_t, char);
 xmlChar		*parse_randoms(xmlChar *);
-char		password_read(char **);
+char		password_read(char **, char);
 void		kc_gen_crypt_params(int, char *);
 void		kc_set_cipher(int);
 

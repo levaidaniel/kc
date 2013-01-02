@@ -210,18 +210,18 @@ main(int argc, char *argv[])
 		if (close(pass_file) < 0)
 			perror("close(password file)");
 	} else {
-		if(stat(db_filename, &st) == 0) {	/* if db_filename exists */
+		if(stat(db_filename, &st) == 0)		/* if db_filename exists */
 			/* ask for the password */
-			pass = malloc(PASSWORD_MAXLEN + 1); malloc_check(pass);
-			readpassphrase("Password: ", pass, PASSWORD_MAXLEN + 1, RPP_ECHO_OFF | RPP_REQUIRE_TTY);
-		} else
+			password_read(&pass, 0);
+		else {
 			/* ask for the new password */
 			do {
-				ret = (ssize_t)password_read(&pass);
+				ret = (ssize_t)password_read(&pass, 1);
 			} while (ret == -1);
 
 			if (ret == 0)
 				quit(EXIT_FAILURE);
+		}
 	}
 
 	if(stat(db_filename, &st) == 0) {	/* if db_filename exists */
