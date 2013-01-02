@@ -126,6 +126,16 @@ in key names in the current keychain.
 If the
 .Cm search
 command is prefixed by a '*' (eg.: *search) then search in every keychain in the current database.
+.It Cm s Ar string
+Alias of
+.Cm search .
+.It Cm *search Ar string
+Search for
+.Ar string
+in key names in every keychain.
+.It Cm *s Ar string
+Alias of
+.Cm *search .
 .It Cm / Ar pattern
 Search for
 .Ar pattern
@@ -133,6 +143,10 @@ regular expression in key names in the current keychain.
 If the
 .Cm /
 command is prefixed by a '*' (eg.: */) then search in every keychain in the current database.
+.It Cm */ Ar pattern
+Search for
+.Ar pattern
+regular expression in key names in every keychain.
 .It Cm csearch Ar string
 Search for
 .Ar string
