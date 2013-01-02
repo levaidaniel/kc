@@ -40,6 +40,9 @@ CLEANFILES +=	*.cat[0-9]
 
 all: ${PROG}
 
+test:
+	sh regress/run_tests.sh
+
 ${PROG}: ${SRCS}
 	${CC} -o ${PROG} ${CFLAGS} ${LDADD} \
 		${SRCS}
