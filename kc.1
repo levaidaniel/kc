@@ -64,7 +64,8 @@ command below).
 .It Fl k Ar file
 Use
 .Ar file
-as database. The default is ~/.kc/default.
+as database. The default is
+.Pa ~/.kc/default .
 .It Fl r
 Open the database in read only mode.
 .Nm
@@ -248,7 +249,76 @@ Alias of
 .Cm write .
 .El
 .Ss CIPHERS
-All ciphers use 128 bit keys, generated with a KDF (key-derivation function) from the supplied password, an IV (initialization vector) and a salt. Both the IV and the salt are 128 bits long and read from the host's specific random device (/dev/urandom on Linux and /dev/random on everything else).
+All ciphers use 128 bit keys, generated with a KDF (key-derivation function) from the supplied password, an IV (initialization vector) and a salt. Both the IV and the salt are 128 bits long and read from the host's specific random device (
+.Pa /dev/urandom
+on Linux and
+.Pa /dev/random
+on everything else ).
+.Sh EXAMPLES
+.Bl -tag -offset ||| -width |
+.It Cm pwsafe_convert.pl :
+.Bd -literal -offset |||
+# Export the pwsafe database to a cleartext file:
+$ pwsafe --exportdb > pwsafe_export
+Enter passphrase for .pwsafe.dat:
+
+# Convert the cleartext pwsafe database to a kc XML database file:
+$ pwsafe_convert.pl pwsafe_export kc_db.xml
+opening pwsafe_export for reading.
+opening kc_db.xml for writing.
+Converting...
+Done.
+.Ed
+.Pp
+After the above commands, you should end up with a
+.Nm
+compatible XML database. You can import it to
+.Nm
+using the
+.Cm import
+command.
+.It Cm new :
+.Bd -literal -offset |||
+.Em Simple :
+default% > new testuser
+default% NEW value> testpass
+
+.Em Prompt for both key and value :
+default% > new
+default% NEW key> testuser2
+default% NEW value> test_\er_pass_with_random_characters:\eA
+
+.Em Using the character sequences and multiline value :
+default% > new testuser3
+default% NEW value> \er\eR\en\ea\eA\enthis is a multiline value!
+
+.Em Results :
+default% > list
+0. testuser
+1. testuser2
+2. testuser3
+default% > 0
+[testuser] testpass
+default% > 1
+[testuser2] test_,x_pass_with_random_characters:6nzm
+default% > 2
+[testuser3] [1/3] v#)z!9
+[testuser3] [2/3] HwRz7i
+[testuser3] [3/3] this is a multiline value!
+.Ed
+.It Cm edit :
+.Bd -literal -offset |||
+default% > list
+0. testuser
+1. testuser2
+2. testuser3
+default% > edit 1
+default% EDIT key> testuser2
+default% EDIT value> test_pass_with_random_characters:6nzm
+default% > 1
+[testuser2] test_pass_with_random_characters:6nzm
+.Ed
+.El
 .Sh CAVEATS
 If you use 'cfb128' or 'ofb' for cipher, there is no specific sign if you enter a wrong password during the opening of a database; in this case the database would seem to be corrupt after decrypting, and
 .Nm
