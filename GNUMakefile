@@ -41,6 +41,9 @@ install:
 	install -s -o root -g bin -m 555 kc /usr/local/bin/kc
 	install -s -o root -g bin -m 444 kc.1 /usr/local/man/man1/kc.1
 
+test:
+	sh regress/run_tests.sh
+
 ${PROG}: ${OBJS}
 	${CC} -o ${PROG} ${CFLAGS} ${LDADD} \
 		${SRCS}
