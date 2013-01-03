@@ -44,5 +44,3 @@ sh regress/cmd_write.sh
 sh regress/cmd_passwd.sh
 
 printf "\nAll tests ok! :)\n"
-
-rm -f regress/test*

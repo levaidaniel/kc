@@ -17,6 +17,7 @@ Improvements:
   Now the escape sequences \r, \R, \a, \A can be used
   to request random characters in the value input. (sort
   of like \n to request a new line)
+- New functional tests for detecting regressions.
 
 Cosmetic changes:
 - clean up unused variables

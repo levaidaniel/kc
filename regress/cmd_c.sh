@@ -18,6 +18,10 @@ case "$(uname -s)" in
 	;;
 esac
 
+# XXX
+# This basically doesn't output anything with editline, beacuse the only notion
+# of a successful keychain change is our prompt which displays the chain's name,
+# and editline's prompt is not showing during batchmode...
 SHA256=$(printf "c testchain\n" |./kc -b -k regress/test -p regress/testpass |$SHA256_BIN |cut -d' ' -f1)
 
 if [ ${READLINE} ];then
