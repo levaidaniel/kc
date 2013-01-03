@@ -18,10 +18,10 @@ case "$(uname -s)" in
 	;;
 esac
 
-printf "clist\n" |./kc -b -k regress/test -p regress/testpass
-SHA256=$(printf "clist\n" |./kc -b -k regress/test -p regress/testpass |$SHA256_BIN |cut -d' ' -f1)
+printf "clist\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^default%'
+SHA256=$(printf "clist\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^default%' |$SHA256_BIN |cut -d' ' -f1)
 
-if [ "$SHA256" == 'f0f5a4a4f1a26d9710085a0a3b2a9be501200d5ba4cb7bbde92a757e57e259d7' ];then
+if [ "$SHA256" == '33cab88cabb11191d6b4f13820b591fd8102fea564985666ef7d3a869f692d32' ];then
 	echo $0 test ok!
 else
 	echo $0 test failed!
