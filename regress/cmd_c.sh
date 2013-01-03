@@ -19,7 +19,14 @@ case "$(uname -s)" in
 esac
 
 SHA256=$(printf "c testchain\n" |./kc -b -k regress/test -p regress/testpass |$SHA256_BIN |cut -d' ' -f1)
-if [ "$SHA256" == 'ab65722c447698811e5c11fb49fa9dd277fbd7cf367f871c8d94c7e4c6f1825b' ];then
+
+if [ ${READLINE} ];then
+	REFERENCE='0fe30cb29f4485667bd5b07fbd3470af9488876da0f2c6303a61e7c425744221'
+else
+	REFERENCE='ab65722c447698811e5c11fb49fa9dd277fbd7cf367f871c8d94c7e4c6f1825b'
+fi
+
+if [ "${SHA256}" == "${REFERENCE}" ];then
 	echo "$0 test ok (change chain)!"
 else
 	echo "$0 test failed (change chain)!"
@@ -27,7 +34,7 @@ else
 fi
 
 printf "c nonexistent\n" |./kc -b -k regress/test -p regress/testpass
-SHA256=$(printf "c nonexistent\n" |./kc -b -k regress/test -p regress/testpass |$SHA256_BIN |cut -d' ' -f1)
+SHA256=$(printf "c nonexistent\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^default% >' |$SHA256_BIN |cut -d' ' -f1)
 if [ "$SHA256" == '3bb0673128fe11dd7add24efab95349b07c45cea2971b8691e85c69427a6d297' ];then
 	echo "$0 test ok (nonexistent chain)!"
 else
