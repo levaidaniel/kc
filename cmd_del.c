@@ -30,6 +30,11 @@
 extern xmlNodePtr	keychain;
 extern char		dirty;
 
+#ifndef _READLINE
+extern EditLine		*e;
+extern History		*eh;
+#endif
+
 
 void
 cmd_del(const char *e_line, command *commands)
@@ -38,6 +43,10 @@ cmd_del(const char *e_line, command *commands)
 	xmlChar		*key = NULL;
 
 	int		idx = 0;
+
+#ifndef _READLINE
+	int		e_count = 0;
+#endif
 
 
 	if (sscanf(e_line, "%*s %d", &idx) <= 0) {
