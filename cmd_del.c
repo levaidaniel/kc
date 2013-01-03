@@ -51,19 +51,58 @@ cmd_del(const char *e_line, command *commands)
 
 	db_node = find_key(idx);
 	if (db_node) {
+#ifndef _READLINE
+		/* disable history temporarily */
+		if (el_set(e, EL_HIST, history, NULL) != 0) {
+			perror("el_set(EL_HIST)");
+		}
+		/* clear the prompt temporarily */
+		if (el_set(e, EL_PROMPT, el_prompt_null) != 0) {
+			perror("el_set(EL_PROMPT)");
+		}
+#endif
 		key = xmlGetProp(db_node, BAD_CAST "name");
 
-		db_node_prev = db_node->prev;
-		xmlUnlinkNode(db_node_prev);	/* remove the adjacent 'text' node, which is the indent and newline */
-		xmlFreeNode(db_node_prev);
+		printf("Do you really want to delete '%s'? <yes/no> ", key);
 
-		xmlUnlinkNode(db_node);
-		xmlFreeNode(db_node);
+#ifdef _READLINE
+		rl_redisplay();
+#endif
 
-		printf("'%s' deleted\n", key);
-		xmlFree(key); key = NULL;
+#ifndef _READLINE
+		e_line = el_gets(e, &e_count);
+#else
+		e_line = readline("");
+#endif
+		if (!e_line) {
+#ifndef _READLINE
+			el_reset(e);
 
-		dirty = 1;
+			/* re-enable the default prompt */
+			if (el_set(e, EL_PROMPT, prompt_str) != 0) {
+				perror("el_set(EL_PROMPT)");
+			}
+			/* re-enable history */
+			if (el_set(e, EL_HIST, history, eh) != 0) {
+				perror("el_set(EL_HIST)");
+			}
+#endif
+			return;
+		}
+
+		if (strncmp(e_line, "yes", 3) == 0) {
+			db_node_prev = db_node->prev;
+			xmlUnlinkNode(db_node_prev);	/* remove the adjacent 'text' node, which is the indent and newline */
+			xmlFreeNode(db_node_prev);
+
+			xmlUnlinkNode(db_node);
+			xmlFreeNode(db_node);
+
+			printf("'%s' deleted\n", key);
+			xmlFree(key); key = NULL;
+
+			dirty = 1;
+		}
 	} else
 		puts("invalid index!");
 } /* cmd_del() */

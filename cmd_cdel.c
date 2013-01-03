@@ -115,6 +115,8 @@ cmd_cdel(const char *e_line, command *commands)
 				xmlFreeNode(db_node);
 
 				printf("'%s' deleted\n", cname);
+
+				dirty = 1;
 			}
 			xmlFree(cname); cname = NULL;
 
@@ -129,8 +131,6 @@ cmd_cdel(const char *e_line, command *commands)
 				perror("el_set(EL_HIST)");
 			}
 #endif
-
-			dirty = 1;
 		}
 	} else {
 		printf("'%s' keychain not found.\n", cname);
