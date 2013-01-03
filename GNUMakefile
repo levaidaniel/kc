@@ -35,14 +35,14 @@ endif
 all: ${PROG}
 
 clean:
-	rm -f *.o kc *.cat[0-9]
+	rm -f *.o kc *.cat[0-9] regress/test*
 
 install:
 	install -s -o root -g bin -m 555 kc /usr/local/bin/kc
 	install -s -o root -g bin -m 444 kc.1 /usr/local/man/man1/kc.1
 
 test:
-	sh regress/run_tests.sh
+	sh regress/run_tests.sh readline
 
 ${PROG}: ${OBJS}
 	${CC} -o ${PROG} ${CFLAGS} ${LDADD} \
