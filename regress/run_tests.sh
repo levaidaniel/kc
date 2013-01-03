@@ -8,6 +8,8 @@ if [ $(basename $(pwd))  == 'regress' ];then
 	exit 1
 fi
 
+[ "$1" == 'readline' ]  &&  export READLINE=readline
+
 sh regress/create_db.sh
 sh regress/cmd_quit.sh
 sh regress/cmd_new.sh

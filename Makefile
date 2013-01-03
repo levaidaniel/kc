@@ -35,13 +35,17 @@ LDADD +=	`pkg-config --libs libpcre`
 .endif
 
 
-CLEANFILES +=	*.cat[0-9]
+CLEANFILES +=	*.cat[0-9] regress/test*
 
 
 all: ${PROG}
 
 test:
+.ifdef READLINE
+	sh regress/run_tests.sh readline
+.else
 	sh regress/run_tests.sh
+.endif
 
 ${PROG}: ${SRCS}
 	${CC} -o ${PROG} ${CFLAGS} ${LDADD} \

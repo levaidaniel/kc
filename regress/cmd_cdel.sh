@@ -10,7 +10,7 @@ case "$(uname -s)" in
 		SHA256_BIN=$(which sha256sum)
 	;;
 	*BSD)
-		SHA256_BIN=$(which cksum)
+		SHA256_BIN="$(which cksum) -r -a sha256"
 	;;
 	*)
 		echo "unknown system."

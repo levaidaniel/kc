@@ -10,7 +10,7 @@ case "$(uname -s)" in
 		SHA256_BIN=$(which sha256sum)
 	;;
 	*BSD)
-		SHA256_BIN=$(which cksum)
+		SHA256_BIN="$(which cksum) -r -a sha256"
 	;;
 	*)
 		echo "unknown system."
@@ -18,7 +18,13 @@ case "$(uname -s)" in
 	;;
 esac
 
-printf "edit 0\nedited_\nedited_\nwrite\n" |./kc -b -k regress/test -p regress/testpass
+if [ ${READLINE} ];then
+	cmd="edit 0\nedited_\nedited_\nwrite\n"
+else
+	cmd="edit 0\nedited_testkey0\nedited_testval0\nwrite\n"
+fi
+
+printf "${cmd}" |./kc -b -k regress/test -p regress/testpass
 
 SHA256=$($SHA256_BIN regress/test |cut -d' ' -f1)
 if [ "$SHA256" == 'b083b796a99a3acb57e0a36c581b689d8e441374338a7fccb12970a8306b5c97' ];then
