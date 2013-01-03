@@ -18,10 +18,16 @@ case "$(uname -s)" in
 	;;
 esac
 
-printf "cren testchain\nrenamed_\nwrite\n" |./kc -b -k regress/test -p regress/testpass
+if [ ${READLINE} ];then
+	cmd="cren newchain\nrenamed_\nwrite\n"
+else
+	cmd="cren newchain\nrenamed_newchain\nwrite\n"
+fi
+
+printf "${cmd}" |./kc -b -k regress/test -p regress/testpass
 
 SHA256=$($SHA256_BIN regress/test |cut -d' ' -f1)
-if [ "$SHA256" == '8667dd38f996e1cc85158a03965e0cccae89d49970a032223688649870aa7798' ];then
+if [ "$SHA256" == '86e1c5060f3042419bdaaa5b6b8e8d257eaf693dad935c72003424024e28bc44' ];then
 	echo $0 test ok!
 else
 	echo $0 test failed!

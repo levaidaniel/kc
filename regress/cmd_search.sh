@@ -18,23 +18,30 @@ case "$(uname -s)" in
 	;;
 esac
 
-printf "search estke\n" |./kc -b -k regress/test -p regress/testpass
-SHA256=$(printf "search estke\n" |./kc -b -k regress/test -p regress/testpass |$SHA256_BIN |cut -d' ' -f1)
-if [ "$SHA256" == 'bc5898cae89a9929df2961cd16e77add3fdeeee0d0509adf1476cbe1a9332c13' ];then
+printf "search key\n" |./kc -b -k regress/test -p regress/testpass
+SHA256=$(printf "search key\n" |./kc -b -k regress/test -p regress/testpass |$SHA256_BIN |cut -d' ' -f1)
+if [ "$SHA256" == '4f6ab60a1abd21a8d0c16a0fef60a94b95b549e49d5cd716e9f3bc5f2d1f9991' ];then
 	echo "$0 test ok (current chain)!"
 else
 	echo "$0 test failed (current chain)!"
 	exit 1
 fi
 
-printf "copy 0 renamed_testchain\nwrite\n" |./kc -b -k regress/test -p regress/testpass
-
-printf "*search estke\n" |./kc -b -k regress/test -p regress/testpass
-SHA256=$(printf "*search estke\n" |./kc -b -k regress/test -p regress/testpass |$SHA256_BIN |cut -d' ' -f1)
-if [ "$SHA256" == 'ece907215eb17ed87daa271fa7981fc2f5fb17ce35d34f192b18e0f5e00971ea' ];then
+printf "*search key\n" |./kc -b -k regress/test -p regress/testpass
+SHA256=$(printf "*search key\n" |./kc -b -k regress/test -p regress/testpass |$SHA256_BIN |cut -d' ' -f1)
+if [ "$SHA256" == 'ae8c6394be737e3d7ba27ac2e16213591126dc33350bc96d22a7a89ea57d438c' ];then
 	echo "$0 test ok (all chains)!"
 else
 	echo "$0 test failed (all chains)!"
+	exit 1
+fi
+
+printf "search nonexistent\n" |./kc -b -k regress/test -p regress/testpass
+SHA256=$(printf "search nonexistent\n" |./kc -b -k regress/test -p regress/testpass |$SHA256_BIN |cut -d' ' -f1)
+if [ "$SHA256" == 'b1ab5f2f45667fd6a6f82bbaf5639168d16f14e385f0fbe1bcbc7e0262ba9819' ];then
+	echo "$0 test ok (nonexistent)!"
+else
+	echo "$0 test failed (nonexistent)!"
 	exit 1
 fi
 

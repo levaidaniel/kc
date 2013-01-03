@@ -20,7 +20,7 @@ esac
 
 printf "list\n" |./kc -b -k regress/test -p regress/testpass
 SHA256=$(printf "list\n" |./kc -b -k regress/test -p regress/testpass |$SHA256_BIN |cut -d' ' -f1)
-if [ "$SHA256" == 'dedb5c57680397dc993dd7b9c41240ed408e0e5c64aa85816eb8dd6ca17df2ee' ];then
+if [ "$SHA256" == '4f6ab60a1abd21a8d0c16a0fef60a94b95b549e49d5cd716e9f3bc5f2d1f9991' ];then
 	echo "$0 test ok (list)!"
 else
 	echo "$0 test failed (list)!"
@@ -29,7 +29,7 @@ fi
 
 printf "list testchain\n" |./kc -b -k regress/test -p regress/testpass
 SHA256=$(printf "list testchain\n" |./kc -b -k regress/test -p regress/testpass |$SHA256_BIN |cut -d' ' -f1)
-if [ "$SHA256" == 'd934aedfbf9f4c0f86828ad588b097b5d69ec9cebad7b11f7548af4452472cb1' ];then
+if [ "$SHA256" == 'e636704e38de5e30b2f78b1e3a78b670a6022c00582494d43ba1840dba22a515' ];then
 	echo "$0 test ok (list with parameter)!"
 else
 	echo "$0 test failed (list with parameter)!"
@@ -38,7 +38,7 @@ fi
 
 printf "list nonexistent\n" |./kc -b -k regress/test -p regress/testpass
 SHA256=$(printf "list nonexistent\n" |./kc -b -k regress/test -p regress/testpass |$SHA256_BIN |cut -d' ' -f1)
-if [ "$SHA256" == '392f174e0d24350740598abeb595a3f6e4cfcd57c8ca6c9b1cc34c4e08b02ac0' ];then
+if [ "$SHA256" == '3bb0673128fe11dd7add24efab95349b07c45cea2971b8691e85c69427a6d297' ];then
 	echo "$0 test ok (list with nonexistent parameter)!"
 else
 	echo "$0 test failed (list with nonexistent parameter)!"

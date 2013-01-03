@@ -18,20 +18,20 @@ case "$(uname -s)" in
 	;;
 esac
 
-printf "copy 0 testchain\nwrite\n" |./kc -b -k regress/test -p regress/testpass
+printf "copy 0 emptychain\nwrite\n" |./kc -b -k regress/test -p regress/testpass
 
 SHA256=$($SHA256_BIN regress/test |cut -d' ' -f1)
-if [ "$SHA256" == '949d3896aea10ecc3b4c472aaf70f7f8d09f44a2d3812dc04b191a498be98abb' ];then
+if [ "$SHA256" == 'bdd43b973530c8f7fdd5ce81bbfc4bc03c3f224eb7514dadf2c8dd8c659aeb24' ];then
 	echo "$0 test ok (copy)!"
 else
 	echo "$0 test failed (copy)!"
 	exit 1
 fi
 
-printf "c testchain\nmove 0 default\nwrite\n" |./kc -b -k regress/test -p regress/testpass
+printf "c emptychain\nmove 0 default\nwrite\n" |./kc -b -k regress/test -p regress/testpass
 
 SHA256=$($SHA256_BIN regress/test |cut -d' ' -f1)
-if [ "$SHA256" == '0a9e9fec74bf2b80a1fc136c3a497c12e0f47bde60db45cb19b0ea0470dfcfc1' ];then
+if [ "$SHA256" == '03ba9af771ab3090cd3662063b008a2cfac3e94fd368f411eb9405f3d68e1d78' ];then
 	echo "$0 test ok (move)!"
 else
 	echo "$0 test failed (move)!"

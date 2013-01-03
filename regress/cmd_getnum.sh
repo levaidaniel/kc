@@ -20,16 +20,16 @@ esac
 
 printf "0\n" |./kc -b -k regress/test -p regress/testpass
 SHA256=$(printf "0\n" |./kc -b -k regress/test -p regress/testpass |$SHA256_BIN |cut -d' ' -f1)
-if [ "$SHA256" == '72f9bb4899c8e8da8d2d5478d65d88343b8fe93b37124706a7a61cd6ae4bb14b' ];then
+if [ "$SHA256" == '0fb5e29935c233aea31ed67fc62703b5673986d6083516e8a5a11edb0030ef42' ];then
 	echo "$0 test ok (existing)!"
 else
 	echo "$0 test failed (existing)!"
 	exit 1
 fi
 
-printf "1\n" |./kc -b -k regress/test -p regress/testpass
-SHA256=$(printf "1\n" |./kc -b -k regress/test -p regress/testpass |$SHA256_BIN |cut -d' ' -f1)
-if [ "$SHA256" == 'ac3f063955e0f25e4999253212e0d88cbbb19c51a458d470d69b1aa70a166245' ];then
+printf "2\n" |./kc -b -k regress/test -p regress/testpass
+SHA256=$(printf "2\n" |./kc -b -k regress/test -p regress/testpass |$SHA256_BIN |cut -d' ' -f1)
+if [ "$SHA256" == 'd90439f5631422f4a557ea7b0ef54faf12d8db17efb85db6aa80652a55ad3654' ];then
 	echo "$0 test ok (nonexisting)!"
 else
 	echo "$0 test failed (nonexisting)!"
