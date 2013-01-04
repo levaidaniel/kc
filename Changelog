@@ -18,6 +18,7 @@ Improvements:
   to request random characters in the value input. (sort
   of like \n to request a new line)
 - New functional tests for detecting regressions.
+- 'del' will ask for confirmation just like 'cdel'
 
 Cosmetic changes:
 - clean up unused variables
