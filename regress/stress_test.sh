@@ -3,8 +3,6 @@
 set -e
 
 
-[ "$1" == 'readline' ]  &&  export READLINE=readline
-
 echo "test => $0"
 
 case "$(uname -s)" in
@@ -20,11 +18,27 @@ case "$(uname -s)" in
 	;;
 esac
 
-typeset -i CHECK_DURING_MODIFY=0
-
 typeset -i i=0
-typeset -i loop=5000
-typeset -i offset=0
+typeset -i loop=100
+
+
+while [ $1 ];do
+	case "$1" in
+		'-r')
+			READLINE=readline
+		;;
+		'-l')
+			shift
+			loop=$1
+		;;
+	esac
+
+	shift
+done
+
+# the sha256 sums for this to be enabled, are below and were generated for $loop=5000
+typeset -i CHECK_DURING_MODIFY=0
+[ $loop -eq 5000 ]  &&  CHECK_DURING_MODIFY=1
 
 # this is our sample database from regress/create_db.sh
 echo 'abc123ABC321' > regress/testpass
@@ -39,6 +53,7 @@ iRaLY/GO3OsRjdwAOVC8byYKJMWmeAtqoEbDVYfSANuSmDp85XJSwrQ0HvA+pX9o
 O8zhUz1Cy+avitWpRn5RsQ==' > regress/test
 SHA256_SUM_REFERENCE=$($SHA256_BIN regress/test |cut -d' ' -f1)
 
+typeset -i offset=0
 
 
 # new
@@ -46,7 +61,17 @@ i=0
 while [ $i -lt ${loop} ];do
 	printf "new $i\r" >/dev/stderr
 
-	printf "new newkey$i\nnewval$i\n"
+	# random mode of command invocation for 'new'
+	if [ $(( $RANDOM % 2 )) -eq 0 ];then
+		printf "new\nnewkey$i\nnewval$i\n"
+	else
+		printf "new newkey$i\nnewval$i\n"
+	fi
+
+	# random writes
+	if [ $(( $RANDOM % 2 )) -eq 0 ];then
+		printf "write\n"
+	fi
 
 	if [ $i -eq $(( ${loop} - 1 )) ];then
 		printf "write\n"
@@ -79,6 +104,11 @@ while [ $i -lt $(( ${loop} + ${offset} )) ];do
 		printf "edit $i\nedited_\nedited_\n"
 	else
 		printf "edit $i\nedited_newkey\nedited_newval\n"
+	fi
+
+	# random writes
+	if [ $(( $RANDOM % 2 )) -eq 0 ];then
+		printf "write\n"
 	fi
 
 	if [ $i -eq $(( ${loop} + ${offset} - 1 )) ];then
@@ -116,8 +146,8 @@ while [ $i -ge ${offset} ];do
 
 	printf "del ${todel}\nyes\n"
 
-	# random writes, when the index is even
-	if [ $(( $i % 2 )) -eq 0 ];then
+	# random writes
+	if [ $(( $RANDOM % 2 )) -eq 0 ];then
 		printf "write\n"
 	fi
 
