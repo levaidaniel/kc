@@ -878,7 +878,14 @@ version(void)
 	printf("%s %s\n", NAME, VERSION);
 	printf("%s was written by Daniel LEVAI <leva@ecentrum.hu>\n"
 		"Source, information, bugs:\n"
-		"http://keychain.googlecode.com\n", NAME);
+		"http://keychain.googlecode.com\n"
+		"Compiled with "
+#ifndef _READLINE
+		"Editline"
+#else
+		"Readline"
+#endif
+		" support.\n", NAME);
 } /* help */
 
 void
