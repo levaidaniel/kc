@@ -123,6 +123,13 @@ commands_init(command **commands)
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
 
+		(*commands)->name = "passwd";
+		(*commands)->usage = "passwd";
+		(*commands)->help = "Change the current database's password. All changes will be written immediately.";
+		(*commands)->fn = cmd_passwd;
+		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
+		(*commands) = (*commands)->next;
+
 		(*commands)->name = "write";
 		(*commands)->usage = "write";
 		(*commands)->help = "Save the current database.";
@@ -195,13 +202,6 @@ commands_init(command **commands)
 	(*commands)->usage = "ls [keychain]";
 	(*commands)->help = "Alias of 'list'.\nList the keys in the current keychain or if specified, in the keychain named 'keychain'. Every key gets prefixed by its index number. 'keychain' can be an index number or the keychain's name.";
 	(*commands)->fn = cmd_list;
-	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
-	(*commands) = (*commands)->next;
-
-	(*commands)->name = "passwd";
-	(*commands)->usage = "passwd";
-	(*commands)->help = "Change the current database's password. All changes will be written immediately.";
-	(*commands)->fn = cmd_passwd;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
