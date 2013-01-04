@@ -18,15 +18,17 @@ case "$(uname -s)" in
 	;;
 esac
 
+if ./kc -v |grep -E -q -e '^Compiled with Readline support\.$';then
+	export READLINE=readline
+fi
+
+
 typeset -i i=0
 typeset -i loop=100
 
 
 while [ $1 ];do
 	case "$1" in
-		'-r')
-			READLINE=readline
-		;;
 		'-l')
 			shift
 			loop=$1

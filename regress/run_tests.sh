@@ -8,7 +8,9 @@ if [ $(basename $(pwd))  == 'regress' ];then
 	exit 1
 fi
 
-[ "$1" == 'readline' ]  &&  export READLINE=readline
+if ./kc -v |grep -E -q -e '^Compiled with Readline support\.$';then
+	export READLINE=readline
+fi
 
 sh regress/create_db.sh
 
