@@ -29,7 +29,7 @@
 
 
 #define	NAME	"kc"
-#define	VERSION	"2.2.0rc3"
+#define	VERSION	"2.2-dev"
 #define	USAGE	"[-k database file] [-r] [-p password file] [-m cipher mode] [-b] [-v] [-h]"
 
 #define	PASSWORD_MAXLEN	64
