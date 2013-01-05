@@ -34,17 +34,9 @@ LDADD +=	`pkg-config --libs libxml-2.0`
 LDADD +=	`pkg-config --libs libpcre`
 .endif
 
-
-CLEANFILES +=	*.cat[0-9] regress/test*
-
-
-all: ${PROG}
+CLEANFILES +=	regress/test*
 
 test:
 	sh regress/run_tests.sh
-
-${PROG}: ${SRCS}
-	${CC} -o ${PROG} ${CFLAGS} ${LDADD} \
-		${SRCS}
 
 .include <bsd.prog.mk>
