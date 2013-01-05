@@ -30,7 +30,7 @@ else
 	REFERENCE='ab65722c447698811e5c11fb49fa9dd277fbd7cf367f871c8d94c7e4c6f1825b'
 fi
 
-if [ "${SHA256}" == "${REFERENCE}" ];then
+if [ "${SHA256}" = "${REFERENCE}" ];then
 	echo "$0 test ok (change chain)!"
 else
 	echo "$0 test failed (change chain)!"
@@ -39,7 +39,7 @@ fi
 
 printf "c nonexistent\n" |./kc -b -k regress/test -p regress/testpass
 SHA256=$(printf "c nonexistent\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^default% >' |$SHA256_BIN |cut -d' ' -f1)
-if [ "$SHA256" == '3bb0673128fe11dd7add24efab95349b07c45cea2971b8691e85c69427a6d297' ];then
+if [ "$SHA256" = '3bb0673128fe11dd7add24efab95349b07c45cea2971b8691e85c69427a6d297' ];then
 	echo "$0 test ok (nonexistent chain)!"
 else
 	echo "$0 test failed (nonexistent chain)!"

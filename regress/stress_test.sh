@@ -3,6 +3,27 @@
 set -e
 
 
+typeset -i i=0
+typeset -i loop=100
+
+
+while [ $1 ];do
+	case "$1" in
+		'-l')
+			shift
+			loop=$1
+		;;
+		'-h')
+			shift
+			echo "$0 <-l loop count>"
+			exit 0
+		;;
+	esac
+
+	shift
+done
+
+
 echo "test => $0"
 
 case "$(uname -s)" in
@@ -23,24 +44,10 @@ if ./kc -v |grep -E -q -e '^Compiled with Readline support\.$';then
 fi
 
 
-typeset -i i=0
-typeset -i loop=100
-
-
-while [ $1 ];do
-	case "$1" in
-		'-l')
-			shift
-			loop=$1
-		;;
-	esac
-
-	shift
-done
-
 # the sha256 sums for this to be enabled, are below and were generated for $loop=5000
 typeset -i CHECK_DURING_MODIFY=0
 [ $loop -eq 5000 ]  &&  CHECK_DURING_MODIFY=1
+[ $CHECK_DURING_MODIFY -gt 0 ]  &&  echo "Checking db sum in between tests!"
 
 # this is our sample database from regress/create_db.sh
 echo 'abc123ABC321' > regress/testpass
@@ -163,7 +170,7 @@ done |./kc -b -k regress/test -p regress/testpass >/dev/null
 echo # new line
 
 SHA256=$($SHA256_BIN regress/test |cut -d' ' -f1)
-if [ "$SHA256" == "$SHA256_SUM_REFERENCE" ];then
+if [ "$SHA256" = "$SHA256_SUM_REFERENCE" ];then
 	echo $0 test ok!
 else
 	echo $0 test failed!

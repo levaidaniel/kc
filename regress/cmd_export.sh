@@ -26,7 +26,7 @@ if [ ! -r "regress/test_export" ];then
 fi
 
 SHA256=$($SHA256_BIN regress/test_export |cut -d' ' -f1)
-if [ "$SHA256" == '0bca06de21e6dfa4b63361d57d7f002304b66341af9859d7bfea332c4ca061a4' ];then
+if [ "$SHA256" = '0bca06de21e6dfa4b63361d57d7f002304b66341af9859d7bfea332c4ca061a4' ];then
 	echo $0 test ok!
 else
 	echo $0 test failed!

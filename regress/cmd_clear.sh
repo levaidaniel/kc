@@ -1,4 +1,6 @@
-#!/bin/sh
+#!/bin/sh -e
+
+set -e
 
 
 echo "test => $0"

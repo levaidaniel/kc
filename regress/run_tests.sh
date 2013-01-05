@@ -3,7 +3,7 @@
 set -e
 
 
-if [ $(basename $(pwd))  == 'regress' ];then
+if [ $(basename $(pwd))  = 'regress' ];then
 	echo "please run this script directly from the source directory."
 	exit 1
 fi
