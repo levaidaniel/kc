@@ -210,14 +210,12 @@ main(int argc, char *argv[])
 		if (close(pass_file) < 0)
 			perror("close(password file)");
 	} else {
-		if(stat(db_filename, &st) == 0) {	/* if db_filename exists */
-			printf("Using '%s' database.\n", db_filename);
+		printf("Using '%s' database.\n", db_filename);
 
+		if(stat(db_filename, &st) == 0)		/* if db_filename exists */
 			/* ask for the password */
 			password_read(&pass, 0);
-		} else {
-			printf("Using new '%s' database.\n", db_filename);
-
+		else {
 			/* ask for the new password */
 			do {
 				ret = (ssize_t)password_read(&pass, 1);
