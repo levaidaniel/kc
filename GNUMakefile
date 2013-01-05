@@ -1,6 +1,9 @@
 CC =		gcc
 PROG =		kc
 
+DESTDIR ?=	
+PREFIX ?=	usr/local
+
 SRCS =		kc.c malloc_check.c
 SRCS +=		cmd_c.c cmd_cdel.c cmd_clist.c cmd_cnew.c cmd_cren.c cmd_del.c \
 		cmd_edit.c cmd_import.c cmd_export.c cmd_getnum.c cmd_help.c \
@@ -35,11 +38,11 @@ endif
 all: ${PROG}
 
 clean:
-	rm -f *.o kc *.cat[0-9] regress/test*
+	rm -f *.o kc regress/test*
 
 install:
-	install -s -o root -g bin -m 555 kc /usr/local/bin/kc
-	install -s -o root -g bin -m 444 kc.1 /usr/local/man/man1/kc.1
+	install -D -s -o root -m 755 kc ${DESTDIR}/${PREFIX}/bin/kc
+	install -D -o root -m 644 kc.1 ${DESTDIR}/${PREFIX}/man/man1/kc.1
 
 test:
 	sh regress/run_tests.sh
