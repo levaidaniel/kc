@@ -878,16 +878,15 @@ void
 version(void)
 {
 	printf("%s %s\n", NAME, VERSION);
-	printf("%s was written by Daniel LEVAI <leva@ecentrum.hu>\n"
-		"Source, information, bugs:\n"
-		"http://keychain.googlecode.com\n"
+	printf("Written by Daniel LEVAI <leva@ecentrum.hu>\n"
+		"Source, information, bugs: http://keychain.googlecode.com\n"
 		"Compiled with "
 #ifndef _READLINE
 		"Editline"
 #else
 		"Readline"
 #endif
-		" support.\n", NAME);
+		" support.\n");
 } /* help */
 
 void
