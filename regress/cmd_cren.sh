@@ -7,10 +7,10 @@ echo "test => $0"
 
 case "$(uname -s)" in
 	Linux)
-		SHA256_BIN=$(which sha256sum)
+		SHA1_BIN=$(which sha1sum)
 	;;
 	*BSD)
-		SHA256_BIN="$(which cksum) -r -a sha256"
+		SHA1_BIN="$(which sha1) -r"
 	;;
 	*)
 		echo "unknown system."
@@ -26,8 +26,8 @@ fi
 
 printf "${cmd}" |./kc -b -k regress/test -p regress/testpass
 
-SHA256=$($SHA256_BIN regress/test |cut -d' ' -f1)
-if [ "$SHA256" = '86e1c5060f3042419bdaaa5b6b8e8d257eaf693dad935c72003424024e28bc44' ];then
+SHA1=$($SHA1_BIN regress/test |cut -d' ' -f1)
+if [ "$SHA1" = 'd8d394b445da5240483016662265638be3197688' ];then
 	echo $0 test ok!
 else
 	echo $0 test failed!

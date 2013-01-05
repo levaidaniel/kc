@@ -28,10 +28,10 @@ echo "test => $0"
 
 case "$(uname -s)" in
 	Linux)
-		SHA256_BIN=$(which sha256sum)
+		SHA1_BIN=$(which sha1sum)
 	;;
 	*BSD)
-		SHA256_BIN="$(which cksum) -r -a sha256"
+		SHA1_BIN="$(which sha1) -r"
 	;;
 	*)
 		echo "unknown system."
@@ -60,7 +60,7 @@ KrbeoLrGsNAFJ1paFuXinmwn2hVS11+5ayEfadHgpsi0cm4Ze9xoroM0eX+Vj7LT
 FIOgRFau1xvBM2kauEalqRwYKTjOmTdv41iEKK+FaDhhYl2OId5vbHJSp52OF51s
 iRaLY/GO3OsRjdwAOVC8byYKJMWmeAtqoEbDVYfSANuSmDp85XJSwrQ0HvA+pX9o
 O8zhUz1Cy+avitWpRn5RsQ==' > regress/test
-SHA256_SUM_REFERENCE=$($SHA256_BIN regress/test |cut -d' ' -f1)
+SHA1_SUM_REFERENCE=$($SHA1_BIN regress/test |cut -d' ' -f1)
 
 typeset -i offset=0
 
@@ -92,8 +92,8 @@ done |./kc -b -k regress/test -p regress/testpass >/dev/null
 echo # new line
 
 if [ ${CHECK_DURING_MODIFY} -gt 0 ];then
-	SHA256=$($SHA256_BIN regress/test |cut -d' ' -f1)
-	if [ "$SHA256" == 'd333279529484e9d2bfb40c11d013191da7970d19e716742f2ee6a27541649dd' ];then
+	SHA1=$($SHA1_BIN regress/test |cut -d' ' -f1)
+	if [ "$SHA1" == '93846fc7857d78ee201799caf132ad726f8064c9' ];then
 		echo "$0 test ok (#${loop} new entry)!"
 	else
 		echo "$0 test failed (#${loop} new entry)!"
@@ -130,8 +130,8 @@ done |./kc -b -k regress/test -p regress/testpass >/dev/null
 echo # new line
 
 if [ ${CHECK_DURING_MODIFY} -gt 0 ];then
-	SHA256=$($SHA256_BIN regress/test |cut -d' ' -f1)
-	if [ "$SHA256" == 'fbfb29703234f8605ceadb7e978eebc93003c4fab6b0836cad9e6aa5fb7c3998' ];then
+	SHA1=$($SHA1_BIN regress/test |cut -d' ' -f1)
+	if [ "$SHA1" == '91c10a0e026e60e2bb65190d0f9ff75b73675167' ];then
 		echo "$0 test ok (#${loop} entry edit)!"
 	else
 		echo "$0 test failed (#${loop} entry edit)!"
@@ -169,8 +169,8 @@ while [ $i -ge ${offset} ];do
 done |./kc -b -k regress/test -p regress/testpass >/dev/null
 echo # new line
 
-SHA256=$($SHA256_BIN regress/test |cut -d' ' -f1)
-if [ "$SHA256" = "$SHA256_SUM_REFERENCE" ];then
+SHA1=$($SHA1_BIN regress/test |cut -d' ' -f1)
+if [ "$SHA1" = "$SHA1_SUM_REFERENCE" ];then
 	echo $0 test ok!
 else
 	echo $0 test failed!

@@ -7,10 +7,10 @@ echo "test => $0"
 
 case "$(uname -s)" in
 	Linux)
-		SHA256_BIN=$(which sha256sum)
+		SHA1_BIN=$(which sha1sum)
 	;;
 	*BSD)
-		SHA256_BIN="$(which cksum) -r -a sha256"
+		SHA1_BIN="$(which sha1) -r"
 	;;
 	*)
 		echo "unknown system."
@@ -19,8 +19,8 @@ case "$(uname -s)" in
 esac
 
 printf "/^d.*.[abck]ey[0-9]$\n" |./kc -b -k regress/test -p regress/testpass
-SHA256=$(printf "/^d.*.[abck]ey[0-9]+$\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^default% >' |$SHA256_BIN |cut -d' ' -f1)
-if [ "$SHA256" = '4f6ab60a1abd21a8d0c16a0fef60a94b95b549e49d5cd716e9f3bc5f2d1f9991' ];then
+SHA1=$(printf "/^d.*.[abck]ey[0-9]+$\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^default% >' |$SHA1_BIN |cut -d' ' -f1)
+if [ "$SHA1" = '646c97c66d3c5f0810adfabe230ba164a182825e' ];then
 	echo "$0 test ok (current chain)!"
 else
 	echo "$0 test failed (current chain)!"
@@ -28,8 +28,8 @@ else
 fi
 
 printf "*/^(default)*[abck]ey(test)*[0-9]$\n" |./kc -b -k regress/test -p regress/testpass
-SHA256=$(printf "*/^(default)*[abck]ey(test)*[0-9]$\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^default% >' |$SHA256_BIN |cut -d' ' -f1)
-if [ "$SHA256" = 'ae8c6394be737e3d7ba27ac2e16213591126dc33350bc96d22a7a89ea57d438c' ];then
+SHA1=$(printf "*/^(default)*[abck]ey(test)*[0-9]$\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^default% >' |$SHA1_BIN |cut -d' ' -f1)
+if [ "$SHA1" = 'dc238e4c5b82d4c0d03eb301297285eb4bdf2f66' ];then
 	echo "$0 test ok (all chains)!"
 else
 	echo "$0 test failed (all chains)!"
@@ -37,8 +37,8 @@ else
 fi
 
 printf "/nonexistent\n" |./kc -b -k regress/test -p regress/testpass
-SHA256=$(printf "/nonexistent\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^default% >' |$SHA256_BIN |cut -d' ' -f1)
-if [ "$SHA256" = 'b1ab5f2f45667fd6a6f82bbaf5639168d16f14e385f0fbe1bcbc7e0262ba9819' ];then
+SHA1=$(printf "/nonexistent\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^default% >' |$SHA1_BIN |cut -d' ' -f1)
+if [ "$SHA1" = 'c5a81f8b956e8aa4cc066a4232be5db06b7f9572' ];then
 	echo "$0 test ok (nonexistent)!"
 else
 	echo "$0 test failed (nonexistent)!"

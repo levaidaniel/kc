@@ -7,10 +7,10 @@ echo "test => $0"
 
 case "$(uname -s)" in
 	Linux)
-		SHA256_BIN=$(which sha256sum)
+		SHA1_BIN=$(which sha1sum)
 	;;
 	*BSD)
-		SHA256_BIN="$(which cksum) -r -a sha256"
+		SHA1_BIN="$(which sha1) -r"
 	;;
 	*)
 		echo "unknown system."
@@ -22,15 +22,15 @@ esac
 # This basically doesn't output anything with editline, beacuse the only notion
 # of a successful keychain change is our prompt which displays the chain's name,
 # and editline's prompt is not showing during batchmode...
-SHA256=$(printf "c testchain\n" |./kc -b -k regress/test -p regress/testpass |$SHA256_BIN |cut -d' ' -f1)
+SHA1=$(printf "c testchain\n" |./kc -b -k regress/test -p regress/testpass |$SHA1_BIN |cut -d' ' -f1)
 
 if [ ${READLINE} ];then
-	REFERENCE='0fe30cb29f4485667bd5b07fbd3470af9488876da0f2c6303a61e7c425744221'
+	REFERENCE='7830303766409cbbd655e1c515e83653cf14e9a0'
 else
-	REFERENCE='ab65722c447698811e5c11fb49fa9dd277fbd7cf367f871c8d94c7e4c6f1825b'
+	REFERENCE='e1e39a0d17ff84eaa4a4b90c5bd2a91c892954e6'
 fi
 
-if [ "${SHA256}" = "${REFERENCE}" ];then
+if [ "${SHA1}" = "${REFERENCE}" ];then
 	echo "$0 test ok (change chain)!"
 else
 	echo "$0 test failed (change chain)!"
@@ -38,8 +38,8 @@ else
 fi
 
 printf "c nonexistent\n" |./kc -b -k regress/test -p regress/testpass
-SHA256=$(printf "c nonexistent\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^default% >' |$SHA256_BIN |cut -d' ' -f1)
-if [ "$SHA256" = '3bb0673128fe11dd7add24efab95349b07c45cea2971b8691e85c69427a6d297' ];then
+SHA1=$(printf "c nonexistent\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^default% >' |$SHA1_BIN |cut -d' ' -f1)
+if [ "$SHA1" = '3cca28bb2a53a71c2a87c820da44d31f3fecf3b6' ];then
 	echo "$0 test ok (nonexistent chain)!"
 else
 	echo "$0 test failed (nonexistent chain)!"
