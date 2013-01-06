@@ -160,6 +160,9 @@ cmd_getnum(int idx, size_t space)
 					case 'j':
 					case '+':
 					case ' ':
+					case '>':
+					case ']':
+					case '}':
 					case 10:
 						if (idx < lines)
 							idx++;
@@ -169,6 +172,9 @@ cmd_getnum(int idx, size_t space)
 					case 'p':
 					case 'k':
 					case '-':
+					case '<':
+					case '[':
+					case '{':
 					case 8:
 						if (idx - 1 > 0)
 							idx--;
