@@ -6,6 +6,7 @@ Bug fixes:
   call failed (couldn't read a line due to some error),
   then when returning from cmd_new(), the already read
   'key' would not have been freed.
+- Fix multiline value displaying when directly jumping to a specified line
 
 Improvements:
 - Introduce a new command 'passwd' that can be used to change the current database's password.
