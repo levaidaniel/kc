@@ -17,7 +17,7 @@
 .\"ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 .\"(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 .\"SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-.Dd Jan 02, 2013
+.Dd Jan 09, 2013
 .Dt KC 1
 .Os
 .Sh NAME
@@ -176,7 +176,7 @@ Alias of
 .It Cm cnew Op name
 Create a new keychain. If
 .Ar name
-is not given then prompt for one.
+is not given then prompt for one. Empty string cancels the addition.
 .It Cm copy Ar index Ar keychain
 Copy a key in the current keychain to another keychain.
 .Ar index
@@ -277,7 +277,7 @@ compatible XML database. You can import it to
 using the
 .Cm import
 command.
-.It Cm new :
+.It Cm Adding new entries :
 .Bd -literal -offset |||
 .Em Simple :
 default% > new testuser
@@ -288,35 +288,77 @@ default% > new
 default% NEW key> testuser2
 default% NEW value> test_\er_pass_with_random_characters:\eA
 
-.Em Using the character sequences and multiline value :
+.Em Using the 'key' only as an indication :
+default% > new www.mysecuresite.com
+default% NEW value> user_name\enpass-word
+
+.Em Using the random and newline character sequences :
 default% > new testuser3
 default% NEW value> \er\eR\en\ea\eA\enthis is a multiline value!
 
+.Em Creating new keychains :
+default% > cnew email_accounts
+default% > cnew
+default% NEW keychain> WebSite Accounts
+
 .Em Results :
+
+.Em Listing the current keychain :
 default% > list
 0. testuser
 1. testuser2
-2. testuser3
+2. www.mysecuresite.com
+3. testuser3
+
+.Em Listing any keychain :
+default% > list email_accounts
+empty keychain.
+default% > list 2    (<-- this is the "WebSite Accounts" keychain)
+empty keychain.
+
+.Em Displaying values in the current keychain :
 default% > 0
 [testuser] testpass
 default% > 1
 [testuser2] test_,x_pass_with_random_characters:6nzm
 default% > 2
+[www.mysecuresite.com] [1/2] user_name
+[www.mysecuresite.com] [2/2] pass-word
+default% > 3
 [testuser3] [1/3] v#)z!9
 [testuser3] [2/3] HwRz7i
 [testuser3] [3/3] this is a multiline value!
+
+.Em Listing keychains :
+default% > clist
+0. default
+1. email_accounts
+2. WebSite Accounts
+
+.Em Switching to other keychains :
+default% > c email_accounts
+email_accounts% > c 2
+WebSite Accounts% >
 .Ed
-.It Cm edit :
+.It Cm Editing existing entries :
 .Bd -literal -offset |||
 default% > list
 0. testuser
 1. testuser2
-2. testuser3
+2. www.mysecuresite.com
+3. testuser3
+
+.Em Edit an entry in the current keychain :
 default% > edit 1
 default% EDIT key> testuser2
 default% EDIT value> test_pass_with_random_characters:6nzm
 default% > 1
 [testuser2] test_pass_with_random_characters:6nzm
+
+.Em Rename a keychain :
+default% > cren default
+default% RENAME keychain> my_own keychain
+my_own keychain% > 
 .Ed
 .El
 .Sh CAVEATS
