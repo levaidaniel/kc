@@ -43,11 +43,13 @@ After starting
 .Nm
 the
 .Cm help
-command shows the available commands, and usage information for them.
+command shows the available commands, and usage information for them. If you're in a hurry, for starters, you create a new entry with the
+.Cm new
+command, then entering only a number in the command line will display the entry with the given index. You quit from the display with 'q' or EOT (usually CTRL+d).
 .Pp
 The CLI supports tab-completion for commands and keychains.
 .Pp
-There is a utility in the source package that can convert an exported pwsafe database to a
+There is a utility in the source package that converts an exported pwsafe database to a
 .Nm
 compatible XML database, which can be imported using the
 .Cm import
@@ -87,7 +89,7 @@ Display version.
 Display help.
 .El
 .Ss COMMANDS
-These commands can be used in the CLI:
+These commands are available in the CLI:
 .Bl -tag -offset ||| -width |
 .It Cm new Op name
 Create a new key with a value in the current keychain. Both key and value will be prompted for, except when

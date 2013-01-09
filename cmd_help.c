@@ -66,9 +66,9 @@ cmd_help(const char *e_line, command *commands)
 			commands = commands->next;
 		}
 		printf("\n%-10s - \t<number> [space]\n", "<number>");
-		puts("\nEntering only a number in the command line will display the entry with the given index. You can quit from the display with 'q'.\n"
+		puts("\nEntering only a number in the command line will display the entry with the given index. You quit from the display with 'q' or EOT (usually CTRL+d).\n"
 			"\nBy specifying another number (space) after the index, that many random characters will be inserted between the value's characters.\n"
-			"\nYou can navigate through a multiline value's lines with keys j/k, n/p, f/b, +/-, [/], {/}, </>, <SPACE>, <ENTER>, <BACKSPACE>. Typing a number between 1-9 will jump directly to that line.\n"
+			"\nYou navigate through a multiline value's lines with keys j/k, n/p, f/b, +/-, [/], {/}, </>, <SPACE>, <ENTER>, <BACKSPACE>. Typing a number between 1-9 will jump directly to that line.\n"
 			"\nFor a command's description, use 'help <command name>'.");
 	}
 

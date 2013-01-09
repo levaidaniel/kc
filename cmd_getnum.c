@@ -81,7 +81,7 @@ cmd_getnum(int idx, size_t space)
 #endif
 
 		idx = 1;	/* from hereafter 'idx' will be our requested line number */
-		while (rc != 'q') {	/* quit for 'q' */
+		while (rc != 'q'  &&  rc != 4) {	/* quit for 'q' or EOT */
 			if (batchmode)
 				puts("");
 
