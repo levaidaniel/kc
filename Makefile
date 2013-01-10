@@ -2,7 +2,7 @@ LOCALBASE ?=	/usr/local
 BINDIR =	${LOCALBASE}/bin
 PROG =		kc
 
-MANDIR =	${LOCALBASE}/man/man1
+MANDIR =	${LOCALBASE}/man/man
 MAN =		kc.1
 
 SRCS =		kc.c malloc_check.c
