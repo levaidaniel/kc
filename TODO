@@ -1,8 +1,0 @@
-o new 'status' command
-	- which database is in use.
-	- other funny information, like
-		how many keychains are in the database,
-		which cipher mode are we in,
-		how many entries are in the current chain,
-		how many entries are in all of the keychains together,
-		how many bytes the xml structure consumes,

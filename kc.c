@@ -60,6 +60,7 @@ xmlDocPtr	db = NULL;
 xmlNodePtr	keychain = NULL;
 
 int		db_file = 0;
+char		*db_filename = NULL;
 
 unsigned char	dirty = 0, batchmode = 0, readonly = 0;
 
@@ -96,7 +97,6 @@ main(int argc, char *argv[])
 	struct stat	st;
 	const char	*default_db_dir = ".kc";
 	const char	*default_db_filename = "default";
-	char		*db_filename = NULL;
 	char		*env_home = NULL;
 
 	xmlNodePtr	db_root = NULL;
@@ -280,7 +280,7 @@ main(int argc, char *argv[])
 	free(pass); pass = NULL;
 
 
-	if (readonly == 0)
+	if (!readonly)
 		if (flock(db_file, LOCK_NB | LOCK_EX) < 0) {
 			if (getenv("KC_DEBUG"))
 				puts("flock(database file)");
@@ -541,7 +541,7 @@ main(int argc, char *argv[])
 	/* create the command list */
 	commands_init(&commands_first);
 
-	if (readonly == 1)
+	if (readonly)
 		puts("Database is read-only!");
 
 	/* command loop */
@@ -653,7 +653,7 @@ prompt_str(void)
 	prompt_len = (size_t)xmlStrlen(cname) + 2 + sizeof(prompt_context) + 2 + 1;
 	prompt = realloc(prompt, prompt_len); malloc_check(prompt);
 
-	snprintf(prompt, prompt_len, "%s%% %s%c ", cname, prompt_context, (readonly == 0 ? '>':'|'));
+	snprintf(prompt, prompt_len, "%s%% %s%c ", cname, prompt_context, (readonly ? '|':'>'));
 	xmlFree(cname); cname = NULL;
 
 	return(prompt);

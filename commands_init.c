@@ -41,7 +41,7 @@ commands_init(command **commands)
 	*commands = (command *)malloc(sizeof(command)); malloc_check(*commands);
 	first = *commands;
 
-	if (readonly == 0) {
+	if (!readonly) {
 		(*commands)->name = "cdel";
 		(*commands)->usage = "cdel <keychain>";
 		(*commands)->help = "Delete a keychain. 'keychain' can be an index number or the keychain's name.";
@@ -248,6 +248,13 @@ commands_init(command **commands)
 	(*commands)->usage = "*s <string>";
 	(*commands)->help = "Alias of '*search'.\nSearch for 'string' in key names in every keychain.";
 	(*commands)->fn = cmd_search;
+	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
+	(*commands) = (*commands)->next;
+
+	(*commands)->name = "status";
+	(*commands)->usage = "status";
+	(*commands)->help = "Display information about the current database.";
+	(*commands)->fn = cmd_status;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 

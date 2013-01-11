@@ -45,4 +45,6 @@ sh regress/cmd_del.sh
 sh regress/cmd_write.sh
 sh regress/cmd_passwd.sh
 
+sh regress/cmd_status.sh
+
 printf "\nAll tests ok! :)\n"
