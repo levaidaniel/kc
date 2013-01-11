@@ -1,26 +1,11 @@
-2.2.0:
+2.3.0:
 
 Bug fixes:
-- Plug a potential memory leak in cmd_new.c (the xmlFree() got stuck in an #ifndef):
-  When using the readline functions, and the readline()
-  call failed (couldn't read a line due to some error),
-  then when returning from cmd_new(), the already read
-  'key' would not have been freed.
-- Fix multiline value displaying when directly jumping to a specified line
 
 Improvements:
-- Introduce a new command 'passwd' that can be used to change the current database's password.
-- New passwords are asked twice for confirmation.
-- add an alias for 'clist': 'cls'
-- Introduce a new utility, which can (hopefully) convert pwsafe databases to kc XML databases.
-- man page and documentation updates
-- new feature to the 'new' and 'edit' commands:
-  Now the escape sequences \r, \R, \a, \A can be used
-  to request random characters in the value input. (sort
-  of like \n to request a new line)
-- New functional tests for detecting regressions.
-- 'del' will ask for confirmation just like 'cdel'
+- New command 'status':
+	What database file is in use...
+	...and other funny stuff about the current database.
 
 Cosmetic changes:
-- clean up unused variables
-- sort the commands (quasi) by their names
+- Add PCRE information to version.
