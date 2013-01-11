@@ -79,35 +79,27 @@ count_items(unsigned char mode)	/* mode: 1=list keychains; 2=list items in a key
 	xmlNodePtr	db_node = keychain;
 
 	unsigned int	count = 0;
-	unsigned int	keychains = 0;
-	unsigned int	items = 0;
 
 
 	while (first) {
 		if (first->type == XML_ELEMENT_NODE) {	/* we only care about ELEMENT nodes */
-			if (mode == 1)
-				keychains++;
-			else {
-				db_node = first->children;
-				while (db_node) {
-					if (db_node->type == XML_ELEMENT_NODE)	/* we only care about ELEMENT nodes */
-						items++;
+			switch (mode) {
+				case 1:
+					count++;
+					break;
+				case 2:
+					db_node = first->children;
+					while (db_node) {
+						if (db_node->type == XML_ELEMENT_NODE)	/* we only care about ELEMENT nodes */
+							count++;
 
-					db_node = db_node->next;
-				}
+						db_node = db_node->next;
+					}
+					break;
 			}
 		}
 
 		first = first->next;
-	}
-
-	switch (mode) {
-		case 1:
-			count = keychains;
-			break;
-		case 2:
-			count = items;
-			break;
 	}
 
 	return(count);
