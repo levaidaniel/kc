@@ -8,7 +8,7 @@ if [ $(basename $(pwd))  = 'regress' ];then
 	exit 1
 fi
 
-if ./kc -v |grep -E -q -e '^Compiled with Readline support\.$';then
+if ./kc -v |grep -E -q -e '^Compiled with Readline(, RegExp)* support\.$';then
 	export READLINE=readline
 fi
 
