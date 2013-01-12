@@ -23,9 +23,16 @@
 */
 
 
+#include <sys/stat.h>
+
 #include "common.h"
 #include "commands.h"
 
+
+#ifndef _READLINE
+extern EditLine		*e;
+extern History		*eh;
+#endif
 
 extern xmlDocPtr	db;
 
@@ -33,9 +40,8 @@ extern xmlDocPtr	db;
 void
 cmd_export(const char *e_line, command *commands)
 {
-	char		*export_filename = NULL;
-
-	char		*line = NULL;
+	char		*export_filename = NULL, *line = NULL;
+	struct stat	st;
 
 
 	line = strdup(e_line);
@@ -48,7 +54,54 @@ cmd_export(const char *e_line, command *commands)
 		return;
 	}
 
-	if (xmlSaveFormatFileEnc(export_filename, db, "UTF-8", XML_SAVE_FORMAT) <= 0)
+	if(lstat(export_filename, &st) == 0) {	/* if export filename exists */
+#ifndef _READLINE
+		/* disable history temporarily */
+		if (el_set(e, EL_HIST, history, NULL) != 0) {
+			perror("el_set(EL_HIST)");
+		}
+		/* clear the prompt temporarily */
+		if (el_set(e, EL_PROMPT, el_prompt_null) != 0) {
+			perror("el_set(EL_PROMPT)");
+		}
+#endif
+		printf("Do you want to overwrite '%s'? <yes/no> ", export_filename);
+
+#ifdef _READLINE
+		rl_redisplay();
+#endif
+
+#ifndef _READLINE
+		e_line = el_gets(e, &e_count);
+#else
+		e_line = readline("");
+#endif
+		if (!e_line) {
+#ifndef _READLINE
+			el_reset(e);
+
+			/* re-enable the default prompt */
+			if (el_set(e, EL_PROMPT, prompt_str) != 0) {
+				perror("el_set(EL_PROMPT)");
+			}
+			/* re-enable history */
+			if (el_set(e, EL_HIST, history, eh) != 0) {
+				perror("el_set(EL_HIST)");
+			}
+#endif
+			free(line); line = NULL;
+			return;
+		}
+
+		if (strncmp(e_line, "yes", 3) != 0) {
+			free(line); line = NULL;
+			return;
+		}
+	}
+
+	if (xmlSaveFormatFileEnc(export_filename, db, "UTF-8", XML_SAVE_FORMAT) > 0)
+		puts("Export OK!");
+	else
 		printf("failed to export to '%s'.\n", export_filename);
 
 	free(line); line = NULL;
