@@ -43,6 +43,8 @@ cmd_new(const char *e_line, command *commands)
 	xmlNodePtr	db_node = NULL;
 	xmlChar		*key = NULL, *value_rR = NULL, *value = NULL;
 
+	char		*created = NULL;
+
 	char		*line = NULL;
 
 #ifndef _READLINE
@@ -134,17 +136,25 @@ cmd_new(const char *e_line, command *commands)
 	strlcpy(prompt_context, "", sizeof(prompt_context));
 
 
+	created = malloc(TIME_MAXLEN); malloc_check(created);
+	snprintf(created, TIME_MAXLEN, "%d", (int)time(NULL));
+
 	/* XXX reloading a saved document inserts a 'text' element between each visible node (why?)
 	 * so we must reproduce this */
 	xmlAddChild(keychain, xmlNewText(BAD_CAST "\t"));
 
 	/* add new element */
 	db_node = xmlNewChild(keychain, NULL, BAD_CAST "key", NULL);
+
 	xmlNewProp(db_node, BAD_CAST "name", key);
 	xmlNewProp(db_node, BAD_CAST "value", value);
+	xmlNewProp(db_node, BAD_CAST "created", BAD_CAST created);
+	xmlNewProp(db_node, BAD_CAST "modified", BAD_CAST created);
+
 	xmlFree(key); key = NULL;
 	xmlFree(value_rR); value_rR = NULL;
 	xmlFree(value); value = NULL;
+	free(created); created = NULL;
 
 	/* make the XML document prettttyyy */
 	xmlAddChild(keychain, xmlNewText(BAD_CAST "\n\t"));

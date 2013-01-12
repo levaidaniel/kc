@@ -34,6 +34,8 @@
 
 #define	PASSWORD_MAXLEN	64
 
+#define	TIME_MAXLEN	11
+
 enum {
 	KC_GENERATE_IV = 1,
 	KC_GENERATE_SALT = 1 << 1,

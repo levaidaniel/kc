@@ -44,6 +44,9 @@ cmd_edit(const char *e_line, command *commands)
 	xmlNodePtr	db_node = NULL, db_node_new = NULL;
 	xmlChar		*key = NULL, *value_rR = NULL, *value = NULL;
 
+	xmlChar		*created = NULL;
+	char		*modified = NULL;
+
 #ifndef _READLINE
 	int		e_count = 0;
 #endif
@@ -145,12 +148,23 @@ cmd_edit(const char *e_line, command *commands)
 		}
 		value = parse_randoms(value_rR);
 
+		created = xmlGetProp(db_node, BAD_CAST "created");
+		modified = malloc(TIME_MAXLEN); malloc_check(modified);
+		snprintf(modified, TIME_MAXLEN, "%d", (int)time(NULL));
+
+
 		db_node_new = xmlNewChild(keychain, NULL, BAD_CAST "key", NULL);
+
 		xmlNewProp(db_node_new, BAD_CAST "name", key);
 		xmlNewProp(db_node_new, BAD_CAST "value", value);
+		xmlNewProp(db_node_new, BAD_CAST "created", created);
+		xmlNewProp(db_node_new, BAD_CAST "modified", BAD_CAST modified);
+
 		xmlFree(key); key = NULL;
 		xmlFree(value_rR); value_rR = NULL;
 		xmlFree(value); value = NULL;
+		xmlFree(created); value = NULL;
+		free(modified); modified = NULL;
 
 		db_node = xmlReplaceNode(db_node, db_node_new);
 		xmlFreeNode(db_node);
