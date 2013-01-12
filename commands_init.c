@@ -192,6 +192,13 @@ commands_init(command **commands)
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
+	(*commands)->name = "info";
+	(*commands)->usage = "info <index>";
+	(*commands)->help = "Print information about a key in the current keychain. 'index' is the key's index number in the current keychain.";
+	(*commands)->fn = cmd_info;
+	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
+	(*commands) = (*commands)->next;
+
 	(*commands)->name = "list";
 	(*commands)->usage = "list [keychain]";
 	(*commands)->help = "List the keys in the current keychain or if specified, in the keychain named 'keychain'. Every key gets prefixed by its index number. 'keychain' can be an index number or the keychain's name.";
