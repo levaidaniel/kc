@@ -34,6 +34,7 @@ cmd_info(const char *e_line, command *commands)
 	xmlChar		*key = NULL, *created = NULL, *modified = NULL;
 
 	int		idx = 0;
+	time_t		created_time = 0, modified_time = 0;
 
 
 	if (sscanf(e_line, "%*s %d", &idx) <= 0) {
@@ -48,26 +49,26 @@ cmd_info(const char *e_line, command *commands)
 	db_node = find_key(idx);
 	if (db_node) {
 		key = xmlGetProp(db_node, BAD_CAST "name");
+		printf("Name: %s\n", key);
+		xmlFree(key); key = NULL;
 
+		printf("Created: ");
 		created = xmlGetProp(db_node, BAD_CAST "created");
 		if (created) {
-			/* TODO Convert timestamp to calendar date */
+			created_time = atoi((const char *)created);
+			printf("%s", ctime(&created_time));
+			xmlFree(created); created = NULL;
 		} else
-			created = xmlStrdup(BAD_CAST "Not defined.");
+			puts("Not defined.");
 
+		printf("Modified: ");
 		modified = xmlGetProp(db_node, BAD_CAST "modified");
 		if (modified) {
-			/* TODO Convert timestamp to calendar date */
-		} else
-			modified = xmlStrdup(BAD_CAST "Not defined.");
-
-		printf("Name: %s\n", key);
-		printf("Created: %s\n", created);
-		printf("Modified: %s\n", modified);
-
-		xmlFree(key); key = NULL;
-		xmlFree(created); created = NULL;
-		xmlFree(modified); modified = NULL;
+			modified_time = atoi((const char *)modified);
+			printf("%s", ctime(&modified_time));
+			xmlFree(modified); modified = NULL;
+		} else 
+			puts("Not defined.");
 	} else
 		puts("invalid index!");
 } /* cmd_info() */
