@@ -611,8 +611,10 @@ cmd_match(const char *e_line)
 			cmd = "c/";
 		else {
 			cmd = strtok(line, " ");
-			if (!cmd)	/* probably an empty line */
+			if (!cmd) {	/* probably an empty line */
+				free(line); line = NULL;
 				return;
+			}
 		}
 
 		while(commands) {
