@@ -43,6 +43,10 @@ cmd_export(const char *e_line, command *commands)
 	char		*export_filename = NULL, *line = NULL;
 	struct stat	st;
 
+#ifndef _READLINE
+	int		e_count = 0;
+#endif
+
 
 	line = strdup(e_line);
 
