@@ -6,6 +6,9 @@ Improvements:
 - New command 'status':
 	What database file is in use...
 	...and other funny stuff about the current database.
+- New command 'info':
+	Displays information about a key (currently only
+	'created' and 'modified' properties).
 
 Cosmetic changes:
 - Add PCRE information to version.
