@@ -76,7 +76,7 @@ unsigned int
 count_items(unsigned char mode)	/* mode: 1=list keychains; 2=list items in a keychain */
 {
 	xmlNodePtr	first = keychain;
-	xmlNodePtr	db_node = keychain;
+	xmlNodePtr	db_node = NULL;
 
 	unsigned int	count = 0;
 
