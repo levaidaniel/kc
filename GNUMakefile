@@ -1,4 +1,3 @@
-CC =		gcc
 PROG =		kc
 
 DESTDIR ?=	
@@ -19,8 +18,11 @@ OBJS +=		cmd_c.o cmd_cdel.o cmd_clear.o cmd_clist.o cmd_cnew.o cmd_copy.o \
 		cmd_version.o cmd_write.o \
 		commands.o commands_init.o
 
+CFLAGS +=	-D_LINUX
+ifndef EDITLINE
+CFLAGS +=	-D_READLINE
+endif
 CFLAGS +=	-pedantic -Wall -g
-CFLAGS +=	-D_LINUX -D_READLINE
 CFLAGS +=	`pkg-config --cflags libssl`
 CFLAGS +=	`pkg-config --cflags libbsd`
 CFLAGS +=	`pkg-config --cflags libxml-2.0`
@@ -31,7 +33,11 @@ endif
 LDADD +=	`pkg-config --libs libssl`
 LDADD +=	`pkg-config --libs libbsd`
 LDADD +=	`pkg-config --libs libxml-2.0`
+ifdef EDITLINE
+LDADD +=	-ledit -lncursesw
+else
 LDADD +=	-lreadline -ltermcap
+endif
 ifdef HAVE_PCRE
 LDADD +=	`pkg-config --libs libpcre`
 endif
