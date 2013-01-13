@@ -2,15 +2,15 @@
 set -e
 
 
-OPTIONS='HAVE_PCRE=y'
+OPTIONS_DEFAULT='HAVE_PCRE=y'
 
-MAKE="make $@"
+MAKE="make"
 case "$(uname -s)" in
 	Linux)
-		${MAKE} -f GNUMakefile ${OPTIONS}
+		${MAKE} -f GNUMakefile ${OPTIONS_DEFAULT} $@
 	;;
 	*BSD)
-		${MAKE} -f Makefile ${OPTIONS}
+		${MAKE} -f Makefile ${OPTIONS_DEFAULT} $@
 	;;
 	*)
 		echo "unknown system."
