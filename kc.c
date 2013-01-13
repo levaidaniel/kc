@@ -740,8 +740,10 @@ el_tab_complete(EditLine *e)
 		word_next = strtok(NULL, " ");
 	}
 	/* nothing in the 'line_buf', other than space(s) */
-	if (!word)
+	if (!word) {
+		free(line_buf_copy);
 		return(CC_CURSOR);
+	}
 
 	word_len = strlen(word);
 
