@@ -57,7 +57,7 @@ cmd_quit(const char *e_line, command *commands)
 		}
 #endif
 
-		do {
+		while (1) {
 #ifndef _READLINE
 			printf("Do you want to write the changes? <yes/no> ");
 			e_line = el_gets(e, &e_count);
@@ -86,18 +86,20 @@ cmd_quit(const char *e_line, command *commands)
 			line[(long)(strlen(line) - 1)] = '\0';	/* remove the newline */
 #endif
 
-		} while (	strcasecmp(line, "yes") != 0  &&
-				strcasecmp(line, "y") != 0  &&
-				strcasecmp(line, "no") != 0  &&
-				strcasecmp(line, "n") != 0);
+			if (strcasecmp(line, "yes") == 0  ||  strcasecmp(line, "y") == 0) {
+				cmd_write(NULL, NULL);
+				break;
+			}
 
-		if (	strcasecmp(line, "yes") == 0  ||
-			strcasecmp(line, "y") == 0)
+			if (strcasecmp(line, "no") == 0  ||  strcasecmp(line, "n") == 0) {
+				puts("Changes were NOT saved.");
+				break;
+			}
 
-			cmd_write(NULL, NULL);
-		else
-			puts("Changes were NOT saved.");
+			free(line); line = NULL;
+		}
 	}
+	free(line); line = NULL;
 
 	quit(EXIT_SUCCESS);
 } /* cmd_quit() */
