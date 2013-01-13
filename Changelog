@@ -1,6 +1,7 @@
 2.3.0:
 
 Bug fixes:
+- Plug in some memory leaks.
 
 Improvements:
 - New command 'status':
@@ -9,6 +10,8 @@ Improvements:
 - New command 'info':
 	Displays information about a key (currently only
 	'created' and 'modified' properties).
+- Make it possible to compile kc with libedit on Linux too, with the EDITLINE
+  flag. The default remains readline on Linux.
 
 Cosmetic changes:
 - Add PCRE information to version.
