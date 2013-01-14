@@ -30,6 +30,7 @@ sh regress/cmd_searchre.sh
 
 sh regress/cmd_new.sh
 sh regress/cmd_edit.sh
+sh regress/cmd_info.sh
 
 sh regress/cmd_export.sh
 sh regress/cmd_import.sh
