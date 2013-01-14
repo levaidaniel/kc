@@ -19,7 +19,7 @@ OBJS +=		cmd_c.o cmd_cdel.o cmd_clear.o cmd_clist.o cmd_cnew.o cmd_copy.o \
 		commands.o commands_init.o
 
 CFLAGS +=	-pedantic -Wall -g
-CFLAGS +=	`pkg-config --cflags libssl`
+CFLAGS +=	`pkg-config --cflags libcrypto`
 CFLAGS +=	`pkg-config --cflags libbsd`
 CFLAGS +=	`pkg-config --cflags libxml-2.0`
 CFLAGS +=	-D_LINUX
@@ -30,7 +30,7 @@ ifdef HAVE_PCRE
 CFLAGS +=	`pkg-config --cflags libpcre` -D_HAVE_PCRE
 endif
 
-LDADD +=	`pkg-config --libs libssl`
+LDADD +=	`pkg-config --libs libcrypto`
 LDADD +=	`pkg-config --libs libbsd`
 LDADD +=	`pkg-config --libs libxml-2.0`
 ifdef EDITLINE
