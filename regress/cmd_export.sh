@@ -27,7 +27,7 @@ if [ ! -r "regress/test_export" ];then
 	exit 1
 fi
 
-SHA1=$(cat regress/test_export |sed -e 's/created="[0-9]\+"//' -e 's/modified="[0-9]\+"//' |$SHA1_BIN |cut -d' ' -f1)
+SHA1=$(cat regress/test_export |sed -e 's/created="[0-9]\{1,\}"//' -e 's/modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
 if [ "$SHA1" = '23fa5cccf87201c76a9fd7b29be13cfda3b2295b' ];then
 	echo $0 test ok!
 else
