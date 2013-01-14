@@ -20,9 +20,8 @@ esac
 
 printf "cnew newchain\nwrite\n" |./kc -b -k regress/test -p regress/testpass
 
-SHA1=$($SHA1_BIN regress/test |cut -d' ' -f1)
-
-if [ "$SHA1" = '1638d7e9685cc1eeb4b03712be52ea7ef55f3e5e' ];then
+SHA1=$(printf "list\n" |KC_DEBUG=yes ./kc -b -k regress/test -p regress/testpass |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/created="[0-9]\+"//' -e 's/modified="[0-9]\+"//' |$SHA1_BIN |cut -d' ' -f1)
+if [ "$SHA1" = '521beb993f111f50e3d846d6d6df4377bddb1dcb' ];then
 	echo $0 test ok!
 else
 	echo $0 test failed!

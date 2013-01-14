@@ -18,6 +18,8 @@ case "$(uname -s)" in
 	;;
 esac
 
+rm -f regress/test_export
+
 printf "xport regress/test_export\n" |./kc -b -k regress/test -p regress/testpass
 
 if [ ! -r "regress/test_export" ];then
@@ -25,8 +27,8 @@ if [ ! -r "regress/test_export" ];then
 	exit 1
 fi
 
-SHA1=$($SHA1_BIN regress/test_export |cut -d' ' -f1)
-if [ "$SHA1" = 'fcd724024dbbab3a99afbd103f3ead5e97fe24b4' ];then
+SHA1=$(cat regress/test_export |sed -e 's/created="[0-9]\+"//' -e 's/modified="[0-9]\+"//' |$SHA1_BIN |cut -d' ' -f1)
+if [ "$SHA1" = '23fa5cccf87201c76a9fd7b29be13cfda3b2295b' ];then
 	echo $0 test ok!
 else
 	echo $0 test failed!

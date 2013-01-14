@@ -26,8 +26,8 @@ fi
 
 printf "${cmd}" |./kc -b -k regress/test -p regress/testpass
 
-SHA1=$($SHA1_BIN regress/test |cut -d' ' -f1)
-if [ "$SHA1" = 'd8d394b445da5240483016662265638be3197688' ];then
+SHA1=$(printf "list\n" |KC_DEBUG=yes ./kc -b -k regress/test -p regress/testpass |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/created="[0-9]\+"//' -e 's/modified="[0-9]\+"//' |$SHA1_BIN |cut -d' ' -f1)
+if [ "$SHA1" = '5696a3aa02908b3c0ae80c935322792d6cf75b81' ];then
 	echo $0 test ok!
 else
 	echo $0 test failed!
