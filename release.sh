@@ -7,10 +7,11 @@ if [ ! -f common.h ];then
 	exit 1;
 fi
 
+NAME=kc
 VERSION=$(fgrep VERSION common.h |cut -f3 |tr -d '"')
 
-rm -Rf ../kc-"${VERSION}"
-svn export . ../kc-"${VERSION}"
+rm -Rf ../"${NAME}"-"${VERSION}"
+svn export . ../"${NAME}"-"${VERSION}"
 cd ..
-tar -vzcf kc-"${VERSION}".tar.gz ./kc-"${VERSION}"
-rm -Rf ./kc-"${VERSION}"
+tar -vzcf "${NAME}"-"${VERSION}".tar.gz ./"${NAME}"-"${VERSION}"
+rm -Rf ./"${NAME}"-"${VERSION}"
