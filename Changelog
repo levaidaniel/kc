@@ -1,6 +1,7 @@
 2.2.1:
 Bug fixes:
 - Plug in memory leaks
+- Don't link to libssl, just libcrypto
 
 2.2.0:
 
