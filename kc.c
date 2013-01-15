@@ -741,7 +741,7 @@ el_tab_complete(EditLine *e)
 	}
 	/* nothing in the 'line_buf', other than space(s) */
 	if (!word) {
-		free(line_buf_copy);
+		free(line_buf_copy); line_buf_copy = NULL;
 		return(CC_CURSOR);
 	}
 
@@ -813,9 +813,9 @@ el_tab_complete(EditLine *e)
 			el_set(e, EL_REFRESH);
 		break;
 	}
-	free(line_buf);
-	free(line_buf_copy);
-	free(match);
+	free(line_buf); line_buf = NULL;
+	free(line_buf_copy); line_buf_copy = NULL;
+	free(match); match = NULL;
 
 
 	return(CC_REDISPLAY);

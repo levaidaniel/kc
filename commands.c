@@ -253,7 +253,7 @@ parse_randoms(xmlChar *line)
 						ret[j++] = rand_str[3];
 					}
 
-					free(rand_str);
+					free(rand_str); rand_str = NULL;
 				} else
 					puts("Random number generation failure!");
 
@@ -342,7 +342,7 @@ kc_gen_crypt_params(int flags, char *pass)
 			return;
 		}
 		strlcpy((char *)iv, rand_str, sizeof(iv));
-		free(rand_str);
+		free(rand_str); rand_str = NULL;
 
 		if (getenv("KC_DEBUG"))
 			printf("iv='%s'\n", iv);
@@ -355,7 +355,7 @@ kc_gen_crypt_params(int flags, char *pass)
 			return;
 		}
 		strlcpy((char *)salt, rand_str, sizeof(salt));
-		free(rand_str);
+		free(rand_str); rand_str = NULL;
 
 		if (getenv("KC_DEBUG"))
 			printf("salt='%s'\n", salt);

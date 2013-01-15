@@ -46,5 +46,5 @@ cmd_random(const char *e_line, command *commands)
 	if (!rand_str)
 		return;
 	printf("%s\n", rand_str);
-	free(rand_str);
+	free(rand_str); rand_str = NULL;
 } /* cmd_random() */
