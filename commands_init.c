@@ -44,7 +44,7 @@ commands_init(command **commands)
 	if (!readonly) {
 		(*commands)->name = "cdel";
 		(*commands)->usage = "cdel <keychain>";
-		(*commands)->help = "Delete a keychain. 'keychain' can be an index number or the keychain's name.";
+		(*commands)->help = "Delete a keychain. 'keychain' can be the keychain's index number or name. Index number takes priority when addressing a keychain.";
 		(*commands)->fn = cmd_cdel;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
@@ -58,20 +58,20 @@ commands_init(command **commands)
 
 		(*commands)->name = "copy";
 		(*commands)->usage = "copy <index> <keychain>";
-		(*commands)->help = "Copy a key in the current keychain to another keychain. 'index' is the key's index to copy and 'keychain' is the destination keychain's index number or name.";
+		(*commands)->help = "Copy a key in the current keychain to another keychain. 'index' is the key's index to copy and 'keychain' is the destination keychain's index number or name. Index number takes priority when addressing a keychain.";
 		(*commands)->fn = cmd_copy;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
 		(*commands)->name = "cp";
 		(*commands)->usage = "cp <index> <keychain>";
-		(*commands)->help = "Alias of 'copy'.\nCopy a key in the current keychain to another keychain. 'index' is the key's index to copy and 'keychain' is the destination keychain's index number or name.";
+		(*commands)->help = "Alias of 'copy'.\nCopy a key in the current keychain to another keychain. 'index' is the key's index to copy and 'keychain' is the destination keychain's index number or name. Index number takes priority when addressing a keychain.";
 		(*commands)->fn = cmd_copy;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
 
 		(*commands)->name = "cren";
 		(*commands)->usage = "cren <keychain>";
-		(*commands)->help = "Rename a keychain. 'keychain' can be an index number or the keychain's name.";
+		(*commands)->help = "Rename a keychain. 'keychain' can be the keychain's index number or name. Index number takes priority when addressing a keychain.";
 		(*commands)->fn = cmd_cren;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
@@ -105,13 +105,13 @@ commands_init(command **commands)
 
 		(*commands)->name = "move";
 		(*commands)->usage = "move <index> <keychain>";
-		(*commands)->help = "Move a key in the current keychain to another keychain. 'index' is the key's index to move and 'keychain' is the destination keychain's index number or name.";
+		(*commands)->help = "Move a key in the current keychain to another keychain. 'index' is the key's index to move and 'keychain' is the destination keychain's index number or name. Index number takes priority when addressing a keychain.";
 		(*commands)->fn = cmd_copy;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
 		(*commands)->name = "mv";
 		(*commands)->usage = "mv <index> <keychain>";
-		(*commands)->help = "Alias of 'move'.\nMove a key in the current keychain to another keychain. 'index' is the key's index to move and 'keychain' is the destination keychain's index number or name.";
+		(*commands)->help = "Alias of 'move'.\nMove a key in the current keychain to another keychain. 'index' is the key's index to move and 'keychain' is the destination keychain's index number or name. Index number takes priority when addressing a keychain.";
 		(*commands)->fn = cmd_copy;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
@@ -146,7 +146,7 @@ commands_init(command **commands)
 
 	(*commands)->name = "c";
 	(*commands)->usage = "c <keychain>";
-	(*commands)->help = "Change the current keychain. 'keychain' can be an index number or the keychain's name.";
+	(*commands)->help = "Change the current keychain. 'keychain' can be the keychain's index number or name. Index number takes priority when addressing a keychain.";
 	(*commands)->fn = cmd_c;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
@@ -201,13 +201,13 @@ commands_init(command **commands)
 
 	(*commands)->name = "list";
 	(*commands)->usage = "list [keychain]";
-	(*commands)->help = "List the keys in the current keychain or if specified, in the keychain named 'keychain'. Every key gets prefixed by its index number. 'keychain' can be an index number or the keychain's name.";
+	(*commands)->help = "List the keys in the current keychain or if specified, in the keychain named 'keychain'. Every key gets prefixed by its index number. 'keychain' can be the keychain's index number or name. Index number takes priority when addressing a keychain.";
 	(*commands)->fn = cmd_list;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 	(*commands)->name = "ls";
 	(*commands)->usage = "ls [keychain]";
-	(*commands)->help = "Alias of 'list'.\nList the keys in the current keychain or if specified, in the keychain named 'keychain'. Every key gets prefixed by its index number. 'keychain' can be an index number or the keychain's name.";
+	(*commands)->help = "Alias of 'list'.\nList the keys in the current keychain or if specified, in the keychain named 'keychain'. Every key gets prefixed by its index number. 'keychain' can be the keychain's index number or name. Index number takes priority when addressing a keychain.";
 	(*commands)->fn = cmd_list;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
