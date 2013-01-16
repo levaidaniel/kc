@@ -273,8 +273,8 @@ commands_init(command **commands)
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "xport";
-	(*commands)->usage = "xport <filename>";
-	(*commands)->help = "Export the current database to the XML file named 'filename'.";
+	(*commands)->usage = "xport <filename> [keychain]";
+	(*commands)->help = "Export the current database to the XML file named 'filename'. When specifying a keychain, export only that keychain to the XML file. 'keychain' can be the keychain's index number or name. Index number takes priority when addressing a keychain.";
 	(*commands)->fn = cmd_export;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;

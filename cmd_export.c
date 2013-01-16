@@ -40,6 +40,10 @@ extern xmlDocPtr	db;
 void
 cmd_export(const char *e_line, command *commands)
 {
+	xmlDocPtr	db_tmp = NULL;
+	xmlNodePtr	keychain = NULL, keychain_tmp = NULL, root_node_tmp = NULL;
+	xmlChar		*cname = NULL;
+
 	char		*export_filename = NULL, *line = NULL;
 	struct stat	st;
 
@@ -57,6 +61,55 @@ cmd_export(const char *e_line, command *commands)
 		free(line); line = NULL;
 		return;
 	}
+
+	cname = BAD_CAST strtok(NULL, " ");	/* assign the command's parameter */
+	if (cname) {
+		/* A 'keychain' was specified, so export only that one.
+		 * We must create a new xmlDoc and copy the specified keychain to it.
+		 */
+
+		keychain = find_keychain(cname);
+		if (!keychain) {
+			printf("'%s' keychain not found.\n", cname);
+			free(line); line = NULL;
+			return;
+		}
+
+		/* create the new document */
+		db_tmp = xmlNewDoc(BAD_CAST "1.0");
+		if (!db_tmp) {
+			puts("Could not create the new XML document for export!");
+			free(line); line = NULL;
+			return;
+		}
+
+		xmlCreateIntSubset(db_tmp, BAD_CAST "kc", NULL, BAD_CAST "kc.dtd");
+
+		/* A new root node */
+		root_node_tmp = xmlNewNode(NULL, BAD_CAST "kc");
+		if (!root_node_tmp) {
+			puts("Could not create the new root node for export!");
+			xmlFreeDoc(db_tmp);
+			free(line); line = NULL;
+			return;
+		}
+		xmlDocSetRootElement(db_tmp, root_node_tmp);
+
+		/* add the specified keychain's node to the export xmlDoc */
+		xmlAddChild(root_node_tmp, xmlNewText(BAD_CAST "\n\t"));
+		keychain_tmp = xmlCopyNode(keychain, 1);
+		if (!keychain_tmp) {
+			puts("Could not duplicate keychain for export!");
+			xmlFreeDoc(db_tmp);
+			free(line); line = NULL;
+			return;
+		}
+		xmlAddChild(root_node_tmp, keychain_tmp);
+
+		xmlAddChild(root_node_tmp, xmlNewText(BAD_CAST "\n"));
+	} else
+		/* save the whole document */
+		db_tmp = db;
 
 	if(lstat(export_filename, &st) == 0) {	/* if export filename exists */
 #ifndef _READLINE
@@ -103,10 +156,13 @@ cmd_export(const char *e_line, command *commands)
 		}
 	}
 
-	if (xmlSaveFormatFileEnc(export_filename, db, "UTF-8", XML_SAVE_FORMAT) > 0)
+	if (xmlSaveFormatFileEnc(export_filename, db_tmp, "UTF-8", XML_SAVE_FORMAT) > 0)
 		puts("Export OK!");
 	else
 		printf("failed to export to '%s'.\n", export_filename);
+
+	if (cname)
+		xmlFreeDoc(db_tmp);	/* if we saved a specific keychain, clean up the temporary xmlDoc and its tree. */
 
 	free(line); line = NULL;
 } /* cmd_export() */
