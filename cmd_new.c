@@ -99,6 +99,11 @@ cmd_new(const char *e_line, command *commands)
 
 #ifndef _READLINE
 	e_line = el_gets(e, &e_count);
+
+	/* re-enable history */
+	if (el_set(e, EL_HIST, history, eh) != 0) {
+		perror("el_set(EL_HIST)");
+	}
 #else
 	e_line = readline(prompt_str());
 #endif
@@ -110,11 +115,6 @@ cmd_new(const char *e_line, command *commands)
 	} else {
 #ifndef _READLINE
 		el_reset(e);
-
-		/* re-enable history */
-		if (el_set(e, EL_HIST, history, eh) != 0) {
-			perror("el_set(EL_HIST)");
-		}
 #endif
 		strlcpy(prompt_context, "", sizeof(prompt_context));
 
@@ -125,13 +125,6 @@ cmd_new(const char *e_line, command *commands)
 
 	if (getenv("KC_DEBUG"))
 		printf("new value is '%s'\n", value);
-
-#ifndef _READLINE
-	/* re-enable history */
-	if (el_set(e, EL_HIST, history, eh) != 0) {
-		perror("el_set(EL_HIST)");
-	}
-#endif
 
 	strlcpy(prompt_context, "", sizeof(prompt_context));
 

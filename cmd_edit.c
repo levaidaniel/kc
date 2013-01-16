@@ -122,6 +122,11 @@ cmd_edit(const char *e_line, command *commands)
 		xmlFree(value); value = NULL;
 
 		e_line = el_gets(e, &e_count);
+
+		/* re-enable history */
+		if (el_set(e, EL_HIST, history, eh) != 0) {
+			perror("el_set(EL_HIST)");
+		}
 #else
 		rl_pre_input_hook = (rl_hook_func_t *)_rl_push_buffer;
 		e_line = readline(prompt_str());
@@ -135,11 +140,6 @@ cmd_edit(const char *e_line, command *commands)
 		} else {
 #ifndef _READLINE
 			el_reset(e);
-
-			/* re-enable history */
-			if (el_set(e, EL_HIST, history, eh) != 0) {
-				perror("el_set(EL_HIST)");
-			}
 #endif
 			strlcpy(prompt_context, "", sizeof(prompt_context));
 
@@ -176,13 +176,6 @@ cmd_edit(const char *e_line, command *commands)
 		db_node = xmlReplaceNode(db_node, db_node_new);
 		xmlFreeNode(db_node);
 
-
-#ifndef _READLINE
-		/* re-enable history */
-		if (el_set(e, EL_HIST, history, eh) != 0) {
-			perror("el_set(EL_HIST)");
-		}
-#endif
 
 		strlcpy(prompt_context, "", sizeof(prompt_context));
 

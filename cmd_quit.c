@@ -61,21 +61,21 @@ cmd_quit(const char *e_line, command *commands)
 #ifndef _READLINE
 			printf("Do you want to write the changes? <yes/no> ");
 			e_line = el_gets(e, &e_count);
+
+			/* re-enable the default prompt */
+			if (el_set(e, EL_PROMPT, prompt_str) != 0) {
+				perror("el_set(EL_PROMPT)");
+			}
+			/* re-enable history */
+			if (el_set(e, EL_HIST, history, eh) != 0) {
+				perror("el_set(EL_HIST)");
+			}
 #else
 			e_line = readline("Do you want to write the changes? <yes/no> ");
 #endif
 			if (!e_line) {
 #ifndef _READLINE
 				el_reset(e);
-
-				/* re-enable the default prompt */
-				if (el_set(e, EL_PROMPT, prompt_str) != 0) {
-					perror("el_set(EL_PROMPT)");
-				}
-				/* re-enable history */
-				if (el_set(e, EL_HIST, history, eh) != 0) {
-					perror("el_set(EL_HIST)");
-				}
 #endif
 				return;
 			}

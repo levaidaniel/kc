@@ -87,21 +87,21 @@ cmd_cdel(const char *e_line, command *commands)
 
 #ifndef _READLINE
 			e_line = el_gets(e, &e_count);
+
+			/* re-enable the default prompt */
+			if (el_set(e, EL_PROMPT, prompt_str) != 0) {
+				perror("el_set(EL_PROMPT)");
+			}
+			/* re-enable history */
+			if (el_set(e, EL_HIST, history, eh) != 0) {
+				perror("el_set(EL_HIST)");
+			}
 #else
 			e_line = readline("");
 #endif
 			if (!e_line) {
 #ifndef _READLINE
 				el_reset(e);
-
-				/* re-enable the default prompt */
-				if (el_set(e, EL_PROMPT, prompt_str) != 0) {
-					perror("el_set(EL_PROMPT)");
-				}
-				/* re-enable history */
-				if (el_set(e, EL_HIST, history, eh) != 0) {
-					perror("el_set(EL_HIST)");
-				}
 #endif
 				return;
 			}
@@ -119,18 +119,6 @@ cmd_cdel(const char *e_line, command *commands)
 				dirty = 1;
 			}
 			xmlFree(cname); cname = NULL;
-
-
-#ifndef _READLINE
-			/* re-enable the default prompt */
-			if (el_set(e, EL_PROMPT, prompt_str) != 0) {
-				perror("el_set(EL_PROMPT)");
-			}
-			/* re-enable history */
-			if (el_set(e, EL_HIST, history, eh) != 0) {
-				perror("el_set(EL_HIST)");
-			}
-#endif
 		}
 	} else {
 		printf("'%s' keychain not found.\n", cname);
