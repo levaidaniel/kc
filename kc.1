@@ -110,7 +110,7 @@ List the keys in the current keychain or if specified, in the keychain named
 .Ar keychain .
 Every key gets prefixed by its index number.
 .Ar keychain
-can be an index number or the keychain's name.
+can be the keychain's index number or name. Index number takes priority when addressing a keychain.
 .It Cm ls Op keychain
 Alias of
 .Cm list .
@@ -161,11 +161,11 @@ regular expression in keychain names in the current database.
 .It Cm c Ar keychain
 Change the current keychain.
 .Ar keychain
-can be an index number or the keychain's name.
+can be the keychain's index number or name. Index number takes priority when addressing a keychain.
 .It Cm cdel Ar keychain
 Delete a keychain.
 .Ar keychain
-can be an index number or the keychain's name.
+can be the keychain's index number or name. Index number takes priority when addressing a keychain.
 .It Cm clear Op count
 Emulate a screen clearing. Scrolls 50 lines by default, which can be multiplied by
 .Ar count
@@ -184,7 +184,7 @@ Copy a key in the current keychain to another keychain.
 .Ar index
 is the key's index to copy and
 .Ar keychain
-is the destination keychain's index number or name.
+is the destination keychain's index number or name. Index number takes priority when addressing a keychain.
 .It Cm cp Ar index Ar keychain
 Alias of
 .Cm copy .
@@ -193,14 +193,14 @@ Move a key in the current keychain to another keychain.
 .Ar index
 is the key's index to move and
 .Ar keychain
-is the destination keychain's index number or name.
+is the destination keychain's index number or name. Index number takes priority when addressing a keychain.
 .It Cm mv Ar index Ar keychain
 Alias of
 .Cm move .
 .It Cm cren Ar keychain
 Rename a keychain.
 .Ar keychain
-can be an index number or the keychain's name.
+can be the keychain's index number or name. Index number takes priority when addressing a keychain.
 .It Cm del Ar index
 Delete a key from the current keychain.
 .Ar index
