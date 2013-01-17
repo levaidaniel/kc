@@ -41,9 +41,9 @@ cmd_import(const char *e_line, command *commands)
 	xmlDtdPtr		dtd = NULL;
 	xmlValidCtxt		valid_ctx;
 
-	char		*import_filename = NULL;
+	char			*import_filename = NULL;
 
-	char		*line = NULL;
+	char			*line = NULL;
 
 
 	line = strdup(e_line);
