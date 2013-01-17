@@ -36,7 +36,7 @@ void
 cmd_import(const char *e_line, command *commands)
 {
 	xmlDocPtr	db_new = NULL;
-	xmlNodePtr	db_root = NULL;
+	xmlNodePtr	db_root_new = NULL;
 
 	char		*import_filename = NULL;
 
@@ -54,14 +54,23 @@ cmd_import(const char *e_line, command *commands)
 	}
 
 	if (getenv("KC_DEBUG"))
-		db_new = xmlReadFile(import_filename, "UTF-8", XML_PARSE_NONET | XML_PARSE_RECOVER);
+		db_new = xmlReadFile(import_filename, "UTF-8", XML_PARSE_NONET);
 	else
-		db_new = xmlReadFile(import_filename, "UTF-8", XML_PARSE_NONET | XML_PARSE_NOERROR | XML_PARSE_NOWARNING | XML_PARSE_RECOVER);
+		db_new = xmlReadFile(import_filename, "UTF-8", XML_PARSE_NONET | XML_PARSE_NOERROR | XML_PARSE_NOWARNING);
 	if (db_new) {
+		db_root_new = xmlDocGetRootElement(db_new);
+		if (db_root_new->children->next == NULL) {
+			puts("Won't import an empty database!");
+
+			xmlFreeDoc(db_new);
+			free(line); line = NULL;
+			return;
+		}
+
+		keychain = db_root_new->children->next;
+
 		xmlFreeDoc(db);
 		db = db_new;
-		db_root = xmlDocGetRootElement(db);
-		keychain = db_root->children->next;
 
 		dirty = 1;
 	} else
