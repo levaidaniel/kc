@@ -2,6 +2,7 @@
 
 Bug fixes:
 - Plug in some memory leaks.
+- Don't link to libssl, just libcrypto
 
 Improvements:
 - New command 'status':
@@ -12,6 +13,16 @@ Improvements:
 	'created' and 'modified' properties).
 - Make it possible to compile kc with libedit on Linux too, with the EDITLINE
   flag. The default remains readline on Linux.
+- New feature for the 'export' command:
+  xport <filename> [keychain]
+  Export only one keychain from the current database to the specified file.
+- Make the exported file readable only by its owner.
+- New command 'append':
+  append <filename>
+  Append every keychain from 'filename' to the database. (ie.: without
+  overwriting the it like 'import')
+- Add a DTD for the kc XML structure.
+- Validate against the DTD when importing/appending.
 
 Cosmetic changes:
 - Add PCRE information to version.

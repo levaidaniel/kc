@@ -36,19 +36,21 @@ void
 cmd_import(const char *e_line, command *commands)
 {
 	xmlDocPtr		db_new = NULL;
-	xmlNodePtr		db_root = NULL;
+	xmlNodePtr		db_root = NULL, db_root_new = NULL, db_node_new = NULL, keychain_new = NULL;
 	xmlParserInputBufferPtr	buf = NULL;
 	xmlDtdPtr		dtd = NULL;
 	xmlValidCtxt		valid_ctx;
 
-	char			*import_filename = NULL;
-
-	char			*line = NULL;
+	char			*cmd = NULL, append = 0;
+	char			*line = NULL, *import_filename = NULL;
 
 
 	line = strdup(e_line);
 
-	strtok(line, " ");			/* remove the command from the line */
+	cmd = strtok(line, " ");		/* get the command name */
+	if (strcmp(cmd, "append") == 0)
+		append = 1;
+
 	import_filename = strtok(NULL, " ");	/* assign the command's parameter */
 	if (!import_filename) {
 		puts(commands->usage);
@@ -93,14 +95,42 @@ cmd_import(const char *e_line, command *commands)
 		return;
 	}
 
-	xmlFreeDoc(db);
-	db = db_new;
-	db_root = xmlDocGetRootElement(db);
-	keychain = db_root->children->next;
+
+	if (append) {
+		db_root = xmlDocGetRootElement(db);	/* the existing db root */
+		db_root_new = xmlDocGetRootElement(db_new);
+
+		/* extract the keychain from the document being appended */
+		db_node_new = db_root_new->children->next;
+
+		/* We would like to append every keychain that is in the source file,
+		 * hence the loop. */
+		while (db_node_new) {
+			if (db_node_new->type == XML_ELEMENT_NODE) {	/* we only care about ELEMENT nodes */
+				keychain_new = xmlCopyNode(db_node_new, 1);
+
+				xmlAddChild(db_root, xmlNewText(BAD_CAST "\t"));
+				xmlAddChild(db_root, keychain_new);
+				xmlAddChild(db_root, xmlNewText(BAD_CAST "\n"));
+			}
+
+			db_node_new = db_node_new->next;
+		}
+
+		xmlFreeDoc(db_new);
+	} else {
+		xmlFreeDoc(db);
+		db = db_new;
+		db_root = xmlDocGetRootElement(db);
+		keychain = db_root->children->next;
+	}
 
 	dirty = 1;
 
-	puts("Import OK!");
+	if (append)
+		puts("Append OK!");
+	else
+		puts("Import OK!");
 
 	free(line); line = NULL;
 } /* cmd_import() */

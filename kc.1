@@ -220,7 +220,9 @@ When specifying a keychain, export only that keychain to the XML file.
 .Ar keychain
 can be the keychain's index number or name. Index number takes priority when addressing a keychain.
 (see command
-.Cm import )
+.Cm import
+and
+.Cm append )
 .Em NOTE :
 the created XML file will be plain text.
 .It Cm import Ar filename
@@ -229,9 +231,20 @@ Import a database from the XML file named
 It must be a properly formatted
 .Nm
 XML database. (see command
-.Cm xport )
+.Cm xport
+and
+.Cm append )
 .Em NOTE :
 The current database will be overwritten if saved.
+.It Cm append Ar filename
+Append keychain(s) to the database from the XML file named
+.Ar filename .
+It must be a properly formatted
+.Nm
+XML database. (see command
+.Cm xport
+and
+.Cm import )
 .It Cm info Ar index
 Print information about a key in the current keychain.
 .Ar index

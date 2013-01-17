@@ -1,2 +1,0 @@
-New 'append' command. Append the keychain(s) from the file to the current database.
-Somehow validate the append and import commands' input XML.
