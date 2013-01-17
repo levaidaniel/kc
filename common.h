@@ -42,6 +42,21 @@ enum {
 	KC_GENERATE_KEY = 1 << 2
 };
 
+#define	KC_DTD	"\
+<!ELEMENT kc (keychain)*>\
+\
+<!ELEMENT keychain (key)*> \
+<!ATTLIST keychain \
+	name CDATA #REQUIRED> \
+\
+<!ELEMENT key EMPTY> \
+<!ATTLIST key \
+	name CDATA #REQUIRED \
+	value CDATA #REQUIRED \
+	created CDATA #IMPLIED \
+	modified CDATA #IMPLIED> \
+"
+
 #ifndef _READLINE
 const char	*el_prompt_null(void);
 #endif
