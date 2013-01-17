@@ -156,10 +156,13 @@ cmd_export(const char *e_line, command *commands)
 		}
 	}
 
-	if (xmlSaveFormatFileEnc(export_filename, db_tmp, "UTF-8", XML_SAVE_FORMAT) > 0)
+	if (xmlSaveFormatFileEnc(export_filename, db_tmp, "UTF-8", XML_SAVE_FORMAT) > 0) {
+		if (chmod(export_filename, S_IRUSR) < 0)
+			puts("Couldn't change permissions of export file!");
+
 		puts("Export OK!");
-	else
-		printf("failed to export to '%s'.\n", export_filename);
+	} else
+		printf("Failed to export to '%s'.\n", export_filename);
 
 	if (cname)
 		xmlFreeDoc(db_tmp);	/* if we saved a specific keychain, clean up the temporary xmlDoc and its tree. */
