@@ -35,8 +35,11 @@ extern char		dirty;
 void
 cmd_import(const char *e_line, command *commands)
 {
-	xmlDocPtr	db_new = NULL;
-	xmlNodePtr	db_root = NULL;
+	xmlDocPtr		db_new = NULL;
+	xmlNodePtr		db_root = NULL;
+	xmlParserInputBufferPtr	buf = NULL;
+	xmlDtdPtr		dtd = NULL;
+	xmlValidCtxt		valid_ctx;
 
 	char		*import_filename = NULL;
 
@@ -49,6 +52,23 @@ cmd_import(const char *e_line, command *commands)
 	import_filename = strtok(NULL, " ");	/* assign the command's parameter */
 	if (!import_filename) {
 		puts(commands->usage);
+
+		free(line); line = NULL;
+		return;
+	}
+
+	buf = xmlParserInputBufferCreateStatic(KC_DTD, sizeof(KC_DTD), XML_CHAR_ENCODING_NONE);
+	if (!buf) {
+		xmlGenericError(xmlGenericErrorContext, "Could not allocate buffer for DTD.\n");
+
+		free(line); line = NULL;
+		return;
+	}
+
+	dtd = xmlIOParseDTD(NULL, buf, XML_CHAR_ENCODING_NONE);
+	if (!dtd) {
+		xmlGenericError(xmlGenericErrorContext, "Could not parse kc DTD.\n");
+
 		free(line); line = NULL;
 		return;
 	}
@@ -57,15 +77,30 @@ cmd_import(const char *e_line, command *commands)
 		db_new = xmlReadFile(import_filename, "UTF-8", XML_PARSE_NONET | XML_PARSE_RECOVER);
 	else
 		db_new = xmlReadFile(import_filename, "UTF-8", XML_PARSE_NONET | XML_PARSE_NOERROR | XML_PARSE_NOWARNING | XML_PARSE_RECOVER);
-	if (db_new) {
-		xmlFreeDoc(db);
-		db = db_new;
-		db_root = xmlDocGetRootElement(db);
-		keychain = db_root->children->next;
 
-		dirty = 1;
-	} else
-		printf("failed to import from '%s'.\n", import_filename);
+	if (!db_new) {
+		xmlGenericError(xmlGenericErrorContext, "Failed to import from '%s'.\n", import_filename);
+
+		free(line); line = NULL;
+		return;
+	}
+
+	if (!xmlValidateDtd(&valid_ctx, db_new, dtd)) {
+		printf("Not a valid kc XML file: '%s'.\n", import_filename);
+
+		xmlFreeDoc(db_new);
+		free(line); line = NULL;
+		return;
+	}
+
+	xmlFreeDoc(db);
+	db = db_new;
+	db_root = xmlDocGetRootElement(db);
+	keychain = db_root->children->next;
+
+	dirty = 1;
+
+	puts("Import OK!");
 
 	free(line); line = NULL;
 } /* cmd_import() */
