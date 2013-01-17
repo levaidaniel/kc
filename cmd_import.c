@@ -100,6 +100,14 @@ cmd_import(const char *e_line, command *commands)
 		db_root = xmlDocGetRootElement(db);	/* the existing db root */
 		db_root_new = xmlDocGetRootElement(db_new);
 
+		if (db_root_new->children->next == NULL) {
+			puts("Won't append from an empty database!");
+
+			xmlFreeDoc(db_new);
+			free(line); line = NULL;
+			return;
+		}
+
 		/* extract the keychain from the document being appended */
 		db_node_new = db_root_new->children->next;
 
@@ -119,10 +127,19 @@ cmd_import(const char *e_line, command *commands)
 
 		xmlFreeDoc(db_new);
 	} else {
+		db_root_new = xmlDocGetRootElement(db_new);
+		if (db_root_new->children->next == NULL) {
+			puts("Won't import an empty database!");
+
+			xmlFreeDoc(db_new);
+			free(line); line = NULL;
+			return;
+		}
+
+		keychain = db_root_new->children->next;
+
 		xmlFreeDoc(db);
 		db = db_new;
-		db_root = xmlDocGetRootElement(db);
-		keychain = db_root->children->next;
 	}
 
 	dirty = 1;
