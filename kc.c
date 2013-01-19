@@ -212,11 +212,11 @@ main(int argc, char *argv[])
 
 		if(stat(db_filename, &st) == 0)		/* if db_filename exists */
 			/* ask for the password */
-			password_read(&pass, 0);
+			kc_password_read(&pass, 0);
 		else {
 			/* ask for the new password */
 			do {
-				ret = (ssize_t)password_read(&pass, 1);
+				ret = (ssize_t)kc_password_read(&pass, 1);
 			} while (ret == -1);
 
 			if (ret == 0)

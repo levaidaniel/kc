@@ -267,7 +267,7 @@ parse_randoms(xmlChar *line)
 
 
 char
-password_read(char **pass1, char new)
+kc_password_read(char **pass1, char new)
 {
 	/*
 	 * returns:
@@ -321,7 +321,7 @@ password_read(char **pass1, char new)
 	}
 
 	return(1);
-} /* password_read() */
+} /* kc_password_read() */
 
 
 char

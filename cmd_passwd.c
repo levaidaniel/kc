@@ -43,7 +43,7 @@ cmd_passwd(const char *e_line, command *commands)
 
 	/* ask for the new password */
 	while (ret == -1)
-		ret = password_read(&pass, 1);
+		ret = kc_password_read(&pass, 1);
 
 	if (ret == 0)	/* canceled */
 		return;
