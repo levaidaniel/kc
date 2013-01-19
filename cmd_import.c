@@ -145,9 +145,9 @@ cmd_import(const char *e_line, command *commands)
 	dirty = 1;
 
 	if (append)
-		puts("Append OK!");
+		puts("Append OK");
 	else
-		puts("Import OK!");
+		puts("Import OK");
 
 	free(line); line = NULL;
 } /* cmd_import() */
