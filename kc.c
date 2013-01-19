@@ -28,10 +28,8 @@
 #include <sys/stat.h>
 #ifndef _LINUX
 #include <fcntl.h>
-#include <readpassphrase.h>
 #else
 #include <sys/file.h>
-#include <bsd/readpassphrase.h>
 #endif
 
 #include "common.h"
@@ -51,7 +49,7 @@ BIO		*bio_chain = NULL;
 
 char		*cipher_mode = "cbc";
 
-unsigned char	salt[SALT_LEN + 1], iv[IV_LEN + 1], key[KEY_LEN];
+unsigned char	iv[IV_LEN + 1], salt[SALT_LEN + 1], key[KEY_LEN];
 
 command		*commands_first = NULL;
 
@@ -94,7 +92,7 @@ main(int argc, char *argv[])
 
 	struct stat	st;
 	const char	*default_db_dir = ".kc";
-	const char	*default_db_filename = "default";
+	const char	*default_db_filename = "default.kcd";
 	char		*env_home = NULL;
 
 	xmlNodePtr	db_root = NULL;
