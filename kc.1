@@ -111,9 +111,16 @@ List the keys in the current keychain or if specified, in the keychain named
 Every key gets prefixed by its index number.
 .Ar keychain
 can be the keychain's index number or name. Index number takes priority when addressing a keychain.
+.It Cm plist Op keychain
+Works exactly like
+.Cm list
+but every 20th line the output stops, and continues for <SPACE> or <ENTER>, and quits for 'q' or EOT (usually CTRL+d).
 .It Cm ls Op keychain
 Alias of
 .Cm list .
+.It Cm pls Op keychain
+Alias of
+.Cm plist .
 .It Cm edit Ar index
 Edit a key in the current keychain.
 .Ar index

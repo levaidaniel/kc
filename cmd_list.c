@@ -30,6 +30,12 @@
 extern xmlDocPtr	db;
 extern xmlNodePtr	keychain;
 
+#ifndef _READLINE
+extern EditLine		*e;
+#endif
+
+extern char		batchmode;
+
 
 void
 cmd_list(const char *e_line, command *commands)
@@ -40,6 +46,7 @@ cmd_list(const char *e_line, command *commands)
 	int		idx = 0;
 
 	char		*line = NULL;
+	char		pager = 0, *cmd = NULL, rc = 0;
 
 
 	if (getenv("KC_DEBUG")) {
@@ -49,7 +56,11 @@ cmd_list(const char *e_line, command *commands)
 
 	line = strdup(e_line);
 
-	strtok(line, " ");				/* remove the command from the line */
+	cmd = strtok(line, " ");			/* get the command name */
+	if (	strcmp(cmd, "plist") == 0  ||
+		strcmp(cmd, "pls") == 0)
+		pager = 20;
+
 	cname = BAD_CAST strtok(NULL, " ");		/* assign the command's parameter */
 	if (cname) {
 		list_keychain = find_keychain(cname);	/* list the specified keychain */
@@ -67,6 +78,34 @@ cmd_list(const char *e_line, command *commands)
 			key = xmlGetProp(db_node, BAD_CAST "name");
 			printf("%d. %s\n", idx++, key);
 			xmlFree(key); key = NULL;
+
+			/* pager */
+			if (	!batchmode  &&  pager  &&
+				(idx % pager == 0)) {
+#ifndef _READLINE
+				/* clear the prompt temporarily */
+				if (el_set(e, EL_PROMPT, el_prompt_null) != 0) {
+					perror("el_set(EL_PROMPT)");
+				}
+				if (el_set(e, EL_UNBUFFERED, 1) != 0) {
+					perror("el_set(EL_UNBUFFERED)");
+					return;
+				}
+#else
+				rl_prep_terminal(1);
+#endif
+				rc = 0;
+				while (	rc != ' '  &&  rc != 13  &&
+					rc != 4  &&  rc != 'q') {
+#ifndef _READLINE
+					el_getc(e, &rc);
+#else
+					rc = rl_read_key();
+#endif
+				}
+				if (rc == 4  ||  rc == 'q')
+					break;
+			}
 		}
 
 		db_node = db_node->next;
