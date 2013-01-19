@@ -192,6 +192,13 @@ commands_init(command **commands)
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
+	(*commands)->name = "dump";
+	(*commands)->usage = "dump <filename> [keychain]";
+	(*commands)->help = "Dump the current database to the XML file named 'filename'. When specifying a keychain, dump only that keychain to the XML file. 'keychain' can be the keychain's index number or name. Index number takes priority when addressing a keychain.\nSee command 'xport'\n\nNOTE: the created XML file will be plain text.";
+	(*commands)->fn = cmd_export;
+	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
+	(*commands) = (*commands)->next;
+
 	(*commands)->name = "help";
 	(*commands)->usage = "help [command]";
 	(*commands)->help = "Print application help or describe a 'command'.";
@@ -281,7 +288,7 @@ commands_init(command **commands)
 
 	(*commands)->name = "xport";
 	(*commands)->usage = "xport <filename> [keychain]";
-	(*commands)->help = "Export the current database to the XML file named 'filename'. When specifying a keychain, export only that keychain to the XML file. 'keychain' can be the keychain's index number or name. Index number takes priority when addressing a keychain.\nSee command 'import' and 'append'\n\nNOTE: the created XML file will be plain text.";
+	(*commands)->help = "Export the current database to the encrypted file named 'filename'. When specifying a keychain, export only that keychain. 'keychain' can be the keychain's index number or name. Index number takes priority when addressing a keychain.\nSee command 'dump', 'import' and 'append'";
 	(*commands)->fn = cmd_export;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;

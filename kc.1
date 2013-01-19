@@ -52,14 +52,14 @@ The CLI supports tab-completion for commands and keychains.
 There is a utility in the source package that converts an exported pwsafe database to a
 .Nm
 compatible XML database, which can be imported using the
-.Cm import
+.Cm importxml
 command.
 .Pp
 .Em NOTE :
-Currently there is no character set conversion taking place in the program. You either input UTF-8 and be ready to display it, or you don't input anything other than US-ASCII. You would still be able to read the database after not UTF-8 nor US-ASCII (eg.: latin2) input, but not in the way you would expect it. You can "repair" such databases, by exporting (see the
-.Cm xport
-command below), converting the plain text XML file to UTF-8, then importing the database. (see the
-.Cm import
+Currently there is no character set conversion taking place in the program. You either input UTF-8 and be ready to display it, or you don't input anything other than US-ASCII. You would still be able to read the database after not UTF-8 nor US-ASCII (eg.: latin2) input, but not in the way you would expect it. You can "repair" such databases, by dumping (see the
+.Cm dump
+command below), converting the plain text XML file to UTF-8, then importing back the XML file. (see the
+.Cm importxml
 command below).
 .Ss PARAMETERS
 .Bl -tag -offset ||| -width |
@@ -213,16 +213,25 @@ Change the current database's password. All changes will be written immediately.
 .It Cm help Op command
 Print application help or describe a
 .Ar command .
-.It Cm xport Ar filename
-Export the current database as an XML file named
+.It Cm xport Ar filename Op keychain
+Export the current database to the encrypted file named
 .Ar filename .
-When specifying a keychain, export only that keychain to the XML file.
+When specifying a keychain, export only that keychain.
 .Ar keychain
 can be the keychain's index number or name. Index number takes priority when addressing a keychain.
 (see command
+.Cm dump ,
 .Cm import
 and
 .Cm append )
+.It Cm dump Ar filename Op keychain
+Dump the current database to the XML file named
+.Ar filename .
+When specifying a keychain, dump only that keychain to the XML file.
+.Ar keychain
+can be the keychain's index number or name. Index number takes priority when addressing a keychain.
+(see command
+.Cm xport )
 .Em NOTE :
 the created XML file will be plain text.
 .It Cm import Ar filename
@@ -231,6 +240,7 @@ Import a database from the XML file named
 It must be a properly formatted
 .Nm
 XML database. (see command
+.Cm importxml ,
 .Cm xport
 and
 .Cm append )
@@ -242,6 +252,7 @@ Append keychain(s) to the database from the XML file named
 It must be a properly formatted
 .Nm
 XML database. (see command
+.Cm appendxml ,
 .Cm xport
 and
 .Cm import )

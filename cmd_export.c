@@ -24,6 +24,11 @@
 
 
 #include <sys/stat.h>
+#ifndef _LINUX
+#include <fcntl.h>
+#else
+#include <sys/file.h>
+#endif
 
 #include "common.h"
 #include "commands.h"
@@ -36,15 +41,23 @@ extern History		*eh;
 
 extern xmlDocPtr	db;
 
+extern char		*cipher_mode;
+
 
 void
 cmd_export(const char *e_line, command *commands)
 {
+	BIO		*bio_chain = NULL;
+
 	xmlDocPtr	db_tmp = NULL;
 	xmlNodePtr	keychain = NULL, keychain_tmp = NULL, root_node_tmp = NULL;
 	xmlChar		*cname = NULL;
 
 	char		*export_filename = NULL, *line = NULL;
+	int		export_file = 0;
+	char		*cmd = NULL, dump = 0, ret = -1;
+	char		*pass = NULL;
+	unsigned char	iv[IV_LEN + 1], salt[SALT_LEN + 1], key[KEY_LEN];
 	struct stat	st;
 
 #ifndef _READLINE
@@ -54,13 +67,17 @@ cmd_export(const char *e_line, command *commands)
 
 	line = strdup(e_line);
 
-	strtok(line, " ");			/* remove the command from the line */
+	cmd = strtok(line, " ");		/* get the command name */
+	if (strcmp(cmd, "dump") == 0)
+		dump = 1;
+
 	export_filename = strtok(NULL, " ");	/* assign the command's parameter */
 	if (!export_filename) {
 		puts(commands->usage);
 		free(line); line = NULL;
 		return;
 	}
+	export_filename = strdup(export_filename);
 
 	cname = BAD_CAST strtok(NULL, " ");	/* assign the command's parameter */
 	if (cname) {
@@ -71,6 +88,8 @@ cmd_export(const char *e_line, command *commands)
 		keychain = find_keychain(cname);
 		if (!keychain) {
 			printf("'%s' keychain not found.\n", cname);
+
+			free(export_filename); export_filename = NULL;
 			free(line); line = NULL;
 			return;
 		}
@@ -79,6 +98,8 @@ cmd_export(const char *e_line, command *commands)
 		db_tmp = xmlNewDoc(BAD_CAST "1.0");
 		if (!db_tmp) {
 			puts("Could not create the new XML document for export!");
+
+			free(export_filename); export_filename = NULL;
 			free(line); line = NULL;
 			return;
 		}
@@ -89,7 +110,9 @@ cmd_export(const char *e_line, command *commands)
 		root_node_tmp = xmlNewNode(NULL, BAD_CAST "kc");
 		if (!root_node_tmp) {
 			puts("Could not create the new root node for export!");
+
 			xmlFreeDoc(db_tmp);
+			free(export_filename); export_filename = NULL;
 			free(line); line = NULL;
 			return;
 		}
@@ -100,7 +123,9 @@ cmd_export(const char *e_line, command *commands)
 		keychain_tmp = xmlCopyNode(keychain, 1);
 		if (!keychain_tmp) {
 			puts("Could not duplicate keychain for export!");
+
 			xmlFreeDoc(db_tmp);
+			free(export_filename); export_filename = NULL;
 			free(line); line = NULL;
 			return;
 		}
@@ -110,6 +135,12 @@ cmd_export(const char *e_line, command *commands)
 	} else
 		/* save the whole document */
 		db_tmp = db;
+
+	/* Check if the supplied filename contains an extension */
+	if (!strchr(export_filename, '.')) {
+		export_filename = realloc(export_filename, strlen(export_filename) + 4); malloc_check(export_filename);
+		strlcat(export_filename, dump ? ".xml" : ".kcd", strlen(export_filename) + 4 + 1);
+	}
 
 	if(lstat(export_filename, &st) == 0) {	/* if export filename exists */
 #ifndef _READLINE
@@ -146,26 +177,87 @@ cmd_export(const char *e_line, command *commands)
 #ifndef _READLINE
 			el_reset(e);
 #endif
+			free(export_filename); export_filename = NULL;
 			free(line); line = NULL;
 			return;
 		}
 
 		if (strncmp(e_line, "yes", 3) != 0) {
+			free(export_filename); export_filename = NULL;
 			free(line); line = NULL;
 			return;
 		}
 	}
 
-	if (xmlSaveFormatFileEnc(export_filename, db_tmp, "UTF-8", XML_SAVE_FORMAT) > 0) {
-		if (chmod(export_filename, S_IRUSR | S_IWUSR) < 0)
-			puts("Couldn't change permissions of export file!");
+	if (dump) {
+		if (xmlSaveFormatFileEnc(export_filename, db_tmp, "UTF-8", XML_SAVE_FORMAT) > 0) {
+			if (chmod(export_filename, S_IRUSR | S_IWUSR) < 0)
+				puts("Couldn't change permissions of dump file!");
 
-		puts("Export OK!");
-	} else
-		printf("Failed to export to '%s'.\n", export_filename);
+			puts("Dump OK");
+		} else
+			printf("Failed dumping to '%s'.\n", export_filename);
+	} else {
+		export_file = open(export_filename, O_RDWR | O_CREAT, 0600);
+		if (export_file < 0) {
+			perror("open(database file)");
+
+			free(export_filename); export_filename = NULL;
+			free(line); line = NULL;
+			return;
+		}
+
+		bio_chain = kc_setup_bio_chain(export_filename);
+		if (!bio_chain) {
+			printf("Couldn't setup bio_chain!");
+
+			close(export_file);
+			free(export_filename); export_filename = NULL;
+			free(line); line = NULL;
+			return;
+		}
+
+
+		/* ask for the new password */
+		while (ret == -1)
+			ret = kc_password_read(&pass, 1);
+
+		if (ret == 0) {	/* canceled */
+			BIO_free_all(bio_chain);
+			close(export_file);
+			free(export_filename); export_filename = NULL;
+			free(line); line = NULL;
+			return;
+		}
+
+		/* Generate iv/salt, setup cipher mode and turn on encrypting */
+		if (!kc_setup_crypt(bio_chain, 1, cipher_mode, pass, iv, salt, key, KC_SETUP_CRYPT_IV | KC_SETUP_CRYPT_SALT | KC_SETUP_CRYPT_KEY)) {
+			printf("Couldn't setup encrypting!");
+
+			BIO_free_all(bio_chain);
+			close(export_file);
+			free(export_filename); export_filename = NULL;
+			free(line); line = NULL;
+			return;
+		}
+
+		if (pass)
+			memset(pass, '\0', PASSWORD_MAXLEN);
+		free(pass); pass = NULL;
+
+
+		if (kc_db_writer(export_file, db_tmp, bio_chain, iv, salt))
+			puts("Export OK");
+		else
+			printf("Failed exporting to '%s'.\n", export_filename);
+
+		BIO_free_all(bio_chain);
+		close(export_file);
+	}
 
 	if (cname)
 		xmlFreeDoc(db_tmp);	/* if we saved a specific keychain, clean up the temporary xmlDoc and its tree. */
 
+	free(export_filename); export_filename = NULL;
 	free(line); line = NULL;
 } /* cmd_export() */
