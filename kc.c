@@ -285,7 +285,10 @@ main(int argc, char *argv[])
 
 	/* Optionally generate iv/salt.
 	 * Setup cipher mode and turn on decrypting */
-	kc_setup_crypt(bio_chain, 0, cipher_mode, pass, iv, salt, key, kc_setup_crypt_flags);
+	if (!kc_setup_crypt(bio_chain, 0, cipher_mode, pass, iv, salt, key, kc_setup_crypt_flags)) {
+		printf("Couldn't setup decrypting!");
+		quit(EXIT_FAILURE);
+	}
 
 
 	if (pass)
@@ -368,7 +371,10 @@ main(int argc, char *argv[])
 
 
 	/* turn on encrypting */
-	kc_setup_crypt(bio_chain, 1, cipher_mode, NULL, iv, NULL, key, 0);
+	if (!kc_setup_crypt(bio_chain, 1, cipher_mode, NULL, iv, NULL, key, 0)) {
+		printf("Couldn't setup decrypting!");
+		quit(EXIT_FAILURE);
+	}
 
 
 	if (pos == 0) {		/* empty file? */
