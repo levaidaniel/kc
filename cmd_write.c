@@ -23,6 +23,15 @@
 */
 
 
+#include <sys/stat.h>
+#ifndef _LINUX
+#include <sys/syslimits.h>
+#include <fcntl.h>
+#else
+#include <linux/limits.h>
+#include <sys/file.h>
+#endif
+
 #include "common.h"
 #include "commands.h"
 
@@ -30,21 +39,91 @@
 extern xmlDocPtr	db;
 
 extern BIO		*bio_chain;
+extern char		*cipher_mode;
+extern unsigned char	salt[SALT_LEN + 1], iv[IV_LEN + 1], key[KEY_LEN];
 
 extern int		db_file;
+extern char		*db_filename;
 
 extern char		dirty;
-
-extern unsigned char	salt[SALT_LEN + 1], iv[IV_LEN + 1];
 
 
 void
 cmd_write(const char *e_line, command *commands)
 {
-	if (kc_db_writer(db_file, db, bio_chain, iv, salt)) {
-		puts("Save OK");
+	BIO		*bio_chain_tmp = NULL;
 
-		dirty = 0;
-	} else
-		puts("There was an error while trying to save the database!\nIt is now maybe corrupted!");
+	struct stat	st;
+	char		*rand_str = NULL;
+	char		db_filename_tmp[PATH_MAX];
+	int		db_file_tmp = 0;
+
+
+	rand_str = get_random_str(6, 1);
+	if (!rand_str)
+		return;
+
+	strlcpy(db_filename_tmp, db_filename, PATH_MAX);
+	strlcat(db_filename_tmp, rand_str, PATH_MAX);
+	free(rand_str); rand_str = NULL;
+	if(stat(db_filename_tmp, &st) == 0) {	/* if temporary database filename exists */
+		puts("Couldn't create temporary database file (exists)!");
+
+		return;
+	}
+
+	db_file_tmp = open(db_filename_tmp, O_RDWR | O_CREAT, 0600);
+	if (db_file_tmp < 0) {
+		puts("Couldn't open temporary database file!");
+		perror("open(db_file_tmp)");
+
+		return;
+	}
+
+	/* setup temporary bio_chain */
+	bio_chain_tmp = kc_setup_bio_chain(db_filename_tmp);
+	if (!bio_chain_tmp) {
+		printf("Couldn't setup bio_chain_tmp!");
+
+		close(db_file_tmp);
+		unlink(db_filename_tmp);
+		return;
+	}
+
+	/* Setup cipher mode and turn on encrypting */
+	if (!kc_setup_crypt(bio_chain_tmp, 1, cipher_mode, NULL, iv, NULL, key, 0)) {
+		printf("Couldn't setup encrypting!");
+
+		BIO_free_all(bio_chain_tmp);
+		close(db_file_tmp);
+		unlink(db_filename_tmp);
+		return;
+	}
+
+	if (!kc_db_writer(db_file_tmp, db, bio_chain_tmp, iv, salt)) {
+		puts("There was an error while trying to save the database!");
+
+		BIO_free_all(bio_chain_tmp);
+		close(db_file_tmp);
+		unlink(db_filename_tmp);
+		return;
+	}
+
+	if (rename(db_filename_tmp, db_filename) < 0) {
+		puts("Couldn't rename temporary database file!");
+		perror("open(db_file_tmp)");
+
+		BIO_free_all(bio_chain_tmp);
+		close(db_file_tmp);
+		unlink(db_filename_tmp);
+		return;
+	}
+
+	puts("Save OK");
+
+	dirty = 0;
+
+	BIO_free_all(bio_chain_tmp);
+	close(db_file_tmp);
+	unlink(db_filename_tmp);
 } /* cmd_write() */
