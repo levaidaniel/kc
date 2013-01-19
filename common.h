@@ -33,6 +33,9 @@
 #define	USAGE	"[-k database file] [-r] [-p password file] [-m cipher mode] [-b] [-v] [-h]"
 
 #define	PASSWORD_MAXLEN	64
+#define	IV_LEN		16
+#define	SALT_LEN	16
+#define	KEY_LEN		128
 
 #define	TIME_MAXLEN	11
 

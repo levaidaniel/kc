@@ -39,7 +39,7 @@ extern xmlNodePtr	keychain;
 extern BIO		*bio_cipher;
 extern char		*cipher_mode;
 
-extern unsigned char	salt[17], iv[17], key[128];
+extern unsigned char	salt[SALT_LEN + 1], iv[IV_LEN + 1], key[KEY_LEN];
 
 extern char		batchmode;
 
@@ -366,7 +366,7 @@ kc_gen_crypt_params(int flags, char *pass)
 			printf("generating new key from pass and salt.\n");
 
 		/* generate a proper key for encoding/decoding BIO */
-		PKCS5_PBKDF2_HMAC_SHA1(pass, (int)strlen(pass), salt, sizeof(salt), 5000, 128, key);
+		PKCS5_PBKDF2_HMAC_SHA1(pass, (int)strlen(pass), salt, sizeof(salt), 5000, KEY_LEN, key);
 	}
 } /* generate_iv_salt_key() */
 

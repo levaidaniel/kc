@@ -35,7 +35,7 @@ extern int		db_file;
 
 extern char		dirty;
 
-extern unsigned char	salt[17], iv[17];
+extern unsigned char	salt[SALT_LEN + 1], iv[IV_LEN + 1];
 
 
 void

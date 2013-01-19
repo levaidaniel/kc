@@ -52,7 +52,7 @@ BIO		*bio_cipher = NULL;
 
 char		*cipher_mode = "cbc";
 
-unsigned char	salt[17], iv[17], key[128];
+unsigned char	salt[SALT_LEN + 1], iv[IV_LEN + 1], key[KEY_LEN];
 
 command		*commands_first = NULL;
 
@@ -240,24 +240,24 @@ main(int argc, char *argv[])
 		}
 
 		/* read the IV */
-		rbuf = malloc(sizeof(iv)); malloc_check(rbuf);
+		rbuf = malloc(IV_LEN + 1); malloc_check(rbuf);
 
-		ret = read(db_file, rbuf, sizeof(iv) - 1);
+		ret = read(db_file, rbuf, IV_LEN);
 		if (ret < 0)
 			perror("read(database file)");
 		else
-			strlcpy((char *)iv, (const char *)rbuf, sizeof(iv));
+			strlcpy((char *)iv, (const char *)rbuf, IV_LEN + 1);
 
 		free(rbuf); rbuf = NULL;
 
 		/* read the salt */
-		rbuf = malloc(sizeof(salt)); malloc_check(rbuf);
+		rbuf = malloc(SALT_LEN + 1); malloc_check(rbuf);
 
-		ret = read(db_file, rbuf, sizeof(salt) - 1);
+		ret = read(db_file, rbuf, SALT_LEN);
 		if (ret < 0)
 			perror("read(database file)");
 		else
-			strlcpy((char *)salt, (const char *)rbuf, sizeof(salt));
+			strlcpy((char *)salt, (const char *)rbuf, SALT_LEN + 1);
 
 		free(rbuf); rbuf = NULL;
 
@@ -322,7 +322,7 @@ main(int argc, char *argv[])
 
 
 	/* seek after the IV and salt */
-	BIO_seek(bio_chain, sizeof(iv) - 1 + sizeof(salt) - 1);
+	BIO_seek(bio_chain, IV_LEN + SALT_LEN);
 
 	/* read in the database file to a buffer */
 	db_buf = calloc(1, db_buf_size); malloc_check(db_buf);
