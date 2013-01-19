@@ -131,7 +131,7 @@ echo # new line
 
 if [ ${CHECK_DURING_MODIFY} -gt 0 ];then
 	SHA1=$(printf "list\n" |KC_DEBUG=yes ./kc -b -k regress/test -p regress/testpass |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/created="[0-9]\{1,\}"//' -e 's/modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
-	if [ "$SHA1" == 'a3a9879d939bf1cf3ce29427c11aea349cb20ea6' ];then
+	if [ "$SHA1" == '755c4e1e4d4951f58065188fcf1291dc25db8fcc' ];then
 		echo "$0 test ok (#${loop} entry edit)!"
 	else
 		echo "$0 test failed (#${loop} entry edit)!"
