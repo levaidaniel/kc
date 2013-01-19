@@ -59,7 +59,7 @@ cmd_quit(const char *e_line, command *commands)
 
 		while (1) {
 #ifndef _READLINE
-			printf("Do you want to write the changes? <yes/no> ");
+			printf("Do you want to write the changes? <yes/y/no/n> ");
 			e_line = el_gets(e, &e_count);
 
 			/* re-enable the default prompt */
@@ -71,7 +71,7 @@ cmd_quit(const char *e_line, command *commands)
 				perror("el_set(EL_HIST)");
 			}
 #else
-			e_line = readline("Do you want to write the changes? <yes/no> ");
+			e_line = readline("Do you want to write the changes? <yes/y/no/n> ");
 #endif
 			if (!e_line) {
 #ifndef _READLINE
