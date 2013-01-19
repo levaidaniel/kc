@@ -71,7 +71,7 @@ commands_init(command **commands)
 		(*commands) = (*commands)->next;
 		(*commands)->name = "cp";
 		(*commands)->usage = "cp <index> <keychain>";
-		(*commands)->help = "Alias of 'copy'.\nCopy a key in the current keychain to another keychain. 'index' is the key's index to copy and 'keychain' is the destination keychain's index number or name. Index number takes priority when addressing a keychain.";
+		(*commands)->help = "Alias of 'copy'.";
 		(*commands)->fn = cmd_copy;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
@@ -91,7 +91,7 @@ commands_init(command **commands)
 		(*commands) = (*commands)->next;
 		(*commands)->name = "rm";
 		(*commands)->usage = "rm <index>";
-		(*commands)->help = "Alias of 'del'.\nDelete a key from the current keychain. 'index' is the key's index number in the current keychain.";
+		(*commands)->help = "Alias of 'del'.";
 		(*commands)->fn = cmd_del;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
@@ -118,7 +118,7 @@ commands_init(command **commands)
 		(*commands) = (*commands)->next;
 		(*commands)->name = "mv";
 		(*commands)->usage = "mv <index> <keychain>";
-		(*commands)->help = "Alias of 'move'.\nMove a key in the current keychain to another keychain. 'index' is the key's index to move and 'keychain' is the destination keychain's index number or name. Index number takes priority when addressing a keychain.";
+		(*commands)->help = "Alias of 'move'.";
 		(*commands)->fn = cmd_copy;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
@@ -145,7 +145,7 @@ commands_init(command **commands)
 		(*commands) = (*commands)->next;
 		(*commands)->name = "save";
 		(*commands)->usage = "save";
-		(*commands)->help = "Alias of 'write'.\nSave the current database.";
+		(*commands)->help = "Alias of 'write'.";
 		(*commands)->fn = cmd_write;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
@@ -180,7 +180,7 @@ commands_init(command **commands)
 	(*commands) = (*commands)->next;
 	(*commands)->name = "cls";
 	(*commands)->usage = "cls";
-	(*commands)->help = "Alias of 'clist'.\nList keychains in the current database. Every keychain gets prefixed by its index number.";
+	(*commands)->help = "Alias of 'clist'.";
 	(*commands)->fn = cmd_clist;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
@@ -221,7 +221,7 @@ commands_init(command **commands)
 	(*commands) = (*commands)->next;
 	(*commands)->name = "ls";
 	(*commands)->usage = "ls [keychain]";
-	(*commands)->help = "Alias of 'list'.\nList the keys in the current keychain or if specified, in the keychain named 'keychain'. Every key gets prefixed by its index number. 'keychain' can be the keychain's index number or name. Index number takes priority when addressing a keychain.";
+	(*commands)->help = "Alias of 'list'.";
 	(*commands)->fn = cmd_list;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
@@ -234,7 +234,7 @@ commands_init(command **commands)
 	(*commands) = (*commands)->next;
 	(*commands)->name = "exit";
 	(*commands)->usage = "exit";
-	(*commands)->help = "Alias of 'quit'.\nQuit the program. If the database has been modified, then ask if it should be saved.";
+	(*commands)->help = "Alias of 'quit'.";
 	(*commands)->fn = cmd_quit;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
@@ -254,7 +254,7 @@ commands_init(command **commands)
 	(*commands) = (*commands)->next;
 	(*commands)->name = "s";
 	(*commands)->usage = "s <string>";
-	(*commands)->help = "Alias of 'search'.\nSearch for 'string' in key names in the current keychain. If the search command is prefixed by a '*' (eg.: *search) then search in every keychain in the current database.";
+	(*commands)->help = "Alias of 'search'.";
 	(*commands)->fn = cmd_search;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
@@ -267,7 +267,7 @@ commands_init(command **commands)
 	(*commands) = (*commands)->next;
 	(*commands)->name = "*s";
 	(*commands)->usage = "*s <string>";
-	(*commands)->help = "Alias of '*search'.\nSearch for 'string' in key names in every keychain.";
+	(*commands)->help = "Alias of '*search'.";
 	(*commands)->fn = cmd_search;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
