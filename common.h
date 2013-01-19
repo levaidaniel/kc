@@ -40,9 +40,9 @@
 #define	TIME_MAXLEN	11
 
 enum {
-	KC_GENERATE_IV = 1,
-	KC_GENERATE_SALT = 1 << 1,
-	KC_GENERATE_KEY = 1 << 2
+	KC_SETUP_CRYPT_IV = 1,
+	KC_SETUP_CRYPT_SALT = 1 << 1,
+	KC_SETUP_CRYPT_KEY = 1 << 2
 };
 
 #define	KC_DTD	"\

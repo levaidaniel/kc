@@ -27,6 +27,13 @@
 #include "commands.h"
 
 
+extern BIO		*bio_chain;
+
+extern char		*cipher_mode;
+
+extern unsigned char	salt[17], iv[17], key[128];
+
+
 void
 cmd_passwd(const char *e_line, command *commands)
 {
@@ -41,13 +48,11 @@ cmd_passwd(const char *e_line, command *commands)
 	if (ret == 0)	/* canceled */
 		return;
 
-	kc_gen_crypt_params(KC_GENERATE_IV | KC_GENERATE_SALT | KC_GENERATE_KEY, pass);
+	kc_setup_crypt(bio_chain, 1, cipher_mode, pass, iv, salt, key, KC_SETUP_CRYPT_IV | KC_SETUP_CRYPT_SALT | KC_SETUP_CRYPT_KEY);
 
 	if (pass)
 		memset(pass, '\0', PASSWORD_MAXLEN);
 	free(pass); pass = NULL;
-
-	kc_set_cipher(1);
 
 	cmd_write(NULL, NULL);
 } /* cmd_passwd() */

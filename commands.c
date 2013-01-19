@@ -36,11 +36,6 @@
 
 extern xmlNodePtr	keychain;
 
-extern BIO		*bio_cipher;
-extern char		*cipher_mode;
-
-extern unsigned char	salt[SALT_LEN + 1], iv[IV_LEN + 1], key[KEY_LEN];
-
 extern char		batchmode;
 
 #ifdef _READLINE
@@ -329,63 +324,131 @@ password_read(char **pass1, char new)
 } /* password_read() */
 
 
-void
-kc_gen_crypt_params(int flags, char *pass) 
+char
+kc_setup_crypt(BIO *bio_chain, int enc, char *cipher_mode, char *pass,
+		unsigned char *iv, unsigned char *salt, unsigned char *key,
+		int flags)
 {
-	char	*rand_str = NULL;
+	char	*iv_tmp = NULL, *salt_tmp = NULL;
 
 
-	if ((flags & KC_GENERATE_IV)) {
-		rand_str = get_random_str(sizeof(iv) - 1, 0);
-		if (!rand_str) {
+	if ((flags & KC_SETUP_CRYPT_IV)) {
+		iv_tmp = get_random_str(IV_LEN, 0);
+		if (!iv_tmp) {
 			puts("IV generation failure!");
-			return;
+			return(0);
 		}
-		strlcpy((char *)iv, rand_str, sizeof(iv));
-		free(rand_str); rand_str = NULL;
+	}
+
+	if ((flags & KC_SETUP_CRYPT_SALT)) {
+		salt_tmp = get_random_str(SALT_LEN, 0);
+		if (!salt_tmp) {
+			puts("Salt generation failure!");
+
+			free(iv_tmp); iv_tmp = NULL;
+			return(0);
+		}
+	}
+
+
+	if ((flags & KC_SETUP_CRYPT_IV)) {
+		strlcpy((char *)iv, iv_tmp, IV_LEN + 1);
+		free(iv_tmp); iv_tmp = NULL;
 
 		if (getenv("KC_DEBUG"))
 			printf("iv='%s'\n", iv);
 	}
 
-	if ((flags & KC_GENERATE_SALT)) {
-		rand_str = get_random_str(sizeof(salt) - 1, 0);
-		if (!rand_str) {
-			puts("Salt generation failure!");
-			return;
-		}
-		strlcpy((char *)salt, rand_str, sizeof(salt));
-		free(rand_str); rand_str = NULL;
+	if ((flags & KC_SETUP_CRYPT_SALT)) {
+		strlcpy((char *)salt, salt_tmp, SALT_LEN + 1);
+		free(salt_tmp); salt_tmp = NULL;
 
 		if (getenv("KC_DEBUG"))
 			printf("salt='%s'\n", salt);
 	}
 
-	if ((flags & KC_GENERATE_KEY)) {
+
+	if ((flags & KC_SETUP_CRYPT_KEY)) {
 		if (getenv("KC_DEBUG"))
 			printf("generating new key from pass and salt.\n");
 
 		/* generate a proper key for encoding/decoding BIO */
-		PKCS5_PBKDF2_HMAC_SHA1(pass, (int)strlen(pass), salt, sizeof(salt), 5000, KEY_LEN, key);
+		PKCS5_PBKDF2_HMAC_SHA1(pass, (int)strlen(pass), salt, SALT_LEN + 1, 5000, KEY_LEN, key);
 	}
-} /* generate_iv_salt_key() */
+	if (!key) {
+		puts("Key generation failure!");
+
+		free(iv_tmp); iv_tmp = NULL;
+		free(salt_tmp); salt_tmp = NULL;
+		return(0);
+	}
 
 
-void
-kc_set_cipher(int enc)
-{
-	/* reconfigure encoding with the newly generated key and IV */
+	/* extract bio_cipher from bio_chain */
+	while (bio_chain) {
+		if (BIO_method_type(bio_chain) == BIO_TYPE_CIPHER)
+			break;
+
+		bio_chain = BIO_next(bio_chain);
+	}
+	if (!bio_chain) {
+		puts("Couldn't find cipher BIO in bio_chain!");
+
+		free(iv_tmp); iv_tmp = NULL;
+		free(salt_tmp); salt_tmp = NULL;
+		return(0);
+	}
+
+
+	/* reconfigure encoding with the key and IV */
 	if (strcmp(cipher_mode, "cfb128") == 0) {
 		if (getenv("KC_DEBUG"))
 			printf("using cipher mode: %s\n", cipher_mode);
-		BIO_set_cipher(bio_cipher, EVP_aes_256_cfb128(), key, iv, enc);
+		BIO_set_cipher(bio_chain, EVP_aes_256_cfb128(), key, iv, enc);
 	} else if (strcmp(cipher_mode, "ofb") == 0) {
 		if (getenv("KC_DEBUG"))
 			printf("using cipher mode: %s\n", cipher_mode);
-		BIO_set_cipher(bio_cipher, EVP_aes_256_ofb(), key, iv, enc);
+		BIO_set_cipher(bio_chain, EVP_aes_256_ofb(), key, iv, enc);
 	} else {	/* the default is CBC */
 		if (getenv("KC_DEBUG"))
 			printf("using default cipher mode: %s\n", cipher_mode);
-		BIO_set_cipher(bio_cipher, EVP_aes_256_cbc(), key, iv, enc);
+		BIO_set_cipher(bio_chain, EVP_aes_256_cbc(), key, iv, enc);
 	}
-} /* kc_set_cipher() */
+
+	return(1);
+} /* kc_setup_crypt() */
+
+
+BIO *
+kc_setup_bio_chain(const char *db_filename)
+{
+	BIO		*bio_file = NULL;
+	BIO		*bio_b64 = NULL;
+	BIO		*bio_cipher = NULL;
+	BIO		*bio_chain = NULL;
+
+
+	bio_file = BIO_new_file(db_filename, "r+");
+	if (!bio_file) {
+		perror("BIO_new_file()");
+		return(NULL);
+	}
+	BIO_set_close(bio_file, BIO_CLOSE);
+	bio_chain = BIO_push(bio_file, bio_chain);
+
+	bio_b64 = BIO_new(BIO_f_base64());
+	if (!bio_b64) {
+		perror("BIO_new(f_base64)");
+		return(NULL);
+	}
+	bio_chain = BIO_push(bio_b64, bio_chain);
+
+	bio_cipher = BIO_new(BIO_f_cipher());
+	if (!bio_cipher) {
+		perror("BIO_new(f_cipher)");
+		return(NULL);
+	}
+	bio_chain = BIO_push(bio_cipher, bio_chain);
+
+	return(bio_chain);
+} /* kc_setup_bio_chain() */

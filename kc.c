@@ -48,7 +48,6 @@ char *cmd_generator(const char *, int);
 
 
 BIO		*bio_chain = NULL;
-BIO		*bio_cipher = NULL;
 
 char		*cipher_mode = "cbc";
 
@@ -82,8 +81,6 @@ main(int argc, char *argv[])
 	const char	*e_line = NULL;
 	char		*line = NULL;
 
-	BIO		*bio_file = NULL;
-	BIO		*bio_b64 = NULL;
 	char		*db_buf = NULL;
 	ssize_t		ret = -1;
 	size_t		db_buf_size = 1024;
@@ -93,6 +90,7 @@ main(int argc, char *argv[])
 	char		*pass_filename = NULL;
 	int		pass_file = -1;
 	size_t		pass_size = 128;
+	int		kc_setup_crypt_flags = 0;
 
 	struct stat	st;
 	const char	*default_db_dir = ".kc";
@@ -262,7 +260,7 @@ main(int argc, char *argv[])
 		free(rbuf); rbuf = NULL;
 
 
-		kc_gen_crypt_params(KC_GENERATE_KEY, pass);
+		kc_setup_crypt_flags = KC_SETUP_CRYPT_KEY;
 	} else {
 		printf("Creating '%s'\n", db_filename);
 
@@ -272,8 +270,23 @@ main(int argc, char *argv[])
 			quit(EXIT_FAILURE);
 		}
 
-		kc_gen_crypt_params(KC_GENERATE_IV | KC_GENERATE_SALT | KC_GENERATE_KEY, pass);
+		kc_setup_crypt_flags = KC_SETUP_CRYPT_IV | KC_SETUP_CRYPT_SALT | KC_SETUP_CRYPT_KEY;
 	}
+
+
+	bio_chain = kc_setup_bio_chain(db_filename);
+	if (!bio_chain) {
+		printf("Couldn't setup bio_chain!");
+		quit(EXIT_FAILURE);
+	}
+	if (getenv("KC_DEBUG"))
+		print_bio_chain(bio_chain);
+
+
+	/* Optionally generate iv/salt.
+	 * Setup cipher mode and turn on decrypting */
+	kc_setup_crypt(bio_chain, 0, cipher_mode, pass, iv, salt, key, kc_setup_crypt_flags);
+
 
 	if (pass)
 		memset(pass, '\0', PASSWORD_MAXLEN);
@@ -288,37 +301,6 @@ main(int argc, char *argv[])
 			puts("Could not lock the database file!\nMaybe another instance is using that database?");
 			quit(EXIT_FAILURE);
 		}
-
-
-	bio_file = BIO_new_file(db_filename, "r+");
-	if (!bio_file) {
-		perror("BIO_new_file()");
-		quit(EXIT_FAILURE);
-	}
-	BIO_set_close(bio_file, BIO_CLOSE);
-	bio_chain = BIO_push(bio_file, bio_chain);
-
-	bio_b64 = BIO_new(BIO_f_base64());
-	if (!bio_b64) {
-		perror("BIO_new(f_base64)");
-		quit(EXIT_FAILURE);
-	}
-	bio_chain = BIO_push(bio_b64, bio_chain);
-
-	bio_cipher = BIO_new(BIO_f_cipher());
-	if (!bio_cipher) {
-		perror("BIO_new(f_cipher)");
-		quit(EXIT_FAILURE);
-	}
-	bio_chain = BIO_push(bio_cipher, bio_chain);
-
-
-	/* turn on decoding */
-	kc_set_cipher(0);
-
-
-	if (getenv("KC_DEBUG"))
-		print_bio_chain(bio_chain);
 
 
 	/* seek after the IV and salt */
@@ -385,8 +367,8 @@ main(int argc, char *argv[])
 	}
 
 
-	/* turn on encoding */
-	kc_set_cipher(1);
+	/* turn on encrypting */
+	kc_setup_crypt(bio_chain, 1, cipher_mode, NULL, iv, NULL, key, 0);
 
 
 	if (pos == 0) {		/* empty file? */
