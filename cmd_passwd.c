@@ -48,11 +48,14 @@ cmd_passwd(const char *e_line, command *commands)
 	if (ret == 0)	/* canceled */
 		return;
 
-	kc_setup_crypt(bio_chain, 1, cipher_mode, pass, iv, salt, key, KC_SETUP_CRYPT_IV | KC_SETUP_CRYPT_SALT | KC_SETUP_CRYPT_KEY);
+	ret = kc_setup_crypt(bio_chain, 1, cipher_mode, pass, iv, salt, key, KC_SETUP_CRYPT_IV | KC_SETUP_CRYPT_SALT | KC_SETUP_CRYPT_KEY);
+	if (!ret)
+		printf("Couldn't setup encrypting!");
 
 	if (pass)
 		memset(pass, '\0', PASSWORD_MAXLEN);
 	free(pass); pass = NULL;
 
-	cmd_write(NULL, NULL);
+	if (ret)
+		cmd_write(NULL, NULL);
 } /* cmd_passwd() */
