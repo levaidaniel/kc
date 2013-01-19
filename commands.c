@@ -452,3 +452,103 @@ kc_setup_bio_chain(const char *db_filename)
 
 	return(bio_chain);
 } /* kc_setup_bio_chain() */
+
+
+char
+kc_db_writer(int db_file, xmlDocPtr db, BIO *bio_chain, unsigned char *iv, unsigned char *salt)
+{
+	xmlSaveCtxtPtr		xml_save = NULL;
+	xmlBufferPtr		xml_buf = NULL;
+
+	int			ret = 0, remaining = 0;
+
+
+	xml_buf = xmlBufferCreate();
+	xml_save = xmlSaveToBuffer(xml_buf, "UTF-8", XML_SAVE_FORMAT);
+
+	if (xml_save) {
+		xmlSaveDoc(xml_save, db);
+		xmlSaveFlush(xml_save);
+		if (getenv("KC_DEBUG"))
+			printf("xml_buf content:\n'%s'(%d)\n", xmlBufferContent(xml_buf), (int)xmlBufferLength(xml_buf));
+		xmlSaveClose(xml_save);
+
+
+		/* rewrite the database */
+		if (ftruncate(db_file, 0) != 0) {
+			if (getenv("KC_DEBUG"))
+				perror("db file truncate");
+
+			return(0);
+		}
+		lseek(db_file, 0, SEEK_SET);
+
+		/* write the IV and salt first */
+		write(db_file, iv, IV_LEN);
+		write(db_file, salt, SALT_LEN);
+
+
+		BIO_reset(bio_chain);		/* we must reset the cipher BIO to work after subsequent calls to cmd_write() */
+
+		BIO_seek(bio_chain, IV_LEN + SALT_LEN);	/* seek after the IV and salt */
+
+		remaining = xmlBufferLength(xml_buf);
+		while (remaining > 0) {
+			ret = BIO_write(bio_chain, xmlBufferContent(xml_buf), remaining);
+
+			if (ret <= 0) {
+				if (BIO_should_retry(bio_chain)) {
+					if (getenv("KC_DEBUG"))
+						puts("write delay");
+
+					sleep(1);
+					continue;
+				} else {
+					if (getenv("KC_DEBUG"))
+						puts("BIO_write() error (don't retry)");
+
+					break;
+				}
+			}
+
+			remaining -= ret;
+
+			if (getenv("KC_DEBUG")) {
+				printf("wrote: %d\n", ret);
+				printf("remaining: %d\n", remaining);
+			}
+		}
+
+		do {
+			if (BIO_flush(bio_chain) == 1) {
+				if (getenv("KC_DEBUG"))
+					puts("flushed bio_chain");
+			} else {
+				if (BIO_should_retry(bio_chain)) {
+					if (getenv("KC_DEBUG"))
+						puts("flush delay");
+
+					sleep(1);
+					continue;
+				} else {
+					if (getenv("KC_DEBUG"))
+						puts("BIO_should_retry() is false");
+
+					break;
+				}
+			}
+		} while(BIO_wpending(bio_chain) > 0);
+
+		if (getenv("KC_DEBUG"))
+			printf("db_file size -> %d\n", BIO_tell(bio_chain));
+
+		xmlBufferFree(xml_buf);
+
+		return(1);
+	} else {
+		if (getenv("KC_DEBUG"))
+			puts("xmlSaveToBuffer() error");
+
+		return(0);
+	}
+} /* kc_db_writer() */
