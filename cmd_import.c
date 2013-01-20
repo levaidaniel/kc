@@ -158,7 +158,7 @@ cmd_import(const char *e_line, command *commands)
 
 		ret = kc_read_database(&rbuf, bio_chain);
 		if (getenv("KC_DEBUG"))
-			printf("read %d bytes\n", ret);
+			printf("read %d bytes\n", (int)ret);
 
 		if (BIO_get_cipher_status(bio_chain) == 0  &&  ret > 0) {
 			puts("Failed to decrypt import file!");
