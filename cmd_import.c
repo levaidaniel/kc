@@ -53,11 +53,10 @@ cmd_import(const char *e_line, command *commands)
 	line = strdup(e_line);
 
 	cmd = strtok(line, " ");		/* get the command name */
-	if (strncmp(cmd, "append", 6) == 0) {	/* command is 'append' or 'appendxml' */
+	if (strncmp(cmd, "append", 6) == 0)	/* command is 'append' or 'appendxml' */
 		append = 1;
-		if (strcmp(cmd + 6, "xml") == 0)
-			xml = 1;
-	} else if (strcmp(cmd + 5, "xml") == 0)	/* command is 'importxml' */
+
+	if (strcmp(cmd + 6, "xml") == 0)
 		xml = 1;
 
 	import_filename = strtok(NULL, " ");	/* assign the command's parameter */
@@ -68,6 +67,7 @@ cmd_import(const char *e_line, command *commands)
 		return;
 	}
 
+
 	if (xml) {
 		/* plain text XML database import */
 
@@ -77,7 +77,7 @@ cmd_import(const char *e_line, command *commands)
 			db_new = xmlReadFile(import_filename, "UTF-8", XML_PARSE_NONET | XML_PARSE_NOERROR | XML_PARSE_NOWARNING | XML_PARSE_RECOVER);
 
 		if (!db_new) {
-			xmlGenericError(xmlGenericErrorContext, "Failed to import from '%s'.\n", import_filename);
+			xmlGenericError(xmlGenericErrorContext, "Failed to parse XML from '%s'.\n", import_filename);
 
 			free(line); line = NULL;
 			return;
