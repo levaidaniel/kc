@@ -50,6 +50,7 @@ char		kc_password_read(char **, char);
 char		kc_setup_crypt(BIO *, int, char *, char *, unsigned char *, unsigned char *, unsigned char *, int);
 BIO		*kc_setup_bio_chain(const char *);
 char		kc_db_writer(int, xmlDocPtr, BIO *, unsigned char *, unsigned char *);
+char		kc_validate_xml(xmlDocPtr);
 
 
 #endif

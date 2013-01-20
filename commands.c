@@ -552,3 +552,35 @@ kc_db_writer(int db_file, xmlDocPtr db, BIO *bio_chain, unsigned char *iv, unsig
 		return(0);
 	}
 } /* kc_db_writer() */
+
+
+char
+kc_validate_xml(xmlDocPtr db)
+{
+	xmlParserInputBufferPtr	buf = NULL;
+	xmlDtdPtr		dtd = NULL;
+	xmlValidCtxt		valid_ctx;
+
+
+	buf = xmlParserInputBufferCreateStatic(KC_DTD, sizeof(KC_DTD), XML_CHAR_ENCODING_NONE);
+	if (!buf) {
+		if (getenv("KC_DEBUG"))
+			xmlGenericError(xmlGenericErrorContext, "Could not allocate buffer for DTD.\n");
+
+		return(0);
+	}
+
+	dtd = xmlIOParseDTD(NULL, buf, XML_CHAR_ENCODING_NONE);
+	if (!dtd) {
+		if (getenv("KC_DEBUG"))
+			xmlGenericError(xmlGenericErrorContext, "Could not parse kc DTD.\n");
+
+		return(0);
+	}
+
+	if (!xmlValidateDtd(&valid_ctx, db, dtd))
+		return(0);
+
+
+	return(1);
+} /* kc_validate_xml() */

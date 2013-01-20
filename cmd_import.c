@@ -44,9 +44,6 @@ cmd_import(const char *e_line, command *commands)
 {
 	xmlDocPtr		db_new = NULL;
 	xmlNodePtr		db_root = NULL, db_root_new = NULL, db_node_new = NULL, keychain_new = NULL;
-	xmlParserInputBufferPtr	buf = NULL;
-	xmlDtdPtr		dtd = NULL;
-	xmlValidCtxt		valid_ctx;
 
 	char			*cmd = NULL, append = 0, xml = 0;
 	char			*line = NULL, *import_filename = NULL;
@@ -103,23 +100,8 @@ cmd_import(const char *e_line, command *commands)
 		 */
 	}
 
-	buf = xmlParserInputBufferCreateStatic(KC_DTD, sizeof(KC_DTD), XML_CHAR_ENCODING_NONE);
-	if (!buf) {
-		xmlGenericError(xmlGenericErrorContext, "Could not allocate buffer for DTD.\n");
 
-		free(line); line = NULL;
-		return;
-	}
-
-	dtd = xmlIOParseDTD(NULL, buf, XML_CHAR_ENCODING_NONE);
-	if (!dtd) {
-		xmlGenericError(xmlGenericErrorContext, "Could not parse kc DTD.\n");
-
-		free(line); line = NULL;
-		return;
-	}
-
-	if (!xmlValidateDtd(&valid_ctx, db_new, dtd)) {
+	if (!kc_validate_xml(db_new)) {
 		printf("Not a valid kc XML structure ('%s')!\n", import_filename);
 
 		xmlFreeDoc(db_new);
