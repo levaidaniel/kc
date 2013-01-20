@@ -71,14 +71,14 @@ cmd_copy(const char *e_line, command *commands)
 
 	db_node_c = find_keychain(cname, 0);
 	if (!db_node_c) {
-		puts("keychain not found.");
+		puts("Keychain not found.");
 		free(line); line = NULL;
 		return;
 	}
 
 	db_node = find_key(idx);
 	if (!db_node) {
-		puts("invalid index!");
+		puts("Invalid index!");
 		free(line); line = NULL;
 		return;
 	} else {
