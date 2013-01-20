@@ -16,6 +16,16 @@ Improvements:
 - New feature for the 'export' command:
   xport <filename> [keychain]
   Export only one keychain from the current database to the specified file.
+- xport command now exports to an encrypted kc database. Password will be
+  prompted for.
+- New 'dump' command to dump the whole XML structure to a plain text XML file.
+  This is how 'xport' worked before.
+- New 'plist' and 'pls' commands, to use a "pager" when listing more than 20
+  keys in a keychain.
+- Change database save logic so it tries hard not to end up with an unusable
+  database file in case of a library or other catastrophic failure.
+  Write to temporary file first, and if that succeeds, rename that file to the
+  original database filename.
 - Make the exported file readable only by its owner.
 - New command 'append':
   append <filename>
@@ -23,6 +33,9 @@ Improvements:
   overwriting the it like 'import')
 - Add a DTD for the kc XML structure.
 - Validate against the DTD when importing/appending.
+- Use .kcd extension for kc encrypted database files. kc will be looking for
+  'default.kcd' under ~/.kc, so rename you existing database if you used this
+  name.
 
 Cosmetic changes:
 - Add PCRE information to version.
