@@ -49,7 +49,7 @@ cmd_c(const char *e_line, command *commands)
 		return;
 	}
 
-	db_node = find_keychain(cname);
+	db_node = find_keychain(cname, 0);
 	if (db_node)
 		keychain = db_node;
 	else

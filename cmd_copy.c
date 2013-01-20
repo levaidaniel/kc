@@ -69,7 +69,7 @@ cmd_copy(const char *e_line, command *commands)
 		return;
 	}
 
-	db_node_c = find_keychain(cname);
+	db_node_c = find_keychain(cname, 0);
 	if (!db_node_c) {
 		puts("keychain not found.");
 		free(line); line = NULL;

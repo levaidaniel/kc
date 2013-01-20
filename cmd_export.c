@@ -85,7 +85,7 @@ cmd_export(const char *e_line, command *commands)
 		 * We must create a new xmlDoc and copy the specified keychain to it.
 		 */
 
-		keychain = find_keychain(cname);
+		keychain = find_keychain(cname, 0);
 		if (!keychain) {
 			printf("'%s' keychain not found.\n", cname);
 

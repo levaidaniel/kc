@@ -59,7 +59,7 @@ cmd_cdel(const char *e_line, command *commands)
 		return;
 	}
 
-	db_node = find_keychain(cname);
+	db_node = find_keychain(cname, 0);
 	free(line); line = NULL;
 	if (db_node) {
 		if (	xmlUTF8Charcmp(xmlGetProp(keychain, BAD_CAST "name"),

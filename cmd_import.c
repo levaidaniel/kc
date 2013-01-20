@@ -36,18 +36,26 @@
 
 extern xmlDocPtr	db;
 extern xmlNodePtr	keychain;
+extern char		*cipher_mode;
+
 extern char		dirty;
 
 
 void
 cmd_import(const char *e_line, command *commands)
 {
-	xmlDocPtr		db_new = NULL;
-	xmlNodePtr		db_root = NULL, db_root_new = NULL, db_node_new = NULL, keychain_new = NULL;
+	BIO		*bio_chain = NULL;
 
-	char			*cmd = NULL, append = 0, xml = 0;
-	char			*line = NULL, *import_filename = NULL;
-	int			import_file = 0;
+	xmlDocPtr	db_new = NULL;
+	xmlNodePtr	db_root = NULL, db_root_new = NULL, db_node_new = NULL, keychain_new = NULL;
+
+	char		*cmd = NULL, append = 0, xml = 0;
+	char		*line = NULL, *import_filename = NULL;
+	char		*rbuf = NULL;
+	unsigned char	iv[IV_LEN + 1], salt[SALT_LEN + 1], key[KEY_LEN];
+	char		*pass = NULL;
+	ssize_t		ret = -1;
+	int		import_file = 0;
 
 
 	line = strdup(e_line);
@@ -98,6 +106,86 @@ cmd_import(const char *e_line, command *commands)
 		 * create a new xmlDoc from the read in XML,
 		 * progress further to validation.
 		 */
+		/* read the IV */
+		rbuf = malloc(IV_LEN + 1); malloc_check(rbuf);
+
+		ret = read(import_file, rbuf, IV_LEN);
+		if (ret < 0)
+			perror("read(import file)");
+		else
+			strlcpy((char *)iv, (const char *)rbuf, IV_LEN + 1);
+
+		free(rbuf); rbuf = NULL;
+
+		/* read the salt */
+		rbuf = malloc(SALT_LEN + 1); malloc_check(rbuf);
+
+		ret = read(import_file, rbuf, SALT_LEN);
+		if (ret < 0)
+			perror("read(import file)");
+		else
+			strlcpy((char *)salt, (const char *)rbuf, SALT_LEN + 1);
+
+		free(rbuf); rbuf = NULL;
+
+
+		bio_chain = kc_setup_bio_chain(import_filename);
+		if (!bio_chain) {
+			printf("Couldn't setup bio_chain!");
+
+			close(import_file);
+			free(line); line = NULL;
+			return;
+		}
+
+		/* ask for the password */
+		kc_password_read(&pass, 0);
+
+		/* Setup cipher mode and turn on decrypting */
+		if (!kc_setup_crypt(bio_chain, 0, cipher_mode, pass, iv, salt, key, KC_SETUP_CRYPT_KEY)) {
+			printf("Couldn't setup decrypting!");
+
+			BIO_free_all(bio_chain);
+			close(import_file);
+			free(line); line = NULL;
+			return;
+		}
+
+		if (pass)
+			memset(pass, '\0', PASSWORD_MAXLEN);
+		free(pass); pass = NULL;
+
+
+		ret = kc_read_database(&rbuf, bio_chain);
+		if (getenv("KC_DEBUG"))
+			printf("read %d bytes\n", ret);
+
+		if (BIO_get_cipher_status(bio_chain) == 0  &&  ret > 0) {
+			puts("Failed to decrypt import file!");
+
+			BIO_free_all(bio_chain);
+			close(import_file);
+			free(rbuf); rbuf = NULL;
+			free(line); line = NULL;
+			return;
+		}
+
+		BIO_free_all(bio_chain);
+		close(import_file);
+
+		if (getenv("KC_DEBUG"))
+			db_new = xmlReadMemory(rbuf, (int)ret, NULL, "UTF-8", XML_PARSE_NONET | XML_PARSE_RECOVER);
+		else
+			db_new = xmlReadMemory(rbuf, (int)ret, NULL, "UTF-8", XML_PARSE_NONET | XML_PARSE_NOERROR | XML_PARSE_NOWARNING | XML_PARSE_RECOVER);
+
+		free(rbuf); rbuf = NULL;
+
+		if (!db_new) {
+			puts("Could not parse XML document!");
+
+			free(line); line = NULL;
+			return;
+		}
 	}
 
 

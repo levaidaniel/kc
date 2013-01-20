@@ -44,7 +44,7 @@ xmlChar			*_rl_helper_var = NULL;
 
 
 xmlNodePtr
-find_keychain(xmlChar *cname_find)
+find_keychain(xmlChar *cname_find, char name)	/* name: 1 = keychain's name takes priority over its index number */
 {
 	xmlNodePtr	db_node = NULL;
 	xmlChar		*cname = NULL;
@@ -54,11 +54,14 @@ find_keychain(xmlChar *cname_find)
 	long		idx = -1;
 
 
-	/* if we got a number */
+	/* check if we got a number */
 	idx = strtol((const char *)cname_find, &inv, 10);
-	if (strncmp(inv, "\0", 1) != 0) {
+
+	/* if we didn't get a number, or are forced to search for the keychain's name */
+	if (	strncmp(inv, "\0", 1) != 0  ||
+		name == 1)
+
 		idx = -1;
-	}
 
 
 	db_node = keychain->parent->children;
@@ -70,9 +73,8 @@ find_keychain(xmlChar *cname_find)
 		}
 
 		if (idx >= 0) {		/* if an index number was given in the parameter */
-			if (i++ == idx) {
+			if (i++ == idx)
 				break;
-			}
 		} else {		/* if keychain name was given in the parameter */
 			cname = xmlGetProp(db_node, BAD_CAST "name");
 			if (xmlStrcmp(cname, cname_find) == 0) {

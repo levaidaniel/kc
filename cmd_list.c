@@ -63,7 +63,7 @@ cmd_list(const char *e_line, command *commands)
 
 	cname = BAD_CAST strtok(NULL, " ");		/* assign the command's parameter */
 	if (cname) {
-		list_keychain = find_keychain(cname);	/* list the specified keychain */
+		list_keychain = find_keychain(cname, 0);	/* list the specified keychain */
 		if (!list_keychain) {
 			puts("Keychain not found.");
 			free(line); line = NULL;
