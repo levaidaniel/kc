@@ -588,3 +588,70 @@ kc_validate_xml(xmlDocPtr db)
 
 	return(1);
 } /* kc_validate_xml() */
+
+
+unsigned int
+kc_read_database(char **buf, BIO *bio_chain)
+{
+	unsigned int	pos = 0;
+	size_t		buf_size = 1024;
+	ssize_t		ret = -1;
+
+
+	/* seek after the IV and salt */
+	BIO_seek(bio_chain, IV_LEN + SALT_LEN);
+
+	/* read in the database file to a buffer */
+	*buf = calloc(1, buf_size); malloc_check(*buf);
+	pos = 0;
+	do {
+		/* if we've reached the size of 'buf', grow it */
+		if (buf_size <= pos) {
+			buf_size += 1024;
+			*buf = realloc(*buf, buf_size); malloc_check(*buf);
+		}
+
+		ret = BIO_read(bio_chain, *buf + pos, (int)(buf_size - pos));
+		if (getenv("KC_DEBUG"))
+			printf("BIO_read(): %d\n", (unsigned int)ret);
+		switch (ret) {
+			case 0:
+				if (BIO_should_retry(bio_chain)) {
+					if (getenv("KC_DEBUG"))
+						puts("read delay");
+
+					sleep(1);
+					continue;
+				}
+			break;
+			case -1:
+				if (BIO_should_retry(bio_chain)) {
+					if (getenv("KC_DEBUG"))
+						puts("read delay");
+
+					sleep(1);
+					continue;
+				} else {
+					if (getenv("KC_DEBUG"))
+						perror("BIO_read() error (don't retry)");
+
+					puts("There was an error while trying to read the database!");
+				}
+			break;
+			case -2:
+				if (getenv("KC_DEBUG"))
+					perror("unsupported operation");
+
+				puts("There was an error while trying to read the database!");
+			break;
+			default:
+				pos += (unsigned int)ret;
+				if (getenv("KC_DEBUG"))
+					printf("pos: %d\n", pos);
+			break;
+		}
+	} while (ret > 0);
+
+
+	return(pos);
+} /* kc_read_database() */

@@ -81,7 +81,6 @@ main(int argc, char *argv[])
 
 	char		*db_buf = NULL;
 	ssize_t		ret = -1;
-	size_t		db_buf_size = 1024;
 	unsigned int	pos = 0;
 	char		*pass = NULL;
 	void		*rbuf = NULL;
@@ -304,63 +303,9 @@ main(int argc, char *argv[])
 		}
 
 
-	/* seek after the IV and salt */
-	BIO_seek(bio_chain, IV_LEN + SALT_LEN);
-
-	/* read in the database file to a buffer */
-	db_buf = calloc(1, db_buf_size); malloc_check(db_buf);
-	pos = 0;
-	do {
-		/* if we've reached the size of 'db_buf', grow it */
-		if (db_buf_size <= pos) {
-			db_buf_size += 1024;
-			db_buf = realloc(db_buf, db_buf_size); malloc_check(db_buf);
-		}
-
-		ret = BIO_read(bio_chain, db_buf + pos, (int)(db_buf_size - pos));
-		if (getenv("KC_DEBUG"))
-			printf("BIO_read(): %d\n", (unsigned int)ret);
-		switch (ret) {
-			case 0:
-				if (BIO_should_retry(bio_chain)) {
-					if (getenv("KC_DEBUG"))
-						puts("read delay");
-
-					sleep(1);
-					continue;
-				}
-			break;
-			case -1:
-				if (BIO_should_retry(bio_chain)) {
-					if (getenv("KC_DEBUG"))
-						puts("read delay");
-
-					sleep(1);
-					continue;
-				} else {
-					if (getenv("KC_DEBUG"))
-						perror("BIO_read() error (don't retry)");
-
-					puts("There was an error while trying to read the database!");
-				}
-			break;
-			case -2:
-				if (getenv("KC_DEBUG"))
-					perror("unsupported operation");
-
-				puts("There was an error while trying to read the database!");
-			break;
-			default:
-				pos += (unsigned int)ret;
-				if (getenv("KC_DEBUG"))
-					printf("pos: %d\n", pos);
-			break;
-		}
-	} while (ret > 0);
-
+	pos = kc_read_database(&db_buf, bio_chain);
 	if (getenv("KC_DEBUG"))
 		printf("read %d bytes\n", pos);
-
 
 	if (BIO_get_cipher_status(bio_chain) == 0  &&  pos > 0) {
 		puts("Failed to decrypt database file!");
