@@ -1,2 +1,0 @@
-import/append : encrypted input
-	test these to import bogus stuff and try to crash it
