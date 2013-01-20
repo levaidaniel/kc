@@ -421,6 +421,12 @@ main(int argc, char *argv[])
 			quit(EXIT_FAILURE);
 		}
 
+		/* Validate the XML structure against our kc.dtd */
+		if (!kc_validate_xml(db)) {
+			printf("Not a valid kc XML structure ('%s')!\n", db_filename);
+			quit(EXIT_FAILURE);
+		}
+
 		db_root = xmlDocGetRootElement(db);
 		if (!db_root) {
 			puts("Could not find root node!");
