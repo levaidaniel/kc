@@ -32,7 +32,7 @@ printf "del 0\nyes\nwrite\n" |./kc -b -k regress/test -p regress/testpass
 printf "append regress/test_export.kcd\n${PASSWORD}\nwrite\n" |./kc -b -k regress/test -p regress/testpass
 
 SHA1=$(printf "list\n" |KC_DEBUG=yes ./kc -b -k regress/test -p regress/testpass |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/created="[0-9]\{1,\}"//' -e 's/modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = '978106cf0f2307586b663a7782bba61f69cf8d13' ];then
+if [ "$SHA1" = '29d087507c761b2ab892421cbf42df1608669454' ];then
 	echo "$0 test ok (append)!"
 else
 	echo "$0 test failed (append)!"
@@ -58,7 +58,7 @@ printf "del 0\nyes\nwrite\n" |./kc -b -k regress/test -p regress/testpass
 printf "appendxml regress/test_dump.xml\nwrite\n" |./kc -b -k regress/test -p regress/testpass
 
 SHA1=$(printf "list\n" |KC_DEBUG=yes ./kc -b -k regress/test -p regress/testpass |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/created="[0-9]\{1,\}"//' -e 's/modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = '978106cf0f2307586b663a7782bba61f69cf8d13' ];then
+if [ "$SHA1" = '29d087507c761b2ab892421cbf42df1608669454' ];then
 	echo "$0 test ok (appendxml)!"
 else
 	echo "$0 test failed (appendxml)!"
