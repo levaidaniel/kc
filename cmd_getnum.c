@@ -211,7 +211,7 @@ cmd_getnum(int idx, size_t space)
 		rl_deprep_terminal();
 #endif
 	} else
-		puts("invalid index!");
+		puts("Invalid index!");
 } /* cmd_getnum() */
 
 

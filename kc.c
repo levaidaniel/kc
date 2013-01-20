@@ -613,7 +613,7 @@ cmd_match(const char *e_line)
 		if (commands)
 			commands->fn(e_line, commands);	/* we call the command's respective function here */
 		else
-			printf("unknown command: '%s'\n", cmd);
+			printf("Unknown command: '%s'\n", cmd);
 	}
 
 	free(line); line = NULL;

@@ -65,7 +65,7 @@ cmd_list(const char *e_line, command *commands)
 	if (cname) {
 		list_keychain = find_keychain(cname);	/* list the specified keychain */
 		if (!list_keychain) {
-			puts("keychain not found.");
+			puts("Keychain not found.");
 			free(line); line = NULL;
 			return;
 		}
@@ -112,7 +112,7 @@ cmd_list(const char *e_line, command *commands)
 	}
 
 	if (idx == 0)
-		puts("empty keychain.");
+		puts("Empty keychain.");
 
 	free(line); line = NULL;
 
