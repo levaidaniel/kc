@@ -578,8 +578,12 @@ kc_validate_xml(xmlDocPtr db)
 		return(0);
 	}
 
-	if (!xmlValidateDtd(&valid_ctx, db, dtd))
+	if (!xmlValidateDtd(&valid_ctx, db, dtd)) {
+		if (getenv("KC_DEBUG"))
+			xmlGenericError(xmlGenericErrorContext, "Validation failed against kc DTD.\n");
+
 		return(0);
+	}
 
 
 	return(1);
