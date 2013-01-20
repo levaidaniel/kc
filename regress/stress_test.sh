@@ -112,7 +112,7 @@ while [ $i -lt $(( ${loop} + ${offset} )) ];do
 	if [ ${READLINE} ];then
 		printf "edit $i\nedited_\nedited_\n"
 	else
-		printf "edit $i\nedited_newkey\nedited_newval\n"
+		printf "edit $i\nedited_newkey$(( $i - 2 ))\nedited_newval$(( $i - 2 ))\n"
 	fi
 
 	# random writes
