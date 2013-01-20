@@ -63,6 +63,13 @@ commands_init(command **commands)
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
 
+		(*commands)->name = "ccdel";
+		(*commands)->usage = "ccdel <keychain name>";
+		(*commands)->help = "Works like 'cdel', but the keychain's name takes priority over its index number.\nSee command 'cdel'";
+		(*commands)->fn = cmd_cdel;
+		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
+		(*commands) = (*commands)->next;
+
 		(*commands)->name = "cnew";
 		(*commands)->usage = "cnew [name]";
 		(*commands)->help = "Create a new keychain. If 'name' is not given then prompt for one.";
@@ -86,6 +93,13 @@ commands_init(command **commands)
 		(*commands)->name = "cren";
 		(*commands)->usage = "cren <keychain>";
 		(*commands)->help = "Rename a keychain. 'keychain' can be the keychain's index number or name. Index number takes priority when addressing a keychain.";
+		(*commands)->fn = cmd_cren;
+		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
+		(*commands) = (*commands)->next;
+
+		(*commands)->name = "ccren";
+		(*commands)->usage = "ccren <keychain name>";
+		(*commands)->help = "Works like 'cren', but the keychain's name takes priority over its index number.\nSee command 'cren'";
 		(*commands)->fn = cmd_cren;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
@@ -168,6 +182,13 @@ commands_init(command **commands)
 	(*commands)->name = "c";
 	(*commands)->usage = "c <keychain>";
 	(*commands)->help = "Change the current keychain. 'keychain' can be the keychain's index number or name. Index number takes priority when addressing a keychain.";
+	(*commands)->fn = cmd_c;
+	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
+	(*commands) = (*commands)->next;
+
+	(*commands)->name = "cc";
+	(*commands)->usage = "cc <keychain name>";
+	(*commands)->help = "Works like 'c', but the keychain's name takes priority over its index number.\nSee command 'c'";
 	(*commands)->fn = cmd_c;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;

@@ -113,7 +113,7 @@ Every key gets prefixed by its index number.
 can be the keychain's index number or name. Index number takes priority when addressing a keychain.
 .It Cm plist Op keychain
 Works exactly like
-.Cm list
+.Cm list ,
 but every 20th line the output stops, and continues for <SPACE> or <ENTER>, and quits for 'q' or EOT (usually CTRL+d).
 .It Cm ls Op keychain
 Alias of
@@ -169,10 +169,20 @@ regular expression in keychain names in the current database.
 Change the current keychain.
 .Ar keychain
 can be the keychain's index number or name. Index number takes priority when addressing a keychain.
+.It Cm cc Ar keychain name
+Works like
+.Cm c ,
+but the keychain's name takes priority over its index number. (see command
+.Cm c )
 .It Cm cdel Ar keychain
 Delete a keychain.
 .Ar keychain
 can be the keychain's index number or name. Index number takes priority when addressing a keychain.
+.It Cm ccdel Ar keychain name
+Works like
+.Cm cdel ,
+but the keychain's name takes priority over its index number. (see command
+.Cm cdel )
 .It Cm clear Op count
 Emulate a screen clearing. Scrolls 50 lines by default, which can be multiplied by
 .Ar count
@@ -208,6 +218,11 @@ Alias of
 Rename a keychain.
 .Ar keychain
 can be the keychain's index number or name. Index number takes priority when addressing a keychain.
+.It Cm ccren Ar keychain name
+Works like
+.Cm cren ,
+but the keychain's name takes priority over its index number. (see command
+.Cm cren )
 .It Cm del Ar index
 Delete a key from the current keychain.
 .Ar index
