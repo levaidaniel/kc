@@ -297,7 +297,7 @@ kc_password_read(char **pass1, char new)
 	if (new) {
 		if (!strlen(*pass1)) {
 			free(*pass1); *pass1 = NULL;
-			puts("canceled.");
+			puts("Canceled.");
 			return(0);
 		}
 
@@ -306,7 +306,7 @@ kc_password_read(char **pass1, char new)
 		if (!strlen(pass2)) {
 			free(*pass1); *pass1 = NULL;
 			free(pass2); pass2 = NULL;
-			puts("canceled.");
+			puts("Canceled.");
 			return(0);
 		}
 
