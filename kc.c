@@ -79,11 +79,10 @@ main(int argc, char *argv[])
 	const char	*e_line = NULL;
 	char		*line = NULL;
 
-	char		*db_buf = NULL;
+	char		*buf = NULL;
 	ssize_t		ret = -1;
 	unsigned int	pos = 0;
 	char		*pass = NULL;
-	void		*rbuf = NULL;
 	char		*pass_filename = NULL;
 	int		pass_file = -1;
 	size_t		pass_size = 128;
@@ -196,7 +195,7 @@ main(int argc, char *argv[])
 				perror("read(password file)");
 				break;
 			} else
-				pos += (unsigned int)ret;
+				pos += ret;
 		}
 		pass[pos] = '\0';
 		if (strrchr(pass, '\n'))
@@ -241,26 +240,26 @@ main(int argc, char *argv[])
 		}
 
 		/* read the IV */
-		rbuf = malloc(IV_LEN + 1); malloc_check(rbuf);
+		buf = malloc(IV_LEN + 1); malloc_check(buf);
 
-		ret = read(db_file, rbuf, IV_LEN);
+		ret = read(db_file, buf, IV_LEN);
 		if (ret < 0)
 			perror("read(database file)");
 		else
-			strlcpy((char *)iv, (const char *)rbuf, IV_LEN + 1);
+			strlcpy((char *)iv, (const char *)buf, IV_LEN + 1);
 
-		free(rbuf); rbuf = NULL;
+		free(buf); buf = NULL;
 
 		/* read the salt */
-		rbuf = malloc(SALT_LEN + 1); malloc_check(rbuf);
+		buf = malloc(SALT_LEN + 1); malloc_check(buf);
 
-		ret = read(db_file, rbuf, SALT_LEN);
+		ret = read(db_file, buf, SALT_LEN);
 		if (ret < 0)
 			perror("read(database file)");
 		else
-			strlcpy((char *)salt, (const char *)rbuf, SALT_LEN + 1);
+			strlcpy((char *)salt, (const char *)buf, SALT_LEN + 1);
 
-		free(rbuf); rbuf = NULL;
+		free(buf); buf = NULL;
 
 
 		kc_setup_crypt_flags = KC_SETUP_CRYPT_KEY;
@@ -309,7 +308,7 @@ main(int argc, char *argv[])
 		}
 
 
-	pos = kc_read_database(&db_buf, bio_chain);
+	pos = kc_read_database(&buf, bio_chain);
 	if (getenv("KC_DEBUG"))
 		printf("read %d bytes\n", pos);
 
@@ -364,9 +363,9 @@ main(int argc, char *argv[])
 		cmd_write(NULL, NULL);
 	} else {
 		if (getenv("KC_DEBUG"))
-			db = xmlReadMemory(db_buf, (int)pos, NULL, "UTF-8", XML_PARSE_NONET | XML_PARSE_RECOVER);
+			db = xmlReadMemory(buf, (int)pos, NULL, "UTF-8", XML_PARSE_NONET | XML_PARSE_RECOVER);
 		else
-			db = xmlReadMemory(db_buf, (int)pos, NULL, "UTF-8", XML_PARSE_NONET | XML_PARSE_NOERROR | XML_PARSE_NOWARNING | XML_PARSE_RECOVER);
+			db = xmlReadMemory(buf, (int)pos, NULL, "UTF-8", XML_PARSE_NONET | XML_PARSE_NOERROR | XML_PARSE_NOWARNING | XML_PARSE_RECOVER);
 		if (!db) {
 			puts("Could not parse XML document!");
 			quit(EXIT_FAILURE);
@@ -398,7 +397,7 @@ main(int argc, char *argv[])
 			quit(EXIT_FAILURE);
 		}
 	}
-	free(db_buf); db_buf = NULL;
+	free(buf); buf = NULL;
 
 
 	/* init and start the CLI */
