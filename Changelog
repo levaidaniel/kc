@@ -31,6 +31,9 @@ Improvements:
   append <filename>
   Append every keychain from 'filename' to the database. (ie.: without
   overwriting the it like 'import')
+- New commands 'appendxml' and 'importxml':
+  In regards to xport/dump changes, make it possible to import/append encrypted
+  database exports, and also xml database dumps.
 - Add a DTD for the kc XML structure.
 - Validate against the DTD when importing/appending.
 - Use .kcd extension for kc encrypted database files. kc will be looking for
