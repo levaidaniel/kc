@@ -1,5 +1,2 @@
 import/append : encrypted input
 	test these to import bogus stuff and try to crash it
-importxml/appendxml : for XML inputs.
-
-kc.c: validate XML structre
