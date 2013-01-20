@@ -370,7 +370,7 @@ main(int argc, char *argv[])
 
 	/* turn on encrypting */
 	if (!kc_setup_crypt(bio_chain, 1, cipher_mode, NULL, iv, NULL, key, 0)) {
-		printf("Couldn't setup decrypting!");
+		printf("Couldn't setup encrypting!");
 		quit(EXIT_FAILURE);
 	}
 
