@@ -42,6 +42,7 @@ cmd_cdel(const char *e_line, command *commands)
 	xmlNodePtr	db_node = NULL, db_node_tmp = NULL;
 	xmlChar		*cname = NULL;
 
+	char		*cmd = NULL, name = 0;
 	char		*line = NULL;
 
 #ifndef _READLINE
@@ -51,7 +52,10 @@ cmd_cdel(const char *e_line, command *commands)
 
 	line = strdup(e_line);
 
-	strtok(line, " ");		/* remove the command from the line */
+	cmd = strtok(line, " ");		/* get the command name */
+	if (strncmp(cmd, "cc", 2) == 0)
+		name = 1;			/* force to search for the keychain's name */
+
 	cname = BAD_CAST strtok(NULL, " ");	/* assign the command's parameter */
 	if (!cname) {
 		puts(commands->usage);
@@ -59,7 +63,7 @@ cmd_cdel(const char *e_line, command *commands)
 		return;
 	}
 
-	db_node = find_keychain(cname, 0);
+	db_node = find_keychain(cname, name);
 	free(line); line = NULL;
 	if (db_node) {
 		if (	xmlUTF8Charcmp(xmlGetProp(keychain, BAD_CAST "name"),
