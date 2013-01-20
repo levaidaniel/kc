@@ -152,8 +152,7 @@ cmd_edit(const char *e_line, command *commands)
 		modified = malloc(TIME_MAXLEN); malloc_check(modified);
 		snprintf(modified, TIME_MAXLEN, "%d", (int)time(NULL));
 
-		/* XXX
-		 * To be compatible with older versions (pre-2.3), we derive the
+		/* XXX To be compatible with older versions (pre-2.3), we derive the
 		 * 'created' date from the 'modified' date if 'created' was not
 		 * present originally.
 		 */
