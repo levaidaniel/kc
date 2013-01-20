@@ -88,7 +88,7 @@ cmd_cnew(const char *e_line, command *commands)
 		strlcpy(prompt_context, "", sizeof(prompt_context));
 	}
 
-	db_node = find_keychain(cname, 0);
+	db_node = find_keychain(cname, 1);
 	if (!db_node) {
 		/* XXX reloading a saved document inserts a 'text' element between each visible node (why?)
 		 * so we must reproduce this */
