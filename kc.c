@@ -212,12 +212,18 @@ main(int argc, char *argv[])
 			kc_password_read(&pass, 0);
 		else {
 			/* ask for the new password */
-			do {
-				ret = (ssize_t)kc_password_read(&pass, 1);
-			} while (ret == -1);
-
-			if (ret == 0)
-				quit(EXIT_FAILURE);
+			while (1)
+				switch (kc_password_read(&pass, 1)) {
+					case 1:
+						break;
+					break;
+					case 0:
+						quit(EXIT_FAILURE);
+					break;
+					case -1:
+						continue;
+					break;
+				}
 		}
 	}
 
