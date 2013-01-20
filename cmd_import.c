@@ -47,7 +47,9 @@ cmd_import(const char *e_line, command *commands)
 	BIO		*bio_chain = NULL;
 
 	xmlDocPtr	db_new = NULL;
-	xmlNodePtr	db_root = NULL, db_root_new = NULL, db_node_new = NULL, keychain_new = NULL;
+	xmlNodePtr	db_root = NULL, db_root_new = NULL, entry_new = NULL,
+			keychain_new = NULL, keychain_cur = NULL;
+	xmlChar		*cname = NULL;
 
 	char		*cmd = NULL, append = 0, xml = 0;
 	char		*line = NULL, *import_filename = NULL;
@@ -100,12 +102,6 @@ cmd_import(const char *e_line, command *commands)
 			free(line); line = NULL;
 			return;
 		}
-		/* TODO
-		 * Setup new bio_chain,
-		 * read in XML structure through bio_chain,
-		 * create a new xmlDoc from the read in XML,
-		 * progress further to validation.
-		 */
 		/* read the IV */
 		rbuf = malloc(IV_LEN + 1); malloc_check(rbuf);
 
@@ -211,26 +207,42 @@ cmd_import(const char *e_line, command *commands)
 		}
 
 		/* extract the keychain from the document being appended */
-		db_node_new = db_root_new->children->next;
+		keychain_new = db_root_new->children->next;
 
 		/* We would like to append every keychain that is in the source file,
 		 * hence the loop. */
-		while (db_node_new) {
-			if (db_node_new->type == XML_ELEMENT_NODE) {	/* we only care about ELEMENT nodes */
-				/* TODO
-				 * If an existing keychain name is encountered,
+		while (keychain_new) {
+			if (keychain_new->type == XML_ELEMENT_NODE) {	/* we only care about ELEMENT nodes */
+				cname = xmlGetProp(keychain_new, BAD_CAST "name");
+				keychain_cur = find_keychain(cname, 1);	/* search for an existing keychain name in the current db */
+				xmlFree(cname); cname = NULL;
+
+				/* If an existing keychain name is encountered,
 				 * append the entries from the imported keychain to
 				 * the existing keychain, and don't add a duplicate
 				 * keychain.
 				 */
-				keychain_new = xmlCopyNode(db_node_new, 1);
+				if (keychain_cur) {
+					entry_new = keychain_new->children->next;
+					while (entry_new) {
+						if (entry_new->type == XML_ELEMENT_NODE) {	/* we only care about ELEMENT nodes */
+							xmlAddChild(keychain_cur, xmlNewText(BAD_CAST "\t"));
+							xmlAddChild(keychain_cur, xmlCopyNode(entry_new, 1));
+							xmlAddChild(keychain_cur, xmlNewText(BAD_CAST "\n\t"));
+						}
 
-				xmlAddChild(db_root, xmlNewText(BAD_CAST "\t"));
-				xmlAddChild(db_root, keychain_new);
-				xmlAddChild(db_root, xmlNewText(BAD_CAST "\n"));
+						entry_new = entry_new->next;
+					}
+				} else {
+					/* create a non-existing keychain */
+
+					xmlAddChild(db_root, xmlNewText(BAD_CAST "\t"));
+					xmlAddChild(db_root, xmlCopyNode(keychain_new, 1));
+					xmlAddChild(db_root, xmlNewText(BAD_CAST "\n"));
+				}
 			}
 
-			db_node_new = db_node_new->next;
+			keychain_new = keychain_new->next;
 		}
 
 		xmlFreeDoc(db_new);
