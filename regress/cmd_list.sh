@@ -38,7 +38,7 @@ fi
 
 printf "list nonexistent\n" |./kc -b -k regress/test -p regress/testpass
 SHA1=$(printf "list nonexistent\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^default% >' |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = '3cca28bb2a53a71c2a87c820da44d31f3fecf3b6' ];then
+if [ "$SHA1" = '7972d6683794c10f1c092273fee326a19d78cbff' ];then
 	echo "$0 test ok (list with nonexistent parameter)!"
 else
 	echo "$0 test failed (list with nonexistent parameter)!"

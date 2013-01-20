@@ -29,7 +29,7 @@ fi
 
 printf "2\n" |./kc -b -k regress/test -p regress/testpass
 SHA1=$(printf "2\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^default% >' |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = 'dcf00ae2f5f3cd9d2db098e44d212c8f86be5e34' ];then
+if [ "$SHA1" = '6e9d4f5fb288d38a9d5e849be38100e08389689f' ];then
 	echo "$0 test ok (nonexisting)!"
 else
 	echo "$0 test failed (nonexisting)!"
