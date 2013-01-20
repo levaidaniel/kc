@@ -217,6 +217,12 @@ cmd_import(const char *e_line, command *commands)
 		 * hence the loop. */
 		while (db_node_new) {
 			if (db_node_new->type == XML_ELEMENT_NODE) {	/* we only care about ELEMENT nodes */
+				/* TODO
+				 * If an existing keychain name is encountered,
+				 * append the entries from the imported keychain to
+				 * the existing keychain, and don't add a duplicate
+				 * keychain.
+				 */
 				keychain_new = xmlCopyNode(db_node_new, 1);
 
 				xmlAddChild(db_root, xmlNewText(BAD_CAST "\t"));

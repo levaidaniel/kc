@@ -3,6 +3,9 @@
 Bug fixes:
 - Plug in some memory leaks.
 - Don't link to libssl, just libcrypto
+- Information and error message corrections.
+- With command 'cnew', force checking for the keychain's name instead of its
+  index number while checking for an existing keychain.
 
 Improvements:
 - New command 'status':
@@ -39,6 +42,8 @@ Improvements:
 - Use .kcd extension for kc encrypted database files. kc will be looking for
   'default.kcd' under ~/.kc, so rename you existing database if you used this
   name.
+- New cc, ccdel, ccren commands. With these commands the keychain's name takes
+  priority over its index number when specifying it as a parameter.
 
 Cosmetic changes:
 - Add PCRE information to version.
