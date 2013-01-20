@@ -23,6 +23,13 @@
 */
 
 
+/*#include <sys/stat.h>*/
+#ifndef _LINUX
+#include <fcntl.h>
+#else
+#include <sys/file.h>
+#endif
+
 #include "common.h"
 #include "commands.h"
 
@@ -41,15 +48,20 @@ cmd_import(const char *e_line, command *commands)
 	xmlDtdPtr		dtd = NULL;
 	xmlValidCtxt		valid_ctx;
 
-	char			*cmd = NULL, append = 0;
+	char			*cmd = NULL, append = 0, xml = 0;
 	char			*line = NULL, *import_filename = NULL;
+	int			import_file = 0;
 
 
 	line = strdup(e_line);
 
 	cmd = strtok(line, " ");		/* get the command name */
-	if (strcmp(cmd, "append") == 0)
+	if (strncmp(cmd, "append", 6) == 0) {	/* command is 'append' or 'appendxml' */
 		append = 1;
+		if (strcmp(cmd + 6, "xml") == 0)
+			xml = 1;
+	} else if (strcmp(cmd + 5, "xml") == 0)	/* command is 'importxml' */
+		xml = 1;
 
 	import_filename = strtok(NULL, " ");	/* assign the command's parameter */
 	if (!import_filename) {
@@ -57,6 +69,38 @@ cmd_import(const char *e_line, command *commands)
 
 		free(line); line = NULL;
 		return;
+	}
+
+	if (xml) {
+		/* plain text XML database import */
+
+		if (getenv("KC_DEBUG"))
+			db_new = xmlReadFile(import_filename, "UTF-8", XML_PARSE_NONET | XML_PARSE_RECOVER);
+		else
+			db_new = xmlReadFile(import_filename, "UTF-8", XML_PARSE_NONET | XML_PARSE_NOERROR | XML_PARSE_NOWARNING | XML_PARSE_RECOVER);
+
+		if (!db_new) {
+			xmlGenericError(xmlGenericErrorContext, "Failed to import from '%s'.\n", import_filename);
+
+			free(line); line = NULL;
+			return;
+		}
+	} else {
+		/* encrypted database import */
+
+		import_file = open(import_filename, O_RDONLY);
+		if (import_file < 0) {
+			perror("Couldn't open import file");
+
+			free(line); line = NULL;
+			return;
+		}
+		/* TODO
+		 * Setup new bio_chain,
+		 * read in XML structure through bio_chain,
+		 * create a new xmlDoc from the read in XML,
+		 * progress further to validation.
+		 */
 	}
 
 	buf = xmlParserInputBufferCreateStatic(KC_DTD, sizeof(KC_DTD), XML_CHAR_ENCODING_NONE);
@@ -75,20 +119,8 @@ cmd_import(const char *e_line, command *commands)
 		return;
 	}
 
-	if (getenv("KC_DEBUG"))
-		db_new = xmlReadFile(import_filename, "UTF-8", XML_PARSE_NONET | XML_PARSE_RECOVER);
-	else
-		db_new = xmlReadFile(import_filename, "UTF-8", XML_PARSE_NONET | XML_PARSE_NOERROR | XML_PARSE_NOWARNING | XML_PARSE_RECOVER);
-
-	if (!db_new) {
-		xmlGenericError(xmlGenericErrorContext, "Failed to import from '%s'.\n", import_filename);
-
-		free(line); line = NULL;
-		return;
-	}
-
 	if (!xmlValidateDtd(&valid_ctx, db_new, dtd)) {
-		printf("Not a valid kc XML file: '%s'.\n", import_filename);
+		printf("Not a valid kc XML structure ('%s')!\n", import_filename);
 
 		xmlFreeDoc(db_new);
 		free(line); line = NULL;

@@ -17,7 +17,7 @@
 .\"ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 .\"(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 .\"SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-.Dd Jan 09, 2013
+.Dd Jan 20, 2013
 .Dt KC 1
 .Os
 .Sh NAME
@@ -222,7 +222,8 @@ Print application help or describe a
 .Ar command .
 .It Cm xport Ar filename Op keychain
 Export the current database to the encrypted file named
-.Ar filename .
+.Ar filename
+(if no extension specified, ".kcd" will be appended).
 When specifying a keychain, export only that keychain.
 .Ar keychain
 can be the keychain's index number or name. Index number takes priority when addressing a keychain.
@@ -233,7 +234,8 @@ and
 .Cm append )
 .It Cm dump Ar filename Op keychain
 Dump the current database to the XML file named
-.Ar filename .
+.Ar filename
+(if no extension specified, ".xml" will be appended).
 When specifying a keychain, dump only that keychain to the XML file.
 .Ar keychain
 can be the keychain's index number or name. Index number takes priority when addressing a keychain.
@@ -242,9 +244,9 @@ can be the keychain's index number or name. Index number takes priority when add
 .Em NOTE :
 the created XML file will be plain text.
 .It Cm import Ar filename
-Import a database from the XML file named
+Import a database from the encrypted kc database file named
 .Ar filename .
-It must be a properly formatted
+It must contain a properly formatted
 .Nm
 XML database. (see command
 .Cm importxml ,
@@ -253,13 +255,35 @@ and
 .Cm append )
 .Em NOTE :
 The current database will be overwritten if saved.
+.It Cm importxml Ar filename
+Import a database from the XML file named
+.Ar filename .
+It must be a properly formatted
+.Nm
+XML database. (see command
+.Cm import ,
+.Cm xport
+and
+.Cm append )
+.Em NOTE :
+The current database will be overwritten if saved.
 .It Cm append Ar filename
+Append keychain(s) to the database from the encrypted kc database file named
+.Ar filename .
+It must contain a properly formatted
+.Nm
+XML database. (see command
+.Cm appendxml ,
+.Cm xport
+and
+.Cm import )
+.It Cm appendxml Ar filename
 Append keychain(s) to the database from the XML file named
 .Ar filename .
 It must be a properly formatted
 .Nm
 XML database. (see command
-.Cm appendxml ,
+.Cm append ,
 .Cm xport
 and
 .Cm import )

@@ -44,7 +44,14 @@ commands_init(command **commands)
 	if (!readonly) {
 		(*commands)->name = "append";
 		(*commands)->usage = "append <filename>";
-		(*commands)->help = "Append keychain(s) to the database from the XML file named 'filename'. It must be a properly formatted kc XML document.\nSee command 'xport' and 'import'.";
+		(*commands)->help = "Append keychain(s) to the database from the encrypted kc database file named 'filename'. It must contain a properly formatted kc XML document.\nSee command 'appendxml', 'xport' and 'import'.";
+		(*commands)->fn = cmd_import;
+		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
+		(*commands) = (*commands)->next;
+
+		(*commands)->name = "appendxml";
+		(*commands)->usage = "appendxml <filename>";
+		(*commands)->help = "Append keychain(s) to the database from the XML file named 'filename'. It must be a properly formatted kc XML document.\nSee command 'append', 'xport' and 'import'.";
 		(*commands)->fn = cmd_import;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
@@ -105,7 +112,14 @@ commands_init(command **commands)
 
 		(*commands)->name = "import";
 		(*commands)->usage = "import <filename>";
-		(*commands)->help = "Import a database from the XML file named 'filename'. It must be a properly formatted kc XML document.\nSee command 'xport' and 'append'.\n\nNOTE: The current database will be overwritten if saved.";
+		(*commands)->help = "Import a database from the encrypted kc database file named 'filename'. It must contain a properly formatted kc XML document.\nSee command 'importxml', 'xport' and 'append'.\n\nNOTE: The current database will be overwritten if saved.";
+		(*commands)->fn = cmd_import;
+		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
+		(*commands) = (*commands)->next;
+
+		(*commands)->name = "importxml";
+		(*commands)->usage = "importxml <filename>";
+		(*commands)->help = "Import a database from the XML file named 'filename'. It must be a properly formatted kc XML document.\nSee command 'import', 'xport' and 'append'.\n\nNOTE: The current database will be overwritten if saved.";
 		(*commands)->fn = cmd_import;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
@@ -194,7 +208,7 @@ commands_init(command **commands)
 
 	(*commands)->name = "dump";
 	(*commands)->usage = "dump <filename> [keychain]";
-	(*commands)->help = "Dump the current database to the XML file named 'filename'. When specifying a keychain, dump only that keychain to the XML file. 'keychain' can be the keychain's index number or name. Index number takes priority when addressing a keychain.\nSee command 'xport'\n\nNOTE: the created XML file will be plain text.";
+	(*commands)->help = "Dump the current database to the XML file named 'filename' (if no extension specified, \".xml\" will be appended). When specifying a keychain, dump only that keychain to the XML file. 'keychain' can be the keychain's index number or name. Index number takes priority when addressing a keychain.\nSee command 'xport'\n\nNOTE: the created XML file will be plain text.";
 	(*commands)->fn = cmd_export;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
@@ -300,7 +314,7 @@ commands_init(command **commands)
 
 	(*commands)->name = "xport";
 	(*commands)->usage = "xport <filename> [keychain]";
-	(*commands)->help = "Export the current database to the encrypted file named 'filename'. When specifying a keychain, export only that keychain. 'keychain' can be the keychain's index number or name. Index number takes priority when addressing a keychain.\nSee command 'dump', 'import' and 'append'";
+	(*commands)->help = "Export the current database to the encrypted file named 'filename' (if no extension specified, \".kcd\" will be appended). When specifying a keychain, export only that keychain. 'keychain' can be the keychain's index number or name. Index number takes priority when addressing a keychain.\nSee command 'dump', 'import' and 'append'";
 	(*commands)->fn = cmd_export;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
