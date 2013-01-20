@@ -109,6 +109,16 @@ cmd_write(const char *e_line, command *commands)
 		return;
 	}
 
+	stat(db_filename_tmp, &st);
+	if (st->st_size <= (IV_LEN + SALT_LEN + 1)) {	/* "+ 1" is for a newline */
+		puts("Temporary database file became unusally small!");
+
+		BIO_free_all(bio_chain_tmp);
+		close(db_file_tmp);
+		unlink(db_filename_tmp);
+		return;
+	}
+
 	if (rename(db_filename_tmp, db_filename) < 0) {
 		puts("Couldn't rename temporary database file!");
 		perror("open(db_file_tmp)");
