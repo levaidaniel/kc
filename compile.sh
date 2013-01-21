@@ -4,6 +4,9 @@ set -e
 
 OPTIONS_DEFAULT='HAVE_PCRE=y'
 
+SVN_VERSION=$(svn info |awk '/^Revision:/ {print $2}')
+sed -r -i -e "s/dev-SVN_VERSION/dev-${SVN_VERSION}/" common.h
+
 MAKE="make"
 case "$(uname -s)" in
 	Linux)
@@ -16,3 +19,5 @@ case "$(uname -s)" in
 		echo "unknown system."
 	;;
 esac
+
+sed -r -i -e "s/dev-${SVN_VERSION}/dev-SVN_VERSION/" common.h
