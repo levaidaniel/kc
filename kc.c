@@ -357,9 +357,9 @@ main(int argc, char *argv[])
 		cmd_write(NULL, NULL);
 	} else {
 		if (getenv("KC_DEBUG"))
-			db = xmlReadMemory(buf, (int)pos, NULL, "UTF-8", XML_PARSE_NONET | XML_PARSE_RECOVER);
+			db = xmlReadMemory(buf, (int)pos, NULL, "UTF-8", XML_PARSE_NONET | XML_PARSE_PEDANTIC);
 		else
-			db = xmlReadMemory(buf, (int)pos, NULL, "UTF-8", XML_PARSE_NONET | XML_PARSE_NOERROR | XML_PARSE_NOWARNING | XML_PARSE_RECOVER);
+			db = xmlReadMemory(buf, (int)pos, NULL, "UTF-8", XML_PARSE_NONET | XML_PARSE_NOERROR | XML_PARSE_NOWARNING);
 		if (!db) {
 			puts("Could not parse XML document!");
 			quit(EXIT_FAILURE);

@@ -82,9 +82,9 @@ cmd_import(const char *e_line, command *commands)
 		/* plain text XML database import */
 
 		if (getenv("KC_DEBUG"))
-			db_new = xmlReadFile(import_filename, "UTF-8", XML_PARSE_NONET | XML_PARSE_RECOVER);
+			db_new = xmlReadFile(import_filename, "UTF-8", XML_PARSE_NONET | XML_PARSE_PEDANTIC);
 		else
-			db_new = xmlReadFile(import_filename, "UTF-8", XML_PARSE_NONET | XML_PARSE_NOERROR | XML_PARSE_NOWARNING | XML_PARSE_RECOVER);
+			db_new = xmlReadFile(import_filename, "UTF-8", XML_PARSE_NONET | XML_PARSE_NOERROR | XML_PARSE_NOWARNING);
 
 		if (!db_new) {
 			xmlGenericError(xmlGenericErrorContext, "Failed to parse XML from '%s'.\n", import_filename);
