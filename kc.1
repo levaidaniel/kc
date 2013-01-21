@@ -17,14 +17,14 @@
 .\"ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 .\"(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 .\"SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-.Dd Jan 20, 2013
+.Dd Jan 21, 2013
 .Dt KC 1
 .Os
 .Sh NAME
 .Nm kc
 .Nd console based username and password management application
 .Sh SYNOPSIS
-.Nm kc
+.Nm
 .Op Fl k Ar database file
 .Op Fl r
 .Op Fl p Ar password file
@@ -259,7 +259,9 @@ can be the keychain's index number or name. Index number takes priority when add
 .Em NOTE :
 the created XML file will be plain text.
 .It Cm import Ar filename
-Import a database from the encrypted kc database file named
+Import a database from the encrypted
+.Nm
+database file named
 .Ar filename .
 It must contain a properly formatted
 .Nm
@@ -283,7 +285,9 @@ and
 .Em NOTE :
 The current database will be overwritten if saved.
 .It Cm append Ar filename
-Append keychain(s) to the database from the encrypted kc database file named
+Append keychain(s) to the database from the encrypted
+.Nm
+database file named
 .Ar filename .
 It must contain a properly formatted
 .Nm
@@ -442,6 +446,16 @@ my_own keychain% >
 If you use 'cfb128' or 'ofb' for cipher, there is no specific sign if you enter a wrong password during the opening of a database; in this case the database would seem to be corrupt after decrypting, and
 .Nm
 will not be able to open it.
+.Pp
+If you use
+.Cm xport
+to export to an encrypted
+.Nm
+database, it is not possible to choose a different cipher mode than the one being used with the current database. It is also not possible to choose a cipher mode during an
+.Cm import
+of an encrypted
+.Nm
+database, and the one being utilized by the current database will be used.
 .Pp
 There is no character conversion taking place for the input fields.
 .Sh AUTHOR
