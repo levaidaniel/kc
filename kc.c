@@ -640,11 +640,14 @@ el_tab_complete(EditLine *e)
 	xmlNodePtr	db_node = NULL;
 	xmlChar		*cname = NULL;
 
-	char		*line_buf = NULL, *line_buf_copy = NULL, *match = NULL, *word_next = NULL, *word = NULL;
+	char		*line_buf = NULL, *line_buf_copy = NULL,
+			**match = NULL,
+			*word_next = NULL, *word = NULL,
+			*complete_max = NULL;
 	const LineInfo	*el_lineinfo = NULL;
 	command		*commands = commands_first;
-	int		hits = 0;
-	size_t		match_len = 0, word_len = 0;
+	int		hits = 0, i = 0, j = 0, ref = 0, match_max = 0;
+	size_t		match_size = 0, word_len = 0;
 	long		line_buf_len = 0;
 
 
@@ -660,8 +663,10 @@ el_tab_complete(EditLine *e)
 	line_buf[line_buf_len] = '\0';
 
 	/* empty buffer (ie. line) */
-	if (!line_buf_len)
+	if (!line_buf_len) {
+		free(line_buf); line_buf = NULL;
 		return(CC_CURSOR);
+	}
 
 
 	/*
@@ -677,6 +682,7 @@ el_tab_complete(EditLine *e)
 	}
 	/* nothing in the 'line_buf', other than space(s) */
 	if (!word) {
+		free(line_buf); line_buf = NULL;
 		free(line_buf_copy); line_buf_copy = NULL;
 		return(CC_CURSOR);
 	}
@@ -685,30 +691,37 @@ el_tab_complete(EditLine *e)
 
 
 	/* initialize 'match' for use with strlcat() */
-	match = calloc(1, 1); malloc_check(match);
+	/*match = calloc(1, 1); malloc_check(match);*/
 
 	/*
 	 * Basically, the first word will only be completed to a command.
-	 * The second (or any additional) word will be completed to a command only if the first word was 'help' (because help [command] shows the help for command),
-	 * or (if the first word is something other than 'help') it will be completed to a keychain name (to serve as a parameter for the previously completed command).
+	 * The second (or any additional) word will be completed to a command only
+	 * if the first word was 'help' (because help [command] shows the help for command),
+	 * or (if the first word is something other than 'help') it will be completed to a
+	 * keychain name (to serve as a parameter for the previously completed command).
 	 */
-	if (!strchr(line_buf, ' ')  ||  (strncmp(line_buf, "help ", 5) == 0))	/* only search for a command name if this is not an already completed command (ie. there is no space in the line), OR if the already completed command is 'help' */
+
+	/* only search for a command name if this is not an already completed command
+	 * (ie. there is no space in the line), OR if the already completed command is 'help'
+	 */
+	if (!strchr(line_buf, ' ')  ||  (strncmp(line_buf, "help ", 5) == 0))
 		/* search for a command name */
 		do {
 			if (strncmp(word, commands->name, word_len) == 0) {
+				match_size += strlen(commands->name) + 1;
+
+				match = realloc(match, match_size); malloc_check(match);
+				match[hits] = strdup(commands->name);
+
 				hits++;
-
-				match_len += strlen(commands->name) + 1 + 1;
-				match = realloc(match, match_len); malloc_check(match);
-
-				if (hits > 1)	/* don't prefix the first match with a space */
-					strlcat(match, " ", match_len);
-
-				strlcat(match, commands->name, match_len);
 			}
 		} while((commands = commands->next));	/* iterate through the linked list */
 
-	if (strchr(line_buf, ' ')  &&  (strncmp(line_buf, "help ", 5) != 0)) {	/* only search for a keychain name if this is an already completed command (ie. there is space(s) in the line), AND it's not the 'help' command that has been completed previously */
+	/* only search for a keychain name if this is an already completed command
+	 * (ie. there is space(s) in the line), AND it's not the 'help' command that
+	 * has been completed previously
+	 */
+	if (strchr(line_buf, ' ')  &&  (strncmp(line_buf, "help ", 5) != 0)) {
 		/* search for a keychain name */
 		db_node = keychain->parent->children;
 		while (db_node) {
@@ -716,15 +729,12 @@ el_tab_complete(EditLine *e)
 				cname = xmlGetProp(db_node, BAD_CAST "name");
 
 				if (strncmp(word, (char *)cname, word_len) == 0) {
+					match_size += strlen((char *)cname) + 1;
+
+					match = realloc(match, match_size); malloc_check(match);
+					match[hits] = strdup((char *)cname);
+
 					hits++;
-
-					match_len += strlen((char *)cname) + 1 + 1;
-					match = realloc(match, match_len); malloc_check(match);
-
-					if (hits > 1)	/* don't prefix the first match with a space */
-						strlcat(match, " ", match_len);
-
-					strlcat(match, (char *)cname, match_len);
 				}
 
 				xmlFree(cname); cname = NULL;
@@ -736,16 +746,69 @@ el_tab_complete(EditLine *e)
 
 
 	switch (hits) {
-		case 0:
-			printf("\a");			/* no match */
+		case 0:	/* no match */
+			printf("\a");
 		break;
 		case 1:
-			el_push(e, match + (int)word_len);	/* print the word's remaining characters (remaining: the ones without the part (at the beginning) that we've entered already) */
-			if (line_buf[line_buf_len - 1] != ' ')	/* if this is not an already completed word (ie. there is no space at the end), then ... */
-				el_push(e, " ");		/* ... put a space after the completed word */
+			/* print the word's remaining characters
+			 * (remaining: the ones without the part (at the beginning)
+			 * that we've entered already)
+			 */
+			el_push(e, match[0] + (int)word_len);
+
+			/* if this is not an already completed word
+			 * (ie. there is no space at the end), then
+			 * put a space after the completed word
+			 */
+			if (line_buf[line_buf_len - 1] != ' ')
+				el_push(e, " ");
 		break;
-		default:
-			printf("\n%s\n", match);	/* more than one match */
+		default:	/* more than one match */
+			match_max = strlen(match[0]);	/* just a starting value */
+			for (ref = 0; ref < hits; ref++)	/* for every matched command, ... */
+				for (i = ref + 1; i < hits; i++) {	/* ... we compare it with the next and the remaining commands */
+					j = 0;
+					while (	match[ref][j] != '\0'  &&  match[i][j] != '\0'  &&  
+						match[ref][j] == match[i][j])
+						j++;
+
+					/* We are searching for the character that is the
+					 * last common one in all of the matched commands.
+					 *
+					 * We are looking for the smallest number, the smallest
+					 * difference between the user supplied command fragment
+					 * and the shortest command name fragment that is common
+					 * in all of the matched commands.
+					 */
+					if (j < match_max)
+						match_max = j;
+				}
+
+			j = 0;
+			/* complete_max will be the string difference between the user supplied command fragment
+			 * and the shortest command name fragment that is common in all of the matched commands.
+			 * eg.: user: "imp", matched commands: "import" and "importxml" => complete_max = "ort".
+			 */
+			complete_max = malloc(word_len + match_max + 1); malloc_check(complete_max);
+			for (i = word_len; i < match_max; i++)
+				complete_max[j++] = match[0][i];
+
+			complete_max[j] = '\0';
+
+			/* We put the string difference in a char*, because el_push()
+			 * only accepts that type.
+			 * It would have been simpler to just push the characters into
+			 * the line buffer one after another.
+			 */
+			el_push(e, complete_max);
+
+			puts("");
+			for (i = 0; i < hits; i++) {
+				printf("%s ", match[i]);
+				free(match[i]);
+			}
+			puts("");
+
 			el_set(e, EL_REFRESH);
 		break;
 	}
