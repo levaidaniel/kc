@@ -690,9 +690,6 @@ el_tab_complete(EditLine *e)
 	word_len = strlen(word);
 
 
-	/* initialize 'match' for use with strlcat() */
-	/*match = calloc(1, 1); malloc_check(match);*/
-
 	/*
 	 * Basically, the first word will only be completed to a command.
 	 * The second (or any additional) word will be completed to a command only
@@ -708,12 +705,10 @@ el_tab_complete(EditLine *e)
 		/* search for a command name */
 		do {
 			if (strncmp(word, commands->name, word_len) == 0) {
-				match_size += strlen(commands->name) + 1;
-
-				match = realloc(match, match_size); malloc_check(match);
-				match[hits] = strdup(commands->name);
-
 				hits++;
+
+				match = realloc(match, hits * sizeof(char *)); malloc_check(match);
+				match[hits - 1] = strdup(commands->name);
 			}
 		} while((commands = commands->next));	/* iterate through the linked list */
 
@@ -729,12 +724,10 @@ el_tab_complete(EditLine *e)
 				cname = xmlGetProp(db_node, BAD_CAST "name");
 
 				if (strncmp(word, (char *)cname, word_len) == 0) {
-					match_size += strlen((char *)cname) + 1;
-
-					match = realloc(match, match_size); malloc_check(match);
-					match[hits] = strdup((char *)cname);
-
 					hits++;
+
+					match = realloc(match, hits * sizeof(char *)); malloc_check(match);
+					match[hits - 1] = strdup((char *)cname);
 				}
 
 				xmlFree(cname); cname = NULL;
