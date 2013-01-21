@@ -75,7 +75,7 @@ cmd_status(const char *e_line, command *commands)
 unsigned int
 count_items(unsigned char mode)	/* mode: 1=list keychains; 2=list items in a keychain */
 {
-	xmlNodePtr	first = keychain;
+	xmlNodePtr	first = keychain->parent->children;
 	xmlNodePtr	db_node = NULL;
 
 	unsigned int	count = 0;
