@@ -17,7 +17,7 @@
 .\"ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 .\"(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 .\"SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-.Dd Jan 21, 2013
+.Dd Jan 22, 2013
 .Dt KC 1
 .Os
 .Sh NAME
@@ -135,7 +135,7 @@ Search for
 in key names in the current keychain.
 If the
 .Cm search
-command is prefixed by a '*' (eg.: *search) then search in every keychain in the current database.
+command is prefixed by a '*' (eg.: *search) then search in every keychain.
 .It Cm s Ar string
 Alias of
 .Cm search .
@@ -152,7 +152,7 @@ Search for
 regular expression in key names in the current keychain.
 If the
 .Cm /
-command is prefixed by a '*' (eg.: */) then search in every keychain in the current database.
+command is prefixed by a '*' (eg.: */) then search in every keychain.
 .It Cm */ Ar pattern
 Search for
 .Ar pattern
@@ -160,11 +160,11 @@ regular expression in key names in every keychain.
 .It Cm csearch Ar string
 Search for
 .Ar string
-in keychain names in the current database.
+in keychain names.
 .It Cm c/ Ar pattern
 Search for
 .Ar pattern
-regular expression in keychain names in the current database.
+regular expression in keychain names.
 .It Cm c Ar keychain
 Change the current keychain.
 .Ar keychain
@@ -188,7 +188,7 @@ Emulate a screen clearing. Scrolls 50 lines by default, which can be multiplied 
 .Ar count
 times if specified.
 .It Cm clist
-List keychains in the current database. Every keychain gets prefixed by its index number.
+List keychains. Every keychain gets prefixed by its index number.
 .It Cm cls
 Alias of
 .Cm clist .
@@ -231,12 +231,14 @@ is the key's index number in the current keychain.
 Alias of
 .Cm del .
 .It Cm passwd
-Change the current database's password. All changes will be written immediately.
+Change the database password. All changes will be written immediately.
 .It Cm help Op command
 Print application help or describe a
 .Ar command .
+.It Cm status
+Display information about the database.
 .It Cm xport Ar filename Op keychain
-Export the current database to the encrypted file named
+Export the database to the encrypted file named
 .Ar filename
 (if no extension specified, ".kcd" will be appended).
 When specifying a keychain, export only that keychain.
@@ -248,7 +250,7 @@ can be the keychain's index number or name. Index number takes priority when add
 and
 .Cm append )
 .It Cm dump Ar filename Op keychain
-Dump the current database to the XML file named
+Dump the database to the XML file named
 .Ar filename
 (if no extension specified, ".xml" will be appended).
 When specifying a keychain, dump only that keychain to the XML file.
@@ -259,49 +261,45 @@ can be the keychain's index number or name. Index number takes priority when add
 .Em NOTE :
 the created XML file will be plain text.
 .It Cm import Ar filename
-Import a database from the encrypted
-.Nm
-database file named
+Overwrite the current database with the one from the encrypted database file named
 .Ar filename .
-It must contain a properly formatted
+.Ar filename
+must be a proper
 .Nm
-XML database. (see command
+database. (see command
 .Cm importxml ,
 .Cm xport
 and
 .Cm append )
-.Em NOTE :
-The current database will be overwritten if saved.
 .It Cm importxml Ar filename
-Import a database from the XML file named
+Overwrite the current database with the one from the XML file named
 .Ar filename .
-It must be a properly formatted
+.Ar filename
+must contain a properly formatted
 .Nm
-XML database. (see command
+XML document. (see command
 .Cm import ,
 .Cm xport
 and
 .Cm append )
-.Em NOTE :
-The current database will be overwritten if saved.
 .It Cm append Ar filename
-Append keychain(s) to the database from the encrypted
-.Nm
-database file named
+Append new and merge existing keychains to the database from the encrypted database file named
 .Ar filename .
-It must contain a properly formatted
+.Ar filename
+must be a proper
 .Nm
-XML database. (see command
+database. (see command
 .Cm appendxml ,
 .Cm xport
 and
 .Cm import )
 .It Cm appendxml Ar filename
-Append keychain(s) to the database from the XML file named
+Append new and merge existing keychains to the database from the XML file named
 .Ar filename .
-It must be a properly formatted
+.Ar filename
+must contain a properly formatted
 .Nm
-XML database. (see command
+XML document. (see command
 .Cm append ,
 .Cm xport
 and
@@ -324,7 +322,7 @@ is 8.
 .It Cm version
 Display the program version.
 .It Cm write
-Save the current database.
+Save the database.
 .It Cm save
 Alias of
 .Cm write .
@@ -337,7 +335,7 @@ on Linux and
 on everything else ).
 .Sh EXAMPLES
 .Bl -tag -offset ||| -width |
-.It Cm pwsafe_convert.pl :
+.It Em pwsafe_convert.pl :
 .Bd -literal -offset |||
 # Export the pwsafe database to a cleartext file:
 $ pwsafe --exportdb > pwsafe_export
@@ -358,7 +356,7 @@ compatible XML database. You can import it to
 using the
 .Cm import
 command.
-.It Cm Adding new entries :
+.It Em Adding new entries :
 .Bd -literal -offset |||
 .Em Simple :
 default% > new testuser
@@ -421,7 +419,7 @@ default% > c email_accounts
 email_accounts% > c 2
 WebSite Accounts% >
 .Ed
-.It Cm Editing existing entries :
+.It Em Editing existing entries :
 .Bd -literal -offset |||
 default% > list
 0. testuser

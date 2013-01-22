@@ -44,14 +44,14 @@ commands_init(command **commands)
 	if (!readonly) {
 		(*commands)->name = "append";
 		(*commands)->usage = "append <filename>";
-		(*commands)->help = "Append keychain(s) to the database from the encrypted kc database file named 'filename'. It must contain a properly formatted kc XML document.\nSee command 'appendxml', 'xport' and 'import'.";
+		(*commands)->help = "Append new and merge existing keychains to the database from the encrypted database file named 'filename'. 'filename' must be a proper kc database.\nSee command 'appendxml', 'xport' and 'import'.";
 		(*commands)->fn = cmd_import;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
 
 		(*commands)->name = "appendxml";
 		(*commands)->usage = "appendxml <filename>";
-		(*commands)->help = "Append keychain(s) to the database from the XML file named 'filename'. It must be a properly formatted kc XML document.\nSee command 'append', 'xport' and 'import'.";
+		(*commands)->help = "Append new and merge existing keychains to the database from the XML file named 'filename'. 'filename' must contain a properly formatted kc XML document.\nSee command 'append', 'xport' and 'import'.";
 		(*commands)->fn = cmd_import;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
@@ -126,14 +126,14 @@ commands_init(command **commands)
 
 		(*commands)->name = "import";
 		(*commands)->usage = "import <filename>";
-		(*commands)->help = "Import a database from the encrypted kc database file named 'filename'. It must contain a properly formatted kc XML document.\nSee command 'importxml', 'xport' and 'append'.\n\nNOTE: The current database will be overwritten if saved.";
+		(*commands)->help = "Overwrite the current database with the one from the encrypted database file named 'filename'. 'filename' must be a proper kc database.\nSee command 'importxml', 'xport' and 'append'.";
 		(*commands)->fn = cmd_import;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
 
 		(*commands)->name = "importxml";
 		(*commands)->usage = "importxml <filename>";
-		(*commands)->help = "Import a database from the XML file named 'filename'. It must be a properly formatted kc XML document.\nSee command 'import', 'xport' and 'append'.\n\nNOTE: The current database will be overwritten if saved.";
+		(*commands)->help = "Overwrite the current database with the one from the XML file named 'filename'. 'filename' must contain a properly formatted kc XML document.\nSee command 'import', 'xport' and 'append'.";
 		(*commands)->fn = cmd_import;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
@@ -160,14 +160,14 @@ commands_init(command **commands)
 
 		(*commands)->name = "passwd";
 		(*commands)->usage = "passwd";
-		(*commands)->help = "Change the current database's password. All changes will be written immediately.";
+		(*commands)->help = "Change the database password. All changes will be written immediately.";
 		(*commands)->fn = cmd_passwd;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
 
 		(*commands)->name = "write";
 		(*commands)->usage = "write";
-		(*commands)->help = "Save the current database.";
+		(*commands)->help = "Save the database.";
 		(*commands)->fn = cmd_write;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
@@ -195,7 +195,7 @@ commands_init(command **commands)
 
 	(*commands)->name = "c/";
 	(*commands)->usage = "c/<pattern>";
-	(*commands)->help = "Search for 'pattern' regular expression in keychain names in the current database.";
+	(*commands)->help = "Search for 'pattern' regular expression in keychain names.";
 	(*commands)->fn = cmd_searchre;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
@@ -209,7 +209,7 @@ commands_init(command **commands)
 
 	(*commands)->name = "clist";
 	(*commands)->usage = "clist";
-	(*commands)->help = "List keychains in the current database. Every keychain gets prefixed by its index number.";
+	(*commands)->help = "List keychains. Every keychain gets prefixed by its index number.";
 	(*commands)->fn = cmd_clist;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
@@ -222,14 +222,14 @@ commands_init(command **commands)
 
 	(*commands)->name = "csearch";
 	(*commands)->usage = "csearch <string>";
-	(*commands)->help = "Search for 'string' in keychain names in the current database.";
+	(*commands)->help = "Search for 'string' in keychain names.";
 	(*commands)->fn = cmd_search;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "dump";
 	(*commands)->usage = "dump <filename> [keychain]";
-	(*commands)->help = "Dump the current database to the XML file named 'filename' (if no extension specified, \".xml\" will be appended). When specifying a keychain, dump only that keychain to the XML file. 'keychain' can be the keychain's index number or name. Index number takes priority when addressing a keychain.\nSee command 'xport'\n\nNOTE: the created XML file will be plain text.";
+	(*commands)->help = "Dump the database to the XML file named 'filename' (if no extension specified, \".xml\" will be appended). When specifying a keychain, dump only that keychain to the XML file. 'keychain' can be the keychain's index number or name. Index number takes priority when addressing a keychain.\nSee command 'xport'\n\nNOTE: the created XML file will be plain text.";
 	(*commands)->fn = cmd_export;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
@@ -295,7 +295,7 @@ commands_init(command **commands)
 
 	(*commands)->name = "search";
 	(*commands)->usage = "search <string>";
-	(*commands)->help = "Search for 'string' in key names in the current keychain. If the search command is prefixed by a '*' (eg.: *search) then search in every keychain in the current database.";
+	(*commands)->help = "Search for 'string' in key names in the current keychain. If the search command is prefixed by a '*' (eg.: *search) then search in every keychain.";
 	(*commands)->fn = cmd_search;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
@@ -321,7 +321,7 @@ commands_init(command **commands)
 
 	(*commands)->name = "status";
 	(*commands)->usage = "status";
-	(*commands)->help = "Display information about the current database.";
+	(*commands)->help = "Display information about the database.";
 	(*commands)->fn = cmd_status;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
@@ -335,14 +335,14 @@ commands_init(command **commands)
 
 	(*commands)->name = "xport";
 	(*commands)->usage = "xport <filename> [keychain]";
-	(*commands)->help = "Export the current database to the encrypted file named 'filename' (if no extension specified, \".kcd\" will be appended). When specifying a keychain, export only that keychain. 'keychain' can be the keychain's index number or name. Index number takes priority when addressing a keychain.\nSee command 'dump', 'import' and 'append'";
+	(*commands)->help = "Export the database to the encrypted file named 'filename' (if no extension specified, \".kcd\" will be appended). When specifying a keychain, export only that keychain. 'keychain' can be the keychain's index number or name. Index number takes priority when addressing a keychain.\nSee command 'dump', 'import' and 'append'";
 	(*commands)->fn = cmd_export;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "/";
 	(*commands)->usage = "/<pattern>";
-	(*commands)->help = "Search for 'pattern' regular expression in key names in the current keychain. If the / command is prefixed by a '*' (eg.: */) then search in every keychain in the current database.";
+	(*commands)->help = "Search for 'pattern' regular expression in key names in the current keychain. If the / command is prefixed by a '*' (eg.: */) then search in every keychain.";
 	(*commands)->fn = cmd_searchre;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
