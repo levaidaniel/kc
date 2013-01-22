@@ -647,7 +647,7 @@ el_tab_complete(EditLine *e)
 	const LineInfo	*el_lineinfo = NULL;
 	command		*commands = commands_first;
 	int		hits = 0, i = 0, j = 0, ref = 0, match_max = 0;
-	size_t		match_size = 0, word_len = 0;
+	size_t		word_len = 0;
 	long		line_buf_len = 0;
 
 
@@ -761,7 +761,7 @@ el_tab_complete(EditLine *e)
 			for (ref = 0; ref < hits; ref++)	/* for every matched command, ... */
 				for (i = ref + 1; i < hits; i++) {	/* ... we compare it with the next and the remaining commands */
 					j = 0;
-					while (	match[ref][j] != '\0'  &&  match[i][j] != '\0'  &&  
+					while (	match[ref][j] != '\0'  &&  match[i][j] != '\0'  &&
 						match[ref][j] == match[i][j])
 						j++;
 
