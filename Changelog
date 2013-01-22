@@ -6,11 +6,14 @@ Bug fixes:
 - Information and error message corrections.
 - With command 'cnew', force checking for the keychain's name instead of its
   index number while checking for an existing keychain.
+- Change editline TAB completion, so that partial commands will be completed up
+  until the first differing character in the matched command names.
+- Fix potential crashes when importing bogus encrypted/plaintext databases.
 
 Improvements:
 - New command 'status':
-	What database file is in use...
-	...and other funny stuff about the current database.
+	What database file is in use,
+	and other funny stuff about the current database.
 - New command 'info':
 	Displays information about a key (currently only
 	'created' and 'modified' properties).
@@ -33,7 +36,9 @@ Improvements:
 - New command 'append':
   append <filename>
   Append every keychain from 'filename' to the database. (ie.: without
-  overwriting the it like 'import')
+  overwriting it like 'import')
+  Append won't create existing keychains (based on their names), instead
+  append their entries to the already present keychain.
 - New commands 'appendxml' and 'importxml':
   In regards to xport/dump changes, make it possible to import/append encrypted
   database exports, and also xml database dumps.
