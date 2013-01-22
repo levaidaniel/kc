@@ -6,7 +6,7 @@ set -e
 echo "test => $0"
 
 
-database_name=$(echo "status" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^default% >' |grep -E -e '^Database file:')
+database_name=$(echo "status" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^default% >' |grep -E -e '^Database file:' |sed -e 's/ (.*)$//')
 cipher_mode=$(echo "status" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^default% >' |grep -E -e '^Cipher mode:')
 keychains=$(echo "status" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^default% >' |grep -E -e '^Keychains: ')
 items_all=$(echo "status" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^default% >' |grep -E -e '^Items \(all\): ')
@@ -14,7 +14,7 @@ read_only=$(echo "status" |./kc -b -k regress/test -p regress/testpass |grep -E 
 modified=$(echo "status" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^default% >' |grep -E -e '^Modified: ')
 xml_size=$(echo "status" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^default% >' |grep -E -e '^XML structure size \(bytes\): ')
 
-if [ "$database_name" = 'Database file: regress/test (/home/daniell/stuff/progs/kc/trunk/regress/test)' ];then
+if [ "$database_name" = 'Database file: regress/test' ];then
 	echo "$0 test ok (database name)!"
 else
 	echo "$0 test failed (database name)!"
