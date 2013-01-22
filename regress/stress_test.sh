@@ -4,7 +4,7 @@ set -e
 
 
 typeset -i i=0
-typeset -i loop=100
+typeset -i loop=5000
 
 
 while [ $1 ];do
