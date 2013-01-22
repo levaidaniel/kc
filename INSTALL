@@ -1,0 +1,27 @@
+Prerequisites:
+- libxml >= 2.6
+- libedit or libreadline
+
+Optional:
+- libpcre
+
+
+Compile:
+
+- BSD:
+  $ make <OPTIONS>
+  $ make install
+
+- Linux:
+  $ gmake -f GNUMakefile <OPTIONS>
+  $ gmake -f GNUMakefile install
+
+Options:
+HAVE_PCRE=y - This will turn on regexp support in searches, and needs libcpre.
+EDITLINE=y - Use libedit as the line editing function. This needs libedit.
+READLINE=y - Use readline as the line editing function. This needs libreadline.
+
+Example:
+  $ make HAVE_PCRE=1 && make install
+or
+  $ gmake -f GNUMakefile HAVE_PCRE=1 EDITLINE=1 && make -f GNUMakefile install
