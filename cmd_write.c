@@ -24,11 +24,10 @@
 
 
 #include <sys/stat.h>
+#include <sys/param.h>
 #ifndef _LINUX
-#include <sys/syslimits.h>
 #include <fcntl.h>
 #else
-#include <linux/limits.h>
 #include <sys/file.h>
 #endif
 
@@ -55,7 +54,7 @@ cmd_write(const char *e_line, command *commands)
 
 	struct stat	st;
 	char		*rand_str = NULL;
-	char		db_filename_tmp[PATH_MAX];
+	char		db_filename_tmp[MAXPATHLEN];
 	int		db_file_tmp = 0;
 
 
@@ -63,8 +62,8 @@ cmd_write(const char *e_line, command *commands)
 	if (!rand_str)
 		return;
 
-	strlcpy(db_filename_tmp, db_filename, PATH_MAX);
-	strlcat(db_filename_tmp, rand_str, PATH_MAX);
+	strlcpy(db_filename_tmp, db_filename, MAXPATHLEN);
+	strlcat(db_filename_tmp, rand_str, MAXPATHLEN);
 	free(rand_str); rand_str = NULL;
 	if(stat(db_filename_tmp, &st) == 0) {	/* if temporary database filename exists */
 		puts("Couldn't create temporary database file (exists)!");
