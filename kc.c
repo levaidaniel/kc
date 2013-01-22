@@ -413,45 +413,43 @@ main(int argc, char *argv[])
 		perror("history_init()");
 		quit(EXIT_FAILURE);
 	}
-	if (history(eh, &eh_ev, H_SETSIZE, 100) < 0) {
+	if (history(eh, &eh_ev, H_SETSIZE, 100) < 0)
 		fprintf(stderr, "history(H_SETSIZE): %s\n", eh_ev.str);
-	}
-	if (history(eh, &eh_ev, H_SETUNIQUE, 1) < 0) {
+
+	if (history(eh, &eh_ev, H_SETUNIQUE, 1) < 0)
 		fprintf(stderr, "history(H_SETUNIQUE): %s\n", eh_ev.str);
-	}
 
 	/* setup editline/history parameters */
-	if (el_set(e, EL_PROMPT, prompt_str) != 0) {
+	if (el_set(e, EL_PROMPT, prompt_str) != 0)
 		perror("el_set(EL_PROMPT)");
-	}
-	if (el_set(e, EL_SIGNAL, 1) != 0) {
+
+	if (el_set(e, EL_SIGNAL, 1) != 0)
 		perror("el_set(EL_SIGNAL)");
-	}
-	if (el_set(e, EL_HIST, history, eh) != 0) {
+
+	if (el_set(e, EL_HIST, history, eh) != 0)
 		perror("el_set(EL_HIST)");
-	}
-	if (el_set(e, EL_ADDFN, "TAB", "TAB completion", el_tab_complete) != 0) {
+
+	if (el_set(e, EL_ADDFN, "TAB", "TAB completion", el_tab_complete) != 0)
 		perror("el_set(EL_ADDFN)");
-	}
-	if (el_set(e, EL_BIND, "\t", "TAB", NULL) != 0) {
+
+	if (el_set(e, EL_BIND, "\t", "TAB", NULL) != 0)
 		perror("el_set(EL_BIND)");
-	}
-	if (el_set(e, EL_BIND, "^R", "ed-redisplay", NULL) != 0) {
+
+	if (el_set(e, EL_BIND, "^R", "ed-redisplay", NULL) != 0)
 		perror("el_set(EL_BIND)");
-	}
-	if (el_set(e, EL_BIND, "^E", "ed-move-to-end", NULL) != 0) {
+
+	if (el_set(e, EL_BIND, "^E", "ed-move-to-end", NULL) != 0)
 		perror("el_set(EL_BIND)");
-	}
-	if (el_set(e, EL_BIND, "^A", "ed-move-to-beg", NULL) != 0) {
+
+	if (el_set(e, EL_BIND, "^A", "ed-move-to-beg", NULL) != 0)
 		perror("el_set(EL_BIND)");
-	}
+
 	if (el_source(e, NULL) != 0) {
 		if (errno != 0) {
 			if (errno != ENOENT)
 				perror("Error executing .editrc");
-		} else {
+		} else
 			printf("Error executing .editrc\n");
-		}
 	}
 	if (el_set(e, EL_EDITMODE, 1) != 0) {
 		perror("el_set(EL_EDITMODE)");
