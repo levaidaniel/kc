@@ -11,44 +11,48 @@ Bug fixes:
 - Fix potential crashes when importing bogus encrypted/plaintext databases.
 
 Improvements:
-- New command 'status':
+- New commands
+  status:
 	What database file is in use,
 	and other funny stuff about the current database.
-- New command 'info':
+  info:
 	Displays information about a key (currently only
 	'created' and 'modified' properties).
-- Make it possible to compile kc with libedit on Linux too, with the EDITLINE
-  flag. The default remains readline on Linux.
-- New feature for the 'export' command:
-  xport <filename> [keychain]
-  Export only one keychain from the current database to the specified file.
+  append:
+	append <filename>
+	Append every keychain from 'filename' to the database. (ie.: without
+	overwriting it like 'import')
+	Append won't create existing keychains (based on their names), instead
+	appends their entries to the already present keychain.
+  importxml, appendxml:
+	In regards contrast to xport/dump, make it possible to import/append
+	kc XML document dumps.
+  dump:
+  	Dump the whole XML structure to a plain text XML file.
+	This is how 'xport' worked before.
+  plist, pls:
+	Use a "pager" when listing more than 20 keys in a keychain.
+  cc, ccdel, ccren commands:
+	With these commands the keychain's name takes priority over its
+	index number when specifying it as a parameter.
+	This avoids confusion when naming a keychain as a number.
 - xport command now exports to an encrypted kc database. Password will be
   prompted for.
-- New 'dump' command to dump the whole XML structure to a plain text XML file.
-  This is how 'xport' worked before.
-- New 'plist' and 'pls' commands, to use a "pager" when listing more than 20
-  keys in a keychain.
+  Also a new feature for the 'xport' command:
+  xport <filename> [keychain]
+  Export only one keychain from the current database to the specified file.
+- Make it possible to compile kc with libedit on Linux too, with the EDITLINE
+  flag. The default remains readline on Linux.
 - Change database save logic so it tries hard not to end up with an unusable
   database file in case of a library or other catastrophic failure.
-  Write to temporary file first, and if that succeeds, rename that file to the
+  Write to a temporary file first, and if that succeeds, rename that file to the
   original database filename.
-- Make the exported file readable only by its owner.
-- New command 'append':
-  append <filename>
-  Append every keychain from 'filename' to the database. (ie.: without
-  overwriting it like 'import')
-  Append won't create existing keychains (based on their names), instead
-  append their entries to the already present keychain.
-- New commands 'appendxml' and 'importxml':
-  In regards to xport/dump changes, make it possible to import/append encrypted
-  database exports, and also xml database dumps.
-- Add a DTD for the kc XML structure.
-- Validate against the DTD when importing/appending.
+- Make the exported/dumped file readable only by its owner.
+- Add a DTD for the kc XML structure, and validate against it when
+  importing/appending.
 - Use .kcd extension for kc encrypted database files. kc will be looking for
   'default.kcd' under ~/.kc, so rename you existing database if you used this
   name.
-- New cc, ccdel, ccren commands. With these commands the keychain's name takes
-  priority over its index number when specifying it as a parameter.
 
 Cosmetic changes:
 - Add PCRE information to version.
