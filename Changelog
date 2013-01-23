@@ -38,8 +38,9 @@ Improvements:
 	This avoids confusion when naming a keychain as a number.
 - xport command now exports to an encrypted kc database. Password will be
   prompted for.
-  Also a new feature for the 'xport' command:
+  Also a new feature for the 'xport' and 'dump' commands:
   xport <filename> [keychain]
+  dump <filename> [keychain]
   Export only one keychain from the current database to the specified file.
 - Make it possible to compile kc with libedit on Linux too, with the EDITLINE
   flag. The default remains readline on Linux.
