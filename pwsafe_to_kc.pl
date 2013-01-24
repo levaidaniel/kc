@@ -71,10 +71,9 @@ while (<INPUT>) {
 		}
 
 		print OUTPUT "\t" . '<keychain name="' . ($chain eq '' ? 'default' : $chain) . '">' . "\n";
-		print OUTPUT "\t\t" . '<key name="' . $key . '" value="' . $value . '"/>' . "\n";
-	} else {
-		print OUTPUT "\t\t" . '<key name="' . $key . '" value="' . $value . '"/>' . "\n";
 	}
+
+	print OUTPUT "\t\t" . '<key name="' . $key . '"' . ' value="' . $value . '"' . ' created="' . time() . '"' . ' modified="' . time() . '"' . '/>' . "\n";
 
 	$chain_prev = $chain;
 }
