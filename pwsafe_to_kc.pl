@@ -23,6 +23,9 @@ print "opening ${KC_XML_FILE} for writing.\n";
 open(OUTPUT, '>', $KC_XML_FILE)  or  die "couldn't open kc xml output file '${KC_XML_FILE}': $!";
 print OUTPUT '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . '<!DOCTYPE kc SYSTEM "kc.dtd">' . "\n" . '<kc>' . "\n";
 
+my $items = 0;
+my $keychains = 0;
+
 my $i = 0;
 my $answer = '';
 my $stuff = '';
@@ -66,6 +69,8 @@ while (<INPUT>) {
 	}
 
 	if ($chain ne $chain_prev) {
+		$keychains++;
+
 		if ($i != 1) {
 			print OUTPUT "\t" . '</keychain>' . "\n";
 		}
@@ -73,6 +78,7 @@ while (<INPUT>) {
 		print OUTPUT "\t" . '<keychain name="' . ($chain eq '' ? 'default' : $chain) . '">' . "\n";
 	}
 
+	$items++;
 	print OUTPUT "\t\t" . '<key name="' . $key . '"' . ' value="' . $value . '"' . ' created="' . time() . '"' . ' modified="' . time() . '"' . '/>' . "\n";
 
 	$chain_prev = $chain;
@@ -84,4 +90,4 @@ print OUTPUT '</kc>' . "\n";
 close(INPUT);
 close(OUTPUT);
 
-print "Done.\n";
+printf("Converted %d keychains with %d items.\n", $keychains, $items);
