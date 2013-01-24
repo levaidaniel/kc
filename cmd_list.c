@@ -72,6 +72,21 @@ cmd_list(const char *e_line, command *commands)
 	} else
 		list_keychain = keychain;		/* list the current keychain */
 
+	if (!batchmode  &&  pager) {
+#ifndef _READLINE
+		/* clear the prompt temporarily */
+		if (el_set(e, EL_PROMPT, el_prompt_null) != 0) {
+			perror("el_set(EL_PROMPT)");
+		}
+		if (el_set(e, EL_UNBUFFERED, 1) != 0) {
+			perror("el_set(EL_UNBUFFERED)");
+			return;
+		}
+#else
+		rl_prep_terminal(1);
+#endif
+	}
+
 	db_node = list_keychain->children;
 	while (db_node) {
 		if (db_node->type == XML_ELEMENT_NODE) {	/* we only care about ELEMENT nodes */
@@ -82,18 +97,7 @@ cmd_list(const char *e_line, command *commands)
 			/* pager */
 			if (	!batchmode  &&  pager  &&
 				(idx % pager == 0)) {
-#ifndef _READLINE
-				/* clear the prompt temporarily */
-				if (el_set(e, EL_PROMPT, el_prompt_null) != 0) {
-					perror("el_set(EL_PROMPT)");
-				}
-				if (el_set(e, EL_UNBUFFERED, 1) != 0) {
-					perror("el_set(EL_UNBUFFERED)");
-					return;
-				}
-#else
-				rl_prep_terminal(1);
-#endif
+
 				rc = 0;
 				while (	rc != ' '  &&  rc != 13  &&
 					rc != 4  &&  rc != 'q') {
@@ -109,6 +113,18 @@ cmd_list(const char *e_line, command *commands)
 		}
 
 		db_node = db_node->next;
+	}
+
+	if (!batchmode  &&  pager) {
+#ifndef _READLINE
+		/* re-enable the default prompt */
+		if (el_set(e, EL_PROMPT, prompt_str) != 0) {
+			perror("el_set(EL_PROMPT)");
+		}
+		el_set(e, EL_UNBUFFERED, 0);
+#else
+		rl_deprep_terminal();
+#endif
 	}
 
 	if (idx == 0)
