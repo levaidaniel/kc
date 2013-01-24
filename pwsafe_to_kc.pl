@@ -9,7 +9,7 @@ if ($#ARGV < 1  or  $ARGV[0] eq '-h'  or  $ARGV[0] eq '--help') {
 	print "Usage:\n$0 <pwsafe export file> <kc xml output file>\n";
 	print "\nConverts an exported pwsafe database to a kc XML database,\nwhich can be imported by kc using the 'import' command.\n";
 	print "\nThere were some shallow tests using pwsafe 0.2.0 with database version 2.\nPlease report any misbehaviour.\n";
-	print "\n$0 was written by Daniel LEVAI <leva\@ecentrum.hu>\nSource, information, bugs:\nhttp://keychain.googlecode.com\n";
+	print "\n$0 was written by LEVAI Daniel <leva\@ecentrum.hu>\nSource, information, bugs:\nhttp://keychain.googlecode.com\n";
 	exit(1);
 }
 

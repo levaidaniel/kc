@@ -872,7 +872,7 @@ void
 version(void)
 {
 	printf("%s %s\n", NAME, VERSION);
-	puts("Written by Daniel LEVAI <leva@ecentrum.hu>");
+	puts("Written by LEVAI Daniel <leva@ecentrum.hu>");
 	puts("Source, information, bugs: http://keychain.googlecode.com");
 	puts("Compiled with "
 #ifndef _READLINE
