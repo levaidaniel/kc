@@ -4,6 +4,9 @@ Bug fixes:
   importing less flexible about "bad" kc XML files, but without validation
   (it's in v2.3), this is all we can do now). Before this change this would
   result in a segfault.
+- Fix editline TAB completion, so that partial commands will be completed up
+  until the first differing character in the matched command names.
+- Fix keychain name comparison during keychain delete.
 
 2.2.1:
 Bug fixes:
