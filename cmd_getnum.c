@@ -124,8 +124,8 @@ cmd_getnum(int idx, size_t space)
 			} else {
 				printf("%s", line);
 			}
-#ifdef _READLINE		
-			rl_redisplay();		
+#ifdef _READLINE
+			rl_redisplay();
 #endif
 			xmlFree(line); line = NULL;
 			free(line_randomed); line_randomed = NULL;
