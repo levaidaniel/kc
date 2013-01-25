@@ -67,7 +67,7 @@ cmd_info(const char *e_line, command *commands)
 			modified_time = atoi((const char *)modified);
 			printf("%s", ctime(&modified_time));
 			xmlFree(modified); modified = NULL;
-		} else 
+		} else
 			puts("Not defined.");
 	} else
 		puts("invalid index!");

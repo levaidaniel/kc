@@ -136,8 +136,8 @@ get_random_str(size_t length, char alnum)
         char		*tmp = NULL;
         ssize_t		ret = -1;
         char		*rnd_str = NULL;
- 
- 
+
+
 	rnd_file = open(rnd_dev, O_RDONLY);
 	if (rnd_file < 0) {
 		printf("Error opening %s!", rnd_dev);
