@@ -299,16 +299,15 @@ commands_init(command **commands)
 	(*commands)->fn = cmd_search;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
-	(*commands)->name = "s";
-	(*commands)->usage = "s <string>";
-	(*commands)->help = "Alias of 'search'.";
-	(*commands)->fn = cmd_search;
-	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
-	(*commands) = (*commands)->next;
-
 	(*commands)->name = "*search";
 	(*commands)->usage = "*search <string>";
 	(*commands)->help = "Search for 'string' in key names in every keychain.";
+	(*commands)->fn = cmd_search;
+	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
+	(*commands) = (*commands)->next;
+	(*commands)->name = "s";
+	(*commands)->usage = "s <string>";
+	(*commands)->help = "Alias of 'search'.";
 	(*commands)->fn = cmd_search;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
@@ -346,7 +345,6 @@ commands_init(command **commands)
 	(*commands)->fn = cmd_searchre;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
-
 	(*commands)->name = "*/";
 	(*commands)->usage = "*/<pattern>";
 	(*commands)->help = "Search for 'pattern' regular expression in key names in every keychain.";
