@@ -80,6 +80,7 @@ cmd_list(const char *e_line, command *commands)
 		}
 		if (el_set(e, EL_UNBUFFERED, 1) != 0) {
 			perror("el_set(EL_UNBUFFERED)");
+			free(line); line = NULL;
 			return;
 		}
 #else
