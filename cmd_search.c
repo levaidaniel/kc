@@ -131,8 +131,11 @@ cmd_search(const char *e_line, command *commands)
 			search_keychain = NULL;		/* force the quit from the loop */
 	}
 
-	if (!hits)
-		printf("'%s' not found.\n", pattern);
+	if (hits > 0) {
+		printf("= %d ", hits);
+		hits == 1 ? puts("key was found =") : puts("keys were found =");
+	} else
+		printf("'%s' was not found.\n", pattern);
 
 	free(line); line = NULL;
 } /* cmd_search() */
