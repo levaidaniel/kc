@@ -49,8 +49,8 @@ cmd_searchre(const char *e_line, command *commands)
 
 	const char	*pattern = NULL;
 	char		*cmd = NULL;
-	char		chain = 0, searchall = 0;
-	int		hits = 0, idx = 0;
+	char		chain = 0, searchall = 0, searchinv = 0;
+	int		search = -1, hits = 0, idx = 0;
 
 	char		*line = NULL;
 
@@ -58,10 +58,17 @@ cmd_searchre(const char *e_line, command *commands)
 	line = strdup(e_line);
 
 	cmd = strtok(line, " ");		/* get the command name */
+
+	if (strncmp(cmd, "!", 1) == 0) {
+		searchinv = 1;
+		cmd++;
+	}
+
 	if (strncmp(cmd, "*", 1) == 0) {
 		searchall = 1;
 		cmd++;
 	}
+
 	if (strncmp(cmd, "c", 1) == 0)
 		chain = 1;
 
@@ -135,7 +142,9 @@ cmd_searchre(const char *e_line, command *commands)
 			if (getenv("KC_DEBUG"))
 				printf("name=%s", key);
 
-			if (pcre_exec(re, re_study, (const char *)key, xmlStrlen(key), 0, 0, ovector, 30) >= 0) {
+			search = pcre_exec(re, re_study, (const char *)key, xmlStrlen(key), 0, 0, ovector, 30);
+			/* poor man's XOR: */
+			if (((search >= 0)  ||  searchinv)  &&  !((search >= 0)  &&  searchinv)) {
 				if (getenv("KC_DEBUG"))
 					printf(" <=== hit\n");
 
@@ -167,6 +176,6 @@ cmd_searchre(const char *e_line, command *commands)
 
 	free(line); line = NULL;
 #else
-	puts("regexp support was not compiled in.");
+	puts("PCRE - regular expression - support was not compiled in!");
 #endif
 } /* cmd_searchre() */

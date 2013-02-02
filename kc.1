@@ -133,30 +133,60 @@ for more information about this.
 Search for
 .Ar string
 in key names in the current keychain.
-If the
-.Cm search
-command is prefixed by a '*' (eg.: *search) then search in every keychain.
+.Pp
+Modifiers:
+.Pp
+.Ql \&!
+prefix (eg.: !search): show non-matching keys.
+.Pp
+.Ql *
+prefix (eg.: *search): search in every keychain.
+.Pp
+You can combine modifiers in this order.
+.It Cm !search Ar string
+See command
+.Cm search .
+.It Cm *search Ar string
+See command
+.Cm search .
+.It Cm !*search Ar string
+See command
+.Cm search .
 .It Cm s Ar string
 Alias of
 .Cm search .
-.It Cm *search Ar string
-Search for
-.Ar string
-in key names in every keychain.
+.It Cm !s Ar string
+Alias of
+.Cm !search .
 .It Cm *s Ar string
 Alias of
 .Cm *search .
+.It Cm !*s Ar string
+Alias of
+.Cm !*search .
 .It Cm / Ar pattern
 Search for
 .Ar pattern
 regular expression in key names in the current keychain.
-If the
-.Cm /
-command is prefixed by a '*' (eg.: */) then search in every keychain.
+.Pp
+Modifiers:
+.Pp
+.Ql \&!
+prefix (eg.: !/): show non-matching keys.
+.Pp
+.Ql *
+prefix (eg.: */): search in every keychain.
+.Pp
+You can combine modifiers in this order.
+.It Cm !/ Ar pattern
+See command
+.Cm / .
 .It Cm */ Ar pattern
-Search for
-.Ar pattern
-regular expression in key names in every keychain.
+See command
+.Cm / .
+.It Cm !*/ Ar pattern
+See command
+.Cm / .
 .It Cm csearch Ar string
 Search for
 .Ar string

@@ -54,6 +54,9 @@ Improvements:
 - Use .kcd extension for kc encrypted database files. kc will be looking for
   'default.kcd' under ~/.kc, so rename you existing database if you used this
   name.
+- 'search' and '/' commands now have another modifier (along with '*'). An
+  exclamation mark ('!') will negate (inverse) the matching and display
+  non-matching key names.
 
 Cosmetic changes:
 - Add PCRE information to version.

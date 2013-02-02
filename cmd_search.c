@@ -38,7 +38,7 @@ cmd_search(const char *e_line, command *commands)
 	const xmlChar	*search = NULL;
 
 	char		*cmd = NULL;
-	char		chain = 0, searchall = 0;
+	char		chain = 0, searchall = 0, searchinv = 0;
 	int		hits = 0, idx = 0;
 
 	char		*line = NULL;
@@ -47,10 +47,17 @@ cmd_search(const char *e_line, command *commands)
 	line = strdup(e_line);
 
 	cmd = strtok(line, " ");		/* get the command name */
+
+	if (strncmp(cmd, "!", 1) == 0) {
+		searchinv = 1;
+		cmd++;
+	}
+
 	if (strncmp(cmd, "*", 1) == 0) {
 		searchall = 1;
 		cmd++;
 	}
+
 	if (strncmp(cmd, "c", 1) == 0)
 		chain = 1;
 
@@ -96,7 +103,8 @@ cmd_search(const char *e_line, command *commands)
 				printf("name=%s", key);
 
 			search = xmlStrstr(key, pattern);
-			if (search) {
+			/* poor man's XOR: */
+			if ((search  ||  searchinv)  &&  !(search  &&  searchinv)) {
 				if (getenv("KC_DEBUG"))
 					printf(" <=== hit\n");
 

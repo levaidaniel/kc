@@ -533,14 +533,18 @@ cmd_match(const char *e_line)
 			cmd_getnum(idx, 0);
 	} else {
 		/*
-		 * special case, if a '[*]/'([*]slash) or 'c/' is the first character,
+		 * special case, if '[!*]/' or 'c/' is the first character,
 		 * then everything that follows is a search pattern (even a space),
 		 * so we must not tokenize the line
 		 */
 		if (strncmp(line, "/", 1) == 0)
 			cmd = "/";
+		else if (strncmp(line, "!/", 2) == 0)
+			cmd = "!/";
 		else if (strncmp(line, "*/", 2) == 0)
 			cmd = "*/";
+		else if (strncmp(line, "!*/", 3) == 0)
+			cmd = "!*/";
 		else if (strncmp(line, "c/", 2) == 0)
 			cmd = "c/";
 		else {
