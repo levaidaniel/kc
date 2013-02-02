@@ -61,3 +61,4 @@ Improvements:
 Cosmetic changes:
 - Add PCRE information to version.
 - Renamed pwsafe convert script.
+- Display the number of matches when using 'search' or '/'.
