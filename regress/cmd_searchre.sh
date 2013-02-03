@@ -5,6 +5,11 @@ set -e
 
 echo "test => $0"
 
+if ! ./kc -v |grep -E -q -e '^Compiled with (Readline|Editline), PCRE support\.$';then
+	echo "$0 - Not running without PCRE support compiled in!"
+	exit 0
+fi
+
 case "$(uname -s)" in
 	Linux)
 		SHA1_BIN=$(which sha1sum)
