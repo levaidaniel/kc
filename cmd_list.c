@@ -46,7 +46,7 @@ cmd_list(const char *e_line, command *commands)
 	int		idx = 0;
 
 	char		*line = NULL;
-	char		pager = 0, *cmd = NULL, rc = 0;
+	char		pager = 20, rc = 0;
 
 
 	if (getenv("KC_DEBUG")) {
@@ -56,11 +56,7 @@ cmd_list(const char *e_line, command *commands)
 
 	line = strdup(e_line);
 
-	cmd = strtok(line, " ");			/* get the command name */
-	if (	strcmp(cmd, "plist") == 0  ||
-		strcmp(cmd, "pls") == 0)
-		pager = 20;
-
+	strtok(line, " ");			/* remove the command name */
 	cname = BAD_CAST strtok(NULL, " ");		/* assign the command's parameter */
 	if (cname) {
 		list_keychain = find_keychain(cname, 0);	/* list the specified keychain */
@@ -72,7 +68,7 @@ cmd_list(const char *e_line, command *commands)
 	} else
 		list_keychain = keychain;		/* list the current keychain */
 
-	if (!batchmode  &&  pager) {
+	if (!batchmode) {
 #ifndef _READLINE
 		/* clear the prompt temporarily */
 		if (el_set(e, EL_PROMPT, el_prompt_null) != 0) {
@@ -95,19 +91,31 @@ cmd_list(const char *e_line, command *commands)
 			printf("%d. %s\n", idx++, key);
 			xmlFree(key); key = NULL;
 
-			/* pager */
-			if (	!batchmode  &&  pager  &&
+			/* Pager */
+			if (	!batchmode  &&  rc != 'Q'  &&
 				(idx % pager == 0)) {
+
+				/* Brief pager usage info. */
+				printf("[SPC,RET,EOT,q,Q,?]");
+				fflush(stdout);
 
 				rc = 0;
 				while (	rc != ' '  &&  rc != 13  &&
-					rc != 4  &&  rc != 'q') {
+					rc != 4  &&  rc != 'q'  &&
+					rc != 'Q') {
 #ifndef _READLINE
 					el_getc(e, &rc);
 #else
 					rc = rl_read_key();
 #endif
+					/* Full pager usage info. */
+					if (rc == '?')
+						puts("\n<SPACE>, <ENTER>: Next page | 'q', <EOT>: Stop | 'Q': Display all");
 				}
+
+				/* Delete brief pager usage info. */
+				printf("\r                   \r");
+
 				if (rc == 4  ||  rc == 'q')
 					break;
 			}
@@ -116,7 +124,7 @@ cmd_list(const char *e_line, command *commands)
 		db_node = db_node->next;
 	}
 
-	if (!batchmode  &&  pager) {
+	if (!batchmode) {
 #ifndef _READLINE
 		/* re-enable the default prompt */
 		if (el_set(e, EL_PROMPT, prompt_str) != 0) {
