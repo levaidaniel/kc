@@ -485,7 +485,7 @@ main(int argc, char *argv[])
 #else
 		e_line = readline(prompt_str());
 #endif
-		if (e_line)
+		if (e_line) {
 			if (strlen(e_line) > 0) {
 				line = strdup(e_line);
 #ifndef _READLINE
@@ -498,9 +498,9 @@ main(int argc, char *argv[])
 
 				free(line); line = NULL;
 			}
-	} while (e_line);
-
-	cmd_quit(NULL, NULL);
+		} else
+			cmd_quit(NULL, NULL);
+	} while (1);
 
 	/* NOTREACHED */
 	return(0);
