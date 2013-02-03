@@ -885,7 +885,7 @@ version(void)
 		"Readline"
 #endif
 #ifdef	_HAVE_PCRE
-		", RegExp"
+		", PCRE"
 #endif
 		" support.");
 } /* help */

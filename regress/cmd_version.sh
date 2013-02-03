@@ -14,7 +14,7 @@ else
 	exit 1
 fi
 
-if printf "version\n" |./kc -b -k regress/test -p regress/testpass |grep -E -e '^Compiled with (Readline|Editline)(, RegExp)* support\.$';then
+if printf "version\n" |./kc -b -k regress/test -p regress/testpass |grep -E -e '^Compiled with (Readline|Editline)(, PCRE)* support\.$';then
 	echo "$0 test ok (compile options)!"
 else
 	echo "$0 test failed (compile options)!"
