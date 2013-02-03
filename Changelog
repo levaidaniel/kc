@@ -9,6 +9,11 @@ Bug fixes:
 - Change editline TAB completion, so that partial commands will be completed up
   until the first differing character in the matched command names.
 - Fix potential crashes when importing bogus encrypted/plaintext databases.
+- Avoid annoying situation, where one would enter EOT in the CLI with a dirty
+  database, and during the confirmation - if the database should be saved or
+  not - comes another EOT and kc would quit (without saving) regardless of the
+  answer for the save confirmation question. Now kc will jump back to the CLI
+  on an EOT during the saving confirmation question.
 
 Improvements:
 - New commands
@@ -30,8 +35,6 @@ Improvements:
   dump:
   	Dump the whole XML structure to a plain text XML file.
 	This is how 'xport' worked before.
-  plist, pls:
-	Use a "pager" when listing more than 20 keys in a keychain.
   cc, ccdel, ccren commands:
 	With these commands the keychain's name takes priority over its
 	index number when specifying it as a parameter.
@@ -54,11 +57,14 @@ Improvements:
 - Use .kcd extension for kc encrypted database files. kc will be looking for
   'default.kcd' under ~/.kc, so rename you existing database if you used this
   name.
-- 'search' and '/' commands now have another modifier (along with '*'). An
+- 'search' and '/' commands now have another modifier (besides '*'). An
   exclamation mark ('!') will negate (inverse) the matching and display
   non-matching key names.
+- 'list' command now uses a "pager" when listing more than 20 keys in a
+  keychain.
 
 Cosmetic changes:
 - Add PCRE information to version.
 - Renamed pwsafe convert script.
-- Display the number of matches when using 'search' or '/'.
+- Display the number of matches when using 'search' or '/' (with more than 5
+  matches).
