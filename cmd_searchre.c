@@ -33,6 +33,8 @@
 
 extern xmlNodePtr	keychain;
 
+extern char		batchmode;
+
 
 void
 cmd_searchre(const char *e_line, command *commands)
@@ -172,10 +174,11 @@ cmd_searchre(const char *e_line, command *commands)
 	}
 
 	if (hits > 0) {
-		printf("= %d ", hits);
-		hits == 1 ? puts("key was found =") : puts("keys were found =");
-	} else
+		if (hits > 5  &&  !batchmode)
+			printf("\n %d keys were found.\n", hits);
+	} else {
 		printf("'%s' was not found.\n", pattern);
+	}
 
 	free(line); line = NULL;
 #else

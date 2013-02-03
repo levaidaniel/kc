@@ -20,7 +20,7 @@ esac
 
 printf "search key\n" |./kc -b -k regress/test -p regress/testpass
 SHA1=$(printf "search key\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^default% >' |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = '77fba7f4dbdf6ae7ea4bb2c694fb472506349524' ];then
+if [ "$SHA1" = '646c97c66d3c5f0810adfabe230ba164a182825e' ];then
 	echo "$0 test ok (current chain)!"
 else
 	echo "$0 test failed (current chain)!"
@@ -29,7 +29,7 @@ fi
 
 printf "!search y0\n" |./kc -b -k regress/test -p regress/testpass
 SHA1=$(printf "!search y0\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^default% >' |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = '1a109bc7e55dfe94540e4dc60a60f1e290a2a193' ];then
+if [ "$SHA1" = 'f94234af3345169c5c28309499883b8a127b7d04' ];then
 	echo "$0 test ok (current chain, inverse)!"
 else
 	echo "$0 test failed (current chain, inverse)!"
@@ -38,7 +38,7 @@ fi
 
 printf "*search key\n" |./kc -b -k regress/test -p regress/testpass
 SHA1=$(printf "*search key\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^default% >' |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = '42c9ddafdbb323e86684162bf4d458dd96c118f9' ];then
+if [ "$SHA1" = 'dc238e4c5b82d4c0d03eb301297285eb4bdf2f66' ];then
 	echo "$0 test ok (all chains)!"
 else
 	echo "$0 test failed (all chains)!"
@@ -47,7 +47,7 @@ fi
 
 printf "!*search y1\n" |./kc -b -k regress/test -p regress/testpass
 SHA1=$(printf "!*search y1\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^default% >' |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = '78d1189766d1f5a0025c729bf068c0cf26c67469' ];then
+if [ "$SHA1" = '9167daa2b4afcc2727364f6f77cf2a1a73cd6954' ];then
 	echo "$0 test ok (all chains, inverse)!"
 else
 	echo "$0 test failed (all chains, inverse)!"
