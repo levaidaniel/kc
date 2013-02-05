@@ -249,8 +249,8 @@ commands_init(command **commands)
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "list";
-	(*commands)->usage = "list [keychain]";
-	(*commands)->help = "List the keys in the current keychain or if specified, in the keychain named 'keychain'. Every key gets prefixed by its index number. 'keychain' can be the keychain's index number or name. Index number takes priority when addressing a keychain.";
+	(*commands)->usage = "list [pager]";
+	(*commands)->help = "List 'pager' keys per page from current keychain. Every key gets prefixed by its index number. If 'pager' is not specified, the default value 20 is used. The special value 0 for 'pager' means to not use the pager.";
 	(*commands)->fn = cmd_list;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;

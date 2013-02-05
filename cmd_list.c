@@ -40,13 +40,13 @@ extern char		batchmode;
 void
 cmd_list(const char *e_line, command *commands)
 {
-	xmlNodePtr	db_node = NULL, list_keychain = NULL;
-	xmlChar		*key = NULL, *cname = NULL;
+	xmlNodePtr	db_node = NULL;
+	xmlChar		*key = NULL;
 
-	int		idx = 0;
+	int		idx = 0, pager = 0, list_pos = 0;
 
 	char		*line = NULL;
-	char		pager = 20, rc = 0;
+	char		rc = 0;
 
 
 	if (getenv("KC_DEBUG")) {
@@ -56,17 +56,12 @@ cmd_list(const char *e_line, command *commands)
 
 	line = strdup(e_line);
 
-	strtok(line, " ");			/* remove the command name */
-	cname = BAD_CAST strtok(NULL, " ");		/* assign the command's parameter */
-	if (cname) {
-		list_keychain = find_keychain(cname, 0);	/* list the specified keychain */
-		if (!list_keychain) {
-			puts("Keychain not found.");
-			free(line); line = NULL;
-			return;
-		}
-	} else
-		list_keychain = keychain;		/* list the current keychain */
+	if (sscanf(e_line, "%*s %d", &pager) <= 0)
+		pager = 20;
+
+	if (pager > 100  ||  pager < 0)
+		pager = 20;
+
 
 	if (!batchmode) {
 #ifndef _READLINE
@@ -84,16 +79,16 @@ cmd_list(const char *e_line, command *commands)
 #endif
 	}
 
-	db_node = list_keychain->children;
+
+	/* If 'pager' is 0 then don't use pager. */
+	list_pos = pager == 0 ? -1 : pager;
+
+	db_node = keychain->children;
 	while (db_node) {
 		if (db_node->type == XML_ELEMENT_NODE) {	/* we only care about ELEMENT nodes */
-			key = xmlGetProp(db_node, BAD_CAST "name");
-			printf("%d. %s\n", idx++, key);
-			xmlFree(key); key = NULL;
-
 			/* Pager */
-			if (	!batchmode  &&  rc != 'Q'  &&
-				(idx % pager == 0)) {
+			if (	( !batchmode  &&  rc != 'Q'  &&  idx == list_pos )
+				||  rc == 13) {
 
 				/* Brief pager usage info. */
 				printf("[SPC,RET,EOT,q,Q,?]");
@@ -110,7 +105,7 @@ cmd_list(const char *e_line, command *commands)
 #endif
 					/* Full pager usage info. */
 					if (rc == '?')
-						puts("\n<SPACE>, <ENTER>: Next page | 'q', <EOT>: Stop | 'Q': Display all");
+						puts("\n<SPACE>: Next page | <ENTER>: Next line | 'q', <EOT>: Stop | 'Q': Display all");
 				}
 
 				/* Delete brief pager usage info. */
@@ -118,7 +113,13 @@ cmd_list(const char *e_line, command *commands)
 
 				if (rc == 4  ||  rc == 'q')
 					break;
+
+				list_pos = idx + pager;
 			}
+
+			key = xmlGetProp(db_node, BAD_CAST "name");
+			printf("%d. %s\n", idx++, key);
+			xmlFree(key); key = NULL;
 		}
 
 		db_node = db_node->next;

@@ -15,7 +15,7 @@ Bug fixes:
   answer for the save confirmation question. Now kc will jump back to the CLI
   on an EOT during the saving confirmation question.
 
-Improvements:
+Functional changes, improvements:
 - New commands
   status:
 	What database file is in use,
@@ -60,8 +60,8 @@ Improvements:
 - 'search' and '/' commands now have another modifier (besides '*'). An
   exclamation mark ('!') will negate (inverse) the matching and display
   non-matching key names.
-- 'list' command now uses a "pager" when listing more than 20 keys in a
-  keychain.
+- 'list' command now uses a "pager" argument instead of keychain. It displays
+  "pager" number of keys at once (the default is 20).
 
 Cosmetic changes:
 - Add PCRE information to version.

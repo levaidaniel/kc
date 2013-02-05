@@ -105,12 +105,14 @@ Character sequences can be used in values:
 "\ea", "\eA" - these will be replaced with 2 and 4 (respectively) random alpha-numeric characters.
 .Pp
 Every character sequence can be used in values regardless of its order or count, and can be escaped using double backslashes (eg.: "\e\ea").
-.It Cm list Op keychain
-List the keys in the current keychain or if specified, in the keychain named
-.Ar keychain .
-Every key gets prefixed by its index number.
-.Ar keychain
-can be the keychain's index number or name. Index number takes priority when addressing a keychain.
+.It Cm list Op pager
+List
+.Ar pager
+keys per page from current keychain. Every key gets prefixed by its index number. If
+.Ar pager
+is not specified, the default value 20 is used. The special value 0 for
+.Ar pager
+means to not use the pager.
 .It Cm ls Op keychain
 Alias of
 .Cm list .
@@ -405,18 +407,12 @@ default% NEW keychain> WebSite Accounts
 
 .Em Results :
 
-.Em Listing the current keychain :
+.Em Listing the keys in the current keychain :
 default% > list
 0. testuser
 1. testuser2
 2. www.mysecuresite.com
 3. testuser3
-
-.Em Listing any keychain :
-default% > list email_accounts
-empty keychain.
-default% > list 2    (<-- this is the "WebSite Accounts" keychain)
-empty keychain.
 
 .Em Displaying values in the current keychain :
 default% > 0
@@ -437,7 +433,7 @@ default% > clist
 1. email_accounts
 2. WebSite Accounts
 
-.Em Switching to other keychains :
+.Em Switch to another keychains :
 default% > c email_accounts
 email_accounts% > c 2
 WebSite Accounts% >
