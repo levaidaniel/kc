@@ -88,14 +88,14 @@ cmd_list(const char *e_line, command *commands)
 		if (db_node->type == XML_ELEMENT_NODE) {	/* we only care about ELEMENT nodes */
 			/* Pager */
 			if (	( !batchmode  &&  rc != 'Q'  &&  idx == list_pos )
-				||  rc == 13) {
+				||  (rc == 13  ||  rc == 10)) {
 
 				/* Brief pager usage info. */
 				printf("[SPC,RET,EOT,q,Q,?]");
 				fflush(stdout);
 
 				rc = 0;
-				while (	rc != ' '  &&  rc != 13  &&
+				while (	rc != ' '  &&  rc != 13  &&  rc != 10  &&
 					rc != 4  &&  rc != 'q'  &&
 					rc != 'Q') {
 #ifndef _READLINE
