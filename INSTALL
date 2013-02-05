@@ -3,7 +3,7 @@ Prerequisites:
 - libedit or libreadline
 
 Optional:
-- libpcre
+- libpcre >= 8.12
 
 
 Compile:
@@ -17,11 +17,14 @@ Compile:
   $ gmake -f GNUMakefile install
 
 Options:
-HAVE_PCRE=y - This will turn on regexp support in searches, and needs libcpre.
-EDITLINE=y - Use libedit as the line editing function. This needs libedit.
-READLINE=y - Use readline as the line editing function. This needs libreadline.
+HAVE_PCRE=y	This will turn on regexp support in searches, and needs libcpre.
+
+EDITLINE=y	Use libedit as the line editing function. This needs libedit.
+READLINE=y	Use readline as the line editing function. This needs libreadline.
+
+		GNUMakefile uses Readline and Makefile uses Editline by default.
 
 Example:
   $ make HAVE_PCRE=1 && make install
 or
-  $ gmake -f GNUMakefile HAVE_PCRE=1 EDITLINE=1 && make -f GNUMakefile install
+  $ gmake -f GNUMakefile HAVE_PCRE=1 EDITLINE=1 && gmake -f GNUMakefile install
