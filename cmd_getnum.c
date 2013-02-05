@@ -163,7 +163,8 @@ cmd_getnum(int idx, size_t space)
 					case '>':
 					case ']':
 					case '}':
-					case 10:
+					case 10:	/* editline */
+					case 13:	/* readline */
 						if (idx < lines)
 							idx++;
 						break;
