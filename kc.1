@@ -186,10 +186,26 @@ See command
 Search for
 .Ar string
 in keychain names.
+.Pp
+Modifiers:
+.Pp
+.Ql \&!
+prefix (eg.: !csearch): show non-matching keychains.
+.It Cm !csearch Ar string
+See command
+.Cm csearch .
 .It Cm c/ Ar pattern
 Search for
 .Ar pattern
 regular expression in keychain names.
+.Pp
+Modifiers:
+.Pp
+.Ql \&!
+prefix (eg.: !c/): show non-matching keychains.
+.It Cm !c/ Ar pattern
+See command
+.Cm c/ .
 .It Cm c Ar keychain
 Change the current keychain.
 .Ar keychain

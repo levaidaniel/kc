@@ -50,44 +50,38 @@ cmd_searchre(const char *e_line, command *commands)
 	int		ovector[30];
 
 	const char	*pattern = NULL;
-	char		*cmd = NULL;
 	char		chain = 0, searchall = 0, searchinv = 0;
-	int		search = -1, hits = 0, idx = 0;
-
-	char		*line = NULL;
+	int		search = -1, hits = 0, idx = 0, offset = 0;
 
 
-	line = strdup(e_line);
-
-	cmd = strtok(line, " ");		/* get the command name */
-
-	if (strncmp(cmd, "!", 1) == 0) {
+	/* Modifiers */
+	if (strncmp(e_line + offset, "!", 1) == 0) {
 		searchinv = 1;
-		cmd++;
+		offset++;
 	}
 
-	if (strncmp(cmd, "*", 1) == 0) {
+	if (strncmp(e_line + offset, "*", 1) == 0) {
 		searchall = 1;
-		cmd++;
+		offset++;
 	}
 
-	if (strncmp(cmd, "c", 1) == 0)
+	if (strncmp(e_line + offset, "c", 1) == 0) {
 		chain = 1;
+		offset++;
+	}
 
+	/* Jump over the first character that is a '/'(slash) from the command. */
+	offset++;
 
-	if (chain)
-		pattern = cmd + 2;	/* remove the 'c/' from the cmd. the remaining part is the pattern */
-	else
-		pattern = cmd + 1;	/* remove the '/'(slash) from the cmd. the remaining part is the pattern */
+	if (offset >= strlen(e_line)) {
+		puts(commands->usage);
+		return;
+	}
+
+	pattern = e_line + offset;
 
 	if (!pattern) {
 		puts(commands->usage);
-		free(line); line = NULL;
-		return;
-	}
-	if (strlen(pattern) == 0) {
-		puts(commands->usage);
-		free(line); line = NULL;
 		return;
 	}
 
@@ -95,7 +89,6 @@ cmd_searchre(const char *e_line, command *commands)
 	re = pcre_compile(pattern, PCRE_UTF8, &error, &erroffset, NULL);
 	if (!re) {
 		printf("error in pattern at %d: (%s)\n", erroffset, error);
-		free(line); line = NULL;
 		return;
 	}
 
@@ -106,7 +99,6 @@ cmd_searchre(const char *e_line, command *commands)
 
 		if (!error) {
 			perror("pcre_study()");
-			free(line); line = NULL;
 			return;
 		}
 	}
@@ -179,8 +171,6 @@ cmd_searchre(const char *e_line, command *commands)
 	} else {
 		printf("'%s' was not found.\n", pattern);
 	}
-
-	free(line); line = NULL;
 #else
 	puts("PCRE - regular expression - support was not compiled in!");
 #endif

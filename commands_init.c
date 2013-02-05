@@ -195,7 +195,13 @@ commands_init(command **commands)
 
 	(*commands)->name = "c/";
 	(*commands)->usage = "c/<pattern>";
-	(*commands)->help = "Search for 'pattern' regular expression in keychain names.";
+	(*commands)->help = "Search for 'pattern' regular expression in keychain names.\nModifiers:\n '!' prefix (eg.: !c/): show non-matching keychains.";
+	(*commands)->fn = cmd_searchre;
+	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
+	(*commands) = (*commands)->next;
+	(*commands)->name = "!c/";
+	(*commands)->usage = "!c/<pattern>";
+	(*commands)->help = "See command 'c/'.";
 	(*commands)->fn = cmd_searchre;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
@@ -222,7 +228,13 @@ commands_init(command **commands)
 
 	(*commands)->name = "csearch";
 	(*commands)->usage = "csearch <string>";
-	(*commands)->help = "Search for 'string' in keychain names.";
+	(*commands)->help = "Search for 'string' in keychain names.\nModifiers:\n '!' prefix (eg.: !csearch): show non-matching keychains.";
+	(*commands)->fn = cmd_search;
+	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
+	(*commands) = (*commands)->next;
+	(*commands)->name = "!csearch";
+	(*commands)->usage = "!csearch <string>";
+	(*commands)->help = "See command 'csearch'.";
 	(*commands)->fn = cmd_search;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;

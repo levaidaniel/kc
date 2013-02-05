@@ -39,35 +39,40 @@ cmd_search(const char *e_line, command *commands)
 	xmlChar		*pattern = NULL, *key = NULL;
 	const xmlChar	*search = NULL;
 
-	char		*cmd = NULL;
 	char		chain = 0, searchall = 0, searchinv = 0;
-	int		hits = 0, idx = 0;
-
-	char		*line = NULL;
+	int		hits = 0, idx = 0, offset = 0;
 
 
-	line = strdup(e_line);
-
-	cmd = strtok(line, " ");		/* get the command name */
-
-	if (strncmp(cmd, "!", 1) == 0) {
+	/* Modifiers */
+	if (strncmp(e_line + offset, "!", 1) == 0) {
 		searchinv = 1;
-		cmd++;
+		offset++;
 	}
 
-	if (strncmp(cmd, "*", 1) == 0) {
+	if (strncmp(e_line + offset, "*", 1) == 0) {
 		searchall = 1;
-		cmd++;
+		offset++;
 	}
 
-	if (strncmp(cmd, "c", 1) == 0)
+	if (strncmp(e_line + offset, "c", 1) == 0) {
 		chain = 1;
+		offset++;
+	}
 
+	if (strncmp(e_line + offset, "search", 6) == 0)
+		offset += 7;
+	else if (strncmp(e_line + offset, "s", 1) == 0)
+		offset += 2;
 
-	pattern = BAD_CAST strtok(NULL, " ");	/* assign the command's parameter */
+	if (offset >= strlen(e_line)) {
+		puts(commands->usage);
+		return;
+	}
+
+	pattern = BAD_CAST (e_line + offset);
+
 	if (!pattern) {
 		puts(commands->usage);
-		free(line); line = NULL;
 		return;
 	}
 
@@ -139,6 +144,4 @@ cmd_search(const char *e_line, command *commands)
 	} else {
 		printf("'%s' was not found.\n", pattern);
 	}
-
-	free(line); line = NULL;
 } /* cmd_search() */

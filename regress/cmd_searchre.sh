@@ -68,4 +68,22 @@ else
 	exit 1
 fi
 
+printf "c/chain\n" |./kc -b -k regress/test -p regress/testpass
+SHA1=$(printf "c/chain\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^default% >' |$SHA1_BIN |cut -d' ' -f1)
+if [ "$SHA1" = '1d8dca2a0bbb6ac6e4260f2734e5801a42e00e32' ];then
+	echo "$0 test ok (c/)!"
+else
+	echo "$0 test failed (c/)!"
+	exit 1
+fi
+
+printf "!c/chain\n" |./kc -b -k regress/test -p regress/testpass
+SHA1=$(printf "!c/chain\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^default% >' |$SHA1_BIN |cut -d' ' -f1)
+if [ "$SHA1" = 'ef7cac9a6237d46aacb5b1990945004a1cfbdf22' ];then
+	echo "$0 test ok (c/, inverse)!"
+else
+	echo "$0 test failed (c/, inverse)!"
+	exit 1
+fi
+
 exit 0

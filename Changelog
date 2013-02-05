@@ -60,6 +60,8 @@ Functional changes, improvements:
 - 'search' and '/' commands now have another modifier (besides '*'). An
   exclamation mark ('!') will negate (inverse) the matching and display
   non-matching key names.
+  Also, it is now possible to include spaces in the patterns for both
+  '[c]search' and '[c]/'.
 - 'list' command now uses a "pager" argument instead of keychain. It displays
   "pager" number of keys at once (the default is 20).
 

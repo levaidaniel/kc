@@ -547,6 +547,8 @@ cmd_match(const char *e_line)
 			cmd = "!*/";
 		else if (strncmp(line, "c/", 2) == 0)
 			cmd = "c/";
+		else if (strncmp(line, "!c/", 3) == 0)
+			cmd = "!c/";
 		else {
 			cmd = strtok(line, " ");
 			if (!cmd) {	/* probably an empty line */
