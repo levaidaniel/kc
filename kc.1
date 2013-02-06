@@ -56,9 +56,13 @@ compatible XML database, which can be imported using the
 command.
 .Pp
 .Em NOTE :
-Currently there is no character set conversion taking place in the program. You either input UTF-8 and be ready to display it, or you don't input anything other than US-ASCII. You would still be able to read the database after not UTF-8 nor US-ASCII (eg.: latin2) input, but not in the way you would expect it. You can "repair" such databases, by dumping (see the
+Currently there is no character set conversion taking place in the program. In this case this means you must be ready to display anything you type in. If somehow you still end up with texts you can not display properly, and for whatever reason you can not edit them in
+.Nm ,
+you can "repair" such database by dumping its content to a
+.Nm
+XML file (see the
 .Cm dump
-command below), converting the plain text XML file to UTF-8, then importing back the XML file. (see the
+command below), converting the plain text XML file to a working character set, then importing back that XML file (see the
 .Cm importxml
 command below).
 .Ss PARAMETERS
