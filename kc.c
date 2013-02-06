@@ -859,8 +859,6 @@ void
 version(void)
 {
 	printf("%s %s\n", NAME, VERSION);
-	puts("Written by LEVAI Daniel <leva@ecentrum.hu>");
-	puts("Source, information, bugs: http://keychain.googlecode.com");
 	puts("Compiled with "
 #ifndef _READLINE
 		"Editline"
@@ -871,6 +869,8 @@ version(void)
 		", PCRE"
 #endif
 		" support.");
+	puts("Written by LEVAI Daniel <leva@ecentrum.hu>");
+	puts("Source, information, bugs: http://keychain.googlecode.com");
 } /* help */
 
 void
