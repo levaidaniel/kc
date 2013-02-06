@@ -30,8 +30,9 @@ Functional changes, improvements:
 	Append won't create existing keychains (based on their names), instead
 	appends their entries to the already present keychain.
   importxml, appendxml:
-	In regards contrast to xport/dump, make it possible to import/append
-	kc XML document dumps.
+	These commands work with plain text kc XML document dumps, in contrast
+	to import/append which work with encrypted database exports (made by
+	the xport command).
   dump:
   	Dump the whole XML structure to a plain text XML file.
 	This is how 'xport' worked before.
@@ -45,13 +46,15 @@ Functional changes, improvements:
   xport <filename> [keychain]
   dump <filename> [keychain]
   Export only one keychain from the current database to the specified file.
+- import command now imports encrypted kc databases instead of plain XML dumps
+  like before.
+- Make the exported/dumped file readable only by its owner.
 - Make it possible to compile kc with libedit on Linux too, with the EDITLINE
   flag. The default remains readline on Linux.
 - Change database save logic so it tries hard not to end up with an unusable
   database file in case of a library or other catastrophic failure.
   Write to a temporary file first, and if that succeeds, rename that file to the
   original database filename.
-- Make the exported/dumped file readable only by its owner.
 - Add a DTD for the kc XML structure, and validate against it when
   importing/appending.
 - Use .kcd extension for kc encrypted database files. kc will be looking for
@@ -62,6 +65,8 @@ Functional changes, improvements:
   non-matching key names.
   Also, it is now possible to include spaces in the patterns for both
   '[c]search' and '[c]/'.
+- '/' and 'c/' commands' parameters (patterns) are now read after a space,
+  like with every other command.
 - 'list' command now uses a "pager" argument instead of keychain. It displays
   "pager" number of keys at once (the default is 20).
 
