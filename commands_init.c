@@ -194,13 +194,13 @@ commands_init(command **commands)
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "c/";
-	(*commands)->usage = "c/<pattern>";
+	(*commands)->usage = "c/ <pattern>";
 	(*commands)->help = "Search for 'pattern' regular expression in keychain names.\nModifiers:\n '!' prefix (eg.: !c/): show non-matching keychains.";
 	(*commands)->fn = cmd_searchre;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 	(*commands)->name = "!c/";
-	(*commands)->usage = "!c/<pattern>";
+	(*commands)->usage = "!c/ <pattern>";
 	(*commands)->help = "See command 'c/'.";
 	(*commands)->fn = cmd_searchre;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
@@ -364,25 +364,25 @@ commands_init(command **commands)
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "/";
-	(*commands)->usage = "/<pattern>";
+	(*commands)->usage = "/ <pattern>";
 	(*commands)->help = "Search for 'pattern' regular expression in key names in the current keychain.\nModifiers:\n '!' prefix (eg.: !/): show non-matching keys.\n '*' prefix (eg.: */): search in every keychain.\nYou can combine modifiers in this order.";
 	(*commands)->fn = cmd_searchre;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 	(*commands)->name = "!/";
-	(*commands)->usage = "!/<pattern>";
+	(*commands)->usage = "!/ <pattern>";
 	(*commands)->help = "See command '/'.";
 	(*commands)->fn = cmd_searchre;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 	(*commands)->name = "*/";
-	(*commands)->usage = "*/<pattern>";
+	(*commands)->usage = "*/ <pattern>";
 	(*commands)->help = "See command '/'.";
 	(*commands)->fn = cmd_searchre;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 	(*commands)->name = "!*/";
-	(*commands)->usage = "!*/<pattern>";
+	(*commands)->usage = "!*/ <pattern>";
 	(*commands)->help = "See command '/'.";
 	(*commands)->fn = cmd_searchre;
 

@@ -70,8 +70,8 @@ cmd_searchre(const char *e_line, command *commands)
 		offset++;
 	}
 
-	/* Jump over the first character that is a '/'(slash) from the command. */
-	offset++;
+	/* Jump over the command that is a '/'(slash). */
+	offset += 2;
 
 	if (offset >= strlen(e_line)) {
 		puts(commands->usage);
