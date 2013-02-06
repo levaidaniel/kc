@@ -121,18 +121,16 @@ main(int argc, char *argv[])
 				exit(EXIT_SUCCESS);
 			break;
 			case 'h':
-				printf(	"%s %s\n"
-					"-k: specify a non-default database file\n"
-					"-r: open database read-only\n"
-					"-p: read password from file.\n"
-					"-m: cipher mode to use: cbc (default), cfb128, ofb.\n"
-					"-b: batch mode: disable some features to enable commands from stdin.\n"
-					"-v: version\n"
-					"-h: this help\n", argv[0], USAGE);
-				exit(EXIT_SUCCESS);
-			break;
+				/* FALLTHROUGH */
 			default:
-				printf(	"%s %s\n", argv[0], USAGE);
+				printf(	"%s [-k <database file>] [-r] [-p <password file>] [-m <cipher mode>] [-b] [-v] [-h]\n\n"
+					"-k <file>: Use file as database. The default is ~/.kc/default.kcd .\n"
+					"-r: Open the database in read-only mode.\n"
+					"-p <file>: Read password from file.\n"
+					"-m <cipher>: Cipher mode: cbc (default), cfb128, ofb.\n"
+					"-b: Batch mode: disable some features to enable commands from standard input.\n"
+					"-v: Display version.\n"
+					"-h: This help.\n", argv[0]);
 				exit(EXIT_SUCCESS);
 			break;
 		}
@@ -872,6 +870,7 @@ version(void)
 	puts("Written by LEVAI Daniel <leva@ecentrum.hu>");
 	puts("Source, information, bugs: http://keychain.googlecode.com");
 } /* help */
+
 
 void
 quit(int retval)

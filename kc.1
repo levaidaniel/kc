@@ -67,16 +67,16 @@ command below).
 Use
 .Ar file
 as database. The default is
-.Pa ~/.kc/default .
+.Pa ~/.kc/default.kcd .
 .It Fl r
-Open the database in read only mode.
+Open the database in read-only mode.
 .Nm
 will not try to lock the database file, and commands which could modify the database will not be available.
 .It Fl p Ar file
 Read password from
 .Ar file .
 .It Fl m Ar mode
-Cipher mode to use.
+Cipher mode.
 .Ar mode
 can be one of 'cbc' (the default), 'cfb128' or 'ofb'. More information is in the
 .Em CIPHERS
