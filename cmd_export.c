@@ -192,7 +192,7 @@ cmd_export(const char *e_line, command *commands)
 	if (dump) {
 		if (xmlSaveFormatFileEnc(export_filename, db_tmp, "UTF-8", XML_SAVE_FORMAT) > 0) {
 			if (chmod(export_filename, S_IRUSR | S_IWUSR) < 0)
-				puts("Couldn't change permissions of dump file!");
+				puts("Could not change permissions of dump file!");
 
 			puts("Dump OK");
 		} else
@@ -209,7 +209,7 @@ cmd_export(const char *e_line, command *commands)
 
 		bio_chain = kc_setup_bio_chain(export_filename);
 		if (!bio_chain) {
-			printf("Couldn't setup bio_chain!");
+			printf("Could not setup bio_chain!");
 
 			close(export_file);
 			free(export_filename); export_filename = NULL;
@@ -232,7 +232,7 @@ cmd_export(const char *e_line, command *commands)
 
 		/* Generate iv/salt, setup cipher mode and turn on encrypting */
 		if (!kc_setup_crypt(bio_chain, 1, cipher_mode, pass, iv, salt, key, KC_SETUP_CRYPT_IV | KC_SETUP_CRYPT_SALT | KC_SETUP_CRYPT_KEY)) {
-			printf("Couldn't setup encrypting!");
+			printf("Could not setup encrypting!");
 
 			BIO_free_all(bio_chain);
 			close(export_file);

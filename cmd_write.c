@@ -66,14 +66,14 @@ cmd_write(const char *e_line, command *commands)
 	strlcat(db_filename_tmp, rand_str, MAXPATHLEN);
 	free(rand_str); rand_str = NULL;
 	if(stat(db_filename_tmp, &st) == 0) {	/* if temporary database filename exists */
-		puts("Couldn't create temporary database file (exists)!");
+		puts("Could not create temporary database file (exists)!");
 
 		return;
 	}
 
 	db_file_tmp = open(db_filename_tmp, O_RDWR | O_CREAT, 0600);
 	if (db_file_tmp < 0) {
-		puts("Couldn't open temporary database file!");
+		puts("Could not open temporary database file!");
 		perror("open(db_file_tmp)");
 
 		return;
@@ -82,7 +82,7 @@ cmd_write(const char *e_line, command *commands)
 	/* setup temporary bio_chain */
 	bio_chain_tmp = kc_setup_bio_chain(db_filename_tmp);
 	if (!bio_chain_tmp) {
-		printf("Couldn't setup bio_chain_tmp!");
+		printf("Could not setup bio_chain_tmp!");
 
 		close(db_file_tmp);
 		unlink(db_filename_tmp);
@@ -91,7 +91,7 @@ cmd_write(const char *e_line, command *commands)
 
 	/* Setup cipher mode and turn on encrypting */
 	if (!kc_setup_crypt(bio_chain_tmp, 1, cipher_mode, NULL, iv, NULL, key, 0)) {
-		printf("Couldn't setup encrypting!");
+		printf("Could not setup encrypting!");
 
 		BIO_free_all(bio_chain_tmp);
 		close(db_file_tmp);
@@ -119,7 +119,7 @@ cmd_write(const char *e_line, command *commands)
 	}
 
 	if (rename(db_filename_tmp, db_filename) < 0) {
-		puts("Couldn't rename temporary database file!");
+		puts("Could not rename temporary database file!");
 		perror("open(db_file_tmp)");
 
 		BIO_free_all(bio_chain_tmp);

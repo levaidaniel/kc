@@ -97,7 +97,7 @@ cmd_import(const char *e_line, command *commands)
 
 		import_file = open(import_filename, O_RDONLY);
 		if (import_file < 0) {
-			perror("Couldn't open import file");
+			perror("Could not open import file");
 
 			free(line); line = NULL;
 			return;
@@ -127,7 +127,7 @@ cmd_import(const char *e_line, command *commands)
 
 		bio_chain = kc_setup_bio_chain(import_filename);
 		if (!bio_chain) {
-			printf("Couldn't setup bio_chain!");
+			printf("Could not setup bio_chain!");
 
 			close(import_file);
 			free(line); line = NULL;
@@ -139,7 +139,7 @@ cmd_import(const char *e_line, command *commands)
 
 		/* Setup cipher mode and turn on decrypting */
 		if (!kc_setup_crypt(bio_chain, 0, cipher_mode, pass, iv, salt, key, KC_SETUP_CRYPT_KEY)) {
-			printf("Couldn't setup decrypting!");
+			printf("Could not setup decrypting!");
 
 			BIO_free_all(bio_chain);
 			close(import_file);

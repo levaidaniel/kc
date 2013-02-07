@@ -50,7 +50,7 @@ cmd_passwd(const char *e_line, command *commands)
 
 	ret = kc_setup_crypt(bio_chain, 1, cipher_mode, pass, iv, salt, key, KC_SETUP_CRYPT_IV | KC_SETUP_CRYPT_SALT | KC_SETUP_CRYPT_KEY);
 	if (!ret)
-		printf("Couldn't setup encrypting!");
+		printf("Could not setup encrypting!");
 
 	if (pass)
 		memset(pass, '\0', PASSWORD_MAXLEN);
