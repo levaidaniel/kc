@@ -338,6 +338,7 @@ kc_setup_crypt(BIO *bio_chain, int enc, char *cipher_mode, char *pass,
 		iv_tmp = get_random_str(IV_LEN, 0);
 		if (!iv_tmp) {
 			puts("IV generation failure!");
+
 			return(0);
 		}
 	}
@@ -380,8 +381,6 @@ kc_setup_crypt(BIO *bio_chain, int enc, char *cipher_mode, char *pass,
 	if (!key) {
 		puts("Key generation failure!");
 
-		free(iv_tmp); iv_tmp = NULL;
-		free(salt_tmp); salt_tmp = NULL;
 		return(0);
 	}
 
@@ -394,28 +393,27 @@ kc_setup_crypt(BIO *bio_chain, int enc, char *cipher_mode, char *pass,
 		bio_chain = BIO_next(bio_chain);
 	}
 	if (!bio_chain) {
-		puts("Couldn't find cipher BIO in bio_chain!");
+		puts("Could not find a usable cipher method!");
 
-		free(iv_tmp); iv_tmp = NULL;
-		free(salt_tmp); salt_tmp = NULL;
 		return(0);
 	}
 
 
 	/* reconfigure encoding with the key and IV */
-	if (strcmp(cipher_mode, "cfb128") == 0) {
-		if (getenv("KC_DEBUG"))
-			printf("using cipher mode: %s\n", cipher_mode);
+	if (strcmp(cipher_mode, "cfb128") == 0)
 		BIO_set_cipher(bio_chain, EVP_aes_256_cfb128(), key, iv, enc);
-	} else if (strcmp(cipher_mode, "ofb") == 0) {
-		if (getenv("KC_DEBUG"))
-			printf("using cipher mode: %s\n", cipher_mode);
+	else if (strcmp(cipher_mode, "ofb") == 0)
 		BIO_set_cipher(bio_chain, EVP_aes_256_ofb(), key, iv, enc);
-	} else {	/* the default is CBC */
-		if (getenv("KC_DEBUG"))
-			printf("using default cipher mode: %s\n", cipher_mode);
+	else if (strcmp(cipher_mode, "cbc") == 0)
 		BIO_set_cipher(bio_chain, EVP_aes_256_cbc(), key, iv, enc);
+	else {
+		printf("Unknown cipher mode: %s!\n", cipher_mode);
+		return(0);
 	}
+
+	if (getenv("KC_DEBUG"))
+		printf("crypt setup: using %s cipher mode\n", cipher_mode);
+
 
 	return(1);
 } /* kc_setup_crypt() */
