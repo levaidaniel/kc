@@ -135,6 +135,18 @@ main(int argc, char *argv[])
 			break;
 		}
 
+
+	/* Check if cipher mode is valid */
+	if (	strcmp(cipher_mode, "cfb128") != 0  &&
+		strcmp(cipher_mode, "ofb") != 0  &&
+		strcmp(cipher_mode, "cbc") != 0) {
+
+		printf("Unknown cipher mode: %s!\n", cipher_mode);
+
+		quit(EXIT_FAILURE);
+	}
+
+
 	if (!db_filename) {
 		/* using default database */
 
