@@ -270,7 +270,7 @@ main(int argc, char *argv[])
 
 	bio_chain = kc_setup_bio_chain(db_filename);
 	if (!bio_chain) {
-		printf("Couldn't setup bio_chain!");
+		puts("Could not setup bio_chain!");
 		quit(EXIT_FAILURE);
 	}
 	if (getenv("KC_DEBUG"))
@@ -280,7 +280,7 @@ main(int argc, char *argv[])
 	/* Optionally generate iv/salt.
 	 * Setup cipher mode and turn on decrypting */
 	if (!kc_setup_crypt(bio_chain, 0, cipher_mode, pass, iv, salt, key, kc_setup_crypt_flags)) {
-		printf("Couldn't setup decrypting!");
+		puts("Could not setup decrypting!");
 		quit(EXIT_FAILURE);
 	}
 
@@ -312,7 +312,7 @@ main(int argc, char *argv[])
 
 	/* turn on encrypting */
 	if (!kc_setup_crypt(bio_chain, 1, cipher_mode, NULL, iv, NULL, key, 0)) {
-		printf("Couldn't setup encrypting!");
+		puts("Could not setup encrypting!");
 		quit(EXIT_FAILURE);
 	}
 
@@ -330,7 +330,7 @@ main(int argc, char *argv[])
 
 		xmlCreateIntSubset(db, BAD_CAST "kc", NULL, BAD_CAST "kc.dtd");
 
-		db_root = xmlNewNode(NULL, BAD_CAST "kc");	/* 'THE' root node */
+		db_root = xmlNewNode(NULL, BAD_CAST "kc");	/* THE root node */
 		if (!db_root) {
 			puts("Could not create root node!");
 			quit(EXIT_FAILURE);
@@ -362,7 +362,7 @@ main(int argc, char *argv[])
 			puts("Could not parse XML document!");
 
 			if (strcmp(cipher_mode, "cbc") != 0)
-				puts("If you have specified 'cfb128' or 'ofb' for chipher mode, this could also mean that either you have entered a wrong password or specified a cipher mode other than that the database was encrypted with!");
+				puts("If you have specified cfb128 or ofb for chipher mode, this could also mean that either you have entered a wrong password or specified a cipher mode other than that the database was encrypted with!");
 
 			quit(EXIT_FAILURE);
 		}
