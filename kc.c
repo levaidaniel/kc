@@ -360,6 +360,10 @@ main(int argc, char *argv[])
 			db = xmlReadMemory(buf, (int)pos, NULL, "UTF-8", XML_PARSE_NONET | XML_PARSE_NOERROR | XML_PARSE_NOWARNING);
 		if (!db) {
 			puts("Could not parse XML document!");
+
+			if (strcmp(cipher_mode, "cbc") != 0)
+				puts("If you have specified 'cfb128' or 'ofb' for chipher mode, this could also mean that either you have entered a wrong password or specified a cipher mode other than that the database was encrypted with!");
+
 			quit(EXIT_FAILURE);
 		}
 
@@ -372,10 +376,6 @@ main(int argc, char *argv[])
 		db_root = xmlDocGetRootElement(db);
 		if (!db_root) {
 			puts("Could not find root node!");
-			puts("If you have specified 'cfb128' or 'ofb' for chipher mode, this could\n"
-				"also mean that either you have entered a wrong password for the\n"
-				"database or specified a cipher mode other than the database was\n"
-				"encrypted with!");
 			quit(EXIT_FAILURE);
 		}
 		if (!db_root->children) {
