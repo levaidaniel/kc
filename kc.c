@@ -184,6 +184,16 @@ main(int argc, char *argv[])
 		if (getenv("KC_DEBUG"))
 			puts("opening password file");
 
+		if(stat(pass_filename, &st) == 0) {
+			if(!S_ISLNK(st.st_mode)  &&  !S_ISREG(st.st_mode)) {
+				printf("'%s' is not a regular file or a link!\n", pass_filename);
+				quit(EXIT_FAILURE);
+			}
+		} else {
+			perror("stat(password file)");
+			quit(EXIT_FAILURE);
+		}
+
 		/* read in the password from the specified file */
 		pass_file = open(pass_filename, O_RDONLY);
 		if (pass_file < 0) {
