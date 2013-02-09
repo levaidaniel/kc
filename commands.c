@@ -422,10 +422,10 @@ kc_setup_crypt(BIO *bio_chain, int enc, char *cipher_mode, char *pass,
 BIO *
 kc_setup_bio_chain(const char *db_filename)
 {
-	BIO		*bio_file = NULL;
-	BIO		*bio_b64 = NULL;
-	BIO		*bio_cipher = NULL;
-	BIO		*bio_chain = NULL;
+	BIO	*bio_file = NULL;
+	BIO	*bio_b64 = NULL;
+	BIO	*bio_cipher = NULL;
+	BIO	*bio_chain = NULL;
 
 
 	bio_file = BIO_new_file(db_filename, "r+");
