@@ -37,11 +37,9 @@
 
 extern xmlDocPtr	db;
 
-extern BIO		*bio_chain;
 extern char		*cipher_mode;
 extern unsigned char	salt[SALT_LEN + 1], iv[IV_LEN + 1], key[KEY_LEN];
 
-extern int		db_file;
 extern char		*db_filename;
 
 extern char		dirty;
