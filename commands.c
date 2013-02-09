@@ -386,12 +386,7 @@ kc_setup_crypt(BIO *bio_chain, int enc, char *cipher_mode, char *pass,
 
 
 	/* extract bio_cipher from bio_chain */
-	while (bio_chain) {
-		if (BIO_method_type(bio_chain) == BIO_TYPE_CIPHER)
-			break;
-
-		bio_chain = BIO_next(bio_chain);
-	}
+	bio_chain = BIO_find_type(bio_chain, BIO_TYPE_CIPHER);
 	if (!bio_chain) {
 		puts("Could not find a usable cipher method!");
 
