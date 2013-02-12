@@ -60,13 +60,16 @@ Functional changes, improvements:
 - Use .kcd extension for kc encrypted database files. kc will be looking for
   'default.kcd' under ~/.kc, so rename you existing database if you used this
   name.
-- 'search' and '/' commands now have another modifier (besides '*'). An
-  exclamation mark ('!') will negate (inverse) the matching and display
+- '[c]search' and '[c]/' commands now understand modifiers:
+  An exclamation mark ('!') will negate (inverse) the matching and display
   non-matching key names.
+  Character 'i' will ignore the case of characters during the search.
+  The '*' characters remains the same, it search in every keychain.
   Also, it is now possible to include spaces in the patterns for both
   '[c]search' and '[c]/'.
 - '/' and 'c/' commands' parameters (patterns) are now read after a space,
   like with every other command.
+- Dropped 's' command. It was an alias for 'search'.
 - 'list' command now uses a "pager" argument instead of keychain. It displays
   "pager" number of keys at once (the default is 20).
 
