@@ -133,83 +133,63 @@ Search for
 .Ar string
 in key names in the current keychain.
 .Pp
-Modifiers:
+Optional modifiers:
 .Pp
 .Ql \&!
-prefix (eg.: !search): show non-matching keys.
+postfix (eg.: search!): show non-matching keys.
 .Pp
 .Ql *
-prefix (eg.: *search): search in every keychain.
+postfix (eg.: search*): search in every keychain.
 .Pp
-You can combine modifiers in this order.
-.It Cm !search Ar string
-See command
-.Cm search .
-.It Cm *search Ar string
-See command
-.Cm search .
-.It Cm !*search Ar string
-See command
-.Cm search .
-.It Cm s Ar string
-Alias of
-.Cm search .
-.It Cm !s Ar string
-Alias of
-.Cm !search .
-.It Cm *s Ar string
-Alias of
-.Cm *search .
-.It Cm !*s Ar string
-Alias of
-.Cm !*search .
+.Ql i
+postfix (eg.: searchi): case doesn't matter.
+.Pp
+You can combine the modifiers.
 .It Cm / Ar pattern
 Search for
 .Ar pattern
 regular expression in key names in the current keychain.
 .Pp
-Modifiers:
+Optional modifiers:
 .Pp
 .Ql \&!
-prefix (eg.: !/): show non-matching keys.
+postfix (eg.: /!): show non-matching keys.
 .Pp
 .Ql *
-prefix (eg.: */): search in every keychain.
+postfix (eg.: /*): search in every keychain.
 .Pp
-You can combine modifiers in this order.
-.It Cm !/ Ar pattern
-See command
-.Cm / .
-.It Cm */ Ar pattern
-See command
-.Cm / .
-.It Cm !*/ Ar pattern
-See command
-.Cm / .
+.Ql i
+postfix (eg.: /i): case doesn't matter.
+.Pp
+You can combine the modifiers.
 .It Cm csearch Ar string
 Search for
 .Ar string
 in keychain names.
 .Pp
-Modifiers:
+Optional modifiers:
 .Pp
 .Ql \&!
-prefix (eg.: !csearch): show non-matching keychains.
-.It Cm !csearch Ar string
-See command
-.Cm csearch .
+postfix (eg.: csearch!): show non-matching keychains.
+.Pp
+.Ql i
+postfix (eg.: csearchi): case doesn't matter.
+.Pp
+You can combine the modifiers.
 .It Cm c/ Ar pattern
 Search for
 .Ar pattern
 regular expression in keychain names.
 .Pp
-Modifiers:
+Optional modifiers:
 .Pp
 .Ql \&!
-prefix (eg.: !c/): show non-matching keychains.
-.It Cm !c/ Ar pattern
-See command
-.Cm c/ .
+postfix (eg.: c/!): show non-matching keychains.
+.Pp
+.Ql i
+postfix (eg.: c/i): case doesn't matter.
+.Pp
+You can combine the modifiers.
 .It Cm c Ar keychain
 Change the current keychain.
 .Ar keychain

@@ -39,38 +39,46 @@ cmd_search(const char *e_line, command *commands)
 	xmlChar		*pattern = NULL, *key = NULL;
 	const xmlChar	*search = NULL;
 
-	char		chain = 0, searchall = 0, searchinv = 0;
+	char		chain = 0, searchall = 0, searchinv = 0, icase = 0;
 	int		hits = 0, idx = 0, offset = 0;
 
 
-	/* Modifiers */
-	if (strncmp(e_line + offset, "!", 1) == 0) {
-		searchinv = 1;
-		offset++;
-	}
-
-	if (strncmp(e_line + offset, "*", 1) == 0) {
-		searchall = 1;
-		offset++;
-	}
-
+	/* Command name */
 	if (strncmp(e_line + offset, "c", 1) == 0) {
 		chain = 1;
 		offset++;
 	}
 
 	if (strncmp(e_line + offset, "search", 6) == 0)
-		offset += 7;
-	else if (strncmp(e_line + offset, "s", 1) == 0)
-		offset += 2;
+		offset += 6;
 
+	/* Modifiers */
+	for (; (e_line[offset] != ' '  &&  offset < strlen(e_line)); offset++)
+		switch (e_line[offset]) {
+			case '!':
+				searchinv = 1;
+				break;
+			case 'i':
+				icase = 1;
+				break;
+			case '*':
+				/* this doesn't make sense with keychain searching */
+				if (chain) {
+					puts(commands->usage);
+					return;
+				} else
+					searchall = 1;
+				break;
+		}
+
+	/* the occasional space after the command */
+	offset++;
 	if (offset >= strlen(e_line)) {
 		puts(commands->usage);
 		return;
 	}
 
 	pattern = BAD_CAST (e_line + offset);
-
 	if (!pattern) {
 		puts(commands->usage);
 		return;
@@ -109,7 +117,11 @@ cmd_search(const char *e_line, command *commands)
 			if (getenv("KC_DEBUG"))
 				printf("name=%s", key);
 
-			search = xmlStrstr(key, pattern);
+			if (icase)
+				search = xmlStrcasestr(key, pattern);
+			else
+				search = xmlStrstr(key, pattern);
+
 			/* poor man's XOR: */
 			if ((search  ||  searchinv)  &&  !(search  &&  searchinv)) {
 				if (getenv("KC_DEBUG"))

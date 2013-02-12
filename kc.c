@@ -559,8 +559,24 @@ cmd_match(const char *e_line)
 		}
 
 		while(commands) {
-			if (strcmp(commands->name, cmd) == 0)	/* find an exact match */
+			/* Find an exact match */
+			if (strcmp(commands->name, cmd) == 0)
 				break;
+
+			/* '[c]search' and '[c]/' commands can have flags as postfixes. */
+			if (strncmp("search", cmd, 6) == 0)
+				if (strncmp(commands->name, cmd, 6) == 0)
+					break;
+			if (strncmp("csearch", cmd, 7) == 0)
+				if (strncmp(commands->name, cmd, 7) == 0)
+					break;
+
+			if (strncmp("/", cmd, 1) == 0)
+				if (strncmp(commands->name, cmd, 1) == 0)
+					break;
+			if (strncmp("c/", cmd, 2) == 0)
+				if (strncmp(commands->name, cmd, 2) == 0)
+					break;
 
 			commands = commands->next;	/* iterate through the linked list */
 		}

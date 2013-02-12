@@ -50,43 +50,53 @@ cmd_searchre(const char *e_line, command *commands)
 	int		ovector[30];
 
 	const char	*pattern = NULL;
-	char		chain = 0, searchall = 0, searchinv = 0;
+	char		chain = 0, searchall = 0, searchinv = 0, icase = 0;
 	int		search = -1, hits = 0, idx = 0, offset = 0;
 
 
-	/* Modifiers */
-	if (strncmp(e_line + offset, "!", 1) == 0) {
-		searchinv = 1;
-		offset++;
-	}
-
-	if (strncmp(e_line + offset, "*", 1) == 0) {
-		searchall = 1;
-		offset++;
-	}
-
+	/* Command name */
 	if (strncmp(e_line + offset, "c", 1) == 0) {
 		chain = 1;
 		offset++;
 	}
 
 	/* Jump over the command that is a '/'(slash). */
-	offset += 2;
+	offset++;
 
+	/* Modifiers */
+	for (; (e_line[offset] != ' '  &&  offset < strlen(e_line)); offset++)
+		switch (e_line[offset]) {
+			case '!':
+				searchinv = 1;
+				break;
+			case 'i':
+				icase = 1;
+				break;
+			case '*':
+				/* this doesn't make sense with keychain searching */
+				if (chain) {
+					puts(commands->usage);
+					return;
+				} else
+					searchall = 1;
+				break;
+		}
+
+	/* the occasional space after the command */
+	offset++;
 	if (offset >= strlen(e_line)) {
 		puts(commands->usage);
 		return;
 	}
 
 	pattern = e_line + offset;
-
 	if (!pattern) {
 		puts(commands->usage);
 		return;
 	}
 
 
-	re = pcre_compile(pattern, PCRE_UTF8, &error, &erroffset, NULL);
+	re = pcre_compile(pattern, PCRE_UTF8 | (icase ? PCRE_CASELESS : 0), &error, &erroffset, NULL);
 	if (!re) {
 		printf("error in pattern at %d: (%s)\n", erroffset, error);
 		return;
