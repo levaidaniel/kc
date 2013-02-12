@@ -195,7 +195,7 @@ commands_init(command **commands)
 
 	(*commands)->name = "c/";
 	(*commands)->usage = "c/[modifier(s)] <pattern>";
-	(*commands)->help = "Search for 'pattern' regular expression in keychain names.\nOptional modifiers:\n '!' postfix (eg.: c/!): show non-matching keychains.\n 'i' postfix (eg.: c/i): case doesn't matter.\nYou can combine the modifiers.";
+	(*commands)->help = "Search for 'pattern' regular expression in keychain names.\nOptional modifiers:\n '!' postfix (eg.: c/!): show non-matching keychains.\n 'i' postfix (eg.: c/i): case of characters doesn't matter.\nYou can combine the modifiers.";
 	(*commands)->fn = cmd_searchre;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
@@ -222,7 +222,7 @@ commands_init(command **commands)
 
 	(*commands)->name = "csearch";
 	(*commands)->usage = "csearch[modifier(s)] <string>";
-	(*commands)->help = "Search for 'string' in keychain names.\nOptional modifiers:\n '!' postfix (eg.: csearch!): show non-matching keychains.\n 'i' postfix (eg.: csearchi): case doesn't matter.\nYou can combine the modifiers.";
+	(*commands)->help = "Search for 'string' in keychain names.\nOptional modifiers:\n '!' postfix (eg.: csearch!): show non-matching keychains.\n 'i' postfix (eg.: csearchi): case of characters doesn't matter.\nYou can combine the modifiers.";
 	(*commands)->fn = cmd_search;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
@@ -283,7 +283,7 @@ commands_init(command **commands)
 
 	(*commands)->name = "search";
 	(*commands)->usage = "search[modifier(s)] <string>";
-	(*commands)->help = "Search for 'string' in key names in the current keychain.\nOptional modifiers:\n '!' postfix (eg.: search!): show non-matching keys.\n '*' postfix (eg.: search*): search in every keychain.\n 'i' postfix (eg.: searchi): case doesn't matter.\nYou can combine the modifiers.";
+	(*commands)->help = "Search for 'string' in key names in the current keychain.\nOptional modifiers:\n '!' postfix (eg.: search!): show non-matching keys.\n '*' postfix (eg.: search*): search in every keychain.\n 'i' postfix (eg.: searchi): case of characters doesn't matter.\nYou can combine the modifiers.";
 	(*commands)->fn = cmd_search;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
@@ -311,7 +311,7 @@ commands_init(command **commands)
 
 	(*commands)->name = "/";
 	(*commands)->usage = "/[modifier(s)] <pattern>";
-	(*commands)->help = "Search for 'pattern' regular expression in key names in the current keychain.\nOptional modifiers:\n '!' postfix (eg.: /!): show non-matching keys.\n '*' postfix (eg.: /*): search in every keychain.\n 'i' postfix (eg.: /i): case doesn't matter.\nYou can combine the modifiers.";
+	(*commands)->help = "Search for 'pattern' regular expression in key names in the current keychain.\nOptional modifiers:\n '!' postfix (eg.: /!): show non-matching keys.\n '*' postfix (eg.: /*): search in every keychain.\n 'i' postfix (eg.: /i): case of characters doesn't matter.\nYou can combine the modifiers.";
 	(*commands)->fn = cmd_searchre;
 
 	(*commands)->next = NULL;
