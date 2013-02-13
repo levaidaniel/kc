@@ -250,7 +250,7 @@ commands_init(command **commands)
 
 	(*commands)->name = "list";
 	(*commands)->usage = "list [pager]";
-	(*commands)->help = "List 'pager' keys per page from current keychain. Every key gets prefixed by its index number. If 'pager' is not specified, the default value 20 is used. The special value 0 for 'pager' means to not use the pager.";
+	(*commands)->help = "List 'pager' number of keys per page from current keychain. Every key gets prefixed by its index number. If 'pager' is not specified, the default value of 20 is used. The special value of 0 means to not use the pager.";
 	(*commands)->fn = cmd_list;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
