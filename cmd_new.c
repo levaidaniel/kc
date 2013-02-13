@@ -44,8 +44,8 @@ cmd_new(const char *e_line, command *commands)
 	xmlChar		*key = NULL, *value_rR = NULL, *value = NULL;
 
 	char		*created = NULL;
-
 	char		*line = NULL;
+	int		idx = 0;
 
 #ifndef _READLINE
 	int		e_count = 0;
@@ -143,6 +143,16 @@ cmd_new(const char *e_line, command *commands)
 	xmlNewProp(db_node, BAD_CAST "value", value);
 	xmlNewProp(db_node, BAD_CAST "created", BAD_CAST created);
 	xmlNewProp(db_node, BAD_CAST "modified", BAD_CAST created);
+
+	/* Get the index of the newly added (last) entry */
+	db_node = keychain->children;
+	while (db_node) {
+		if (db_node->type == XML_ELEMENT_NODE)	/* we only care about ELEMENT nodes */
+			idx++;
+
+		db_node = db_node->next;
+	}
+	printf("Created: %d. %s\n", idx - 1, key);
 
 	xmlFree(key); key = NULL;
 	xmlFree(value_rR); value_rR = NULL;

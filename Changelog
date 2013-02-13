@@ -78,3 +78,4 @@ Cosmetic changes:
 - Renamed pwsafe convert script.
 - Display the number of matches when using 'search' or '/' (with more than 5
   matches).
+- Display the newly added key's index number after using the 'new' command.
