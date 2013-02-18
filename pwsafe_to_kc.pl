@@ -17,10 +17,10 @@ my $PWSAFE_EXPORT_FILE = $ARGV[0];
 my $KC_XML_FILE = $ARGV[1];
 
 print "opening ${PWSAFE_EXPORT_FILE} for reading.\n";
-open(INPUT, '<', $PWSAFE_EXPORT_FILE)  or  die "couldn't open pwsafe export file '${PWSAFE_EXPORT_FILE}': $!";
+open(INPUT, '<', $PWSAFE_EXPORT_FILE)  or  die "couldn't open pwsafe export file '${PWSAFE_EXPORT_FILE}': $!\n";
 
 print "opening ${KC_XML_FILE} for writing.\n";
-open(OUTPUT, '>', $KC_XML_FILE)  or  die "couldn't open kc xml output file '${KC_XML_FILE}': $!";
+open(OUTPUT, '>', $KC_XML_FILE)  or  die "couldn't open kc xml output file '${KC_XML_FILE}': $!\n";
 print OUTPUT '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . '<!DOCTYPE kc SYSTEM "kc.dtd">' . "\n" . '<kc>' . "\n";
 
 my $items = 0;
