@@ -91,12 +91,13 @@ cmd_list(const char *e_line, command *commands)
 				||  (rc == 13  ||  rc == 10)) {
 
 				/* Brief pager usage info. */
-				printf("[SPC,RET,EOT,q,Q,?]");
+				printf("[SPC,RET,0-9,EOT,q,Q,?]");
 				fflush(stdout);
 
 				rc = 0;
 				while (	rc != ' '  &&  rc != 13  &&  rc != 10  &&
 					rc != 4  &&  rc != 'q'  &&
+					(rc < '0'  ||  rc > '9')  &&
 					rc != 'Q') {
 #ifndef _READLINE
 					el_getc(e, &rc);
@@ -105,14 +106,18 @@ cmd_list(const char *e_line, command *commands)
 #endif
 					/* Full pager usage info. */
 					if (rc == '?')
-						puts("\n<SPACE>: Next page | <ENTER>: Next line | 'q', <EOT>: Stop | 'Q': Display all");
+						puts("\n <SPACE>:\tNext page\n <ENTER>:\tNext line\n 1-9:\t\tNew pager value\n 'q', <EOT>, 0:\tStop\n 'Q':\t\tDisplay all\n");
 				}
 
 				/* Delete brief pager usage info. */
-				printf("\r                   \r");
+				printf("\r                       \r");
 
-				if (rc == 4  ||  rc == 'q')
+				if (rc == 4  ||  rc == 'q'  ||  rc == '0')
 					break;
+
+				/* User has modified the pager's value by pressing a number > 0 */
+				if (rc >= '1'  &&  rc <= '9')
+					pager = rc - 48;
 
 				list_pos = idx + pager;
 			}
