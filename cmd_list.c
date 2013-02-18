@@ -43,7 +43,7 @@ cmd_list(const char *e_line, command *commands)
 	xmlNodePtr	db_node = NULL;
 	xmlChar		*key = NULL;
 
-	int		idx = 0, pager = 0, list_pos = 0;
+	int		idx = 0, pager = 0, pager_show = 0;
 
 	char		*line = NULL;
 	char		rc = 0;
@@ -61,6 +61,8 @@ cmd_list(const char *e_line, command *commands)
 
 	if (pager > 100  ||  pager < 0)
 		pager = 20;
+
+	pager_show = pager;
 
 
 	if (!batchmode) {
@@ -80,14 +82,12 @@ cmd_list(const char *e_line, command *commands)
 	}
 
 
-	/* If 'pager' is 0 then don't use pager. */
-	list_pos = pager == 0 ? -1 : pager;
-
 	db_node = keychain->children;
 	while (db_node) {
 		if (db_node->type == XML_ELEMENT_NODE) {	/* we only care about ELEMENT nodes */
 			/* Pager */
-			if (	( !batchmode  &&  rc != 'Q'  &&  idx == list_pos )
+			if (	(!batchmode  &&
+				rc != 'Q'  &&  idx == pager_show  &&  pager != 0)
 				||  (rc == 13  ||  rc == 10)) {
 
 				/* Brief pager usage info. */
@@ -106,20 +106,20 @@ cmd_list(const char *e_line, command *commands)
 #endif
 					/* Full pager usage info. */
 					if (rc == '?')
-						puts("\n <SPACE>:\tNext page\n <ENTER>:\tNext line\n 1-9:\t\tNew pager value\n 'q', <EOT>, 0:\tStop\n 'Q':\t\tDisplay all\n");
+						puts("\n <SPACE>:\tNext page\n <ENTER>:\tNext line\n 1-9:\t\tNew pager value\n 'q', <EOT>:\tStop\n 'Q', 0:\tDisplay all\n");
 				}
 
 				/* Delete brief pager usage info. */
 				printf("\r                       \r");
 
-				if (rc == 4  ||  rc == 'q'  ||  rc == '0')
+				if (rc == 4  ||  rc == 'q')
 					break;
 
 				/* User has modified the pager's value by pressing a number > 0 */
-				if (rc >= '1'  &&  rc <= '9')
+				if (rc >= '0'  &&  rc <= '9')
 					pager = rc - 48;
 
-				list_pos = idx + pager;
+				pager_show = idx + pager;
 			}
 
 			key = xmlGetProp(db_node, BAD_CAST "name");
