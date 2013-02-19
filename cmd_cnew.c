@@ -44,9 +44,11 @@ cmd_cnew(const char *e_line, command *commands)
 	xmlChar		*cname = NULL;
 
 	char		*line = NULL;
+	int		idx = 0;
 #ifndef _READLINE
 	int		e_count = 0;
 #endif
+
 
 	line = strdup(e_line);
 
@@ -98,6 +100,16 @@ cmd_cnew(const char *e_line, command *commands)
 		xmlSetProp(db_node, BAD_CAST "name", cname);
 		xmlAddChild(keychain->parent, db_node);
 
+		/* Get the index of the newly added (last) entry */
+		db_node = keychain;
+		while (db_node) {
+			if (db_node->type == XML_ELEMENT_NODE)	/* we only care about ELEMENT nodes */
+				idx++;
+
+			db_node = db_node->next;
+		}
+		printf("Created keychain: %d. %s\n", idx - 1, cname);
+
 		/* make the XML document prettttyyy */
 		xmlAddChild(db_node, xmlNewText(BAD_CAST "\n\t"));
 
@@ -107,7 +119,7 @@ cmd_cnew(const char *e_line, command *commands)
 
 		dirty = 1;
 	} else {
-		printf("'%s' already exists!\n", cname);
+		printf("Keychain '%s' already exists!\n", cname);
 	}
 
 	xmlFree(cname); cname = NULL;
