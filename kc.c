@@ -715,9 +715,15 @@ el_tab_complete(EditLine *e)
 			if (word)
 				word_len = strlen(word);
 		}
+
 	/*
-	 * It is okay if (word == NULL) only as long as (word_len == 0) !
+	 * Altough it is okay if (word == NULL) as long as (word_len == 0),
+	 * make this a bit nicer and place an empty string in word if it would be NULL.
 	 */
+	if (!word) {
+		word_len = 0;
+		word = "";
+	}
 
 
 	/*
