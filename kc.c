@@ -36,12 +36,11 @@
 #include "commands.h"
 
 
-void print_bio_chain(BIO *);
+void		print_bio_chain(BIO *);
 #ifndef _READLINE
-unsigned char el_tab_complete(EditLine *);
+unsigned char	el_tab_complete(EditLine *);
 #else
-char **rl_tab_complete(const char *, int, int);
-char *cmd_generator(const char *, int);
+char		*cmd_generator(const char *, int);
 #endif
 
 
@@ -486,7 +485,7 @@ main(int argc, char *argv[])
 
 	rl_readline_name = "kc";
 
-	rl_attempted_completion_function = rl_tab_complete;
+	rl_completion_entry_function = cmd_generator;
 #endif
 
 	strlcpy(prompt_context, "", sizeof(prompt_context));
@@ -834,17 +833,6 @@ el_tab_complete(EditLine *e)
 	return(CC_REDISPLAY);
 } /* el_tab_complete() */
 #else
-char **
-rl_tab_complete(const char *text, int start, int end)
-{
-	char	**matches = NULL;
-
-
-	matches = rl_completion_matches(text, cmd_generator);
-
-	return(matches);
-} /* rl_tab_complete() */
-
 char *
 cmd_generator(const char *text, int state)
 {
@@ -855,35 +843,45 @@ cmd_generator(const char *text, int state)
 	int		idx = 0;
 
 
-	/* search for a command name */
-	while (commands) {
-		if (idx < state)
-			idx++;
-		else
-			if (strncmp(text, commands->name, strlen(text)) == 0)
-				return(strdup(commands->name));
-
-
-		commands = commands->next;	/* iterate through the linked list */
-	}
-
-	/* search for a keychain name */
-	db_node = keychain->parent->children;
-	while (db_node) {
-		if (db_node->type == XML_ELEMENT_NODE) {	/* we only care about ELEMENT nodes */
+	/* only search for a command name if this is not an already completed command
+	 * (ie. there is no space in the line), OR if the already completed command is 'help'
+	 */
+	if (!strchr(rl_line_buffer, ' ')  ||  (strncmp(rl_line_buffer, "help ", 5) == 0))
+		/* search for a command name */
+		while (commands) {
 			if (idx < state)
 				idx++;
-			else {
-				cname = xmlGetProp(db_node, BAD_CAST "name");
+			else
+				if (strncmp(text, commands->name, strlen(text)) == 0)
+					return(strdup(commands->name));
 
-				if (strncmp(text, (char *)cname, strlen(text)) == 0)
-					return((char *)cname);
 
-				xmlFree(cname); cname = NULL;
-			}
+			commands = commands->next;	/* iterate through the linked list */
 		}
 
-		db_node = db_node->next;
+	/* only search for a keychain name if this is an already completed command
+	 * (ie. there is space(s) in the line), AND it's not the 'help' command that
+	 * has been completed previously
+	 */
+	if (strchr(rl_line_buffer, ' ')  &&  (strncmp(rl_line_buffer, "help ", 5) != 0)) {
+		/* search for a keychain name */
+		db_node = keychain->parent->children;
+		while (db_node) {
+			if (db_node->type == XML_ELEMENT_NODE) {	/* we only care about ELEMENT nodes */
+				if (idx < state)
+					idx++;
+				else {
+					cname = xmlGetProp(db_node, BAD_CAST "name");
+
+					if (strncmp(text, (char *)cname, strlen(text)) == 0)
+						return((char *)cname);
+
+					xmlFree(cname); cname = NULL;
+				}
+			}
+
+			db_node = db_node->next;
+		}
 	}
 
 	return(NULL);
