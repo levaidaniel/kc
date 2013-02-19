@@ -55,7 +55,7 @@ cmd_help(const char *e_line, command *commands)
 			commands = commands->next;
 		}
 		if (!commands)
-			printf("unknown command: '%s'\n", got_command);
+			printf("Unknown command: '%s'\n", got_command);
 	} else {
 		puts("\nCommands:\n"
 			"[Name]     -    [Usage]\n");

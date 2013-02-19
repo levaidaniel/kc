@@ -120,7 +120,7 @@ cmd_cren(const char *e_line, command *commands)
 
 		dirty = 1;
 	} else {
-		printf("keychain '%s' not found.\n", cname);
+		printf("Keychain '%s' not found.\n", cname);
 	}
 
 	free(line); line = NULL;

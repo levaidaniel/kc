@@ -180,5 +180,5 @@ cmd_edit(const char *e_line, command *commands)
 
 		dirty = 1;
 	} else
-		puts("invalid index!");
+		puts("Invalid index!");
 } /* cmd_edit() */

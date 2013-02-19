@@ -38,7 +38,7 @@ cmd_random(const char *e_line, command *commands)
 		length = 8;
 
 	if (length > 100  ||  length <= 0) {
-		puts("length must be 1-100.");
+		puts("Length must be 1-100.");
 		return;
 	}
 

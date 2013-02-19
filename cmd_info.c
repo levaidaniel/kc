@@ -70,5 +70,5 @@ cmd_info(const char *e_line, command *commands)
 		} else
 			puts("Not defined.");
 	} else
-		puts("invalid index!");
+		puts("Invalid index!");
 } /* cmd_info() */
