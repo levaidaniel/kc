@@ -682,32 +682,42 @@ el_tab_complete(EditLine *e)
 	memcpy(line_buf, el_lineinfo->buffer, (size_t)line_buf_len);
 	line_buf[line_buf_len] = '\0';
 
-	/* empty buffer (ie. line) */
-	if (!line_buf_len) {
-		free(line_buf); line_buf = NULL;
-		return(CC_CURSOR);
-	}
-
 
 	/*
-	 * 'word' is the last word from 'line_buf'.
-	 * 'line_buf' is the whole line entered so far to the edit buffer.
-	 * we want to complete only the last word from the edit buffer.
+	 * We search after match(es) for only the last word in the line buffer,
+	 * and for this we are prepared for space separated words.
+	 * If the last character is a space, then we treat it as if the previous
+	 * word would have been finished, and there were no new one to complete.
+	 * We complete 'word' to a command name or a keychain name, depending on
+	 * its position in the line buffer.
+	 *
+	 * It's a side-effect, that if (word == NULL) and (word_len == 0) when
+	 * searching for matches, then it will match for eveything with strncmp().
+	 * So we will get a full list of command or keychain names which we wanted
+	 * if the user is just pressing the completion key (eg. TAB) without something
+	 * to be completed (eg. empty line, or right after a word and a space).
 	 */
-	line_buf_copy = strdup(line_buf);	/* strtok() modifies its given string */
-	word_next = strtok(line_buf_copy, " ");
-	while (word_next) {
-		word = word_next;
-		word_next = strtok(NULL, " ");
-	}
-	/* nothing in the 'line_buf', other than space(s) */
-	if (!word) {
-		free(line_buf); line_buf = NULL;
-		free(line_buf_copy); line_buf_copy = NULL;
-		return(CC_CURSOR);
-	}
 
-	word_len = strlen(word);
+	if (line_buf_len > 0)
+		if (line_buf[line_buf_len - 1] != ' ') {
+			/*
+			 * 'word' is the last word from 'line_buf'.
+			 * 'line_buf' is the whole line entered so far to the edit buffer.
+			 * we want to complete only the last word from the edit buffer.
+			 */
+			line_buf_copy = strdup(line_buf);	/* strtok() modifies its given string */
+			word_next = strtok(line_buf_copy, " ");
+			while (word_next) {
+				word = word_next;
+				word_next = strtok(NULL, " ");
+			}
+
+			if (word)
+				word_len = strlen(word);
+		}
+	/*
+	 * It is okay if (word == NULL) only as long as (word_len == 0) !
+	 */
 
 
 	/*
@@ -821,8 +831,6 @@ el_tab_complete(EditLine *e)
 				free(match[i]);
 			}
 			puts("");
-
-			el_set(e, EL_REFRESH);
 		break;
 	}
 	free(line_buf); line_buf = NULL;

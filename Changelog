@@ -72,6 +72,7 @@ Functional changes, improvements:
 - Dropped 's' command. It was an alias for 'search'.
 - 'list' command now uses a "pager" argument instead of keychain. It displays
   "pager" number of keys at once (the default is 20).
+- CLI tab completion is a bit more user friendly.
 
 Cosmetic changes:
 - Add PCRE information to version.
