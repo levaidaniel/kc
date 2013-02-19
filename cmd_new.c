@@ -152,7 +152,7 @@ cmd_new(const char *e_line, command *commands)
 
 		db_node = db_node->next;
 	}
-	printf("Created: %d. %s\n", idx - 1, key);
+	printf("Created key: %d. %s\n", idx - 1, key);
 
 	xmlFree(key); key = NULL;
 	xmlFree(value_rR); value_rR = NULL;
