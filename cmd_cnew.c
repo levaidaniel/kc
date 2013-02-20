@@ -100,6 +100,9 @@ cmd_cnew(const char *e_line, command *commands)
 		xmlSetProp(db_node, BAD_CAST "name", cname);
 		xmlAddChild(keychain->parent, db_node);
 
+		/* make the XML document prettttyyy */
+		xmlAddChild(db_node, xmlNewText(BAD_CAST "\n\t"));
+
 		/* Get the index of the newly added (last) entry */
 		db_node = keychain;
 		while (db_node) {
@@ -109,9 +112,6 @@ cmd_cnew(const char *e_line, command *commands)
 			db_node = db_node->next;
 		}
 		printf("Created keychain: %d. %s\n", idx - 1, cname);
-
-		/* make the XML document prettttyyy */
-		xmlAddChild(db_node, xmlNewText(BAD_CAST "\n\t"));
 
 		/* XXX reloading a saved document inserts a 'text' element between each visible node (why?)
 		 * so we must reproduce this */
