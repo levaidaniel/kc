@@ -554,7 +554,7 @@ kc_validate_xml(xmlDocPtr db)
 {
 	xmlParserInputBufferPtr	buf = NULL;
 	xmlDtdPtr		dtd = NULL;
-	xmlValidCtxt		valid_ctx;
+	xmlValidCtxtPtr		valid_ctx = NULL;
 
 
 	buf = xmlParserInputBufferCreateStatic(KC_DTD, sizeof(KC_DTD), XML_CHAR_ENCODING_NONE);
@@ -573,7 +573,16 @@ kc_validate_xml(xmlDocPtr db)
 		return(0);
 	}
 
-	if (!xmlValidateDtd(&valid_ctx, db, dtd)) {
+	valid_ctx = xmlNewValidCtxt();
+	if (!valid_ctx ) {
+		if (getenv("KC_DEBUG"))
+			xmlGenericError(xmlGenericErrorContext, "Could not allocate a new validation context.\n");
+
+		return(0);
+	}
+
+
+	if (!xmlValidateDtd(valid_ctx, db, dtd)) {
 		if (getenv("KC_DEBUG"))
 			xmlGenericError(xmlGenericErrorContext, "Validation failed against kc DTD.\n");
 
