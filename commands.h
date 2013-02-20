@@ -18,11 +18,11 @@ void cmd_match(const char *);
 
 void cmd_c(const char *, command *);
 void cmd_cdel(const char *, command *);
+void cmd_cedit(const char *, command *);
 void cmd_clear(const char *, command *);
 void cmd_clist(const char *, command *);
 void cmd_cnew(const char *, command *);
 void cmd_copy(const char *, command *);
-void cmd_cren(const char *, command *);
 void cmd_del(const char *, command *);
 void cmd_edit(const char *, command *);
 void cmd_export(const char *, command *);

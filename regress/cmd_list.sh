@@ -19,7 +19,7 @@ case "$(uname -s)" in
 esac
 
 printf "list\n" |./kc -b -k regress/test -p regress/testpass
-SHA1=$(printf "list\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^default% >' |$SHA1_BIN |cut -d' ' -f1)
+SHA1=$(printf "list\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^<default% >' |$SHA1_BIN |cut -d' ' -f1)
 if [ "$SHA1" = '646c97c66d3c5f0810adfabe230ba164a182825e' ];then
 	echo "$0 test ok (list)!"
 else
@@ -28,7 +28,7 @@ else
 fi
 
 printf "list 2\n" |./kc -b -k regress/test -p regress/testpass
-SHA1=$(printf "list nonexistent\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^default% >' |$SHA1_BIN |cut -d' ' -f1)
+SHA1=$(printf "list nonexistent\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^<default% >' |$SHA1_BIN |cut -d' ' -f1)
 if [ "$SHA1" = '646c97c66d3c5f0810adfabe230ba164a182825e' ];then
 	echo "$0 test ok (list with pager parameter)!"
 else

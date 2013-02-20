@@ -34,7 +34,7 @@ void
 cmd_clist(const char *e_line, command *commands)
 {
 	xmlNodePtr	db_node = NULL;
-	xmlChar		*cname = NULL;
+	xmlChar		*name = NULL;
 
 	int		idx = 0;
 
@@ -46,9 +46,9 @@ cmd_clist(const char *e_line, command *commands)
 
 	while (db_node) {
 		if (db_node->type == XML_ELEMENT_NODE) {	/* we only care about ELEMENT nodes */
-			cname = xmlGetProp(db_node, BAD_CAST "name");
-			printf("%d. %s\n", idx++, cname);
-			xmlFree(cname); cname = NULL;
+			name = xmlGetProp(db_node, BAD_CAST "name");
+			printf("%d. %s\n", idx++, name);
+			xmlFree(name); name = NULL;
 		}
 
 		db_node = db_node->next;

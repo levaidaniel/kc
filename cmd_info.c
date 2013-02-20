@@ -27,30 +27,47 @@
 #include "commands.h"
 
 
+extern xmlNodePtr	keychain;
+
+
 void
 cmd_info(const char *e_line, command *commands)
 {
 	xmlNodePtr	db_node = NULL;
-	xmlChar		*key = NULL, *created = NULL, *modified = NULL;
+	xmlChar		*name = NULL, *created = NULL, *modified = NULL, *description = NULL;
 
+	char		desc = 0;
 	int		idx = 0;
 	time_t		created_time = 0, modified_time = 0;
 
 
-	if (sscanf(e_line, "%*s %d", &idx) <= 0) {
-		puts(commands->usage);
-		return;
-	}
-	if (idx < 0) {
-		puts(commands->usage);
-		return;
+	if (sscanf(e_line, "%*s %d", &idx) > 0) {
+		if (idx < 0) {
+			puts(commands->usage);
+			return;
+		}
+
+		db_node = find_key(idx);
+	} else {
+		db_node = keychain;
+		desc = 1;
 	}
 
-	db_node = find_key(idx);
+
 	if (db_node) {
-		key = xmlGetProp(db_node, BAD_CAST "name");
-		printf("Name: %s\n", key);
-		xmlFree(key); key = NULL;
+		name = xmlGetProp(db_node, BAD_CAST "name");
+		printf("Name: %s\n", name);
+		xmlFree(name); name = NULL;
+
+		if (desc) {
+			printf("Description: ");
+			description = xmlGetProp(db_node, BAD_CAST "description");
+			if (description) {
+				printf("%s\n", description);
+				xmlFree(description); description = NULL;
+			} else
+				puts("Not defined.");
+		}
 
 		printf("Created: ");
 		created = xmlGetProp(db_node, BAD_CAST "created");

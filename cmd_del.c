@@ -42,6 +42,7 @@ cmd_del(const char *e_line, command *commands)
 	xmlNodePtr	db_node = NULL, db_node_prev = NULL;
 	xmlChar		*key = NULL;
 
+	char		*modified = NULL;
 	int		idx = 0;
 
 #ifndef _READLINE
@@ -109,6 +110,11 @@ cmd_del(const char *e_line, command *commands)
 
 			printf("'%s' deleted\n", key);
 			xmlFree(key); key = NULL;
+
+			/* Update the keychain's modified timestamp */
+			modified = malloc(TIME_MAXLEN); malloc_check(modified);
+			snprintf(modified, TIME_MAXLEN, "%d", (int)time(NULL));
+			xmlSetProp(keychain, BAD_CAST "modified", BAD_CAST modified);
 
 			dirty = 1;
 		}

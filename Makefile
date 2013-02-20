@@ -7,7 +7,7 @@ MAN =		kc.1
 
 SRCS =		kc.c malloc_check.c
 SRCS +=		cmd_c.c cmd_cdel.c cmd_clear.c cmd_clist.c cmd_cnew.c cmd_copy.c \
-		cmd_cren.c cmd_del.c cmd_edit.c cmd_export.c cmd_getnum.c \
+		cmd_cedit.c cmd_del.c cmd_edit.c cmd_export.c cmd_getnum.c \
 		cmd_help.c cmd_import.c cmd_info.c cmd_list.c cmd_new.c cmd_passwd.c \
 		cmd_quit.c cmd_random.c cmd_search.c cmd_searchre.c cmd_status.c \
 		cmd_version.c cmd_write.c \

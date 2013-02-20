@@ -34,10 +34,10 @@ extern char		dirty;
 void
 cmd_copy(const char *e_line, command *commands)
 {
-	xmlNodePtr	db_node = NULL, db_node_new = NULL, db_node_c = NULL, db_node_prev = NULL;
+	xmlNodePtr	key = NULL, key_new = NULL, keychain_dest = NULL, db_node_prev = NULL;
 	xmlChar		*cname = NULL;
 
-	char		*line = NULL;
+	char		*line = NULL, *modified = NULL;
 
 	char		*cmd = NULL, *idx_str = NULL, move = 0;
 	int		idx = 0;
@@ -69,40 +69,54 @@ cmd_copy(const char *e_line, command *commands)
 		return;
 	}
 
-	db_node_c = find_keychain(cname, 0);
-	if (!db_node_c) {
+	keychain_dest = find_keychain(cname, 0);
+	if (!keychain_dest) {
 		puts("Keychain not found.");
 		free(line); line = NULL;
 		return;
 	}
 
-	db_node = find_key(idx);
-	if (!db_node) {
+	key = find_key(idx);
+	if (!key) {
 		puts("Invalid index!");
 		free(line); line = NULL;
 		return;
 	} else {
-		/* duplicate the db_node which is to be copied */
-		db_node_new = xmlCopyNode(db_node, 2);
-		if (!db_node_new) {
-			puts("xmlCopyNode() error!");
+		/* duplicate the key which is to be copied */
+		key_new = xmlCopyNode(key, 2);
+		if (!key_new) {
+			puts("Error copying entry!");
+
+			if (getenv("KC_DEBUG"))
+				puts("xmlCopyNode() error!");
+
 			free(line); line = NULL;
 			return;
 		}
 
 		if (move) {	/* unlink from the source keychain */
 			/* remove the adjacent 'text' node, which is the indent and newline */
-			db_node_prev = db_node->prev;
+			db_node_prev = key->prev;
 			xmlUnlinkNode(db_node_prev);
 			xmlFreeNode(db_node_prev);
 
-			xmlUnlinkNode(db_node);	/* remove the node itself */
+			xmlUnlinkNode(key);	/* remove the node itself */
 		}
 
 		/* add the new entry to the destination keychain */
-		xmlAddChild(db_node_c, xmlNewText(BAD_CAST "\t"));	/* make the XML document prettttyyy */
-		xmlAddChild(db_node_c, db_node_new);
-		xmlAddChild(db_node_c, xmlNewText(BAD_CAST "\n\t"));	/* make the XML document prettttyyy */
+		xmlAddChild(keychain_dest, xmlNewText(BAD_CAST "\t"));	/* make the XML document prettttyyy */
+		xmlAddChild(keychain_dest, key_new);
+		xmlAddChild(keychain_dest, xmlNewText(BAD_CAST "\n\t"));	/* make the XML document prettttyyy */
+
+
+		/* Update the current keychain's modified timestamp */
+		modified = malloc(TIME_MAXLEN); malloc_check(modified);
+		snprintf(modified, TIME_MAXLEN, "%d", (int)time(NULL));
+
+		xmlSetProp(keychain, BAD_CAST "modified", BAD_CAST modified);
+
+		/* Update the destination keychain's modified timestamp */
+		xmlSetProp(keychain_dest, BAD_CAST "modified", BAD_CAST modified);
 
 
 		dirty = 1;

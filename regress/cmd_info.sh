@@ -19,7 +19,7 @@ case "$(uname -s)" in
 esac
 
 
-SHA1=$(printf "info 0\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^default% >' |$SHA1_BIN |cut -d' ' -f1)
+SHA1=$(printf "info 0\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^<default% >' |$SHA1_BIN |cut -d' ' -f1)
 if [ "$SHA1" = 'c305cb0a9c3156d287abc4896f9032458c8a1cf1' ];then
 	echo "$0 test ok (missing created/modified)!"
 else

@@ -70,6 +70,13 @@ commands_init(command **commands)
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
 
+		(*commands)->name = "cedit";
+		(*commands)->usage = "cedit";
+		(*commands)->help = "Edit the current keychain's name and description.";
+		(*commands)->fn = cmd_cedit;
+		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
+		(*commands) = (*commands)->next;
+
 		(*commands)->name = "cnew";
 		(*commands)->usage = "cnew [name]";
 		(*commands)->help = "Create a new keychain. If 'name' is not given then prompt for one.";
@@ -87,20 +94,6 @@ commands_init(command **commands)
 		(*commands)->usage = "cp <index> <keychain>";
 		(*commands)->help = "Alias of 'copy'.";
 		(*commands)->fn = cmd_copy;
-		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
-		(*commands) = (*commands)->next;
-
-		(*commands)->name = "cren";
-		(*commands)->usage = "cren <keychain>";
-		(*commands)->help = "Rename a keychain. 'keychain' can be the keychain's index number or name. Index number takes priority when addressing a keychain.";
-		(*commands)->fn = cmd_cren;
-		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
-		(*commands) = (*commands)->next;
-
-		(*commands)->name = "ccren";
-		(*commands)->usage = "ccren <keychain name>";
-		(*commands)->help = "Works like 'cren', but the keychain's name takes priority over its index number.\nSee command 'cren'";
-		(*commands)->fn = cmd_cren;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
 
@@ -242,8 +235,8 @@ commands_init(command **commands)
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "info";
-	(*commands)->usage = "info <index>";
-	(*commands)->help = "Print information about a key in the current keychain. 'index' is the key's index number in the current keychain.";
+	(*commands)->usage = "info [index]";
+	(*commands)->help = "Print information about a key in the current keychain or the keychain itself. If 'index' is specified, it is the key's index number in the current keychain. If omitted, information is about the current keychain.";
 	(*commands)->fn = cmd_info;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;

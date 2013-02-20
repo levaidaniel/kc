@@ -29,7 +29,7 @@
 
 extern xmlNodePtr	keychain;
 extern char		dirty;
-extern char		prompt_context[20];
+extern char		prompt_context[30];
 
 #ifndef _READLINE
 extern EditLine		*e;
@@ -41,8 +41,9 @@ void
 cmd_cnew(const char *e_line, command *commands)
 {
 	xmlNodePtr	db_node = NULL;
-	xmlChar		*cname = NULL;
+	xmlChar		*name = NULL, *description = NULL;
 
+	char		*created = NULL;
 	char		*line = NULL;
 	int		idx = 0;
 #ifndef _READLINE
@@ -53,10 +54,10 @@ cmd_cnew(const char *e_line, command *commands)
 	line = strdup(e_line);
 
 	strtok(line, " ");				/* remove the command from the line */
-	cname = xmlStrdup(BAD_CAST strtok(NULL, " "));	/* assign the command's first parameter (name) */
+	name = xmlStrdup(BAD_CAST strtok(NULL, " "));	/* assign the command's first parameter (name) */
 	free(line); line = NULL;
-	if (!cname) {					/* if we didn't get a name as a parameter */
-		strlcpy(prompt_context, "NEW keychain", sizeof(prompt_context));
+	if (!name) {					/* if we didn't get a name as a parameter */
+		strlcpy(prompt_context, "NEW keychain name", sizeof(prompt_context));
 
 #ifndef _READLINE
 		/* disable history temporarily */
@@ -74,9 +75,9 @@ cmd_cnew(const char *e_line, command *commands)
 		e_line = readline(prompt_str());
 #endif
 		if (e_line) {
-			cname = xmlStrdup(BAD_CAST e_line);
+			name = xmlStrdup(BAD_CAST e_line);
 #ifndef _READLINE
-			cname[xmlStrlen(cname) - 1] = '\0'; /* remove the newline */
+			name[xmlStrlen(name) - 1] = '\0'; /* remove the newline */
 #endif
 		} else {
 #ifndef _READLINE
@@ -86,19 +87,57 @@ cmd_cnew(const char *e_line, command *commands)
 
 			return;
 		}
-
-		strlcpy(prompt_context, "", sizeof(prompt_context));
 	}
 
-	db_node = find_keychain(cname, 1);
+	strlcpy(prompt_context, "NEW keychain description", sizeof(prompt_context));
+
+#ifndef _READLINE
+	/* disable history temporarily */
+	if (el_set(e, EL_HIST, history, NULL) != 0) {
+		perror("el_set(EL_HIST)");
+	}
+
+	e_line = el_gets(e, &e_count);
+
+	/* re-enable history */
+	if (el_set(e, EL_HIST, history, eh) != 0) {
+		perror("el_set(EL_HIST)");
+	}
+#else
+	e_line = readline(prompt_str());
+#endif
+	if (e_line) {
+		description = xmlStrdup(BAD_CAST e_line);
+#ifndef _READLINE
+		description[xmlStrlen(description) - 1] = '\0'; /* remove the newline */
+#endif
+	} else {
+#ifndef _READLINE
+		el_reset(e);
+#endif
+		strlcpy(prompt_context, "", sizeof(prompt_context));
+
+		return;
+	}
+
+	strlcpy(prompt_context, "", sizeof(prompt_context));
+
+
+	db_node = find_keychain(name, 1);
 	if (!db_node) {
+		created = malloc(TIME_MAXLEN); malloc_check(created);
+		snprintf(created, TIME_MAXLEN, "%d", (int)time(NULL));
+
 		/* XXX reloading a saved document inserts a 'text' element between each visible node (why?)
 		 * so we must reproduce this */
 		xmlAddChild(keychain->parent, xmlNewText(BAD_CAST "\t"));
 
-		db_node = xmlNewNode(NULL, BAD_CAST "keychain");
-		xmlSetProp(db_node, BAD_CAST "name", cname);
-		xmlAddChild(keychain->parent, db_node);
+		db_node = xmlNewChild(keychain->parent, NULL, BAD_CAST "keychain", NULL);
+
+		xmlNewProp(db_node, BAD_CAST "name", name);
+		xmlNewProp(db_node, BAD_CAST "created", BAD_CAST created);
+		xmlNewProp(db_node, BAD_CAST "modified", BAD_CAST created);
+		xmlNewProp(db_node, BAD_CAST "description", description);
 
 		/* make the XML document prettttyyy */
 		xmlAddChild(db_node, xmlNewText(BAD_CAST "\n\t"));
@@ -111,7 +150,7 @@ cmd_cnew(const char *e_line, command *commands)
 
 			db_node = db_node->next;
 		}
-		printf("Created keychain: %d. %s\n", idx - 1, cname);
+		printf("Created keychain: %d. %s\n", idx - 1, name);
 
 		/* XXX reloading a saved document inserts a 'text' element between each visible node (why?)
 		 * so we must reproduce this */
@@ -119,8 +158,8 @@ cmd_cnew(const char *e_line, command *commands)
 
 		dirty = 1;
 	} else {
-		printf("Keychain '%s' already exists!\n", cname);
+		printf("Keychain '%s' already exists!\n", name);
 	}
 
-	xmlFree(cname); cname = NULL;
+	xmlFree(name); name = NULL;
 } /* cmd_cnew() */

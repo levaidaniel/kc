@@ -49,7 +49,10 @@ enum {
 \
 <!ELEMENT keychain (key)*> \
 <!ATTLIST keychain \
-	name CDATA #REQUIRED> \
+	name CDATA #REQUIRED \
+	description CDATA #IMPLIED \
+	created CDATA #IMPLIED \
+	modified CDATA #IMPLIED> \
 \
 <!ELEMENT key EMPTY> \
 <!ATTLIST key \

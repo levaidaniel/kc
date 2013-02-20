@@ -19,7 +19,7 @@ case "$(uname -s)" in
 esac
 
 printf "0\n" |./kc -b -k regress/test -p regress/testpass
-SHA1=$(printf "0\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^default% >' |$SHA1_BIN |cut -d' ' -f1)
+SHA1=$(printf "0\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^<default% >' |$SHA1_BIN |cut -d' ' -f1)
 if [ "$SHA1" = '087c18b2c195235487f9340232b3e1a3d1321fc8' ];then
 	echo "$0 test ok (existing)!"
 else
@@ -28,7 +28,7 @@ else
 fi
 
 printf "2\n" |./kc -b -k regress/test -p regress/testpass
-SHA1=$(printf "2\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^default% >' |$SHA1_BIN |cut -d' ' -f1)
+SHA1=$(printf "2\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^<default% >' |$SHA1_BIN |cut -d' ' -f1)
 if [ "$SHA1" = '6e9d4f5fb288d38a9d5e849be38100e08389689f' ];then
 	echo "$0 test ok (nonexisting)!"
 else

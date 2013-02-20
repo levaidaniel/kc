@@ -46,8 +46,8 @@ if [ ! -r "regress/test_dump.xml" ];then
 	exit 1
 fi
 
-SHA1=$(cat regress/test_dump.xml |sed -e 's/created="[0-9]\{1,\}"//' -e 's/modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = '23fa5cccf87201c76a9fd7b29be13cfda3b2295b' ];then
+SHA1=$(cat regress/test_dump.xml |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' -e 's/ description=".*"//' |$SHA1_BIN |cut -d' ' -f1)
+if [ "$SHA1" = 'fcd724024dbbab3a99afbd103f3ead5e97fe24b4' ];then
 	echo "$0 test ok (dump)!"
 else
 	echo "$0 test failed (dump)!"

@@ -29,7 +29,7 @@
 
 extern xmlNodePtr	keychain;
 extern char		dirty;
-extern char		prompt_context[20];
+extern char		prompt_context[30];
 extern xmlChar		*_rl_helper_var;
 
 #ifndef _READLINE
@@ -41,10 +41,9 @@ extern History		*eh;
 void
 cmd_edit(const char *e_line, command *commands)
 {
-	xmlNodePtr	db_node = NULL, db_node_new = NULL;
+	xmlNodePtr	db_node = NULL;
 	xmlChar		*key = NULL, *value_rR = NULL, *value = NULL;
 
-	xmlChar		*created = NULL;
 	char		*modified = NULL;
 
 #ifndef _READLINE
@@ -75,9 +74,6 @@ cmd_edit(const char *e_line, command *commands)
 
 		/* if we edit an existing entry, push the current value to the edit buffer */
 		key = xmlGetProp(db_node, BAD_CAST "name");
-#ifdef _READLINE
-		_rl_helper_var = key;
-#endif
 
 #ifndef _READLINE
 		el_push(e, (const char *)key);
@@ -85,6 +81,7 @@ cmd_edit(const char *e_line, command *commands)
 
 		e_line = el_gets(e, &e_count);
 #else
+		_rl_helper_var = key;
 		rl_pre_input_hook = (rl_hook_func_t *)_rl_push_buffer;
 		e_line = readline(prompt_str());
 		rl_pre_input_hook = NULL;
@@ -113,9 +110,6 @@ cmd_edit(const char *e_line, command *commands)
 
 		/* if we edit an existing entry, push the current value to the edit buffer */
 		value = xmlGetProp(db_node, BAD_CAST "value");
-#ifdef _READLINE
-		_rl_helper_var = value;
-#endif
 
 #ifndef _READLINE
 		el_push(e, (const char *)value);
@@ -128,6 +122,7 @@ cmd_edit(const char *e_line, command *commands)
 			perror("el_set(EL_HIST)");
 		}
 #else
+		_rl_helper_var = value;
 		rl_pre_input_hook = (rl_hook_func_t *)_rl_push_buffer;
 		e_line = readline(prompt_str());
 		rl_pre_input_hook = NULL;
@@ -148,32 +143,20 @@ cmd_edit(const char *e_line, command *commands)
 		}
 		value = parse_randoms(value_rR);
 
-		created = xmlGetProp(db_node, BAD_CAST "created");
 		modified = malloc(TIME_MAXLEN); malloc_check(modified);
 		snprintf(modified, TIME_MAXLEN, "%d", (int)time(NULL));
 
-		/* XXX To be compatible with older versions (pre-2.3), we derive the
-		 * 'created' date from the 'modified' date if 'created' was not
-		 * present originally.
-		 */
-		if (!created)
-			created = xmlStrdup(BAD_CAST modified);
+		xmlSetProp(db_node, BAD_CAST "name", key);
+		xmlSetProp(db_node, BAD_CAST "value", value);
+		xmlSetProp(db_node, BAD_CAST "modified", BAD_CAST modified);
 
-		db_node_new = xmlNewChild(keychain, NULL, BAD_CAST "key", NULL);
-
-		xmlNewProp(db_node_new, BAD_CAST "name", key);
-		xmlNewProp(db_node_new, BAD_CAST "value", value);
-		xmlNewProp(db_node_new, BAD_CAST "created", created);
-		xmlNewProp(db_node_new, BAD_CAST "modified", BAD_CAST modified);
+		/* Update the keychain's modified timestamp */
+		xmlSetProp(keychain, BAD_CAST "modified", BAD_CAST modified);
 
 		xmlFree(key); key = NULL;
 		xmlFree(value_rR); value_rR = NULL;
 		xmlFree(value); value = NULL;
-		xmlFree(created); value = NULL;
 		free(modified); modified = NULL;
-
-		db_node = xmlReplaceNode(db_node, db_node_new);
-		xmlFreeNode(db_node);
 
 
 		strlcpy(prompt_context, "", sizeof(prompt_context));

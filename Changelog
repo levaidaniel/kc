@@ -21,8 +21,8 @@ Functional changes, improvements:
 	What database file is in use,
 	and other funny stuff about the current database.
   info:
-	Displays information about a key (currently only
-	'created' and 'modified' properties).
+	Displays information about a key or the current keychain ('created' and 'modified', plus 'description' for
+	keychains).
   append:
 	append <filename>
 	Append every keychain from 'filename' to the database. (ie.: without
@@ -36,10 +36,12 @@ Functional changes, improvements:
   dump:
   	Dump the whole XML structure to a plain text XML file.
 	This is how 'xport' worked before.
-  cc, ccdel, ccren commands:
+  cc, ccdel commands:
 	With these commands the keychain's name takes priority over its
 	index number when specifying it as a parameter.
 	This avoids confusion when naming a keychain as a number.
+  cedit:
+  	'cren' was renamed to 'cedit'.
 - xport command now exports to an encrypted kc database. Password will be
   prompted for.
   Also a new feature for the 'xport' and 'dump' commands:
@@ -73,6 +75,10 @@ Functional changes, improvements:
 - 'list' command now uses a "pager" argument instead of keychain. It displays
   "pager" number of keys at once (the default is 20).
 - CLI tab completion is a bit more user friendly.
+- 'cnew' command now asks for an optional description for the keychain being
+  created.
+- 'cren' command was renamed to 'cedit' and can now edit the current
+  keychain's name and description.
 
 Cosmetic changes:
 - Add PCRE information to version.
@@ -80,3 +86,5 @@ Cosmetic changes:
 - Display the number of matches when using 'search' or '/' (with more than 5
   matches).
 - Display the newly added key's index number after using the 'new' command.
+- Changed keychain displaying in the CLI prompt. Hopefully it will not get
+  lost between other texts now.

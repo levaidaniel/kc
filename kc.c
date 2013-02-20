@@ -66,7 +66,7 @@ History		*eh = NULL;
 HistEvent	eh_ev;
 #endif
 
-char		prompt_context[20];
+char		prompt_context[30];
 
 
 int
@@ -608,10 +608,10 @@ prompt_str(void)
 
 	cname = xmlGetProp(keychain, BAD_CAST "name");
 
-	prompt_len = (size_t)xmlStrlen(cname) + 2 + sizeof(prompt_context) + 2 + 1;
+	prompt_len = 1 + (size_t)xmlStrlen(cname) + 2 + sizeof(prompt_context) + 2 + 1;
 	prompt = realloc(prompt, prompt_len); malloc_check(prompt);
 
-	snprintf(prompt, prompt_len, "%s%% %s%c ", cname, prompt_context, (readonly ? '|':'>'));
+	snprintf(prompt, prompt_len, "<%s%% %s%c ", cname, prompt_context, (readonly ? '|':'>'));
 	xmlFree(cname); cname = NULL;
 
 	return(prompt);

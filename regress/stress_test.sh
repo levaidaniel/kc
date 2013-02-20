@@ -49,21 +49,11 @@ typeset -i CHECK_DURING_MODIFY=0
 [ $loop -eq 5000 ]  &&  CHECK_DURING_MODIFY=1
 [ $CHECK_DURING_MODIFY -gt 0 ]  &&  echo "Checking db sum in between tests!"
 
-# this is our sample database from regress/create_db.sh
-echo 'abc123ABC321' > regress/testpass
-echo 'w{CQ5/H^DgPv[$[qHc`*oc*SZH*|G`*.nw33FG5BaciY6pc4aIabq7ORQW6kyZH8VNIEog/32cwnCDsQ0iy+4RU+Z2Y+W9Wx
-Zkfqnpdr1boE5lEW869+AmKMxL9OhKcagB6NNiM1SxtSNf7mMtnOI8YYIh/15tfT
-7V8SIQYFJmeI8tIpm8NvBsP8ELUXSnlEZVqbvXgC9SRYP6iwUUq8g/N6MMzG+EoS
-Y0W/LGOtEzhPBXAwcVp2+akFZ9DR34F2PM/IuauvdW+UZl1I2ObWNPFzde62nMLU
-kloxN6u+ReX+Hi37LsWQuL4yzYkl+pN6DH4wh+vamRc6wYxDImVMi5b9K90/VyDB
-KrbeoLrGsNAFJ1paFuXinmwn2hVS11+5ayEfadHgpsi0cm4Ze9xoroM0eX+Vj7LT
-FIOgRFau1xvBM2kauEalqRwYKTjOmTdv41iEKK+FaDhhYl2OId5vbHJSp52OF51s
-iRaLY/GO3OsRjdwAOVC8byYKJMWmeAtqoEbDVYfSANuSmDp85XJSwrQ0HvA+pX9o
-O8zhUz1Cy+avitWpRn5RsQ==' > regress/test
-SHA1_SUM_REFERENCE=$($SHA1_BIN regress/test |cut -d' ' -f1)
+
+sh regress/create_db.sh
+
 
 typeset -i offset=0
-
 
 # new
 i=0
@@ -92,8 +82,8 @@ done |./kc -b -k regress/test -p regress/testpass >/dev/null
 echo # new line
 
 if [ ${CHECK_DURING_MODIFY} -gt 0 ];then
-	SHA1=$(printf "list\n" |KC_DEBUG=yes ./kc -b -k regress/test -p regress/testpass |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/created="[0-9]\{1,\}"//' -e 's/modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
-	if [ "$SHA1" == '2eeaa74bf795452dbfd532fe9499d22c761a9279' ];then
+	SHA1=$(printf "list\n" |KC_DEBUG=yes ./kc -b -k regress/test -p regress/testpass |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' -e 's/ description=".*"//' |$SHA1_BIN |cut -d' ' -f1)
+	if [ "$SHA1" == '796ef067438935598affa049915a6b1438abb981' ];then
 		echo "$0 test ok (#${loop} new entry)!"
 	else
 		echo "$0 test failed (#${loop} new entry)!"
@@ -130,8 +120,8 @@ done |./kc -b -k regress/test -p regress/testpass >/dev/null
 echo # new line
 
 if [ ${CHECK_DURING_MODIFY} -gt 0 ];then
-	SHA1=$(printf "list\n" |KC_DEBUG=yes ./kc -b -k regress/test -p regress/testpass |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/created="[0-9]\{1,\}"//' -e 's/modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
-	if [ "$SHA1" == '755c4e1e4d4951f58065188fcf1291dc25db8fcc' ];then
+	SHA1=$(printf "list\n" |KC_DEBUG=yes ./kc -b -k regress/test -p regress/testpass |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' -e 's/ description=".*"//' |$SHA1_BIN |cut -d' ' -f1)
+	if [ "$SHA1" == '75e950b88253fd82161097aa11133aff50df8dd1' ];then
 		echo "$0 test ok (#${loop} entry edit)!"
 	else
 		echo "$0 test failed (#${loop} entry edit)!"
@@ -169,8 +159,8 @@ while [ $i -ge ${offset} ];do
 done |./kc -b -k regress/test -p regress/testpass >/dev/null
 echo # new line
 
-SHA1=$($SHA1_BIN regress/test |cut -d' ' -f1)
-if [ "$SHA1" = "$SHA1_SUM_REFERENCE" ];then
+SHA1=$(printf "list\n" |KC_DEBUG=yes ./kc -b -k regress/test -p regress/testpass |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' -e 's/ description=".*"//' |$SHA1_BIN |cut -d' ' -f1)
+if [ "$SHA1" = 'f7c121366b5a79c8865a9df29bf7143f3b65b4ec' ];then
 	echo $0 test ok!
 else
 	echo $0 test failed!

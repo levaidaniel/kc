@@ -29,7 +29,7 @@
 
 extern xmlNodePtr	keychain;
 extern char		dirty;
-extern char		prompt_context[20];
+extern char		prompt_context[30];
 
 #ifndef _READLINE
 extern EditLine		*e;
@@ -143,6 +143,9 @@ cmd_new(const char *e_line, command *commands)
 	xmlNewProp(db_node, BAD_CAST "value", value);
 	xmlNewProp(db_node, BAD_CAST "created", BAD_CAST created);
 	xmlNewProp(db_node, BAD_CAST "modified", BAD_CAST created);
+
+	/* Update the keychain's modified timestamp */
+	xmlSetProp(keychain, BAD_CAST "modified", BAD_CAST created);
 
 	/* Get the index of the newly added (last) entry */
 	db_node = keychain->children;

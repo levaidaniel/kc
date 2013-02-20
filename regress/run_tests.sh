@@ -36,7 +36,7 @@ sh regress/cmd_export.sh
 sh regress/cmd_import.sh
 
 sh regress/cmd_cnew.sh
-sh regress/cmd_cren.sh
+sh regress/cmd_cedit.sh
 sh regress/cmd_cdel.sh
 sh regress/cmd_c.sh
 
