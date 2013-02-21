@@ -78,6 +78,8 @@ main(int argc, char *argv[])
 	const char	*e_line = NULL;
 	char		*line = NULL;
 
+	char		*created = NULL;
+
 	char		*buf = NULL;
 	ssize_t		ret = -1;
 	unsigned int	pos = 0;
@@ -367,6 +369,12 @@ main(int argc, char *argv[])
 		}
 		xmlAddChild(db_root, keychain);
 		xmlNewProp(keychain, BAD_CAST "name", BAD_CAST "default");	/* ... its name is "default" */
+
+		created = malloc(TIME_MAXLEN); malloc_check(created);
+		snprintf(created, TIME_MAXLEN, "%d", (int)time(NULL));
+
+		xmlNewProp(keychain, BAD_CAST "created", BAD_CAST created);
+
 
 		xmlAddChild(keychain, xmlNewText(BAD_CAST "\n\t"));
 
