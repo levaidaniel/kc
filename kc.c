@@ -562,7 +562,7 @@ cmd_match(const char *e_line)
 			if (strcmp(commands->name, cmd) == 0)
 				break;
 
-			/* '[c]search' and '[c]/' commands can have flags as postfixes. */
+			/* '[c]search' and '[c]/' commands can have flags as suffixes. */
 			if (strncmp("search", cmd, 6) == 0)
 				if (strncmp(commands->name, cmd, 6) == 0)
 					break;
