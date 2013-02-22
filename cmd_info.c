@@ -36,7 +36,7 @@ cmd_info(const char *e_line, command *commands)
 	xmlNodePtr	db_node = NULL;
 	xmlChar		*name = NULL, *created = NULL, *modified = NULL, *description = NULL;
 
-	char		desc = 0;
+	char		key = 0;
 	int		idx = 0;
 	time_t		created_time = 0, modified_time = 0;
 
@@ -48,18 +48,20 @@ cmd_info(const char *e_line, command *commands)
 		}
 
 		db_node = find_key(idx);
-	} else {
+		key = 1;
+	} else
 		db_node = keychain;
-		desc = 1;
-	}
 
 
 	if (db_node) {
 		name = xmlGetProp(db_node, BAD_CAST "name");
-		printf("Name: %s\n", name);
+		if (key)
+			printf("Key name: %s\n", name);
+		else
+			printf("Keychain name: %s\n", name);
 		xmlFree(name); name = NULL;
 
-		if (desc) {
+		if (!key) {
 			printf("Description: ");
 			description = xmlGetProp(db_node, BAD_CAST "description");
 			if (description) {
