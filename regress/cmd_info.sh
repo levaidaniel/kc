@@ -19,11 +19,19 @@ case "$(uname -s)" in
 esac
 
 
-SHA1=$(printf "info 0\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^<default% >' |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = 'c305cb0a9c3156d287abc4896f9032458c8a1cf1' ];then
-	echo "$0 test ok (missing created/modified)!"
+SHA1=$(printf "info\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^<default% >' |sed -e 's/^\(Modified: \).*$/\1/' |$SHA1_BIN |cut -d' ' -f1)
+if [ "$SHA1" = 'd559fc302db736029461eccc8a5232bc17678224' ];then
+	echo "$0 test ok (keychain description/created/modified)!"
 else
-	echo "$0 test failed (missing created/modified)!"
+	echo "$0 test failed (keychain description/created/modified)!"
+	exit 1
+fi
+
+SHA1=$(printf "info 0\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^<default% >' |$SHA1_BIN |cut -d' ' -f1)
+if [ "$SHA1" = '4a40a905ddda3754fe05ac8e0b98681e0e7f35f6' ];then
+	echo "$0 test ok (key created/modified)!"
+else
+	echo "$0 test failed (key created/modified)!"
 	exit 1
 fi
 
