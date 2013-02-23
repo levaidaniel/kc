@@ -5,6 +5,11 @@ set -e
 
 echo "test => $0"
 
+if [ -z "${KC_DB}" ]  ||  [ -z ${KC_PASSFILE} ];then
+	echo "No database or password file specified!";
+	exit 1;
+fi
+
 rm -f ${KC_DB} ${KC_PASSFILE}
 
 PASSWORD='abc123ABC321'
