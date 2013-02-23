@@ -40,7 +40,7 @@ extern EditLine		*e;
 
 
 void
-cmd_getnum(int idx, size_t space)
+cmd_getnum(int idx, size_t spice)
 {
 	xmlNodePtr	db_node = NULL;
 	xmlChar		*key = NULL, *value = NULL, *value_nl = NULL, *line = NULL, *line_randomed = NULL, *tmp = NULL;
@@ -95,12 +95,12 @@ cmd_getnum(int idx, size_t space)
 			line = get_line(value_nl, value_len, idx);
 			line_len = strlen((const char *)line);
 
-			if (space) {	/* if random padding is requested */
-				line_randomed_len = line_len + line_len * space + space + 1;
+			if (spice) {	/* if random padding is requested */
+				line_randomed_len = line_len + line_len * spice + spice + 1;
 				line_randomed = calloc(1, line_randomed_len); malloc_check(line_randomed);
 
 				/* begin with the random string */
-				rand_str = get_random_str(space, 0);
+				rand_str = get_random_str(spice, 0);
 				if (!rand_str)
 					return;
 				strlcat((char *)line_randomed, rand_str, line_randomed_len);
@@ -112,7 +112,7 @@ cmd_getnum(int idx, size_t space)
 					xmlFree(tmp); tmp = NULL;
 
 					/* append a random string */
-					rand_str = get_random_str(space, 0);
+					rand_str = get_random_str(spice, 0);
 					if (!rand_str)
 						return;
 					strlcat((char *)line_randomed, rand_str, line_randomed_len);
@@ -144,7 +144,7 @@ cmd_getnum(int idx, size_t space)
 				/* erase (overwrite) the previously written value with spaces */
 				printf("\r");
 				erase_len =	strlen((const char *)key) + 3 +					/* add the key + "[" + "]" + " " */
-						(space ? line_len + line_len * space + space : line_len) +	/* add the random chars too */
+						(spice ? line_len + line_len * spice + spice : line_len) +	/* add the random chars too */
 						(lines > 1 ? digit_length(idx) + digit_length(lines) + 4 : 0);	/* add the line number prefix too + "[" + "/" + "]" + " " */
 				for (i=0; i < (int)erase_len; i++)
 					putchar(' ');
