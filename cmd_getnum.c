@@ -87,7 +87,7 @@ cmd_getnum(int idx, size_t spice)
 
 			printf("[%s] ", key);	/* print the key */
 
-			/* if multiline, prefix the line with a line number */
+			/* if multi-line, prefix the line with a line number */
 			if (lines > 1)
 				printf("[%d/%d] ", idx, lines);
 
