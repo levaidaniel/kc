@@ -35,7 +35,7 @@ void
 cmd_copy(const char *e_line, command *commands)
 {
 	xmlNodePtr	key = NULL, key_new = NULL, keychain_dest = NULL, db_node_prev = NULL;
-	xmlChar		*cname = NULL;
+	xmlChar		*cname = NULL, *name = NULL;
 
 	char		*line = NULL, *modified = NULL;
 
@@ -118,6 +118,10 @@ cmd_copy(const char *e_line, command *commands)
 		/* Update the destination keychain's modified timestamp */
 		xmlSetProp(keychain_dest, BAD_CAST "modified", BAD_CAST modified);
 
+
+		name = xmlGetProp(key, BAD_CAST "name");
+		printf("Key '%d. %s' was %s to keychain: %s\n", idx, name, move ? "moved" : "copied", cname);
+		xmlFree(name); name = NULL;
 
 		dirty = 1;
 	}
