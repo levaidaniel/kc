@@ -18,20 +18,20 @@ case "$(uname -s)" in
 	;;
 esac
 
-printf "copy 0 emptychain\nwrite\n" |./kc -b -k regress/test -p regress/testpass
+printf "copy 0 emptychain\nwrite\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
 
-SHA1=$(printf "list\n" |KC_DEBUG=yes ./kc -b -k regress/test -p regress/testpass |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' -e 's/ description=".*"//' |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = '6c028b5e425d36dd30d174f10f2c8d417a3fb6ac' ];then
+SHA1=$(printf "list\n" |KC_DEBUG=yes ./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
+if [ "$SHA1" = '85c11fd9d14afc76c0bb5045cb0ef1566b284e07' ];then
 	echo "$0 test ok (copy)!"
 else
 	echo "$0 test failed (copy)!"
 	exit 1
 fi
 
-printf "c emptychain\nmove 0 default\nwrite\n" |./kc -b -k regress/test -p regress/testpass
+printf "c emptychain\nmove 0 default\nwrite\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
 
-SHA1=$(printf "list\n" |KC_DEBUG=yes ./kc -b -k regress/test -p regress/testpass |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' -e 's/ description=".*"//' |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = '518d58f1f3a1e1be8a4b5ec7fc915ec01e0bebe7' ];then
+SHA1=$(printf "list\n" |KC_DEBUG=yes ./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
+if [ "$SHA1" = '372f679706efd7977fce1a2abb05303f694e59da' ];then
 	echo "$0 test ok (move)!"
 else
 	echo "$0 test failed (move)!"

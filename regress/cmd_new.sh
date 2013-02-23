@@ -18,10 +18,10 @@ case "$(uname -s)" in
 	;;
 esac
 
-printf "new newkey\nnewval\nwrite\n" |./kc -b -k regress/test -p regress/testpass
+printf "new newkey\nnewval\nwrite\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
 
-SHA1=$(printf "list\n" |KC_DEBUG=yes ./kc -b -k regress/test -p regress/testpass |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' -e 's/ description=".*"//' |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = '7d7b0bd135fa41bd99b25006320d0a043257380e' ];then
+SHA1=$(printf "list\n" |KC_DEBUG=yes ./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
+if [ "$SHA1" = '05438c265aa0398d65528d47a779babd4ba2c6a1' ];then
 	echo $0 test ok!
 else
 	echo $0 test failed!

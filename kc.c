@@ -351,8 +351,6 @@ main(int argc, char *argv[])
 			quit(EXIT_FAILURE);
 		}
 
-		xmlCreateIntSubset(db, BAD_CAST "kc", NULL, BAD_CAST "kc.dtd");
-
 		db_root = xmlNewNode(NULL, BAD_CAST "kc");	/* THE root node */
 		if (!db_root) {
 			puts("Could not create root node!");

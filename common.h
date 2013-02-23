@@ -45,7 +45,7 @@ enum {
 };
 
 #define	KC_DTD	"\
-<!ELEMENT kc (keychain)*>\
+<!ELEMENT kc (keychain)*> \
 \
 <!ELEMENT keychain (key)*> \
 <!ATTLIST keychain \

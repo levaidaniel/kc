@@ -557,7 +557,7 @@ kc_validate_xml(xmlDocPtr db)
 	xmlValidCtxtPtr		valid_ctx = NULL;
 
 
-	buf = xmlParserInputBufferCreateStatic(KC_DTD, sizeof(KC_DTD), XML_CHAR_ENCODING_NONE);
+	buf = xmlParserInputBufferCreateMem(KC_DTD, sizeof(KC_DTD), XML_CHAR_ENCODING_NONE);
 	if (!buf) {
 		if (getenv("KC_DEBUG"))
 			xmlGenericError(xmlGenericErrorContext, "Could not allocate buffer for DTD.\n");
@@ -565,11 +565,15 @@ kc_validate_xml(xmlDocPtr db)
 		return(0);
 	}
 
+	/* XXX xmlIOParseDTD() is supposed to free the ParserInputBuffer context.
+	 * https://mail.gnome.org/archives/xml/2001-July/msg00035.html
+	 */
 	dtd = xmlIOParseDTD(NULL, buf, XML_CHAR_ENCODING_NONE);
 	if (!dtd) {
 		if (getenv("KC_DEBUG"))
 			xmlGenericError(xmlGenericErrorContext, "Could not parse kc DTD.\n");
 
+		xmlFreeParserInputBuffer(buf);
 		return(0);
 	}
 
@@ -586,8 +590,12 @@ kc_validate_xml(xmlDocPtr db)
 		if (getenv("KC_DEBUG"))
 			xmlGenericError(xmlGenericErrorContext, "Validation failed against kc DTD.\n");
 
+		xmlFreeValidCtxt(valid_ctx);
 		return(0);
 	}
+
+
+	xmlFreeValidCtxt(valid_ctx);
 
 
 	return(1);

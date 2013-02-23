@@ -104,8 +104,6 @@ cmd_export(const char *e_line, command *commands)
 			return;
 		}
 
-		xmlCreateIntSubset(db_tmp, BAD_CAST "kc", NULL, BAD_CAST "kc.dtd");
-
 		/* A new root node */
 		root_node_tmp = xmlNewNode(NULL, BAD_CAST "kc");
 		if (!root_node_tmp) {

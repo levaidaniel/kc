@@ -12,6 +12,9 @@ if ./kc -v |grep -E -q -e '^Compiled with Readline(, PCRE)* support\.$';then
 	export READLINE=readline
 fi
 
+export KC_DB='regress/test.kcd'
+export KC_PASSFILE='regress/testpass'
+
 sh regress/create_db.sh
 
 sh regress/cmd_quit.sh

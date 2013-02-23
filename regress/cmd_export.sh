@@ -22,7 +22,7 @@ rm -f regress/test_export.kcd
 
 PASSWORD=aabbccdd112233
 
-printf "xport regress/test_export\n${PASSWORD}\n${PASSWORD}\n" |./kc -b -k regress/test -p regress/testpass
+printf "xport regress/test_export\n${PASSWORD}\n${PASSWORD}\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
 
 if [ ! -r "regress/test_export.kcd" ];then
 	echo "$0 test failed (unreadable export file)!"
@@ -39,15 +39,15 @@ fi
 
 rm -f regress/test_dump.xml
 
-printf "dump regress/test_dump\n" |./kc -b -k regress/test -p regress/testpass
+printf "dump regress/test_dump\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
 
 if [ ! -r "regress/test_dump.xml" ];then
 	echo "$0 test failed (unreadable dump file)!"
 	exit 1
 fi
 
-SHA1=$(cat regress/test_dump.xml |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' -e 's/ description=".*"//' |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = 'fcd724024dbbab3a99afbd103f3ead5e97fe24b4' ];then
+SHA1=$(cat regress/test_dump.xml |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
+if [ "$SHA1" = 'f7fb5577878b3d1ceaf8aa14ea9c273a36b03d15' ];then
 	echo "$0 test ok (dump)!"
 else
 	echo "$0 test failed (dump)!"

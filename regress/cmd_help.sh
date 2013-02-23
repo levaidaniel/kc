@@ -5,7 +5,7 @@ set -e
 
 echo "test => $0"
 
-if echo "help" |./kc -b -k regress/test -p regress/testpass >/dev/null;then
+if echo "help" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} >/dev/null;then
 	echo $0 test ok!
 	exit 0
 else

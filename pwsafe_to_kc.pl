@@ -21,7 +21,7 @@ open(INPUT, '<', $PWSAFE_EXPORT_FILE)  or  die "couldn't open pwsafe export file
 
 print "opening ${KC_XML_FILE} for writing.\n";
 open(OUTPUT, '>', $KC_XML_FILE)  or  die "couldn't open kc xml output file '${KC_XML_FILE}': $!\n";
-print OUTPUT '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . '<!DOCTYPE kc SYSTEM "kc.dtd">' . "\n" . '<kc>' . "\n";
+print OUTPUT '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . '<kc>' . "\n";
 
 my $items = 0;
 my $keychains = 0;

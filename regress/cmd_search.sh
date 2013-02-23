@@ -18,90 +18,90 @@ case "$(uname -s)" in
 	;;
 esac
 
-printf "search key\n" |./kc -b -k regress/test -p regress/testpass
-SHA1=$(printf "search key\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^<default% >' |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = '646c97c66d3c5f0810adfabe230ba164a182825e' ];then
+printf "search key\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
+SHA1=$(printf "search key\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" |$SHA1_BIN |cut -d' ' -f1)
+if [ "$SHA1" = '040b16edbb11c9e9e3da9c09389000a34d473a6a' ];then
 	echo "$0 test ok (current chain)!"
 else
 	echo "$0 test failed (current chain)!"
 	exit 1
 fi
 
-printf "searchi KEY\n" |./kc -b -k regress/test -p regress/testpass
-SHA1=$(printf "searchi KEY\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^<default% >' |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = '646c97c66d3c5f0810adfabe230ba164a182825e' ];then
+printf "searchi KEY\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
+SHA1=$(printf "searchi KEY\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" |$SHA1_BIN |cut -d' ' -f1)
+if [ "$SHA1" = '040b16edbb11c9e9e3da9c09389000a34d473a6a' ];then
 	echo "$0 test ok (current chain, ignore case)!"
 else
 	echo "$0 test failed (current chain, ignore case)!"
 	exit 1
 fi
 
-printf "search! y0\n" |./kc -b -k regress/test -p regress/testpass
-SHA1=$(printf "search! y0\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^<default% >' |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = 'f94234af3345169c5c28309499883b8a127b7d04' ];then
+printf "search! y0\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
+SHA1=$(printf "search! y0\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" |$SHA1_BIN |cut -d' ' -f1)
+if [ "$SHA1" = 'aa6776e0232e8a0a458710cb46f62af8cc3a0caa' ];then
 	echo "$0 test ok (current chain, inverse)!"
 else
 	echo "$0 test failed (current chain, inverse)!"
 	exit 1
 fi
 
-printf "search* key\n" |./kc -b -k regress/test -p regress/testpass
-SHA1=$(printf "search* key\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^<default% >' |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = 'dc238e4c5b82d4c0d03eb301297285eb4bdf2f66' ];then
+printf "search* key\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
+SHA1=$(printf "search* key\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" |$SHA1_BIN |cut -d' ' -f1)
+if [ "$SHA1" = 'bed82c25199d5e6a22f843fa7859cadabb147cbc' ];then
 	echo "$0 test ok (all chains)!"
 else
 	echo "$0 test failed (all chains)!"
 	exit 1
 fi
 
-printf "search!* y1\n" |./kc -b -k regress/test -p regress/testpass
-SHA1=$(printf "search!* y1\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^<default% >' |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = '9167daa2b4afcc2727364f6f77cf2a1a73cd6954' ];then
+printf "search!* y1\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
+SHA1=$(printf "search!* y1\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" |$SHA1_BIN |cut -d' ' -f1)
+if [ "$SHA1" = '3d9d16edab7a59308db38c1f24aa51deb21f6b1b' ];then
 	echo "$0 test ok (all chains, inverse)!"
 else
 	echo "$0 test failed (all chains, inverse)!"
 	exit 1
 fi
 
-printf "search!*i Y1\n" |./kc -b -k regress/test -p regress/testpass
-SHA1=$(printf "search!*i Y1\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^<default% >' |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = '9167daa2b4afcc2727364f6f77cf2a1a73cd6954' ];then
+printf "search!*i Y1\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
+SHA1=$(printf "search!*i Y1\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" |$SHA1_BIN |cut -d' ' -f1)
+if [ "$SHA1" = '3d9d16edab7a59308db38c1f24aa51deb21f6b1b' ];then
 	echo "$0 test ok (all chains, inverse, ignore case)!"
 else
 	echo "$0 test failed (all chains, inverse, ignore case)!"
 	exit 1
 fi
 
-printf "search nonexistent\n" |./kc -b -k regress/test -p regress/testpass
-SHA1=$(printf "search nonexistent\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^<default% >' |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = 'bca9dfb5d8e5d96ece5d1847c95972736c1d662d' ];then
+printf "search nonexistent\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
+SHA1=$(printf "search nonexistent\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" |$SHA1_BIN |cut -d' ' -f1)
+if [ "$SHA1" = '0fe706a810deffbafd203d78867e620c6bc2677f' ];then
 	echo "$0 test ok (nonexistent)!"
 else
 	echo "$0 test failed (nonexistent)!"
 	exit 1
 fi
 
-printf "csearch chain\n" |./kc -b -k regress/test -p regress/testpass
-SHA1=$(printf "csearch chain\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^<default% >' |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = '1d8dca2a0bbb6ac6e4260f2734e5801a42e00e32' ];then
+printf "csearch chain\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
+SHA1=$(printf "csearch chain\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" |$SHA1_BIN |cut -d' ' -f1)
+if [ "$SHA1" = 'd04c0b373b429a0ef466e25be38946e5dde1e915' ];then
 	echo "$0 test ok (csearch)!"
 else
 	echo "$0 test failed (csearch)!"
 	exit 1
 fi
 
-printf "csearchi CHAIN\n" |./kc -b -k regress/test -p regress/testpass
-SHA1=$(printf "csearchi CHAIN\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^<default% >' |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = '1d8dca2a0bbb6ac6e4260f2734e5801a42e00e32' ];then
+printf "csearchi CHAIN\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
+SHA1=$(printf "csearchi CHAIN\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" |$SHA1_BIN |cut -d' ' -f1)
+if [ "$SHA1" = 'd04c0b373b429a0ef466e25be38946e5dde1e915' ];then
 	echo "$0 test ok (csearchi, ignore case)!"
 else
 	echo "$0 test failed (csearchi, ignore case)!"
 	exit 1
 fi
 
-printf "csearch! chain\n" |./kc -b -k regress/test -p regress/testpass
-SHA1=$(printf "csearch! chain\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^<default% >' |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = 'ef7cac9a6237d46aacb5b1990945004a1cfbdf22' ];then
+printf "csearch! chain\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
+SHA1=$(printf "csearch! chain\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" |$SHA1_BIN |cut -d' ' -f1)
+if [ "$SHA1" = '205d065455c5977fea18fdb8521b87151503cec0' ];then
 	echo "$0 test ok (csearch, inverse)!"
 else
 	echo "$0 test failed (csearch, inverse)!"

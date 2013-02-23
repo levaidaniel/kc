@@ -18,21 +18,12 @@ case "$(uname -s)" in
 	;;
 esac
 
-printf "list\n" |./kc -b -k regress/test -p regress/testpass
-SHA1=$(printf "list\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^<default% >' |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = '646c97c66d3c5f0810adfabe230ba164a182825e' ];then
+printf "list\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
+SHA1=$(printf "list\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" |$SHA1_BIN |cut -d' ' -f1)
+if [ "$SHA1" = '040b16edbb11c9e9e3da9c09389000a34d473a6a' ];then
 	echo "$0 test ok (list)!"
 else
 	echo "$0 test failed (list)!"
-	exit 1
-fi
-
-printf "list 2\n" |./kc -b -k regress/test -p regress/testpass
-SHA1=$(printf "list nonexistent\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^<default% >' |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = '646c97c66d3c5f0810adfabe230ba164a182825e' ];then
-	echo "$0 test ok (list with pager parameter)!"
-else
-	echo "$0 test failed (list with pager parameter)!"
 	exit 1
 fi
 

@@ -18,10 +18,10 @@ case "$(uname -s)" in
 	;;
 esac
 
-printf "clist\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^<default% >'
-SHA1=$(printf "clist\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^<default% >' |$SHA1_BIN |cut -d' ' -f1)
+printf "clist\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'"
+SHA1=$(printf "clist\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" |$SHA1_BIN |cut -d' ' -f1)
 
-if [ "$SHA1" = '921b21c0ffcaf71e2843d4acaff89602d63819cd' ];then
+if [ "$SHA1" = '19540f15e011f7704e2adb75d2d68228eed59dda' ];then
 	echo $0 test ok!
 else
 	echo $0 test failed!

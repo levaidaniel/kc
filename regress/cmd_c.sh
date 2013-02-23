@@ -18,40 +18,40 @@ case "$(uname -s)" in
 	;;
 esac
 
-SHA1=$(printf "c testchain\nlist\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^<(default|testchain)% >' |$SHA1_BIN |cut -d' ' -f1)
-if [ "${SHA1}" = '58a77a2e6c812d38aaa2c35d9248739282d3b551' ];then
+printf "c testchain\nlist\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
+SHA1=$(printf "c testchain\nlist\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<(default|testchain)% >' -e "^Opening '${KC_DB}'" |$SHA1_BIN |cut -d' ' -f1)
+if [ "${SHA1}" = '1886fcb9e486061976c72ab5e76de444bc1133c3' ];then
 	echo "$0 test ok (change chain)!"
 else
 	echo "$0 test failed (change chain)!"
 	exit 1
 fi
-printf "c 0\n" |./kc -b -k regress/test -p regress/testpass
 
-
-printf "cnew 10\ndescription\nwrite\n" |./kc -b -k regress/test -p regress/testpass
-
-SHA1=$(printf "c 10\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^<default% >' |$SHA1_BIN |cut -d' ' -f1)
-if [ "${SHA1}" = '7972d6683794c10f1c092273fee326a19d78cbff' ];then
+printf "cnew 10\ndescription\nwrite\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
+printf "c 10\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
+SHA1=$(printf "c 10\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" |$SHA1_BIN |cut -d' ' -f1)
+if [ "${SHA1}" = 'f00ecea88ac8e16851779e4230ffd0871c453d40' ];then
 	echo "$0 test ok (change chain #2)!"
 else
 	echo "$0 test failed (change chain #2)!"
 	exit 1
 fi
 
-SHA1=$(printf "cc 10\nlist\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^<(default|10)% >' |$SHA1_BIN |cut -d' ' -f1)
-if [ "${SHA1}" = 'e5667529ede050810048938eb73abc278b86fa2d' ];then
+printf "cc 10\nlist\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
+SHA1=$(printf "cc 10\nlist\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<(default|10)% >' -e "^Opening '${KC_DB}'" |$SHA1_BIN |cut -d' ' -f1)
+if [ "${SHA1}" = '373d31f0b14700a8dc3199404d069b8a2e80a2f6' ];then
 	echo "$0 test ok (change chain (cc))!"
 else
 	echo "$0 test failed (change chain (cc))!"
 	exit 1
 fi
 
-printf "ccdel 10\nyes\nwrite\n" |./kc -b -k regress/test -p regress/testpass
+printf "ccdel 10\nyes\nwrite\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
 
 
-printf "c nonexistent\n" |./kc -b -k regress/test -p regress/testpass
-SHA1=$(printf "c nonexistent\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^<default% >' |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = '7972d6683794c10f1c092273fee326a19d78cbff' ];then
+printf "c nonexistent\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
+SHA1=$(printf "c nonexistent\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" |$SHA1_BIN |cut -d' ' -f1)
+if [ "$SHA1" = 'f00ecea88ac8e16851779e4230ffd0871c453d40' ];then
 	echo "$0 test ok (nonexistent chain)!"
 else
 	echo "$0 test failed (nonexistent chain)!"

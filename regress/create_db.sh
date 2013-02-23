@@ -5,66 +5,45 @@ set -e
 
 echo "test => $0"
 
-rm -f regress/test regress/testpass
+rm -f ${KC_DB} ${KC_PASSFILE}
 
 PASSWORD='abc123ABC321'
 
 # create a random database
-if printf "${PASSWORD}\n${PASSWORD}\n" |./kc -b -k regress/test;then
+if printf "${PASSWORD}\n${PASSWORD}\n" |./kc -b -k ${KC_DB};then
 	echo "$0 test ok (create random db)!"
 else
 	echo "$0 test failed (create random db)!"
 	exit 1
 fi
 
-echo ${PASSWORD} > regress/testpass
-if echo "" |./kc -b -k regress/test -p regress/testpass;then
+echo ${PASSWORD} > ${KC_PASSFILE}
+if echo "" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE};then
 	echo "$0 test ok (open random db)!"
 else
 	echo "$0 test failed (open random db)!"
 	exit 1
 fi
 
-rm -f regress/test
+rm -f ${KC_DB}
 
 
 # create our sample database
-echo '<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE kc SYSTEM "kc.dtd">
-<kc>
-	<keychain name="default">
-		<key name="defaultkey0" value="defaultvalue0"/>
-		<key name="defaultkey1" value="defaultvalue1"/>
-	</keychain>
-	<keychain name="testchain">
-		<key name="keytest0" value="valuetest0"/>
-		<key name="keytest1" value="valuetest1"/>
-	</keychain>
-	<keychain name="emptychain">
-	</keychain>
-</kc>' > regress/test_db.xml
+echo '*]duY3#42y/qA8}%~e5T3,~[+sj+i@hSoTvN+zSFDyrnv4qupDxDaq13YJ0NQmn4xQfPkOD7TE1Ow4T9iAvu+niN+yiYsdwJ
+oVJQPieg3J5TzwuWo4LAF+9ynn7DGll8+YqUCpVUqv0GwSJrPBU70CvPeWZnxCzr
+I5pynbW1Hy/YW+R3uLhTYpbXB5JC2GDsWB4PZKDOm5ekKCLnb8vD4A62r1H/hNS2
+e0N6m8dUXtgbJ6EFZ2g6txHEX3YXi+WsNJGCaBW36t1KMJ+O85GatfqD7FpjOLr2
+Sbvp5n2E1O4lSkopNDXuUdgoB9Xp3E5VSP4bjLZVMXEwli0wyl/8Z8tawTwvUJ2W
+w7bXPUQNgXFH23KK3E9NWxRIY1+sfIR54Ew2539GTsPsAfGQEXVURUHQES/kOpa1
+oD+C3KU3iDu1z+SUWyIRgZJl2Zd3WJ2b6ZV0Nktqtu3ziYjZsRyC6Z3yqqMRWueZ
+hkhlsJi3BL9UENDOSyur96goOto14xlb+isUihSwY7k=' > ${KC_DB}
 
-if [ ! -r "regress/test_db.xml" ];then
-	echo "$0 test failed (read sample db xml)!"
-	exit 1
-fi
-
-echo 'w{CQ5/H^DgPv[$[qHc`*oc*SZH*|G`*.nw33FG5BaciY6pc4aIabq7ORQW6kyZH8VNIEog/32cwnCDsQ0iy+4RU+Z2Y+W9Wx
-Zkfqnpdr1boE5lEW869+AmKMxL9OhKcagB6NNiM1SxtSNf7mMtnOI8YYIh/15tfT
-7V8SIQYFJmeI8tIpm8NvBsP8ELUXSnlEZVqbvXgC9SRYP6iwUUq8g/N6MMzG+EoS
-Y0W/LGOtEzhPBXAwcVp2+akFZ9DR34F2PM/IuauvdW+UZl1I2ObWNPFzde62nMLU
-kloxN6u+ReX+Hi37LsWQuL4yzYkl+pN6DH4wh+vamRc6wYxDImVMi5b9K90/VyDB
-KrbeoLrGsNAFJ1paFuXinmwn2hVS11+5ayEfadHgpsi0cm4Ze9xoroM0eX+Vj7LT
-FIOgRFau1xvBM2kauEalqRwYKTjOmTdv41iEKK+FaDhhYl2OId5vbHJSp52OF51s
-iRaLY/GO3OsRjdwAOVC8byYKJMWmeAtqoEbDVYfSANuSmDp85XJSwrQ0HvA+pX9o
-O8zhUz1Cy+avitWpRn5RsQ==' > regress/test
-
-if [ ! -r "regress/test" ];then
+if [ ! -r "${KC_DB}" ];then
 	echo "$0 test failed (read sample db)!"
 	exit 1
 fi
 
-if printf "${PASSWORD}" |./kc -b -k regress/test;then
+if printf "${PASSWORD}" |./kc -b -k ${KC_DB};then
 	echo "$0 test ok (create and open sample db)!"
 else
 	echo "$0 test failed (create and open sample db)!"

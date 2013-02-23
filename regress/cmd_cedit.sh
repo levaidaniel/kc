@@ -20,16 +20,16 @@ esac
 
 cmd="c newchain\ncedit\n"
 if [ ${READLINE} ];then
-	cmd=$cmd"renamed_\ndescription\n"
+	cmd=$cmd"renamed_\nrenamed_\n"
 else
-	cmd=$cmd"renamed_newchain\ndescription\n"
+	cmd=$cmd"renamed_newchain\nrenamed_description\n"
 fi
 cmd=$cmd"write\n"
 
-printf "${cmd}" |./kc -b -k regress/test -p regress/testpass
+printf "${cmd}" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
 
-SHA1=$(printf "list\n" |KC_DEBUG=yes ./kc -b -k regress/test -p regress/testpass |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' -e 's/ description=".*"//' |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = 'ffd511e95142efcf312ba543c28209362995755d' ];then
+SHA1=$(printf "list\n" |KC_DEBUG=yes ./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
+if [ "$SHA1" = 'a8401999ae649ba4c78bb4e8c6b574b2900af523' ];then
 	echo $0 test ok!
 else
 	echo $0 test failed!

@@ -50,6 +50,8 @@ typeset -i CHECK_DURING_MODIFY=0
 [ $CHECK_DURING_MODIFY -gt 0 ]  &&  echo "Checking db sum in between tests!"
 
 
+export KC_DB='regress/test.kcd'
+export KC_PASSFILE='regress/testpass'
 sh regress/create_db.sh
 
 
@@ -78,12 +80,12 @@ while [ $i -lt ${loop} ];do
 	fi
 
 	i=$(( $i + 1 ))
-done |./kc -b -k regress/test -p regress/testpass >/dev/null
+done |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} >/dev/null
 echo # new line
 
 if [ ${CHECK_DURING_MODIFY} -gt 0 ];then
-	SHA1=$(printf "list\n" |KC_DEBUG=yes ./kc -b -k regress/test -p regress/testpass |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' -e 's/ description=".*"//' |$SHA1_BIN |cut -d' ' -f1)
-	if [ "$SHA1" == '796ef067438935598affa049915a6b1438abb981' ];then
+	SHA1=$(printf "list\n" |KC_DEBUG=yes ./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
+	if [ "$SHA1" == 'ff93f58b1306ae81a5a59acc032d554b7a303683' ];then
 		echo "$0 test ok (#${loop} new entry)!"
 	else
 		echo "$0 test failed (#${loop} new entry)!"
@@ -116,12 +118,12 @@ while [ $i -lt $(( ${loop} + ${offset} )) ];do
 	fi
 
 	i=$(( $i + 1 ))
-done |./kc -b -k regress/test -p regress/testpass >/dev/null
+done |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} >/dev/null
 echo # new line
 
 if [ ${CHECK_DURING_MODIFY} -gt 0 ];then
-	SHA1=$(printf "list\n" |KC_DEBUG=yes ./kc -b -k regress/test -p regress/testpass |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' -e 's/ description=".*"//' |$SHA1_BIN |cut -d' ' -f1)
-	if [ "$SHA1" == '75e950b88253fd82161097aa11133aff50df8dd1' ];then
+	SHA1=$(printf "list\n" |KC_DEBUG=yes ./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
+	if [ "$SHA1" == '3d599f58ab63ea98d63df6a5c346aaa85848b93c' ];then
 		echo "$0 test ok (#${loop} entry edit)!"
 	else
 		echo "$0 test failed (#${loop} entry edit)!"
@@ -156,11 +158,11 @@ while [ $i -ge ${offset} ];do
 	fi
 
 	i=$(( $i - 1 ))
-done |./kc -b -k regress/test -p regress/testpass >/dev/null
+done |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} >/dev/null
 echo # new line
 
-SHA1=$(printf "list\n" |KC_DEBUG=yes ./kc -b -k regress/test -p regress/testpass |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' -e 's/ description=".*"//' |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = 'f7c121366b5a79c8865a9df29bf7143f3b65b4ec' ];then
+SHA1=$(printf "list\n" |KC_DEBUG=yes ./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
+if [ "$SHA1" = '846e795e8eb1b3c4ab07753f915c619ce1ff4bec' ];then
 	echo $0 test ok!
 else
 	echo $0 test failed!

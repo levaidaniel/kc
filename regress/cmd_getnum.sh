@@ -18,18 +18,18 @@ case "$(uname -s)" in
 	;;
 esac
 
-printf "0\n" |./kc -b -k regress/test -p regress/testpass
-SHA1=$(printf "0\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^<default% >' |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = '087c18b2c195235487f9340232b3e1a3d1321fc8' ];then
+printf "0\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
+SHA1=$(printf "0\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" |$SHA1_BIN |cut -d' ' -f1)
+if [ "$SHA1" = 'e8e99293c6d1adf5980bbad56b4967def2aa2797' ];then
 	echo "$0 test ok (existing)!"
 else
 	echo "$0 test failed (existing)!"
 	exit 1
 fi
 
-printf "2\n" |./kc -b -k regress/test -p regress/testpass
-SHA1=$(printf "2\n" |./kc -b -k regress/test -p regress/testpass |grep -E -v -e '^<default% >' |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = '6e9d4f5fb288d38a9d5e849be38100e08389689f' ];then
+printf "2\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
+SHA1=$(printf "2\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" |$SHA1_BIN |cut -d' ' -f1)
+if [ "$SHA1" = '812e96292afbdf1b0cebb40a7db6a7ffa2e52dfe' ];then
 	echo "$0 test ok (nonexisting)!"
 else
 	echo "$0 test failed (nonexisting)!"
