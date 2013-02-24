@@ -119,7 +119,7 @@ cmd_cdel(const char *e_line, command *commands)
 				xmlUnlinkNode(db_node);
 				xmlFreeNode(db_node);
 
-				printf("'%s' deleted\n", cname);
+				printf("Deleted keychain: %s\n", cname);
 
 				dirty = 1;
 			}

@@ -108,7 +108,7 @@ cmd_del(const char *e_line, command *commands)
 			xmlUnlinkNode(db_node);
 			xmlFreeNode(db_node);
 
-			printf("'%s' deleted\n", key);
+			printf("Deleted key: %d. %s\n", idx, key);
 			xmlFree(key); key = NULL;
 
 			/* Update the keychain's modified timestamp */

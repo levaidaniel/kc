@@ -247,7 +247,7 @@ cmd_export(const char *e_line, command *commands)
 		if (kc_db_writer(export_file, db_tmp, bio_chain, iv, salt))
 			puts("Export OK");
 		else
-			printf("Failed exporting to '%s'.\n", export_filename);
+			printf("Failed exporting to '%s'!\n", export_filename);
 
 		BIO_free_all(bio_chain);
 		close(export_file);
