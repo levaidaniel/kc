@@ -159,8 +159,8 @@ commands_init(command **commands)
 		(*commands) = (*commands)->next;
 
 		(*commands)->name = "swap";
-		(*commands)->usage = "swap <source index> <destination index>";
-		(*commands)->help = "Swap two keys, exchanging their index numbers.";
+		(*commands)->usage = "swap <index> <index>";
+		(*commands)->help = "Swap two keys, exchanging their index numbers. The two 'index' parameters are the keys' index numbers in the current keychain.";
 		(*commands)->fn = cmd_swap;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
