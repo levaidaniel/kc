@@ -49,6 +49,12 @@ cmd_swap(const char *e_line, command *commands)
 		return;
 	}
 
+	/* No funny stuff!!! :) */
+	if (idx_src == idx_dst) {
+		puts("The two indices are the same!");
+		return;
+	}
+
 	key_src = find_key(idx_src);
 	if (!key_src) {
 		puts("Invalid source index!");
