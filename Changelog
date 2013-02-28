@@ -42,6 +42,8 @@ Functional changes, improvements:
 	This avoids confusion when naming a keychain as a number.
   cedit:
   	'cren' was renamed to 'cedit'.
+  swap:
+  	Swap two keys' indices with each other.
 - xport command now exports to an encrypted kc database. Password will be
   prompted for.
   Also a new feature for the 'xport' and 'dump' commands:
@@ -66,7 +68,7 @@ Functional changes, improvements:
   An exclamation mark ('!') will negate (inverse) the matching and display
   non-matching key names.
   Character 'i' will ignore the case of characters during the search.
-  The '*' characters remains the same, it search in every keychain.
+  The '*' character's effect remains the same, it searches in every keychain.
   Also, it is now possible to include spaces in the patterns for both
   '[c]search' and '[c]/'.
 - '/' and 'c/' commands' parameters (patterns) are now read after a space,
@@ -79,6 +81,7 @@ Functional changes, improvements:
   created.
 - 'cren' command was renamed to 'cedit' and can now edit the current
   keychain's name and description.
+- Massive documentation fixes (man page and help/usage messages).
 
 Cosmetic changes:
 - Add PCRE information to version.

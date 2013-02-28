@@ -158,6 +158,13 @@ commands_init(command **commands)
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
 
+		(*commands)->name = "swap";
+		(*commands)->usage = "swap <source index> <destination index>";
+		(*commands)->help = "Swap two keys, exchanging their index numbers.";
+		(*commands)->fn = cmd_swap;
+		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
+		(*commands) = (*commands)->next;
+
 		(*commands)->name = "write";
 		(*commands)->usage = "write";
 		(*commands)->help = "Save the database.";

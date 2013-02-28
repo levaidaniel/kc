@@ -38,6 +38,7 @@ void cmd_random(const char *, command *);
 void cmd_search(const char *, command *);
 void cmd_searchre(const char *, command *);
 void cmd_status(const char *, command *);
+void cmd_swap(const char *, command *);
 void cmd_version(const char *, command *);
 void cmd_write(const char *, command *);
 

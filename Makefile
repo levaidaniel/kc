@@ -10,7 +10,7 @@ SRCS +=		cmd_c.c cmd_cdel.c cmd_clear.c cmd_clist.c cmd_cnew.c cmd_copy.c \
 		cmd_cedit.c cmd_del.c cmd_edit.c cmd_export.c cmd_getnum.c \
 		cmd_help.c cmd_import.c cmd_info.c cmd_list.c cmd_new.c cmd_passwd.c \
 		cmd_quit.c cmd_random.c cmd_search.c cmd_searchre.c cmd_status.c \
-		cmd_version.c cmd_write.c \
+		cmd_swap.c cmd_version.c cmd_write.c \
 		commands.c commands_init.c
 
 CFLAGS +=	-pedantic -Wall -g
