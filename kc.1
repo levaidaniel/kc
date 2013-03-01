@@ -17,7 +17,7 @@
 .\"ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 .\"(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 .\"SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-.Dd Feb 28, 2013
+.Dd Mar 01, 2013
 .Dt KC 1
 .Os
 .Sh NAME
@@ -262,7 +262,9 @@ Print application help or describe a
 .It Cm status
 Display information about the database.
 .It Cm xport Ar filename Op keychain
-Export the database to the encrypted file named
+Export the database to a
+.Nm
+compatible encrypted database file named
 .Ar filename
 (if no extension specified, ".kcd" will be appended).
 When specifying a keychain, export only that keychain.
@@ -274,7 +276,9 @@ can be the keychain's index number or name. Index number takes priority when add
 and
 .Cm append )
 .It Cm dump Ar filename Op keychain
-Dump the database to the XML file named
+Dump the database to a
+.Nm
+compatible XML file named
 .Ar filename
 (if no extension specified, ".xml" will be appended).
 When specifying a keychain, dump only that keychain to the XML file.
@@ -285,7 +289,9 @@ can be the keychain's index number or name. Index number takes priority when add
 .Em NOTE :
 the created XML file will be plain text.
 .It Cm import Ar filename
-Overwrite the current database with the one from the encrypted database file named
+Import and overwrite the current database with the one from a
+.Nm
+compatible encrypted database file named
 .Ar filename .
 .Ar filename
 must be a proper
@@ -296,7 +302,9 @@ database. (see command
 and
 .Cm append )
 .It Cm importxml Ar filename
-Overwrite the current database with the one from the XML file named
+Import and overwrite the current database with the one from a
+.Nm
+compatible XML file named
 .Ar filename .
 .Ar filename
 must contain a properly formatted
@@ -307,7 +315,9 @@ XML document. (see command
 and
 .Cm append )
 .It Cm append Ar filename
-Append new and merge existing keychains to the database from the encrypted database file named
+Append new and merge existing keychains to the database from a
+.Nm
+compatible encrypted database file named
 .Ar filename .
 .Ar filename
 must be a proper
@@ -318,7 +328,9 @@ database. (see command
 and
 .Cm import )
 .It Cm appendxml Ar filename
-Append new and merge existing keychains to the database from the XML file named
+Append new and merge existing keychains to the database from a
+.Nm
+compatible XML file named
 .Ar filename .
 .Ar filename
 must contain a properly formatted
