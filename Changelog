@@ -74,8 +74,9 @@ Functional changes, improvements:
 - '/' and 'c/' commands' parameters (patterns) are now read after a space,
   like with every other command.
 - Dropped 's' command. It was an alias for 'search'.
-- 'list' command now uses a "pager" argument instead of keychain. It displays
-  "pager" number of keys at once (the default is 20).
+- 'list' command now uses a "pager" and an "offset" argument instead of
+  keychain. It displays "pager" number of keys at once (the default is 20)
+  skipping "offset" indices if specified.
 - CLI tab completion is a bit more user friendly.
 - 'cnew' command now asks for an optional description for the keychain being
   created.

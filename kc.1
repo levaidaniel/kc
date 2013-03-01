@@ -109,12 +109,16 @@ Character sequences can be used in values:
 "\ea", "\eA" - these will be replaced with 2 and 4 (respectively) random alpha-numeric characters.
 .Pp
 Every character sequence can be used in values regardless of its order or count, and can be escaped using double backslashes (eg.: "\e\ea").
-.It Cm list Op pager
+.It Cm list Op pager Op offset
 List
 .Ar pager
-number of keys per page from current keychain. Every key gets prefixed by its index number. If
+number of keys per page from the current keychain, skipping
+.Ar offset
+indices if specified. Every key gets prefixed by its index number. If
 .Ar pager
-is not specified, the default value of 20 is used. The special value 0 means to not use the pager.
+is not specified, the default value of 20 is used. The special value 0 means to not use the pager. If
+.Ar offset
+is not specified, it is not used.
 .It Cm ls Op keychain
 Alias of
 .Cm list .

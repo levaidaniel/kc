@@ -43,7 +43,7 @@ cmd_list(const char *e_line, command *commands)
 	xmlNodePtr	db_node = NULL;
 	xmlChar		*key = NULL;
 
-	int		idx = 0, pager = 0, pager_show = 0;
+	int		idx = 0, pager = 20, pager_show = 0, offset = 0;
 
 	char		*line = NULL;
 	char		rc = 0;
@@ -56,8 +56,7 @@ cmd_list(const char *e_line, command *commands)
 
 	line = strdup(e_line);
 
-	if (sscanf(e_line, "%*s %d", &pager) <= 0)
-		pager = 20;
+	sscanf(e_line, "%*s %d %d", &pager, &offset);
 
 	if (pager > 100  ||  pager < 0)
 		pager = 20;
@@ -84,48 +83,65 @@ cmd_list(const char *e_line, command *commands)
 
 	db_node = keychain->children;
 	while (db_node) {
-		if (db_node->type == XML_ELEMENT_NODE) {	/* we only care about ELEMENT nodes */
-			/* Pager */
-			if (	(!batchmode  &&
-				rc != 'Q'  &&  idx == pager_show  &&  pager != 0)
-				||  (rc == 13  ||  rc == 10)) {
+		/* We only care about ELEMENT nodes */
+		if (db_node->type != XML_ELEMENT_NODE) {
+			db_node = db_node->next;
+			continue;
+		}
 
-				/* Brief pager usage info. */
-				printf("[SPC,RET,0-9,EOT,q,Q,?]");
-				fflush(stdout);
+		/* Fast forward 'offset' indices */
+		if (idx < offset) {
+			idx++;
+			pager_show = idx + pager;
 
-				rc = 0;
-				while (	rc != ' '  &&  rc != 13  &&  rc != 10  &&
-					rc != 4  &&  rc != 'q'  &&
-					(rc < '0'  ||  rc > '9')  &&
-					rc != 'Q') {
+			db_node = db_node->next;
+			continue;
+		}
+
+
+		/* Pager */
+		if (	(!batchmode
+			&&  rc != 'Q'
+			&&  idx == pager_show
+			&&  pager != 0)
+			||
+			(rc == 13  ||  rc == 10)) {
+
+			/* Brief pager usage info. */
+			printf("[SPC,RET,0-9,EOT,q,Q,?]");
+			fflush(stdout);
+
+			rc = 0;
+			while (	rc != ' '  &&  rc != 13  &&  rc != 10  &&
+				rc != 4  &&  rc != 'q'  &&
+				(rc < '0'  ||  rc > '9')  &&
+				rc != 'Q') {
 #ifndef _READLINE
-					el_getc(e, &rc);
+				el_getc(e, &rc);
 #else
-					rc = rl_read_key();
+				rc = rl_read_key();
 #endif
-					/* Full pager usage info. */
-					if (rc == '?')
-						puts("\n <SPACE>:\tNext page\n <ENTER>:\tNext line\n 1-9:\t\tNew pager value\n 'q', <EOT>:\tStop\n 'Q', 0:\tDisplay all\n");
-				}
-
-				/* Delete brief pager usage info. */
-				printf("\r                       \r");
-
-				if (rc == 4  ||  rc == 'q')
-					break;
-
-				/* User has modified the pager's value by pressing a number > 0 */
-				if (rc >= '0'  &&  rc <= '9')
-					pager = rc - 48;
-
-				pager_show = idx + pager;
+				/* Full pager usage info. */
+				if (rc == '?')
+					puts("\n <SPACE>:\tNext page\n <ENTER>:\tNext line\n 1-9:\t\tNew pager value\n 'q', <EOT>:\tStop\n 'Q', 0:\tDisplay all\n");
 			}
 
-			key = xmlGetProp(db_node, BAD_CAST "name");
-			printf("%d. %s\n", idx++, key);
-			xmlFree(key); key = NULL;
+			/* Delete brief pager usage info. */
+			printf("\r                       \r");
+
+			if (rc == 4  ||  rc == 'q')
+				break;
+
+			/* User has modified the pager's value by pressing a number > 0 */
+			if (rc >= '0'  &&  rc <= '9')
+				pager = rc - 48;
+
+			pager_show = idx + pager;
 		}
+
+		key = xmlGetProp(db_node, BAD_CAST "name");
+		printf("%d. %s\n", idx++, key);
+		xmlFree(key); key = NULL;
 
 		db_node = db_node->next;
 	}
