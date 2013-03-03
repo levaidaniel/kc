@@ -30,7 +30,7 @@
 void
 cmd_clear(const char *e_line, command *commands)
 {
-	int		count = 0, i = 0, j = 0;
+	int	count = 0, i = 0, j = 0;
 
 
 	if (sscanf(e_line, "%*s %d", &count) <= 0)
@@ -41,6 +41,6 @@ cmd_clear(const char *e_line, command *commands)
 
 
 	for (i=0; i<count; i++)
-		for (j=0; j<50; j++)
+		for (j=0; j<100; j++)
 			puts("");
 } /* cmd_clear() */
