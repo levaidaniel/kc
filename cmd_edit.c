@@ -153,6 +153,8 @@ cmd_edit(const char *e_line, command *commands)
 		/* Update the keychain's modified timestamp */
 		xmlSetProp(keychain, BAD_CAST "modified", BAD_CAST modified);
 
+		printf("Modified key: %d. %s\n", idx, key);
+
 		xmlFree(key); key = NULL;
 		xmlFree(value_rR); value_rR = NULL;
 		xmlFree(value); value = NULL;
