@@ -27,6 +27,9 @@
 #include "commands.h"
 
 
+char	swap_keys(xmlNodePtr *, xmlNodePtr *);
+
+
 extern xmlNodePtr	keychain;
 extern char		dirty;
 
@@ -34,13 +37,14 @@ extern char		dirty;
 void
 cmd_swap(const char *e_line, command *commands)
 {
-	xmlNodePtr	key_src = NULL, key_dst = NULL, key_tmp_src = NULL, key_tmp_dst = NULL;
+	xmlNodePtr	key_src = NULL, key_dst = NULL, key_finish = NULL;
 
-	char		*modified = NULL;
+	char		cmd[7], *modified = NULL;
+	char		insert = 0;
 	int		idx_src = 0, idx_dst = 0;
 
 
-	if (sscanf(e_line, "%*s %d %d", &idx_src, &idx_dst) < 2) {
+	if (sscanf(e_line, "%s %d %d", cmd, &idx_src, &idx_dst) < 3) {
 		puts(commands->usage);
 		return;
 	}
@@ -66,36 +70,65 @@ cmd_swap(const char *e_line, command *commands)
 		return;
 	}
 
-	/* duplicate the source key */
-	key_tmp_src = xmlCopyNode(key_src, 2);
-	if (!key_tmp_src) {
-		puts("Error duplicating source entry!");
+	if (strcmp(cmd, "insert") == 0)
+		insert = 1;
 
-		if (getenv("KC_DEBUG"))
-			puts("xmlCopyNode() error!");
-
-		return;
-	}
-
-	/* duplicate the destination key */
-	key_tmp_dst = xmlCopyNode(key_dst, 2);
-	if (!key_tmp_dst) {
-		puts("Error duplicating destination entry!");
-
-		if (getenv("KC_DEBUG"))
-			puts("xmlCopyNode() error!");
+	if (!swap_keys(&key_src, &key_dst)) {
+		if (insert)
+			puts("Error while preparing to insert key!");
+		else
+			puts("Error while trying to swap keys!");
 
 		return;
 	}
 
 
-	/* We need two key_tmp_* variables, because xmlReplaceNode() unlinks both its parameters */
-	xmlReplaceNode(key_src, key_tmp_dst);
-	xmlFreeNode(key_src);
+	if (insert) {
+		/* Inserting is basically swapping the two indices, then shift the surrounding indices ...
+		 *
+		 * if (idx_src > idx_dst)
+		 * ... from the bottom to the top
+		 *
+		 * if (idx_src < idx_dst)
+		 * ... from the top to the bottom
+		 */
 
-	xmlReplaceNode(key_dst, key_tmp_src);
-	xmlFreeNode(key_dst);
+		key_finish = key_src;
+		key_src = key_dst;
 
+		/* We skip one node; it's the text node for formatting */
+		if (idx_src > idx_dst)
+			key_dst = key_src->prev->prev;
+		else
+			key_dst = key_src->next->next;
+
+		while (key_dst) {
+			/* finish */
+			if (key_dst == key_finish)
+				break;
+
+			if (key_dst->type != XML_ELEMENT_NODE) {
+				puts("Error while trying to insert key! Please check you key list and reload your database without saving, if necessary!");
+				if (getenv("KC_DEBUG"))
+					puts("key_dst is non-element node!");
+
+				return;
+			}
+
+			if (!swap_keys(&key_src, &key_dst)) {
+				puts("Error while trying to insert key! Please check you key list and reload your database without saving, if necessary!");
+				if (getenv("KC_DEBUG"))
+					puts("swap_key() error while shifting nodes!");
+
+				return;
+			}
+
+			if (idx_src > idx_dst)
+				key_dst = key_src->prev->prev;
+			else
+				key_dst = key_src->next->next;
+		}
+	}
 
 	/* Update the current keychain's modified timestamp */
 	modified = malloc(TIME_MAXLEN); malloc_check(modified);
@@ -104,7 +137,53 @@ cmd_swap(const char *e_line, command *commands)
 	xmlSetProp(keychain, BAD_CAST "modified", BAD_CAST modified);
 
 
-	printf("Key %d was swapped with %d\n", idx_src, idx_dst);
+	if (insert)
+		printf("Key %d was inserted at %d\n", idx_src, idx_dst);
+	else
+		printf("Key %d was swapped with %d\n", idx_src, idx_dst);
 
 	dirty = 1;
 } /* cmd_swap() */
+
+
+char
+swap_keys(xmlNodePtr *key_src, xmlNodePtr *key_dst)
+{
+	xmlNodePtr	key_tmp_src = NULL, key_tmp_dst = NULL;
+
+
+	/* duplicate the source key */
+	key_tmp_src = xmlCopyNode(*key_src, 2);
+	if (!key_tmp_src) {
+		puts("Error duplicating source entry!");
+
+		if (getenv("KC_DEBUG"))
+			puts("xmlCopyNode() error!");
+
+		return(0);
+	}
+
+	/* duplicate the destination key */
+	key_tmp_dst = xmlCopyNode(*key_dst, 2);
+	if (!key_tmp_dst) {
+		puts("Error duplicating destination entry!");
+
+		if (getenv("KC_DEBUG"))
+			puts("xmlCopyNode() error!");
+
+		return(0);
+	}
+
+
+	/* We need two key_tmp_* variables, because xmlReplaceNode() unlinks both its parameters */
+	xmlReplaceNode(*key_src, key_tmp_dst);
+	xmlFreeNode(*key_src);
+
+	xmlReplaceNode(*key_dst, key_tmp_src);
+	xmlFreeNode(*key_dst);
+
+	*key_src = key_tmp_src;	/* the original "source" index */
+	*key_dst = key_tmp_dst;	/* the original "destination" index */
+
+	return(1);
+} /* swap_keys() */

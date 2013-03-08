@@ -95,6 +95,39 @@ fi
 
 
 
+# insert
+i=0
+while [ $i -lt $(( ${loop} + 2 )) ];do
+	printf "insert #$i\r" >/dev/stderr
+
+	printf "insert 0 $(( ${loop} + 1 ))\n"
+
+	# random writes
+	if [ $(( $RANDOM % 2 )) -eq 0 ];then
+		printf "write\n"
+	fi
+
+	if [ $i -eq $(( ${loop} + 2 )) ];then
+		printf "write\n"
+		break
+	fi
+
+	i=$(( $i + 1 ))
+done |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} >/dev/null
+echo # new line
+
+if [ ${CHECK_DURING_MODIFY} -gt 0 ];then
+	SHA1=$(printf "list\n" |KC_DEBUG=yes ./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
+	if [ "$SHA1" == 'ff93f58b1306ae81a5a59acc032d554b7a303683' ];then
+		echo "$0 test ok (#${loop} inserts)!"
+	else
+		echo "$0 test failed (#${loop} inserts)!"
+		exit 1
+	fi
+fi
+
+
+
 # edit
 offset=2
 i=$(( 0 + ${offset} ))

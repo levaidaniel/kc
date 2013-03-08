@@ -131,6 +131,13 @@ commands_init(command **commands)
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
 
+		(*commands)->name = "insert";
+		(*commands)->usage = "insert <index> <index>";
+		(*commands)->help = "Move the key at the first 'index' parameter to the index at the second 'index' parameter in the current keychain. Surrounding indices will be shifted backwards or forwards.";
+		(*commands)->fn = cmd_swap;
+		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
+		(*commands) = (*commands)->next;
+
 		(*commands)->name = "move";
 		(*commands)->usage = "move <index> <keychain>";
 		(*commands)->help = "Move a key in the current keychain to another keychain. 'index' is the key's index to move and 'keychain' is the destination keychain's index number or name. Index number takes priority when addressing a keychain.";

@@ -134,6 +134,12 @@ for more information about this.
 Swap two keys, exchanging their index numbers. The two
 .Ar index
 parameters are the keys' index numbers in the current keychain.
+.It Cm insert Ar index Ar index
+Move the key at the first
+.Ar index
+parameter to the index at the second
+.Ar index
+parameter in the current keychain. Surrounding indices will be shifted backwards or forwards.
 .It Cm search Ar string
 Search for
 .Ar string

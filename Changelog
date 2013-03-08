@@ -44,6 +44,9 @@ Functional changes, improvements:
   	'cren' was renamed to 'cedit'.
   swap:
   	Swap two keys' indices with each other.
+  insert:
+	Move a key from its position to a new index in the current keychain,
+	while shifting the surrounding indices backwards or forwards.
 - xport command now exports to an encrypted kc database. Password will be
   prompted for.
   Also a new feature for the 'xport' and 'dump' commands:
