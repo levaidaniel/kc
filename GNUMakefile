@@ -57,4 +57,4 @@ test:
 
 ${PROG}: ${OBJS}
 	${CC} -o ${PROG} ${CFLAGS} ${LDADD} \
-		${SRCS}
+		${OBJS}
