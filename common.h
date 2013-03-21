@@ -29,7 +29,7 @@
 
 
 #define	NAME	"kc"
-#define	VERSION	"2.3-dev-SVN_VERSION"
+#define	VERSION	"2.3.0"
 
 #define	PASSWORD_MAXLEN	64
 #define	IV_LEN		16
