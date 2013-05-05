@@ -29,7 +29,7 @@
 
 
 #define	NAME	"kc"
-#define	VERSION	"2.3.0"
+#define	VERSION	"2.3.1"
 
 #define	PASSWORD_MAXLEN	64
 #define	IV_LEN		16

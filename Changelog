@@ -1,3 +1,12 @@
+2.3.1:
+Bug fixes:
+
+Functional changes, improvements:
+- CTRL+l now clears the screen in Editline mode.
+
+Cosmetic changes:
+
+
 2.3.0:
 
 Bug fixes:
