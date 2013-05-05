@@ -469,6 +469,9 @@ main(int argc, char *argv[])
 	if (el_set(e, EL_BIND, "^A", "ed-move-to-beg", NULL) != 0)
 		perror("el_set(EL_BIND)");
 
+	if (el_set(e, EL_BIND, "^L", "ed-clear-screen", NULL) != 0)
+		perror("el_set(EL_BIND)");
+
 	if (el_source(e, NULL) != 0) {
 		if (errno != 0) {
 			if (errno != ENOENT)
