@@ -1,5 +1,7 @@
 2.3.1:
 Bug fixes:
+- When using the 'xport' command, don't leave an empty file after the password
+  input was canceled.
 
 Functional changes, improvements:
 - CTRL+l now clears the screen in Editline mode.
