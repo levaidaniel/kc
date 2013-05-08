@@ -196,12 +196,34 @@ cmd_export(const char *e_line, command *commands)
 		} else
 			printf("Failed dumping to '%s'.\n", export_filename);
 	} else {
+		/* ask for the new password */
+		while (ret == -1)
+			ret = kc_password_read(&pass, 1);
+
+		if (ret == 0) {	/* canceled */
+			BIO_free_all(bio_chain);
+			free(export_filename); export_filename = NULL;
+			free(line); line = NULL;
+
+			if (pass)
+				memset(pass, '\0', PASSWORD_MAXLEN);
+			free(pass); pass = NULL;
+
+			return;
+		}
+
+
 		export_file = open(export_filename, O_RDWR | O_CREAT, 0600);
 		if (export_file < 0) {
 			perror("open(database file)");
 
 			free(export_filename); export_filename = NULL;
 			free(line); line = NULL;
+
+			if (pass)
+				memset(pass, '\0', PASSWORD_MAXLEN);
+			free(pass); pass = NULL;
+
 			return;
 		}
 
@@ -212,21 +234,14 @@ cmd_export(const char *e_line, command *commands)
 			close(export_file);
 			free(export_filename); export_filename = NULL;
 			free(line); line = NULL;
+
+			if (pass)
+				memset(pass, '\0', PASSWORD_MAXLEN);
+			free(pass); pass = NULL;
+
 			return;
 		}
 
-
-		/* ask for the new password */
-		while (ret == -1)
-			ret = kc_password_read(&pass, 1);
-
-		if (ret == 0) {	/* canceled */
-			BIO_free_all(bio_chain);
-			close(export_file);
-			free(export_filename); export_filename = NULL;
-			free(line); line = NULL;
-			return;
-		}
 
 		/* Generate iv/salt, setup cipher mode and turn on encrypting */
 		if (!kc_setup_crypt(bio_chain, 1, cipher_mode, pass, iv, salt, key, KC_SETUP_CRYPT_IV | KC_SETUP_CRYPT_SALT | KC_SETUP_CRYPT_KEY)) {
@@ -236,6 +251,11 @@ cmd_export(const char *e_line, command *commands)
 			close(export_file);
 			free(export_filename); export_filename = NULL;
 			free(line); line = NULL;
+
+			if (pass)
+				memset(pass, '\0', PASSWORD_MAXLEN);
+			free(pass); pass = NULL;
+
 			return;
 		}
 
