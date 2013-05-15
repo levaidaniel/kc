@@ -204,11 +204,6 @@ cmd_export(const char *e_line, command *commands)
 			BIO_free_all(bio_chain);
 			free(export_filename); export_filename = NULL;
 			free(line); line = NULL;
-
-			if (pass)
-				memset(pass, '\0', PASSWORD_MAXLEN);
-			free(pass); pass = NULL;
-
 			return;
 		}
 
