@@ -298,7 +298,10 @@ kc_password_read(char **pass1, char new)
 
 	if (new) {
 		if (!strlen(*pass1)) {
+			if (*pass1)
+				memset(*pass1, '\0', PASSWORD_MAXLEN);
 			free(*pass1); *pass1 = NULL;
+
 			puts("Canceled.");
 			return(0);
 		}
@@ -306,19 +309,33 @@ kc_password_read(char **pass1, char new)
 		pass2 = malloc(PASSWORD_MAXLEN + 1); malloc_check(pass2);
 		readpassphrase("New password again (empty to cancel): ", pass2, PASSWORD_MAXLEN + 1, rpp_flags);
 		if (!strlen(pass2)) {
+			if (*pass1)
+				memset(*pass1, '\0', PASSWORD_MAXLEN);
 			free(*pass1); *pass1 = NULL;
+
+			if (pass2)
+				memset(pass2, '\0', PASSWORD_MAXLEN);
 			free(pass2); pass2 = NULL;
+
 			puts("Canceled.");
 			return(0);
 		}
 
 		if (strcmp(*pass1, pass2) != 0) {
+			if (*pass1)
+				memset(*pass1, '\0', PASSWORD_MAXLEN);
 			free(*pass1); *pass1 = NULL;
+
+			if (pass2)
+				memset(pass2, '\0', PASSWORD_MAXLEN);
 			free(pass2); pass2 = NULL;
+
 			puts("Passwords mismatch.");
 			return(-1);
 		}
 
+		if (pass2)
+			memset(pass2, '\0', PASSWORD_MAXLEN);
 		free(pass2); pass2 = NULL;
 	}
 
