@@ -2,6 +2,7 @@
 Bug fixes:
 - When using the 'xport' command, don't leave an empty file after the password
   input was canceled.
+- Fix regression stress test's insert command section.
 
 Functional changes, improvements:
 - CTRL+l now clears the screen in Editline mode.

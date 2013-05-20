@@ -107,7 +107,7 @@ while [ $i -lt $(( ${loop} + 2 )) ];do
 		printf "write\n"
 	fi
 
-	if [ $i -eq $(( ${loop} + 2 )) ];then
+	if [ $i -eq $(( ${loop} + 1 )) ];then
 		printf "write\n"
 		break
 	fi
