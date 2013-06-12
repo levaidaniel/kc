@@ -122,6 +122,7 @@ cmd_copy(const char *e_line, command *commands)
 		name = xmlGetProp(key, BAD_CAST "name");
 		printf("Key '%d. %s' was %s to keychain: %s\n", idx, name, move ? "moved" : "copied", cname);
 		xmlFree(name); name = NULL;
+		free(modified); modified = NULL;
 
 		dirty = 1;
 	}

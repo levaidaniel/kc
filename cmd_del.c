@@ -116,6 +116,8 @@ cmd_del(const char *e_line, command *commands)
 			snprintf(modified, TIME_MAXLEN, "%d", (int)time(NULL));
 			xmlSetProp(keychain, BAD_CAST "modified", BAD_CAST modified);
 
+			free(modified); modified = NULL;
+
 			dirty = 1;
 		}
 	} else

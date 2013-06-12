@@ -136,6 +136,7 @@ cmd_swap(const char *e_line, command *commands)
 
 	xmlSetProp(keychain, BAD_CAST "modified", BAD_CAST modified);
 
+	free(modified); modified = NULL;
 
 	if (insert)
 		printf("Key %d was inserted at %d\n", idx_src, idx_dst);
