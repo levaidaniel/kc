@@ -138,7 +138,15 @@ cmd_import(const char *e_line, command *commands)
 		kc_password_read(&pass, 0);
 
 		/* Setup cipher mode and turn on decrypting */
-		if (!kc_setup_crypt(bio_chain, 0, cipher_mode, pass, iv, salt, key, KC_SETUP_CRYPT_KEY)) {
+		ret = kc_setup_crypt(bio_chain, 0, cipher_mode, pass, iv, salt, key, KC_SETUP_CRYPT_KEY);
+
+		/* from here on now, we don't need to store the password text anymore */
+		if (pass)
+			memset(pass, '\0', PASSWORD_MAXLEN);
+		free(pass); pass = NULL;
+
+		/* kc_setup_crypt() check from a few lines above */
+		if (!ret) {
 			printf("Could not setup decrypting!");
 
 			BIO_free_all(bio_chain);
@@ -146,10 +154,6 @@ cmd_import(const char *e_line, command *commands)
 			free(line); line = NULL;
 			return;
 		}
-
-		if (pass)
-			memset(pass, '\0', PASSWORD_MAXLEN);
-		free(pass); pass = NULL;
 
 
 		ret = kc_read_database(&rbuf, bio_chain);

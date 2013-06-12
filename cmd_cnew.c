@@ -162,4 +162,5 @@ cmd_cnew(const char *e_line, command *commands)
 	}
 
 	xmlFree(name); name = NULL;
+	free(created); created = NULL;
 } /* cmd_cnew() */

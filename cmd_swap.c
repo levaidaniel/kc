@@ -108,7 +108,7 @@ cmd_swap(const char *e_line, command *commands)
 				break;
 
 			if (key_dst->type != XML_ELEMENT_NODE) {
-				puts("Error while trying to insert key! Please check you key list and reload your database without saving, if necessary!");
+				puts("Error while trying to insert key! Please check your key list and reload your database without saving, if necessary!");
 				if (getenv("KC_DEBUG"))
 					puts("key_dst is non-element node!");
 
@@ -116,7 +116,7 @@ cmd_swap(const char *e_line, command *commands)
 			}
 
 			if (!swap_keys(&key_src, &key_dst)) {
-				puts("Error while trying to insert key! Please check you key list and reload your database without saving, if necessary!");
+				puts("Error while trying to insert key! Please check your key list and reload your database without saving, if necessary!");
 				if (getenv("KC_DEBUG"))
 					puts("swap_key() error while shifting nodes!");
 
@@ -136,6 +136,7 @@ cmd_swap(const char *e_line, command *commands)
 
 	xmlSetProp(keychain, BAD_CAST "modified", BAD_CAST modified);
 
+	free(modified); modified = NULL;
 
 	if (insert)
 		printf("Key %d was inserted at %d\n", idx_src, idx_dst);
