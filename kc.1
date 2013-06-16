@@ -98,7 +98,8 @@ These commands are available in the CLI:
 .It Cm new Op name
 Create a new key in the current keychain. Both key and value will be prompted for, except when
 .Ar name
-is specified; then it will be used as the key's name.
+is specified; then it will be used as the key's name, up until the first space in
+.Ar name .
 .Pp
 Character sequences can be used in values:
 .Pp
@@ -119,7 +120,7 @@ indices if specified. Every key gets prefixed by its index number. If
 is not specified, the default value of 20 is used. The special value 0 means to not use the pager. If
 .Ar offset
 is not specified, it is not used.
-.It Cm ls Op keychain
+.It Cm ls Op pager Op offset
 Alias of
 .Cm list .
 .It Cm edit Ar index
