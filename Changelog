@@ -4,12 +4,17 @@ Bug fixes:
   input was canceled.
 - Fix regression stress test's insert command section.
 - Plug in some memory leaks.
+- Man page fixes.
 
 Functional changes, improvements:
 - CTRL+l now clears the screen in Editline mode.
+- Issue a reminder that after some of the commands' execution, the index
+  numbers could have been modified, so issue a 'list' command first, before
+  using a command with index numbers again.
 
 Cosmetic changes:
 - An error message typo was fixed in 'swap' command.
+- Man page corrections.
 
 
 2.3.0:
