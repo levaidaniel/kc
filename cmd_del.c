@@ -109,6 +109,7 @@ cmd_del(const char *e_line, command *commands)
 			xmlFreeNode(db_node);
 
 			printf("Deleted key: %d. %s\n", idx, key);
+			puts("Key indices have been changed. Make sure to 'list', before using them again!");
 			xmlFree(key); key = NULL;
 
 			/* Update the keychain's modified timestamp */

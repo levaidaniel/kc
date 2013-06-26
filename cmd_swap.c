@@ -143,6 +143,8 @@ cmd_swap(const char *e_line, command *commands)
 	else
 		printf("Key %d was swapped with %d\n", idx_src, idx_dst);
 
+	puts("Key indices may have been changed. Make sure to 'list', before using them again!");
+
 	dirty = 1;
 } /* cmd_swap() */
 

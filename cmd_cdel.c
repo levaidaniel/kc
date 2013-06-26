@@ -120,6 +120,7 @@ cmd_cdel(const char *e_line, command *commands)
 				xmlFreeNode(db_node);
 
 				printf("Deleted keychain: %s\n", cname);
+				puts("Keychain indices have been changed. Make sure to 'clist', before using them again!");
 
 				dirty = 1;
 			}
