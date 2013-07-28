@@ -262,7 +262,7 @@ commands_init(command **commands)
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 	(*commands)->name = "ls";
-	(*commands)->usage = "ls [keychain]";
+	(*commands)->usage = "ls [pager [offset]]";
 	(*commands)->help = "Alias of 'list'.";
 	(*commands)->fn = cmd_list;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
