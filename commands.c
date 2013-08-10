@@ -440,13 +440,15 @@ kc_setup_bio_chain(const char *db_filename)
 	BIO	*bio_cipher = NULL;
 	BIO	*bio_chain = NULL;
 
+	int	ret = 0;
+
 
 	bio_file = BIO_new_file(db_filename, "r+");
 	if (!bio_file) {
 		perror("BIO_new_file()");
 		return(NULL);
 	}
-	BIO_set_close(bio_file, BIO_CLOSE);
+	ret = BIO_set_close(bio_file, BIO_CLOSE);	/* ret = ... is here to silence a compiler warning. BIO_set_close() always returns 1, according to the openssl documentation. */
 	bio_chain = BIO_push(bio_file, bio_chain);
 
 	bio_b64 = BIO_new(BIO_f_base64());
@@ -497,13 +499,39 @@ kc_db_writer(int db_file, xmlDocPtr db, BIO *bio_chain, unsigned char *iv, unsig
 		lseek(db_file, 0, SEEK_SET);
 
 		/* write the IV and salt first */
-		write(db_file, iv, IV_LEN);
-		write(db_file, salt, SALT_LEN);
+		if (write(db_file, iv, IV_LEN) != IV_LEN) {
+			if (getenv("KC_DEBUG"))
+				perror("write() IV_LEN");
 
+			return(0);
+		}
+		if (getenv("KC_DEBUG"))
+			puts("wrote iv to database file");
 
-		BIO_reset(bio_chain);		/* we must reset the cipher BIO to work after subsequent calls to cmd_write() */
+		if (write(db_file, salt, SALT_LEN) != SALT_LEN) {
+			if (getenv("KC_DEBUG"))
+				perror("write() SALT_LEN");
 
-		BIO_seek(bio_chain, IV_LEN + SALT_LEN);	/* seek after the IV and salt */
+			return(0);
+		}
+		if (getenv("KC_DEBUG"))
+			puts("wrote salt to database file");
+
+		/* we must reset the cipher BIO to work after subsequent calls to kc_db_writer() */
+		if (BIO_reset(bio_chain) != 0) {
+			if (getenv("KC_DEBUG"))
+				printf("%s(): BIO_reset() error\n", __func__);
+
+			return(0);
+		}
+
+		/* seek after the IV and salt */
+		if (BIO_seek(bio_chain, IV_LEN + SALT_LEN) != 0) {
+			if (getenv("KC_DEBUG"))
+				printf("%s(): BIO_seek() error\n", __func__);
+
+			return(0);
+		}
 
 		remaining = xmlBufferLength(xml_buf);
 		while (remaining > 0) {
@@ -621,7 +649,7 @@ kc_validate_xml(xmlDocPtr db)
 
 
 unsigned int
-kc_read_database(char **buf, BIO *bio_chain)
+kc_db_reader(char **buf, BIO *bio_chain)
 {
 	unsigned int	pos = 0;
 	size_t		buf_size = 1024;
@@ -629,7 +657,7 @@ kc_read_database(char **buf, BIO *bio_chain)
 
 
 	/* seek after the IV and salt */
-	BIO_seek(bio_chain, IV_LEN + SALT_LEN);
+	ret = BIO_seek(bio_chain, IV_LEN + SALT_LEN);	/* ret = ... is here to silence a compiler warning. It is possible that this is an empty database file, and we can not seek after anything yet. In this case we just create a new database, later. */
 
 	/* read in the database file to a buffer */
 	*buf = calloc(1, buf_size); malloc_check(*buf);
@@ -684,4 +712,4 @@ kc_read_database(char **buf, BIO *bio_chain)
 
 
 	return(pos);
-} /* kc_read_database() */
+} /* kc_db_reader() */

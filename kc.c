@@ -323,7 +323,7 @@ main(int argc, char *argv[])
 		}
 
 
-	pos = kc_read_database(&buf, bio_chain);
+	pos = kc_db_reader(&buf, bio_chain);
 	if (getenv("KC_DEBUG"))
 		printf("read %d bytes\n", pos);
 

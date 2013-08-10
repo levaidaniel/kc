@@ -156,7 +156,7 @@ cmd_import(const char *e_line, command *commands)
 		}
 
 
-		ret = kc_read_database(&rbuf, bio_chain);
+		ret = kc_db_reader(&rbuf, bio_chain);
 		if (getenv("KC_DEBUG"))
 			printf("read %d bytes\n", (int)ret);
 
