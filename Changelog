@@ -11,6 +11,7 @@ Functional changes, improvements:
 - Issue a reminder that after some of the commands' execution, the index
   numbers could have been modified, so issue a 'list' command first, before
   using a command with index numbers again.
+- More sanity checks during database write.
 
 Cosmetic changes:
 - An error message typo was fixed in 'swap' command.
