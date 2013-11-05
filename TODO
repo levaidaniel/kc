@@ -1,0 +1,2 @@
+- 'ls' command: sort by key name option.
+- somehow able to import binary blobs, encoded as base64 in values. (for eg.: private keys etc...)
