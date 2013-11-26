@@ -13,8 +13,8 @@ if ($#ARGV < 1  or  $ARGV[0] eq '-h'  or  $ARGV[0] eq '--help') {
 	exit(1);
 }
 
-my $PWSAFE_EXPORT_FILE = $ARGV[0];
-my $KC_XML_FILE = $ARGV[1];
+my $PWSAFE_EXPORT_FILE = shift;
+my $KC_XML_FILE = shift;
 
 print "opening ${PWSAFE_EXPORT_FILE} for reading.\n";
 open(INPUT, '<', $PWSAFE_EXPORT_FILE)  or  die "couldn't open pwsafe export file '${PWSAFE_EXPORT_FILE}': $!\n";
@@ -25,19 +25,12 @@ print OUTPUT '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . '<kc>' . "\n";
 
 my $items = 0;
 my $keychains = 0;
-
-my $i = 0;
-my $answer = '';
-my $stuff = '';
-
-my $chain = '';
 my $chain_prev = '';
-my $key = '';
-my $value = '';
+my $i = 0;
 
 print "Converting...\n";
 
-#print "--[No.\t[Chain]\tKey:\tValue]--\n";	# verbosity
+print "--[No.\t[Chain]\tKey:\tValue]--\n";
 
 while (<INPUT>) {
 	chomp;
@@ -46,12 +39,13 @@ while (<INPUT>) {
 
 	$i++;
 
-	(undef, $chain, undef, $key, $value, undef) = split;
+	(undef, my $chain, undef, my $key, my $value, undef) = split;
 	$chain =~ s/^"(.*)"$/$1/;
+	$chain ||= 'default';
 	$key =~ s/^"(.*)"$/$1/;
 	$value =~ s/^"(.*)"$/$1/;
 
-	#print "$i.: [${chain}] ${key}: ${value}\n";	# verbosity
+	print "$i.:\t[${chain}] ${key}: ${value}\n";
 
 	# Somehow after exporting from pwsafe there is a possibility that from some strings
 	# wich contain HTML character entities (&gt; &lt; &quot; etc...) the ';' (semicolon)
@@ -62,9 +56,9 @@ while (<INPUT>) {
 	# a proper closing semicolon.
 	# So, we decode the string and then reencode it, because it seems the HTML::Entities
 	# module deals well with unclosed HTML character entities.
-	for $stuff (\$chain, \$key, \$value) {
+	for my $stuff (\$chain, \$key, \$value) {
 		if ($$stuff =~ m/&[a-z]+;/) {
-				$$stuff = encode_entities(decode_entities($$stuff));
+			$$stuff = encode_entities(decode_entities($$stuff));
 		}
 	}
 
