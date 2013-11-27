@@ -1,4 +1,8 @@
 tags
+kc
+compile.sh
+release.sh
+scan-build.sh
 
 # Object files
 *.o
