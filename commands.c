@@ -160,6 +160,9 @@ get_random_str(size_t length, char alnum)
 				ret = read(rnd_file, tmp, 1);
 				if (ret < 0) {
 					perror("read(random device)");
+
+					free(rnd_str); rnd_str = NULL;
+					free(tmp); tmp = NULL;
 					return(NULL);
 				}
 			}
@@ -170,6 +173,9 @@ get_random_str(size_t length, char alnum)
 				ret = read(rnd_file, tmp, 1);
 				if (ret < 0) {
 					perror("read(random device)");
+
+					free(rnd_str); rnd_str = NULL;
+					free(tmp); tmp = NULL;
 					return(NULL);
 				}
 			}

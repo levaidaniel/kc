@@ -74,6 +74,9 @@ cmd_getnum(int idx, size_t spice)
 		}
 		if (el_set(e, EL_UNBUFFERED, 1) != 0) {
 			perror("el_set(EL_UNBUFFERED)");
+
+			xmlFree(key); key = NULL;
+			xmlFree(value_nl); value_nl = NULL;
 			return;
 		}
 #else
@@ -101,8 +104,14 @@ cmd_getnum(int idx, size_t spice)
 
 				/* begin with the random string */
 				rand_str = get_random_str(spice, 0);
-				if (!rand_str)
+				if (!rand_str) {
+					xmlFree(key); key = NULL;
+					xmlFree(value_nl); value_nl = NULL;
+					xmlFree(line); line = NULL;
+					free(line_randomed); line_randomed = NULL;
+
 					return;
+				}
 				strlcat((char *)line_randomed, rand_str, line_randomed_len);
 				free(rand_str); rand_str = NULL;
 				for (i=0;i < (int)line_len;i++) {
@@ -113,8 +122,14 @@ cmd_getnum(int idx, size_t spice)
 
 					/* append a random string */
 					rand_str = get_random_str(spice, 0);
-					if (!rand_str)
+					if (!rand_str) {
+						xmlFree(key); key = NULL;
+						xmlFree(value_nl); value_nl = NULL;
+						xmlFree(line); line = NULL;
+						free(line_randomed); line_randomed = NULL;
+
 						return;
+					}
 					strlcat((char *)line_randomed, rand_str, line_randomed_len);
 					free(rand_str); rand_str = NULL;
 				}
