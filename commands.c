@@ -446,15 +446,13 @@ kc_setup_bio_chain(const char *db_filename)
 	BIO	*bio_cipher = NULL;
 	BIO	*bio_chain = NULL;
 
-	int	ret = 0;
-
 
 	bio_file = BIO_new_file(db_filename, "r+");
 	if (!bio_file) {
 		perror("BIO_new_file()");
 		return(NULL);
 	}
-	ret = BIO_set_close(bio_file, BIO_CLOSE);	/* ret = ... is here to silence a compiler warning. BIO_set_close() always returns 1, according to the openssl documentation. */
+	BIO_set_close(bio_file, BIO_CLOSE);	/* On ignoring the return value: BIO_set_close() always returns 1, according to the openssl documentation. */
 	bio_chain = BIO_push(bio_file, bio_chain);
 
 	bio_b64 = BIO_new(BIO_f_base64());
