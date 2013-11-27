@@ -1,5 +1,5 @@
 Prerequisites:
-- libbsd >= 0.2.0
+- libbsd >= 0.2.0 (except on BSDs, of course)
 - libxml >= 2.6
 - libedit or libreadline
 
