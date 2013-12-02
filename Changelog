@@ -1,3 +1,9 @@
+2.3.2:
+Bug fixes:
+- Fix logic flaw in saving the new database file. There was no file lock on
+  the newly saved database file after invoking the 'write' command.
+
+
 2.3.1:
 Bug fixes:
 - When using the 'xport' command, don't leave an empty file after the password
