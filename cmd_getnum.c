@@ -38,6 +38,9 @@ extern char		batchmode;
 extern EditLine		*e;
 #endif
 
+extern int		db_file;
+extern BIO		*bio_chain;
+
 
 void
 cmd_getnum(int idx, size_t spice)
@@ -49,6 +52,9 @@ cmd_getnum(int idx, size_t spice)
 	size_t		line_len = 0, line_randomed_len = 0, erase_len = 0;
 	char		rc = 0;
 	char		*rand_str = NULL;
+	char		**fork_argv = NULL;
+	int		child;
+	int		pipefd[2];
 
 
 	db_node = find_key(idx);
@@ -206,6 +212,100 @@ cmd_getnum(int idx, size_t spice)
 					case '9':
 						if ((rc - 48) <= lines)
 							idx = rc - 48;
+						break;
+					case 't':
+						/* Copy value to tmux paste buffer */
+
+						switch (child = fork()) {
+							case -1:
+								perror("\nCouldn't fork(2) for tmux(1)");
+								break;
+							case 0:	/* Child */
+								close(0);	/* This is also needed for Editline's UNBUFFERED mode to continue to work properly. */
+								close(1);
+
+								if (bio_chain)
+									BIO_free_all(bio_chain);
+
+								if (db_file) {
+									if (close(db_file) == -1) {
+										perror("child: close(database file)");
+										break;
+									}
+								}
+
+								fork_argv = malloc(5 * sizeof(char *)); malloc_check(fork_argv);
+								fork_argv[0] = "tmux";
+								fork_argv[1] = "set-buffer";
+								fork_argv[2] = "--";
+								fork_argv[3] = (char *) line;
+								fork_argv[4] = NULL;
+
+								if (execvp(fork_argv[0], fork_argv) == -1)
+									perror("\nCouldn't execute tmux(1)");
+
+								quit(EXIT_SUCCESS);
+
+								break;
+							default: /* Parent */
+								break;
+						}
+
+						break;
+					case 'x':
+					case 'X':
+						/* Copy value to X11 clipboard, using xclip(1) */
+
+						pipe(pipefd);
+
+						switch (child = fork()) {
+							case -1:
+								perror("\nCouldn't fork(2) for xclip(1)");
+								break;
+							case 0:	/* Child */
+								close(0);	/* This is also needed for Editline's UNBUFFERED mode to continue to work properly. */
+								close(1);
+								close(pipefd[1]);
+
+								if (bio_chain)
+									BIO_free_all(bio_chain);
+
+								if (db_file) {
+									if (close(db_file) == -1) {
+										perror("child: close(database file)");
+										break;
+									}
+								}
+
+								fork_argv = malloc(3 * sizeof(char *)); malloc_check(fork_argv);
+								fork_argv[0] = "xclip";
+								fork_argv[1] = "-selection";
+								if (rc == 'x') {
+									fork_argv[2] = "primary";
+								} else if (rc == 'X') {
+									fork_argv[2] = "clipboard";
+								}
+								fork_argv[3] = NULL;
+
+								/* stdin becomes the read end of the pipe in the child,
+								 * and the exec'd process will have the same environment. */
+								dup2(pipefd[0], 0);
+								if (execvp(fork_argv[0], fork_argv) == -1)
+									perror("\nCouldn't execute xclip(1)");
+
+								quit(EXIT_SUCCESS);
+
+								break;
+							default: /* Parent */
+								/* Write the value to the pipe's write end, which will
+								 * appear in the child's stdin (pipe's read end). */
+								close(pipefd[0]);
+								write(pipefd[1], line, line_len);
+								close(pipefd[1]);
+
+								break;
+						}
+
 						break;
 					default:
 						break;
