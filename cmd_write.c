@@ -40,6 +40,7 @@ extern xmlDocPtr	db;
 extern char		*cipher_mode;
 extern unsigned char	salt[SALT_LEN + 1], iv[IV_LEN + 1], key[KEY_LEN];
 
+extern int		db_file;
 extern char		*db_filename;
 
 extern char		dirty;
@@ -116,21 +117,54 @@ cmd_write(const char *e_line, command *commands)
 		return;
 	}
 
+	puts("Save OK");
+
+	dirty = 0;
+
+
+	if (close(db_file) == 0) {
+		if (getenv("KC_DEBUG"))
+			puts("closed old database file");
+	} else
+		perror("close(old database file)");
+
 	if (rename(db_filename_tmp, db_filename) < 0) {
 		puts("Could not rename temporary database file!");
-		perror("open(db_file_tmp)");
+		perror("rename(db_filename_tmp, db_filename)");
 
 		BIO_free_all(bio_chain_tmp);
 		close(db_file_tmp);
 		unlink(db_filename_tmp);
 		return;
-	}
-
-	puts("Save OK");
-
-	dirty = 0;
+	} else
+		if (getenv("KC_DEBUG"))
+			puts("renamed temporary database file to the original database filename");
 
 	BIO_free_all(bio_chain_tmp);
 	close(db_file_tmp);
 	unlink(db_filename_tmp);
+
+
+	/* Reopen the new database file as the 'db_file' fd. */
+	db_file = open(db_filename, O_RDWR);
+	if (db_file < 0) {
+		puts("Could not reopen the new database file! This means that a file lock can not be placed on it. I suggest you to restart the application!");
+		perror("open(new database file)");
+
+		return;
+	} else
+		if (getenv("KC_DEBUG"))
+			puts("reopened new database file");
+
+	if (flock(db_file, LOCK_NB | LOCK_EX) < 0) {
+		if (getenv("KC_DEBUG"))
+			puts("flock(new database file)");
+
+		puts("Could not lock the new database file! I suggest you to restart the application!");
+		perror("flock(new database file)");
+
+		return;
+	} else
+		if (getenv("KC_DEBUG"))
+			puts("locked new database file");
 } /* cmd_write() */
