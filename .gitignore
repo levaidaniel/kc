@@ -4,6 +4,9 @@ compile.sh
 release.sh
 scan-build.sh
 
+# Vim swap files
+.*.swp
+
 # Object files
 *.o
 *.ko
