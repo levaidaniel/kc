@@ -3,6 +3,7 @@ kc
 compile.sh
 release.sh
 scan-build.sh
+regress/test*
 
 # Vim swap files
 .*.swp
