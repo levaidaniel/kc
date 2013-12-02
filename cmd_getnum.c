@@ -135,15 +135,14 @@ cmd_getnum(int idx, size_t spice)
 				}
 				line_randomed[(long)(line_randomed_len - 1)] = '\0';
 
-				printf("%s", line_randomed);
-			} else {
-				printf("%s", line);
+				xmlFree(line); line = NULL;
+				line = line_randomed;
 			}
+
+			printf("%s", line);
 #ifdef _READLINE
 			rl_redisplay();
 #endif
-			xmlFree(line); line = NULL;
-			free(line_randomed); line_randomed = NULL;
 
 			if (batchmode) {
 				rc = 'q';
@@ -214,6 +213,7 @@ cmd_getnum(int idx, size_t spice)
 			}
 		}
 
+		xmlFree(line); line = NULL;
 		xmlFree(key); key = NULL;
 		xmlFree(value_nl); value_nl = NULL;
 
