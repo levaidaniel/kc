@@ -1,97 +1,23 @@
-2.3.0:
+2.4.0:
 
 Bug fixes:
-- Plug in some memory leaks.
-- Don't link to libssl, just libcrypto
-- Information and error message corrections.
-- With command 'cnew', force checking for the keychain's name instead of its
-  index number while checking for an existing keychain.
-- Change editline TAB completion, so that partial commands will be completed up
-  until the first differing character in the matched command names.
-- Fix potential crashes when importing bogus encrypted/plaintext databases.
-- Avoid annoying situation, where one would enter EOT in the CLI with a dirty
-  database, and during the confirmation - if the database should be saved or
-  not - comes another EOT and kc would quit (without saving) regardless of the
-  answer for the save confirmation question. Now kc will jump back to the CLI
-  on an EOT during the saving confirmation question.
+- Fix logic flaw in saving the new database file. There was no file lock on
+  the newly saved database file after invoking the 'write' command.
 
 Functional changes, improvements:
-- New commands
-  status:
-	What database file is in use,
-	and other funny stuff about the current database.
-  info:
-	Displays information about a key or the current keychain ('created' and 'modified', plus 'description' for
-	keychains).
-  append:
-	append <filename>
-	Append every keychain from 'filename' to the database. (ie.: without
-	overwriting it like 'import')
-	Append won't create existing keychains (based on their names), instead
-	appends their entries to the already present keychain.
-  importxml, appendxml:
-	These commands work with plain text kc XML document dumps, in contrast
-	to import/append which work with encrypted database exports (made by
-	the xport command).
-  dump:
-  	Dump the whole XML structure to a plain text XML file.
-	This is how 'xport' worked before.
-  cc, ccdel commands:
-	With these commands the keychain's name takes priority over its
-	index number when specifying it as a parameter.
-	This avoids confusion when naming a keychain as a number.
-  cedit:
-  	'cren' was renamed to 'cedit'.
-  swap:
-  	Swap two keys' indices with each other.
-  insert:
-	Move a key from its position to a new index in the current keychain,
-	while shifting the surrounding indices backwards or forwards.
-- xport command now exports to an encrypted kc database. Password will be
-  prompted for.
-  Also a new feature for the 'xport' and 'dump' commands:
-  xport <filename> [keychain]
-  dump <filename> [keychain]
-  Export only one keychain from the current database to the specified file.
-- import command now imports encrypted kc databases instead of plain XML dumps
-  like before.
-- Make the exported/dumped file readable only by its owner.
-- Make it possible to compile kc with libedit on Linux too, with the EDITLINE
-  flag. The default remains readline on Linux.
-- Change database save logic so it tries hard not to end up with an unusable
-  database file in case of a library or other catastrophic failure.
-  Write to a temporary file first, and if that succeeds, rename that file to the
-  original database filename.
-- Add a DTD for the kc XML structure, and validate against it when
-  importing/appending.
-- Use .kcd extension for kc encrypted database files. kc will be looking for
-  'default.kcd' under ~/.kc, so rename you existing database if you used this
-  name.
-- '[c]search' and '[c]/' commands now understand modifiers:
-  An exclamation mark ('!') will negate (inverse) the matching and display
-  non-matching key names.
-  Character 'i' will ignore the case of characters during the search.
-  The '*' character's effect remains the same, it searches in every keychain.
-  Also, it is now possible to include spaces in the patterns for both
-  '[c]search' and '[c]/'.
-- '/' and 'c/' commands' parameters (patterns) are now read after a space,
-  like with every other command.
-- Dropped 's' command. It was an alias for 'search'.
-- 'list' command now uses a "pager" and an "offset" argument instead of
-  keychain. It displays "pager" number of keys at once (the default is 20)
-  skipping "offset" indices if specified.
-- CLI tab completion is a bit more user friendly.
-- 'cnew' command now asks for an optional description for the keychain being
-  created.
-- 'cren' command was renamed to 'cedit' and can now edit the current
-  keychain's name and description.
-- Massive documentation fixes (man page and help/usage messages).
+- Introduce new hotkeys while in value displaying, for copying 'values'
+  to various clipboards:
 
-Cosmetic changes:
-- Add PCRE information to version.
-- Renamed pwsafe convert script.
-- Display the number of matches when using 'search' or '/' (with more than 5
-  matches).
-- Display the newly added key's index number after using the 'new' command.
-- Changed keychain displaying in the CLI prompt. Hopefully it will not get
-  lost between other texts now.
+  'x' will copy to PRIMARY X selection,
+  'X' will copy to CLIPBOARD ("^C -> ^V") X selection,
+  't' will insert the value to tmux's paste buffer.
+
+  'x' and 'X' uses xclip(1): the 'value' is sent to its stdin.
+  't' uses the tmux binary of course, and it just calls the set-buffer
+      command with the 'value' as its parameter.
+
+  Both binaries must be in PATH, and if they can not be executed, an error
+  message gets printed.
+
+  Removal of the 'values' from the clipboards are not being dealt with (!!!),
+  it should be the user's responsibility.
