@@ -27,6 +27,17 @@
 #include "commands.h"
 
 
+/* 'erase_len'
+ * add the key + "[" + "]" + " "
+ * add the random chars too
+ * add the line number prefix too + "[" + "/" + "]" + " "
+ */
+#define		ERASE_LEN \
+	strlen((const char *)key) + 3 + \
+	(spice ? line_len + line_len * spice + spice : line_len) + \
+	(lines > 1 ? digit_length(idx) + digit_length(lines) + 4 : 0)
+
+
 xmlChar	*get_line(xmlChar *, int, int);
 xmlChar	*parse_newlines(xmlChar *, char);
 size_t	digit_length(int);
@@ -163,9 +174,7 @@ cmd_getnum(int idx, size_t spice)
 
 				/* erase (overwrite) the previously written value with spaces */
 				printf("\r");
-				erase_len =	strlen((const char *)key) + 3 +					/* add the key + "[" + "]" + " " */
-						(spice ? line_len + line_len * spice + spice : line_len) +	/* add the random chars too */
-						(lines > 1 ? digit_length(idx) + digit_length(lines) + 4 : 0);	/* add the line number prefix too + "[" + "/" + "]" + " " */
+				erase_len = ERASE_LEN;
 				for (i=0; i < (int)erase_len; i++)
 					putchar(' ');
 
