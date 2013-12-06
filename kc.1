@@ -35,7 +35,9 @@
 .Sh DESCRIPTION
 The
 .Nm
-utility is a console based username and password management application using an encrypted XML document as its database. The database file is protected by a password that the user supplies during the creation of a new database. This password can be at most 256 characters long, and is converted to a key with a KDF (key derivation function).
+utility is a console based username and password management application using an encrypted XML document as its database. The database file is protected by a password that the user supplies during the creation of a new database. This password can be at most 256 characters long, and is converted to a key with a KDF (key derivation function). If the supplied password (either by user input or in a password file) is longer than the allowed maximum,
+.Nm
+silently discards the rest of it.
 .Pp
 A database file can contain multiple keychains, and keychains in turn can contain multiple keys (usernames if you like) and values (passwords if you like).
 .Pp
@@ -79,6 +81,7 @@ will not try to lock the database file, and commands which could modify the data
 .It Fl p Ar file
 Read password from
 .Ar file .
+The last new line gets stripped.
 .It Fl m Ar mode
 Cipher mode.
 .Ar mode
