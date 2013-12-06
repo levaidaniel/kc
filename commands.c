@@ -661,7 +661,7 @@ kc_db_reader(char **buf, BIO *bio_chain)
 
 
 	/* seek after the IV and salt */
-	ret = BIO_seek(bio_chain, IV_LEN + SALT_LEN);	/* ret = ... is here to silence a compiler warning. It is possible that this is an empty database file, and we can not seek after anything yet. In this case we just create a new database, later. */
+	BIO_seek(bio_chain, IV_LEN + SALT_LEN);	/* It is possible that this is an empty database file, and we can not seek after anything yet. In this case we just create a new database, later. */
 
 	/* read in the database file to a buffer */
 	*buf = calloc(1, buf_size); malloc_check(*buf);
