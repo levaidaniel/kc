@@ -277,7 +277,7 @@ cmd_getnum(int idx, size_t spice)
 									}
 								}
 
-								fork_argv = malloc(3 * sizeof(char *)); malloc_check(fork_argv);
+								fork_argv = malloc(4 * sizeof(char *)); malloc_check(fork_argv);
 								fork_argv[0] = "xclip";
 								fork_argv[1] = "-selection";
 								if (rc == 'x') {
