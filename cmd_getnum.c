@@ -239,7 +239,7 @@ cmd_getnum(int idx, size_t spice)
 								if (db_file) {
 									if (close(db_file) == -1) {
 										perror("child: close(database file)");
-										break;
+										exit(EXIT_FAILURE);
 									}
 								}
 
@@ -251,12 +251,13 @@ cmd_getnum(int idx, size_t spice)
 								fork_argv[4] = NULL;
 
 								if (execvp(fork_argv[0], fork_argv) == -1)
-									perror("\nCouldn't execute tmux(1)");
+									fprintf(stderr, "tmux: %s", strerror(errno));
 
-								quit(EXIT_SUCCESS);
+								quit(EXIT_FAILURE);
 
 								break;
 							default: /* Parent */
+								rc = 'q';
 								break;
 						}
 
@@ -282,7 +283,7 @@ cmd_getnum(int idx, size_t spice)
 								if (db_file) {
 									if (close(db_file) == -1) {
 										perror("child: close(database file)");
-										break;
+										exit(EXIT_FAILURE);
 									}
 								}
 
@@ -300,9 +301,9 @@ cmd_getnum(int idx, size_t spice)
 								 * and the exec'd process will have the same environment. */
 								dup2(pipefd[0], 0);
 								if (execvp(fork_argv[0], fork_argv) == -1)
-									perror("\nCouldn't execute xclip(1)");
+									fprintf(stderr, "xclip: %s", strerror(errno));
 
-								quit(EXIT_SUCCESS);
+								quit(EXIT_FAILURE);
 
 								break;
 							default: /* Parent */
@@ -312,6 +313,7 @@ cmd_getnum(int idx, size_t spice)
 								write(pipefd[1], line, line_len);
 								close(pipefd[1]);
 
+								rc = 'q';
 								break;
 						}
 
