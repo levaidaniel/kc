@@ -37,6 +37,7 @@
 extern xmlDocPtr	db;
 extern xmlNodePtr	keychain;
 extern char		*cipher_mode;
+extern char		*kdf;
 
 extern char		dirty;
 
@@ -138,7 +139,7 @@ cmd_import(const char *e_line, command *commands)
 		kc_password_read(&pass, 0);
 
 		/* Setup cipher mode and turn on decrypting */
-		ret = kc_setup_crypt(bio_chain, 0, cipher_mode, pass, iv, salt, key, KC_SETUP_CRYPT_KEY);
+		ret = kc_setup_crypt(bio_chain, 0, cipher_mode, kdf, pass, iv, salt, key, KC_SETUP_CRYPT_KEY);
 
 		/* from here on now, we don't need to store the password text anymore */
 		if (pass)

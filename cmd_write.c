@@ -38,6 +38,7 @@
 extern xmlDocPtr	db;
 
 extern char		*cipher_mode;
+extern char		*kdf;
 extern unsigned char	salt[SALT_LEN + 1], iv[IV_LEN + 1], key[KEY_LEN];
 
 extern int		db_file;
@@ -89,7 +90,7 @@ cmd_write(const char *e_line, command *commands)
 	}
 
 	/* Setup cipher mode and turn on encrypting */
-	if (!kc_setup_crypt(bio_chain_tmp, 1, cipher_mode, NULL, iv, NULL, key, 0)) {
+	if (!kc_setup_crypt(bio_chain_tmp, 1, cipher_mode, kdf, NULL, iv, NULL, key, 0)) {
 		printf("Could not setup encrypting!");
 
 		BIO_free_all(bio_chain_tmp);

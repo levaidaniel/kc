@@ -351,7 +351,7 @@ kc_password_read(char **pass1, char new)
 
 
 char
-kc_setup_crypt(BIO *bio_chain, int enc, char *cipher_mode, char *pass,
+kc_setup_crypt(BIO *bio_chain, int enc, char *cipher_mode, char *kdf, char *pass,
 		unsigned char *iv, unsigned char *salt, unsigned char *key,
 		int flags)
 {
@@ -400,7 +400,14 @@ kc_setup_crypt(BIO *bio_chain, int enc, char *cipher_mode, char *pass,
 			printf("generating new key from pass and salt.\n");
 
 		/* generate a proper key for encoding/decoding BIO */
-		PKCS5_PBKDF2_HMAC_SHA1(pass, (int)strlen(pass), salt, SALT_LEN + 1, 5000, KEY_LEN, key);
+		if (strcmp(kdf, "sha1") == 0)
+			PKCS5_PBKDF2_HMAC_SHA1(pass, (int)strlen(pass), salt, SALT_LEN + 1, 5000, KEY_LEN, key);
+		else if (strcmp(kdf, "sha512") == 0)
+			PKCS5_PBKDF2_HMAC(pass, (int)strlen(pass), salt, SALT_LEN + 1, 5000, EVP_sha512(), KEY_LEN, key);
+		else {
+			printf("Unknown kdf: %s!\n", kdf);
+			return(0);
+		}
 	}
 	if (!key) {
 		puts("Key generation failure!");

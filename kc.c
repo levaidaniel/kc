@@ -47,6 +47,7 @@ char		*cmd_generator(const char *, int);
 BIO		*bio_chain = NULL;
 
 char		*cipher_mode = "cbc";
+char		*kdf = "sha1";
 
 unsigned char	iv[IV_LEN + 1], salt[SALT_LEN + 1], key[KEY_LEN];
 
@@ -99,7 +100,7 @@ main(int argc, char *argv[])
 	size_t		len = 0;
 
 
-	while ((c = getopt(argc, argv, "k:rp:m:bvh")) != -1)
+	while ((c = getopt(argc, argv, "k:rp:P:m:bvh")) != -1)
 		switch (c) {
 			case 'k':
 				db_filename = optarg;
@@ -109,6 +110,9 @@ main(int argc, char *argv[])
 			break;
 			case 'p':
 				pass_filename = optarg;
+			break;
+			case 'P':
+				kdf = optarg;
 			break;
 			case 'm':
 				cipher_mode = optarg;
@@ -127,6 +131,7 @@ main(int argc, char *argv[])
 					"-k <file>: Use file as database. The default is ~/.kc/default.kcd .\n"
 					"-r: Open the database in read-only mode.\n"
 					"-p <file>: Read password from file.\n"
+					"-P <file>: KDF to use: sha1 (default), sha512.\n"
 					"-m <cipher>: Cipher mode: cbc (default), cfb128, ofb.\n"
 					"-b: Batch mode: disable some features to enable commands from standard input.\n"
 					"-v: Display version.\n"
@@ -142,6 +147,15 @@ main(int argc, char *argv[])
 		strcmp(cipher_mode, "cbc") != 0) {
 
 		printf("Unknown cipher mode: %s!\n", cipher_mode);
+
+		quit(EXIT_FAILURE);
+	}
+
+	/* Check if kdf is valid */
+	if (	strcmp(kdf, "sha1") != 0  &&
+		strcmp(kdf, "sha512") != 0) {
+
+		printf("Unknown kdf: %s!\n", kdf);
 
 		quit(EXIT_FAILURE);
 	}
@@ -309,7 +323,7 @@ main(int argc, char *argv[])
 
 	/* Optionally generate iv/salt.
 	 * Setup cipher mode and turn on decrypting */
-	if (!kc_setup_crypt(bio_chain, 0, cipher_mode, pass, iv, salt, key, kc_setup_crypt_flags)) {
+	if (!kc_setup_crypt(bio_chain, 0, cipher_mode, kdf, pass, iv, salt, key, kc_setup_crypt_flags)) {
 		puts("Could not setup decrypting!");
 		quit(EXIT_FAILURE);
 	}
@@ -341,7 +355,7 @@ main(int argc, char *argv[])
 
 
 	/* turn on encrypting */
-	if (!kc_setup_crypt(bio_chain, 1, cipher_mode, NULL, iv, NULL, key, 0)) {
+	if (!kc_setup_crypt(bio_chain, 1, cipher_mode, kdf, NULL, iv, NULL, key, 0)) {
 		puts("Could not setup encrypting!");
 		quit(EXIT_FAILURE);
 	}

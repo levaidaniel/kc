@@ -28,6 +28,7 @@
 .Op Fl k Ar database file
 .Op Fl r
 .Op Fl p Ar password file
+.Op Fl P Ar kdf
 .Op Fl m Ar cipher mode
 .Op Fl b
 .Op Fl v
@@ -82,10 +83,19 @@ will not try to lock the database file, and commands which could modify the data
 Read password from
 .Ar file .
 The last new line gets stripped.
+.It Fl P Ar kdf
+KDF to use with the password.
+.Ar kdf
+can be one of 'sha1' (default) and 'sha512'
+.Em (this will be the default in the next
+.Nm
+version!). More information is in the
+.Em KDF
+section.
 .It Fl m Ar mode
 Cipher mode.
 .Ar mode
-can be one of 'cbc' (the default), 'cfb128' or 'ofb'. More information is in the
+can be one of 'cbc' (default), 'cfb128' or 'ofb'. More information is in the
 .Em CIPHERS
 section.
 .It Fl b
@@ -420,6 +430,33 @@ All ciphers use 128 bit keys, generated with a KDF (key derivation function) fro
 on Linux and
 .Pa /dev/random
 on everything else ).
+.Ss KDF
+The KDF converts the user supplied password to a strong key that can be used safely during encryption. The default SHA-1 based KDF uses 5000 rounds in
+.Nm . If one deems SHA-1 insecure and/or the rounds insufficient, one can use the SHA-512 based KDF (
+.Fl P
+.Ar sha512
+) instead.
+.Pp
+.Em NOTE :
+Changing the KDF (ie.: the database key, essentially) with an existing database involves
+.Em (1)
+exporting the database to XML (see
+.Cm dump )
+.Em (2)
+creating a new database using the new KDF
+.Em (3)
+importing the XML document (see
+.Cm importxml )
+.Em (4)
+using the KDF with which the database was created from here on now. This is because changing the KDF changes the key the database was encrypted with.
+.Pp
+.Em NOTE 2 :
+In the next version of
+.Nm
+the SHA-512 based KDF will be the default, so one will have to explicitly specify
+.Fl P
+.Ar sha1
+(or eg. define an alias='kc -P sha1' in the shell) to open their old databases.
 .Sh EXAMPLES
 .Bl -tag -offset ||| -width |
 .It Em pwsafe_to_kc.pl :

@@ -42,6 +42,7 @@ extern History		*eh;
 extern xmlDocPtr	db;
 
 extern char		*cipher_mode;
+extern char		*kdf;
 
 
 void
@@ -239,7 +240,7 @@ cmd_export(const char *e_line, command *commands)
 
 
 		/* Generate iv/salt, setup cipher mode and turn on encrypting */
-		if (!kc_setup_crypt(bio_chain, 1, cipher_mode, pass, iv, salt, key, KC_SETUP_CRYPT_IV | KC_SETUP_CRYPT_SALT | KC_SETUP_CRYPT_KEY)) {
+		if (!kc_setup_crypt(bio_chain, 1, cipher_mode, kdf, pass, iv, salt, key, KC_SETUP_CRYPT_IV | KC_SETUP_CRYPT_SALT | KC_SETUP_CRYPT_KEY)) {
 			printf("Could not setup encrypting!");
 
 			BIO_free_all(bio_chain);

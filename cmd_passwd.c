@@ -30,6 +30,7 @@
 extern BIO		*bio_chain;
 
 extern char		*cipher_mode;
+extern char		*kdf;
 
 extern unsigned char	salt[17], iv[17], key[128];
 
@@ -48,7 +49,7 @@ cmd_passwd(const char *e_line, command *commands)
 	if (ret == 0)	/* canceled */
 		return;
 
-	ret = kc_setup_crypt(bio_chain, 1, cipher_mode, pass, iv, salt, key, KC_SETUP_CRYPT_IV | KC_SETUP_CRYPT_SALT | KC_SETUP_CRYPT_KEY);
+	ret = kc_setup_crypt(bio_chain, 1, cipher_mode, kdf, pass, iv, salt, key, KC_SETUP_CRYPT_IV | KC_SETUP_CRYPT_SALT | KC_SETUP_CRYPT_KEY);
 
 	if (pass)
 		memset(pass, '\0', PASSWORD_MAXLEN);
