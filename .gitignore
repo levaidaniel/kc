@@ -2,6 +2,7 @@ tags
 kc
 compile.sh
 release.sh
+scan-build
 scan-build.sh
 regress/test*
 
