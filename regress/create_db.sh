@@ -12,7 +12,7 @@ fi
 
 rm -f ${KC_DB} ${KC_PASSFILE}
 
-PASSWORD='abc123ABC321'
+PASSWORD='qNYHMvXunofKXY7NSBCmDa2T4Av8R2rJWk15ADvca0IHkFqpiqriPnjtQHzWeZBq2MCk3SpoSc6aer5VO33RRC0aM85mxtid50gUUwRT0OhsfKxpTTBdr1hxwQhklpQZj5F28GbDYE5OPWWVKxzmhsbpdt1cfmJw8vG3vn8j3KqcljIn7UdTyJl8yGjtnmWR6wE3G4OW2mEZE8ruX2GnYIHBNwRKc71AakejERXObtdIFQfjxY4V6nyTWPkcPRLT'
 
 # create a random database
 if printf "${PASSWORD}\n${PASSWORD}\n" |./kc -b -k ${KC_DB};then
@@ -34,14 +34,14 @@ rm -f ${KC_DB}
 
 
 # create our sample database
-echo '*]duY3#42y/qA8}%~e5T3,~[+sj+i@hSoTvN+zSFDyrnv4qupDxDaq13YJ0NQmn4xQfPkOD7TE1Ow4T9iAvu+niN+yiYsdwJ
-oVJQPieg3J5TzwuWo4LAF+9ynn7DGll8+YqUCpVUqv0GwSJrPBU70CvPeWZnxCzr
-I5pynbW1Hy/YW+R3uLhTYpbXB5JC2GDsWB4PZKDOm5ekKCLnb8vD4A62r1H/hNS2
-e0N6m8dUXtgbJ6EFZ2g6txHEX3YXi+WsNJGCaBW36t1KMJ+O85GatfqD7FpjOLr2
-Sbvp5n2E1O4lSkopNDXuUdgoB9Xp3E5VSP4bjLZVMXEwli0wyl/8Z8tawTwvUJ2W
-w7bXPUQNgXFH23KK3E9NWxRIY1+sfIR54Ew2539GTsPsAfGQEXVURUHQES/kOpa1
-oD+C3KU3iDu1z+SUWyIRgZJl2Zd3WJ2b6ZV0Nktqtu3ziYjZsRyC6Z3yqqMRWueZ
-hkhlsJi3BL9UENDOSyur96goOto14xlb+isUihSwY7k=' > ${KC_DB}
+echo 'FV?Z[,%~d/XDF0eS{w?2NSJ;@KA()}P6ctmK0hGl5qqaCcjKd+5mWIttM66nTl/Bj1XCu/mhqkgcMuWFujYu5pc0X9U3YcNZ
+BvuN6sukT523u7OhItYQWBdXucIv0+EMxKqvTMwAN8XyHmIzMo1Xx3RU7pAYOyH0
+Dg5FRNpIYPDqJ+jLTkyUF3mws0CFWcKdQl7wGjVqAOIJCruyI84+ar9WYCuyZTAh
+AiMCssEl09DG7WqAN7Wkx8dOOczDbZjm8X9XeUMEw6DXugPd8rjVgnLx7L0aK+/T
+4SuoGLCJT68+TKc0kYpqaSqJx7NDqeH8ZwVtanetOVMEZZyWd9U3oXrkkIldYIO8
+snoMnhZtGOPGOv3NDk1yjEcCmuzJ8X7tBkMF1qdUeR2lod7kLa+/sQt3vC+1iIO2
+7LhfTUAT8xrJ5jaO0PlAPTKpzu0/+4KahO41a+Y8Fd40lAhFTSK/bWcjVnbq+YLa
+gpYmuECTa42ZCzhz0ZsrSgbDx+PHFpHcideqYdrqdvM=' > ${KC_DB}
 
 if [ ! -r "${KC_DB}" ];then
 	echo "$0 test failed (read sample db)!"

@@ -15,42 +15,49 @@ fi
 export KC_DB='regress/test.kcd'
 export KC_PASSFILE='regress/testpass'
 
-sh regress/create_db.sh
+COUNTER=0
 
-sh regress/cmd_quit.sh
-sh regress/cmd_help.sh
-sh regress/cmd_version.sh
-sh regress/cmd_random.sh
-sh regress/cmd_clear.sh
+TESTS=$(ls -1 regress/*.sh |grep -F -v -e"stress_test.sh" -e"run_tests.sh" |wc -l)
+trap 'printf "\nTest #$COUNTER (out of $TESTS) failed! :(\n"' ERR
 
-sh regress/cmd_getnum.sh
 
-sh regress/cmd_list.sh
-sh regress/cmd_clist.sh
+sh regress/create_db.sh; COUNTER=$(( COUNTER + 1 ))
 
-sh regress/cmd_search.sh
-sh regress/cmd_searchre.sh
+sh regress/cmd_quit.sh; COUNTER=$(( COUNTER + 1 ))
+sh regress/cmd_help.sh; COUNTER=$(( COUNTER + 1 ))
+sh regress/cmd_version.sh; COUNTER=$(( COUNTER + 1 ))
+sh regress/cmd_random.sh; COUNTER=$(( COUNTER + 1 ))
+sh regress/cmd_clear.sh; COUNTER=$(( COUNTER + 1 ))
 
-sh regress/cmd_new.sh
-sh regress/cmd_edit.sh
-sh regress/cmd_info.sh
-sh regress/cmd_swap.sh
-sh regress/cmd_insert.sh
+sh regress/cmd_getnum.sh; COUNTER=$(( COUNTER + 1 ))
 
-sh regress/cmd_export.sh
-sh regress/cmd_import.sh
+sh regress/cmd_list.sh; COUNTER=$(( COUNTER + 1 ))
+sh regress/cmd_clist.sh; COUNTER=$(( COUNTER + 1 ))
 
-sh regress/cmd_cnew.sh
-sh regress/cmd_cedit.sh
-sh regress/cmd_cdel.sh
-sh regress/cmd_c.sh
+sh regress/cmd_search.sh; COUNTER=$(( COUNTER + 1 ))
+sh regress/cmd_searchre.sh; COUNTER=$(( COUNTER + 1 ))
 
-sh regress/cmd_copy.sh
-sh regress/cmd_del.sh
+sh regress/cmd_new.sh; COUNTER=$(( COUNTER + 1 ))
+sh regress/cmd_edit.sh; COUNTER=$(( COUNTER + 1 ))
+sh regress/cmd_info.sh; COUNTER=$(( COUNTER + 1 ))
+sh regress/cmd_swap.sh; COUNTER=$(( COUNTER + 1 ))
+sh regress/cmd_insert.sh; COUNTER=$(( COUNTER + 1 ))
 
-sh regress/cmd_write.sh
-sh regress/cmd_passwd.sh
+sh regress/cmd_export.sh; COUNTER=$(( COUNTER + 1 ))
+sh regress/cmd_import.sh; COUNTER=$(( COUNTER + 1 ))
 
-sh regress/cmd_status.sh
+sh regress/cmd_cnew.sh; COUNTER=$(( COUNTER + 1 ))
+sh regress/cmd_cedit.sh; COUNTER=$(( COUNTER + 1 ))
+sh regress/cmd_cdel.sh; COUNTER=$(( COUNTER + 1 ))
+sh regress/cmd_c.sh; COUNTER=$(( COUNTER + 1 ))
 
-printf "\nAll tests ok! :)\n"
+sh regress/cmd_copy.sh; COUNTER=$(( COUNTER + 1 ))
+sh regress/cmd_del.sh; COUNTER=$(( COUNTER + 1 ))
+
+sh regress/cmd_write.sh; COUNTER=$(( COUNTER + 1 ))
+sh regress/maxpassword.sh; COUNTER=$(( COUNTER + 1 ))
+sh regress/cmd_passwd.sh; COUNTER=$(( COUNTER + 1 ))
+
+sh regress/cmd_status.sh; COUNTER=$(( COUNTER + 1 ))
+
+printf "\nAll tests were ok! :)\n"

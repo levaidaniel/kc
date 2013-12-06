@@ -86,7 +86,6 @@ main(int argc, char *argv[])
 	char		*pass = NULL;
 	char		*pass_filename = NULL;
 	int		pass_file = -1;
-	size_t		pass_size = 128;
 	int		kc_setup_crypt_flags = 0;
 
 	struct stat	st;
@@ -202,25 +201,33 @@ main(int argc, char *argv[])
 			quit(EXIT_FAILURE);
 		}
 
-		pass = calloc(1, pass_size); malloc_check(pass);
+		pass = malloc(PASSWORD_MAXLEN + 1); malloc_check(pass);
 		pos = 0;
-		while (ret) {
-			/* if we've reached the size of 'pass', grow it */
-			if (pos >= pass_size) {
-				pass_size += 128;
-				pass = realloc(pass, pass_size); malloc_check(pass);
-			}
-
-			ret = read(pass_file, pass + pos, pass_size - pos);
+		/* We read PASSWORD_MAXLEN plus one byte, to see if the password in the
+		 * password file is longer than PASSWORD_MAXLEN.
+		 */
+		while (ret  &&  pos <= PASSWORD_MAXLEN) {
+			ret = read(pass_file, pass + pos, PASSWORD_MAXLEN + 1 - pos);
 			if (ret < 0) {
 				perror("read(password file)");
-				break;
+				quit(EXIT_FAILURE);
 			} else
 				pos += ret;
 		}
+		if (pos == 0) {
+			puts("Password file must not be empty!");
+			quit(EXIT_FAILURE);
+		}
+
+		if (pass[pos - 1] == '\n')	/* if the last read character is a newline, strip it */
+			pass[--pos] = '\0';
+
+		if (pos > PASSWORD_MAXLEN) {
+			printf("WARNING: the password in '%s' is longer than the maximum allowed length (%d) of a password, and it was truncated to %d characters!\n\n", pass_filename, PASSWORD_MAXLEN, PASSWORD_MAXLEN);
+			pos = PASSWORD_MAXLEN;
+		}
+
 		pass[pos] = '\0';
-		if (strrchr(pass, '\n'))
-			pass[pos - 1] = '\0';		/* strip the newline character */
 
 		if (close(pass_file) < 0)
 			perror("close(password file)");
@@ -934,6 +941,8 @@ version(void)
 void
 quit(int retval)
 {
+	memset(key, '\0', KEY_LEN);
+
 	if (getenv("KC_DEBUG"))
 		puts("exiting...");
 
