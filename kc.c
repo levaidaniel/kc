@@ -131,8 +131,8 @@ main(int argc, char *argv[])
 					"-k <file>: Use file as database. The default is ~/.kc/default.kcd .\n"
 					"-r: Open the database in read-only mode.\n"
 					"-p <file>: Read password from file.\n"
-					"-P <file>: KDF to use: sha1 (default), sha512.\n"
-					"-m <cipher>: Cipher mode: cbc (default), cfb128, ofb.\n"
+					"-P <kdf>: KDF to use: sha1 (default), sha512.\n"
+					"-m <mode>: Cipher mode: cbc (default), cfb128, ofb.\n"
 					"-b: Batch mode: disable some features to enable commands from standard input.\n"
 					"-v: Display version.\n"
 					"-h: This help.\n", argv[0]);
