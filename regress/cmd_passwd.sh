@@ -18,9 +18,9 @@ fi
 echo "${PASSWORD}" > ${KC_PASSFILE}
 
 if printf "passwd\n${OLDPASSWORD}\n${OLDPASSWORD}\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE};then
-	echo "$0 test ok (passwd)!"
+	echo "$0 test ok (old passwd)!"
 else
-	echo "$0 test failed (passwd)!"
+	echo "$0 test failed (old passwd)!"
 	exit 1
 fi
 
