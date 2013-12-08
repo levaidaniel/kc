@@ -2,6 +2,7 @@ Prerequisites:
 - libbsd >= 0.2.0 (except on BSDs, of course)
 - libxml >= 2.6
 - libedit or libreadline
+- openssl >= 1.0.0
 
 Optional:
 - libpcre >= 8.12
@@ -14,8 +15,8 @@ Compile:
   $ make install
 
 - Linux:
-  $ gmake -f GNUMakefile <OPTIONS>
-  $ gmake -f GNUMakefile install
+  $ gmake -f Makefile.linux <OPTIONS>
+  $ gmake -f Makefile.linux install
 
 Options:
 HAVE_PCRE=y	This will turn on regexp support in searches, and needs libcpre.
@@ -23,9 +24,9 @@ HAVE_PCRE=y	This will turn on regexp support in searches, and needs libcpre.
 EDITLINE=y	Use libedit as the line editing function. This needs libedit.
 READLINE=y	Use readline as the line editing function. This needs libreadline.
 
-		GNUMakefile uses Readline and Makefile uses Editline by default.
+		Makefile.linux uses Readline and Makefile uses Editline by default.
 
 Example:
-  $ make HAVE_PCRE=1 && make install
+  $ make HAVE_PCRE=yes && make install
 or
-  $ gmake -f GNUMakefile HAVE_PCRE=1 EDITLINE=1 && gmake -f GNUMakefile install
+  $ gmake -f Makefile.linux HAVE_PCRE=1 EDITLINE=1 && gmake -f Makefile.linux install
