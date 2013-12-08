@@ -84,18 +84,38 @@ Read password from
 .Ar file .
 The last new line gets stripped.
 .It Fl P Ar kdf
-KDF to use with the password.
-.Ar kdf
-can be one of 'sha1' (default) and 'sha512'
-.Em (this will be the default in the next
+KDF to use with the password. Valid parameters are:
+.Bl -tag -offset ||| -width |
+.It Ar sha1
+OpenSSL's PKCS5 PBKDF2 with SHA-1. This is the default.
 .Nm
-version!). More information is in the
+uses 5000 rounds.
+.It Ar sha512
+OpenSSL's PKCS5 PBKDF2 with SHA-512.
+.Nm
+uses 5000 rounds.
+.Em This will be the default in the next
+.Nm
+.Em version!
+.It Ar bcrypt
+Bcrypt PBKDF based on Blowfish.
+.Nm
+uses 10 rounds. On Linux, a bundled bcrypt implementation from OpenBSD is used.
+.El
+.Pp
+More information is in the
 .Em KDF
 section.
 .It Fl m Ar mode
-Cipher mode.
-.Ar mode
-can be one of 'cbc' (default), 'cfb128' or 'ofb'. More information is in the
+Cipher mode for database encryption. Valid parameters are:
+.Bl -tag -offset ||| -width |
+.It Ar cbc
+This is the default
+.It Ar cfb128
+.It Ar ofb
+.El
+.Pp
+More information is in the
 .Em CIPHERS
 section.
 .It Fl b
@@ -425,17 +445,24 @@ Perhaps the extra number (spice) after a key's index and its usefulness can use 
 to display that many random characters between the value's original characters when showing it to you. Granted, it will look like a mess (although, that is what we wanted), but you can copy-paste it to the password entry in the website form in question. Then you can start to "blindly" delete the given number of characters from it by moving you cursor to the beginning (eg. HOME key), pressing 'spice' numbers of DEL, then jump over one character to the right (with the right arrow key), then delete the random characters again, then repeating this until you reach the end of you original password (those who played Mortal Kombat will feel a bit nostalgic). You can catch on to this, because the random character padding is of fixed length, so the pattern remains the same for the whole password. You don't even have to pay attention to the original length of the password, because after you've completed the pattern (DELs-move-DELs-move...) and removed the spice (ie.: every padding random character), you end up with you original password, and you'll just be deleting nothing after the end of the string. This of course only makes sense if the form is a password input field, so you (and everybody else) just see stars or dots in place of the password.
 .El
 .Ss CIPHERS
-All ciphers use 128 bit keys, generated with a KDF (key derivation function) from the supplied password, an IV (initialization vector) and a salt. Both the IV and the salt are 128 bits long and read from the host's specific random device (
+Databases are encrypted with AES-256 with one of the available cipher modes (see the
+.Fl m
+option). Ciphers use a 128 byte key, generated with a KDF (key derivation function) from the supplied password (see the
+.Em KDF
+section), and a 16 byte IV (initialization vector) that is read from the host's specific random device (
 .Pa /dev/urandom
 on Linux and
 .Pa /dev/random
-on everything else ).
+on everything else ) as characters. See also the
+.Em CAVEATS
+section.
 .Ss KDF
-The KDF converts the user supplied password to a strong key that can be used safely during encryption. The default SHA-1 based KDF uses 5000 rounds in
-.Nm . If one deems SHA-1 insecure and/or the rounds insufficient, one can use the SHA-512 based KDF (
+The KDF converts the user supplied password with a generated 16 byte salt to a strong key that can be used safely during encryption. The default SHA-1 based PBKDF2 KDF uses 5000 rounds in
+.Nm . If one deems SHA-1 insecure and/or the rounds insufficient, one can use any other available KDF instead (see the
 .Fl P
-.Ar sha512
-) instead.
+option). However, see the next
+.Em NOTE
+section.
 .Pp
 .Em NOTE :
 Changing the KDF (ie.: the database key, essentially) with an existing database involves
@@ -561,7 +588,11 @@ my_own keychain% >
 .Ed
 .El
 .Sh CAVEATS
-If you use 'cfb128' or 'ofb' for cipher, there is no specific sign if you enter a wrong password during the opening of a database; in this case the database would seem to be corrupt after decrypting, and
+If you use
+.Ar cfb128
+or
+.Ar ofb
+as the cipher mode, there is no specific sign if you enter a wrong password during the opening of a database; in this case the database would seem to be corrupt after decrypting, and
 .Nm
 will not be able to open it.
 .Pp

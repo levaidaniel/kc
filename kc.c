@@ -131,7 +131,7 @@ main(int argc, char *argv[])
 					"-k <file>: Use file as database. The default is ~/.kc/default.kcd .\n"
 					"-r: Open the database in read-only mode.\n"
 					"-p <file>: Read password from file.\n"
-					"-P <kdf>: KDF to use: sha1 (default), sha512.\n"
+					"-P <kdf>: KDF to use: sha1 (default), sha512, bcrypt.\n"
 					"-m <mode>: Cipher mode: cbc (default), cfb128, ofb.\n"
 					"-b: Batch mode: disable some features to enable commands from standard input.\n"
 					"-v: Display version.\n"
@@ -153,7 +153,8 @@ main(int argc, char *argv[])
 
 	/* Check if kdf is valid */
 	if (	strcmp(kdf, "sha1") != 0  &&
-		strcmp(kdf, "sha512") != 0) {
+		strcmp(kdf, "sha512") != 0  &&
+		strcmp(kdf, "bcrypt") != 0) {
 
 		printf("Unknown kdf: %s!\n", kdf);
 
