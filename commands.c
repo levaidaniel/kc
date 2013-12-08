@@ -414,6 +414,10 @@ kc_setup_crypt(BIO *bio_chain, int enc, char *cipher_mode, char *kdf, char *pass
 			return(0);
 		}
 	}
+
+	if (getenv("KC_DEBUG"))
+		printf("crypt setup: using %s based KDF\n", kdf);
+
 	if (!key) {
 		puts("Key generation failure!");
 
