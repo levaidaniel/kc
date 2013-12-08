@@ -6,6 +6,10 @@ scan-build
 scan-build.sh
 regress/test*
 
+# Core files
+kc.core
+core
+
 # Vim swap files
 .*.swp
 
