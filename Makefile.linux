@@ -3,6 +3,8 @@ PROG =		kc
 DESTDIR ?=	
 PREFIX ?=	usr/local
 
+BCRYPT_DIR =	bcrypt
+
 SRCS =		kc.c malloc_check.c
 SRCS +=		cmd_c.c cmd_cdel.c cmd_clear.c cmd_clist.c cmd_cnew.c cmd_copy.c \
 		cmd_cedit.c cmd_del.c cmd_edit.c cmd_export.c cmd_getnum.c \
@@ -17,6 +19,9 @@ OBJS +=		cmd_c.o cmd_cdel.o cmd_clear.o cmd_clist.o cmd_cnew.o cmd_copy.o \
 		cmd_quit.o cmd_random.o cmd_search.o cmd_searchre.o cmd_status.o \
 		cmd_swap.o cmd_version.o cmd_write.o \
 		commands.o commands_init.o
+
+BCRYPT_OBJS =	${BCRYPT_DIR}/bcrypt_pbkdf.o ${BCRYPT_DIR}/blf.o ${BCRYPT_DIR}/explicit_bzero.o ${BCRYPT_DIR}/sha2.o
+
 
 CFLAGS +=	-pedantic -Wall -g
 CFLAGS +=	`pkg-config --cflags libcrypto`
@@ -43,18 +48,25 @@ LDADD +=	`pkg-config --libs libpcre`
 endif
 
 
-all: ${PROG}
+all: bcrypt ${PROG}
 
-clean:
+.PHONY: bcrypt
+bcrypt:
+	${MAKE} -C ${BCRYPT_DIR} -f Makefile.linux
+
+bcrypt-clean:
+	rm -f ${BCRYPT_DIR}/*.o
+
+clean: bcrypt-clean
 	rm -f *.o kc regress/test*
 
-install:
+install: all
 	install -D -s -o root -m 755 kc ${DESTDIR}/${PREFIX}/bin/kc
 	install -D -o root -m 644 kc.1 ${DESTDIR}/${PREFIX}/man/man1/kc.1
 
-test:
+test: all
 	sh regress/run_tests.sh
 
 ${PROG}: ${OBJS}
 	${CC} -o ${PROG} ${CFLAGS} ${LDADD} \
-		${OBJS}
+		${OBJS} ${BCRYPT_OBJS}
