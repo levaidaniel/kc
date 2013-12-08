@@ -22,7 +22,7 @@ CFLAGS +=	-D_READLINE
 CFLAGS +=	`pkg-config --cflags libpcre` -D_HAVE_PCRE
 .endif
 
-LDADD +=	-lcrypto
+LDADD +=	-lcrypto -lutil
 LDADD +=	`pkg-config --libs libxml-2.0`
 .ifdef READLINE
 LDADD +=	-lreadline -ltermcap

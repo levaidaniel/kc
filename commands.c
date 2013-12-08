@@ -26,6 +26,7 @@
 #ifndef _LINUX
 #include <fcntl.h>
 #include <readpassphrase.h>
+#include <util.h>
 #else
 #include <sys/file.h>
 #include <bsd/readpassphrase.h>
