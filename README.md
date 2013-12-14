@@ -13,4 +13,3 @@ Features include (but not limited to):
 * compiles and works on \*BSD and Linux
 * editline (libedit) and readline support
 * clean and simple CLI with command and keychain completion
-* comes with a tiny and simple utility which can convert an exported pwsafe database to a kc compatible XML database
