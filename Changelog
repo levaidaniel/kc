@@ -2,6 +2,8 @@
 Bug fixes:
 - Fix logic flaw in saving the new database file. There was no file lock on
   the newly saved database file after invoking the 'write' command.
+- Fix database open/create handling. In special cases, don't try to create a
+  new XML document and overwrite the database, if it could not decrypt it.
 
 
 2.3.1:

@@ -93,6 +93,7 @@ main(int argc, char *argv[])
 	const char	*default_db_dir = ".kc";
 	const char	*default_db_filename = "default.kcd";
 	char		*env_home = NULL;
+	unsigned char	newdb = 0;
 
 	xmlNodePtr	db_root = NULL;
 
@@ -242,6 +243,8 @@ main(int argc, char *argv[])
 	}
 
 	if(stat(db_filename, &st) == 0) {	/* if db_filename exists */
+		newdb = 0;
+
 		if(!S_ISLNK(st.st_mode)  &&  !S_ISREG(st.st_mode)) {
 			printf("'%s' is not a regular file or a link!\n", db_filename);
 			quit(EXIT_FAILURE);
@@ -279,6 +282,8 @@ main(int argc, char *argv[])
 
 		kc_setup_crypt_flags = KC_SETUP_CRYPT_KEY;
 	} else {
+		newdb = 1;
+
 		printf("Creating '%s'\n", db_filename);
 
 		db_file = open(db_filename, O_RDWR | O_CREAT, 0600);
@@ -323,24 +328,7 @@ main(int argc, char *argv[])
 		}
 
 
-	pos = kc_db_reader(&buf, bio_chain);
-	if (getenv("KC_DEBUG"))
-		printf("read %d bytes\n", pos);
-
-	if (BIO_get_cipher_status(bio_chain) == 0  &&  pos > 0) {
-		puts("Failed to decrypt database file!");
-		quit(EXIT_FAILURE);
-	}
-
-
-	/* turn on encrypting */
-	if (!kc_setup_crypt(bio_chain, 1, cipher_mode, NULL, iv, NULL, key, 0)) {
-		puts("Could not setup encrypting!");
-		quit(EXIT_FAILURE);
-	}
-
-
-	if (pos == 0) {		/* empty file? */
+	if (newdb) {		/* new database? */
 		if (getenv("KC_DEBUG"))
 			puts("empty database file");
 
@@ -378,9 +366,18 @@ main(int argc, char *argv[])
 
 		xmlAddChild(db_root, xmlNewText(BAD_CAST "\n"));
 
-		/* write the initial empty XML doc to the file */
-		cmd_write(NULL, NULL);
+		/* Mark the database dirty, as a new initial database was just created */
+		dirty = 1;
 	} else {
+		pos = kc_db_reader(&buf, bio_chain);
+		if (getenv("KC_DEBUG"))
+			printf("read %d bytes\n", pos);
+
+		if (BIO_get_cipher_status(bio_chain) == 0) {
+			puts("Failed to decrypt database file!");
+			quit(EXIT_FAILURE);
+		}
+
 		if (getenv("KC_DEBUG"))
 			db = xmlReadMemory(buf, (int)pos, NULL, "UTF-8", XML_PARSE_NONET | XML_PARSE_PEDANTIC);
 		else
@@ -413,6 +410,13 @@ main(int argc, char *argv[])
 		keychain = db_root->children->next;
 		if (!keychain) {
 			puts("Could not find first keychain!");
+			quit(EXIT_FAILURE);
+		}
+
+
+		/* turn on encrypting */
+		if (!kc_setup_crypt(bio_chain, 1, cipher_mode, NULL, iv, NULL, key, 0)) {
+			puts("Could not setup encrypting!");
 			quit(EXIT_FAILURE);
 		}
 	}

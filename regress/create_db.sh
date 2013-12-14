@@ -15,7 +15,7 @@ rm -f ${KC_DB} ${KC_PASSFILE}
 PASSWORD='abc123ABC321'
 
 # create a random database
-if printf "${PASSWORD}\n${PASSWORD}\n" |./kc -b -k ${KC_DB};then
+if printf "${PASSWORD}\n${PASSWORD}\nwrite\n" |./kc -b -k ${KC_DB};then
 	echo "$0 test ok (create random db)!"
 else
 	echo "$0 test failed (create random db)!"
