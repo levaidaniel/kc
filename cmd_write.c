@@ -53,7 +53,7 @@ cmd_write(const char *e_line, command *commands)
 	db_params_tmp.pass = NULL;
 	db_params_tmp.db_filename = malloc(MAXPATHLEN);
 	if (!db_params_tmp.db_filename) {
-		perror("Could not allocate memory");
+		perror("Could not allocate memory for the file name");
 		return;
 	}
 	db_params_tmp.db_file = -1;
@@ -65,19 +65,26 @@ cmd_write(const char *e_line, command *commands)
 	strlcpy((char *)db_params_tmp.iv, (const char *)db_params.iv, IV_DIGEST_LEN + 1);
 	if (strcmp((const char *)db_params_tmp.iv, (const char *)db_params.iv) != 0) {
 		puts("Could not duplicate the original IV!");
+
+		free(db_params_tmp.db_filename); db_params_tmp.db_filename = NULL;
 		return;
 	}
 	strlcpy((char *)db_params_tmp.salt, (const char *)db_params.salt, SALT_DIGEST_LEN + 1);
 	if (strcmp((const char *)db_params_tmp.salt, (const char *)db_params.salt) != 0) {
 		puts("Could not duplicate the original salt!");
+
+		free(db_params_tmp.db_filename); db_params_tmp.db_filename = NULL;
 		return;
 	}
 	/* the key gets duplicated right before the call to kc_setup_crypt() */
 
 
 	rand_str = get_random_str(6, 0);
-	if (!rand_str)
+	if (!rand_str) {
+
+		free(db_params_tmp.db_filename); db_params_tmp.db_filename = NULL;
 		return;
+	}
 
 	strlcpy(db_params_tmp.db_filename, db_params.db_filename, MAXPATHLEN);
 	strlcat(db_params_tmp.db_filename, rand_str, MAXPATHLEN);
@@ -85,6 +92,7 @@ cmd_write(const char *e_line, command *commands)
 	if(stat(db_params_tmp.db_filename, &st) == 0) {	/* if temporary database filename exists */
 		puts("Could not create temporary database file (exists)!");
 
+		free(db_params_tmp.db_filename); db_params_tmp.db_filename = NULL;
 		return;
 	}
 
@@ -93,6 +101,7 @@ cmd_write(const char *e_line, command *commands)
 		puts("Could not open temporary database file!");
 		perror("open(tmp db_filename)");
 
+		free(db_params_tmp.db_filename); db_params_tmp.db_filename = NULL;
 		return;
 	}
 
@@ -103,6 +112,7 @@ cmd_write(const char *e_line, command *commands)
 
 		close(db_params_tmp.db_file);
 		unlink(db_params_tmp.db_filename);
+		free(db_params_tmp.db_filename); db_params_tmp.db_filename = NULL;
 		return;
 	}
 
@@ -112,6 +122,10 @@ cmd_write(const char *e_line, command *commands)
 		puts("Could not duplicate the original key!");
 
 		memset(db_params_tmp.key, '\0', KEY_LEN);
+		BIO_free_all(bio_chain_tmp);
+		close(db_params_tmp.db_file);
+		unlink(db_params_tmp.db_filename);
+		free(db_params_tmp.db_filename); db_params_tmp.db_filename = NULL;
 		return;
 	}
 	/* Setup cipher mode, turn on encrypting, etc... */
@@ -122,6 +136,7 @@ cmd_write(const char *e_line, command *commands)
 		BIO_free_all(bio_chain_tmp);
 		close(db_params_tmp.db_file);
 		unlink(db_params_tmp.db_filename);
+		free(db_params_tmp.db_filename); db_params_tmp.db_filename = NULL;
 		return;
 	}
 	memset(db_params_tmp.key, '\0', KEY_LEN);
@@ -133,6 +148,7 @@ cmd_write(const char *e_line, command *commands)
 		BIO_free_all(bio_chain_tmp);
 		close(db_params_tmp.db_file);
 		unlink(db_params_tmp.db_filename);
+		free(db_params_tmp.db_filename); db_params_tmp.db_filename = NULL;
 		return;
 	}
 
@@ -147,6 +163,7 @@ cmd_write(const char *e_line, command *commands)
 		BIO_free_all(bio_chain_tmp);
 		close(db_params_tmp.db_file);
 		unlink(db_params_tmp.db_filename);
+		free(db_params_tmp.db_filename); db_params_tmp.db_filename = NULL;
 		return;
 	}
 
@@ -172,6 +189,7 @@ cmd_write(const char *e_line, command *commands)
 		BIO_free_all(bio_chain_tmp);
 		close(db_params_tmp.db_file);
 		unlink(db_params_tmp.db_filename);
+		free(db_params_tmp.db_filename); db_params_tmp.db_filename = NULL;
 		return;
 	} else
 		if (getenv("KC_DEBUG"))
@@ -179,6 +197,7 @@ cmd_write(const char *e_line, command *commands)
 
 	BIO_free_all(bio_chain_tmp);
 	unlink(db_params_tmp.db_filename);
+	free(db_params_tmp.db_filename); db_params_tmp.db_filename = NULL;
 
 
 	/* Reopen the new database file as the 'db_file' fd. */
