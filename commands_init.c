@@ -296,8 +296,8 @@ commands_init(command **commands)
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "tmux";
-	(*commands)->usage = "tmux <index>";
-	(*commands)->help = "Copy the value of 'index' to tmux's paste buffer. 'index' is the key's index number in the current keychain.";
+	(*commands)->usage = "tmux <index> [line]";
+	(*commands)->help = "Copy the value of 'index' to tmux's paste buffer. 'index' is the key's index number in the current keychain. 'line' can be used to specify the line number to copy, if 'index' is a multiline value (defaults to 1).";
 	(*commands)->fn = cmd_clipboard;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
@@ -310,15 +310,15 @@ commands_init(command **commands)
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "xclip";
-	(*commands)->usage = "xclip <index>";
-	(*commands)->help = "Copy the value of 'index' to the PRIMARY X11 selection. 'index' is the key's index number in the current keychain.";
+	(*commands)->usage = "xclip <index> [line]";
+	(*commands)->help = "Copy the value of 'index' to the PRIMARY X11 selection (ie.: middle mouse button). 'index' is the key's index number in the current keychain. 'line' can be used to specify the line number to copy, if 'index' is a multiline value (defaults to 1).";
 	(*commands)->fn = cmd_clipboard;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "Xclip";
-	(*commands)->usage = "Xclip <index>";
-	(*commands)->help = "Copy the value of 'index' to the CLIPBOARD X11 selection. 'index' is the key's index number in the current keychain.";
+	(*commands)->usage = "Xclip <index> [line]";
+	(*commands)->help = "Copy the value of 'index' to the CLIPBOARD X11 selection (aka.: CTRL+c - CTRL+v). 'index' is the key's index number in the current keychain. 'line' can be used to specify the line number to copy, if 'index' is a multiline value (defaults to 1).";
 	(*commands)->fn = cmd_clipboard;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
