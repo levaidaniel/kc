@@ -18,7 +18,7 @@ export KC_PASSFILE='regress/testpass'
 COUNTER=0
 
 TESTS=$(ls -1 regress/*.sh |grep -F -v -e"stress_test.sh" -e"run_tests.sh" |wc -l)
-trap 'printf "\nTest #$COUNTER (out of $TESTS) failed! :(\n"' ERR
+trap 'printf "\nTest #$COUNTER (out of $TESTS) failed! :(\n" 1>&2' ERR
 
 
 sh regress/create_db.sh; COUNTER=$(( COUNTER + 1 ))
