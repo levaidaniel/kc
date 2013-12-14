@@ -15,7 +15,7 @@ rm -f ${KC_DB} ${KC_PASSFILE}
 PASSWORD='qNYHMvXunofKXY7NSBCmDa2T4Av8R2rJWk15ADvca0IHkFqpiqriPnjtQHzWeZBq2MCk3SpoSc6aer5VO33RRC0aM85mxtid50gUUwRT0OhsfKxpTTBdr1hxwQhklpQZj5F28GbDYE5OPWWVKxzmhsbpdt1cfmJw8vG3vn8j3KqcljIn7UdTyJl8yGjtnmWR6wE3G4OW2mEZE8ruX2GnYIHBNwRKc71AakejERXObtdIFQfjxY4V6nyTWPkcPRLT'
 
 # create a random database
-if printf "${PASSWORD}\n${PASSWORD}\n" |./kc -b -k ${KC_DB};then
+if printf "${PASSWORD}\n${PASSWORD}\nwrite\n" |./kc -b -k ${KC_DB};then
 	echo "$0 test ok (create random db)!"
 else
 	echo "$0 test failed (create random db)!"
