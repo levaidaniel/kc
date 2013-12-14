@@ -413,12 +413,36 @@ Quit the program. If the database has been modified, then ask if it should be sa
 .It Cm exit
 Alias of
 .Cm quit .
-.It Cm random Op length
-Print a random string with
-.Ar length
-length. The default
-.Ar length
-is 8.
+.It Cm tmux Ar index Op line
+Copy the value of
+.Ar index
+to tmux's paste buffer.
+.Ar index
+is the key's index number in the current keychain.
+.Ar line
+can be used to specify the line number to copy, if
+.Ar index
+is a multiline value (defaults to 1).
+.It Cm xclip Ar index Op line
+Copy the value of
+.Ar index
+to the PRIMARY X11 selection (ie.: middle mouse button).
+.Ar index
+is the key's index number in the current keychain.
+.Ar line
+can be used to specify the line number to copy, if
+.Ar index
+is a multiline value (defaults to 1).
+.It Cm Xclip Ar index Op line
+Copy the value of
+.Ar index
+to the CLIPBOARD X11 selection (aka.: CTRL+c - CTRL+v).
+.Ar index
+is the key's index number in the current keychain.
+.Ar line
+can be used to specify the line number to copy, if
+.Ar index
+is a multiline value (defaults to 1).
 .It Cm version
 Display the program version.
 .It Cm write
