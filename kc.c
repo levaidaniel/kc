@@ -76,7 +76,7 @@ main(int argc, char *argv[])
 
 	char		*buf = NULL;
 	ssize_t		ret = -1;
-	unsigned int	pos = 0;
+	int		pos = 0;
 	int		pass_file = -1;
 	int		kc_setup_crypt_flags = 0;
 
@@ -84,6 +84,7 @@ main(int argc, char *argv[])
 	const char	*default_db_dir = ".kc";
 	const char	*default_db_filename = "default.kcd";
 	char		*env_home = NULL;
+	unsigned char	newdb = 0;
 
 	xmlNodePtr	db_root = NULL;
 
@@ -181,6 +182,7 @@ main(int argc, char *argv[])
 	/* This should be identical with what is in cmd_import.c */
 	/* if db_filename exists */
 	if(stat(db_params.db_filename, &st) == 0) {
+		newdb = 0;
 
 		printf("Opening '%s'\n",db_params.db_filename);
 
@@ -261,6 +263,8 @@ main(int argc, char *argv[])
 
 		kc_setup_crypt_flags = KC_SETUP_CRYPT_KEY;
 	} else {
+		newdb = 1;
+
 		printf("Creating '%s'\n", db_params.db_filename);
 
 		db_params.db_file = open(db_params.db_filename, O_RDWR | O_CREAT, 0600);
@@ -349,12 +353,7 @@ main(int argc, char *argv[])
 		if (close(pass_file) < 0)
 			perror("close(password file)");
 	} else {
-		if(stat(db_params.db_filename, &st) != 0) {
-			perror("stat while password ask(database file)");
-			quit(EXIT_FAILURE);
-		}
-
-		if(st.st_size == 0) {
+		if(newdb) {
 			/* ask for the new password */
 			do {
 				ret = kc_password_read(&db_params.pass, 1);
@@ -362,10 +361,8 @@ main(int argc, char *argv[])
 
 			if (ret == 0)
 				quit(EXIT_FAILURE);
-		} else {
-			/* ask for the password */
+		} else	/* ask for the password */
 			kc_password_read(&db_params.pass, 0);
-		}
 	}
 
 
@@ -381,15 +378,7 @@ main(int argc, char *argv[])
 	free(db_params.pass); db_params.pass = NULL;
 
 
-	pos = kc_db_reader(&buf, bio_chain);
-
-	if (BIO_get_cipher_status(bio_chain) == 0  &&  pos > 0) {
-		puts("Failed to decrypt database file!");
-		quit(EXIT_FAILURE);
-	}
-
-
-	if (pos == 0) {		/* empty file? */
+	if (newdb) {	/* new database file */
 		if (getenv("KC_DEBUG"))
 			puts("empty database file");
 
@@ -427,13 +416,22 @@ main(int argc, char *argv[])
 
 		xmlAddChild(db_root, xmlNewText(BAD_CAST "\n"));
 
-		/* write the initial empty XML doc to the file */
-		cmd_write(NULL, NULL);
-	} else {
+		/* Mark the database as dirty, if it was created from scratch,
+		 * to warn the user when exiting to save.
+		 */
+		db_params.dirty = 1;
+	} else {	/* existing database file */
+		pos = kc_db_reader(&buf, bio_chain);
+
+		if (BIO_get_cipher_status(bio_chain) == 0) {
+			puts("Failed to decrypt database file!");
+			quit(EXIT_FAILURE);
+		}
+
 		if (getenv("KC_DEBUG"))
-			db = xmlReadMemory(buf, (int)pos, NULL, "UTF-8", XML_PARSE_NONET | XML_PARSE_PEDANTIC);
+			db = xmlReadMemory(buf, pos, NULL, "UTF-8", XML_PARSE_NONET | XML_PARSE_PEDANTIC);
 		else
-			db = xmlReadMemory(buf, (int)pos, NULL, "UTF-8", XML_PARSE_NONET | XML_PARSE_NOERROR | XML_PARSE_NOWARNING);
+			db = xmlReadMemory(buf, pos, NULL, "UTF-8", XML_PARSE_NONET | XML_PARSE_NOERROR | XML_PARSE_NOWARNING);
 		if (!db) {
 			puts("Could not parse XML document!");
 
