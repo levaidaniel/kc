@@ -207,7 +207,7 @@ main(int argc, char *argv[])
 
 		/* read the IV */
 		buf = malloc(IV_DIGEST_LEN + 1); malloc_check(buf);
-		ret = 0; pos = 0;
+		pos = 0;
 		do {
 			ret = read(db_params.db_file, buf, IV_DIGEST_LEN);
 			pos += ret;
@@ -235,7 +235,7 @@ main(int argc, char *argv[])
 
 		/* read the salt */
 		buf = malloc(SALT_DIGEST_LEN + 1); malloc_check(buf);
-		ret = 0; pos = 0;
+		pos = 0;
 		do {
 			ret = read(db_params.db_file, buf, SALT_DIGEST_LEN);
 			pos += ret;
