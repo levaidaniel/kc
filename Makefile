@@ -21,6 +21,9 @@ CFLAGS +=	-D_READLINE
 .ifdef HAVE_PCRE
 CFLAGS +=	`pkg-config --cflags libpcre` -D_HAVE_PCRE
 .endif
+.ifdef HAVE_LIBSCRYPT
+CFLAGS +=	-D_HAVE_LIBSCRYPT
+.endif
 
 LDADD +=	-lcrypto -lutil
 LDADD +=	`pkg-config --libs libxml-2.0`
@@ -31,6 +34,9 @@ LDADD +=	-ledit -lncursesw
 .endif
 .ifdef HAVE_PCRE
 LDADD +=	`pkg-config --libs libpcre`
+.endif
+.ifdef HAVE_LIBSCRYPT
+LDADD +=	-lscrypt
 .endif
 
 CLEANFILES +=	regress/test*
