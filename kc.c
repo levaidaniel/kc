@@ -209,9 +209,10 @@ main(int argc, char *argv[])
 		buf = malloc(IV_DIGEST_LEN + 1); malloc_check(buf);
 		pos = 0;
 		do {
-			ret = read(db_params.db_file, buf, IV_DIGEST_LEN);
+			ret = read(db_params.db_file, buf + pos, IV_DIGEST_LEN - pos);
 			pos += ret;
 		} while (ret > 0  &&  pos < IV_DIGEST_LEN);
+		buf[pos] = '\0';
 
 		if (ret < 0) {
 			perror("read IV(database file)");
@@ -237,9 +238,10 @@ main(int argc, char *argv[])
 		buf = malloc(SALT_DIGEST_LEN + 1); malloc_check(buf);
 		pos = 0;
 		do {
-			ret = read(db_params.db_file, buf, SALT_DIGEST_LEN);
+			ret = read(db_params.db_file, buf + pos, SALT_DIGEST_LEN - pos);
 			pos += ret;
 		} while (ret > 0  &&  pos < SALT_DIGEST_LEN);
+		buf[pos] = '\0';
 
 		if (ret < 0) {
 			perror("read salt(database file)");
@@ -315,18 +317,19 @@ main(int argc, char *argv[])
 			quit(EXIT_FAILURE);
 		}
 
-		db_params.pass = malloc(PASSWORD_MAXLEN + 1); malloc_check(db_params.pass);
+		db_params.pass = malloc(PASSWORD_MAXLEN + 2); malloc_check(db_params.pass);
 		pos = 0;
 		/* We read PASSWORD_MAXLEN plus one byte, to see if the password in the
 		 * password file is longer than PASSWORD_MAXLEN.
 		 */
-		while (ret  &&  pos <= PASSWORD_MAXLEN) {
+		do {
 			ret = read(pass_file, db_params.pass + pos, PASSWORD_MAXLEN + 1 - pos);
-			if (ret < 0) {
-				perror("read(password file)");
-				quit(EXIT_FAILURE);
-			} else
-				pos += ret;
+			pos += ret;
+		} while (ret > 0  &&  pos < PASSWORD_MAXLEN + 1);
+
+		if (ret < 0) {
+			perror("read(password file)");
+			quit(EXIT_FAILURE);
 		}
 		if (pos == 0) {
 			puts("Password file must not be empty!");

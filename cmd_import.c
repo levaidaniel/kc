@@ -156,9 +156,10 @@ cmd_import(const char *e_line, command *commands)
 			buf = malloc(IV_DIGEST_LEN + 1); malloc_check(buf);
 			ret = 0; pos = 0;
 			do {
-				ret = read(db_params_new.db_file, buf, IV_DIGEST_LEN);
+				ret = read(db_params_new.db_file, buf + pos, IV_DIGEST_LEN - pos);
 				pos += ret;
 			} while (ret > 0  &&  pos < IV_DIGEST_LEN);
+			buf[pos] = '\0';
 
 			if (ret < 0) {
 				perror("read IV(database file)");
@@ -192,9 +193,10 @@ cmd_import(const char *e_line, command *commands)
 			buf = malloc(SALT_DIGEST_LEN + 1); malloc_check(buf);
 			ret = 0; pos = 0;
 			do {
-				ret = read(db_params_new.db_file, buf, SALT_DIGEST_LEN);
+				ret = read(db_params_new.db_file, buf + pos, SALT_DIGEST_LEN - pos);
 				pos += ret;
 			} while (ret > 0  &&  pos < SALT_DIGEST_LEN);
+			buf[pos] = '\0';
 
 			if (ret < 0) {
 				perror("read salt(database file)");
