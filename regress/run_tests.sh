@@ -26,7 +26,6 @@ sh regress/create_db.sh; COUNTER=$(( COUNTER + 1 ))
 sh regress/cmd_quit.sh; COUNTER=$(( COUNTER + 1 ))
 sh regress/cmd_help.sh; COUNTER=$(( COUNTER + 1 ))
 sh regress/cmd_version.sh; COUNTER=$(( COUNTER + 1 ))
-sh regress/cmd_random.sh; COUNTER=$(( COUNTER + 1 ))
 sh regress/cmd_clear.sh; COUNTER=$(( COUNTER + 1 ))
 
 sh regress/cmd_getnum.sh; COUNTER=$(( COUNTER + 1 ))

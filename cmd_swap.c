@@ -30,8 +30,8 @@
 char	swap_keys(xmlNodePtr *, xmlNodePtr *);
 
 
+extern db_parameters	db_params;
 extern xmlNodePtr	keychain;
-extern char		dirty;
 
 
 void
@@ -145,7 +145,7 @@ cmd_swap(const char *e_line, command *commands)
 
 	puts("Key indices may have been changed. Make sure to 'list', before using them again!");
 
-	dirty = 1;
+	db_params.dirty = 1;
 } /* cmd_swap() */
 
 

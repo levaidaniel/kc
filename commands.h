@@ -20,6 +20,7 @@ void cmd_c(const char *, command *);
 void cmd_cdel(const char *, command *);
 void cmd_cedit(const char *, command *);
 void cmd_clear(const char *, command *);
+void cmd_clipboard(const char *, command *);
 void cmd_clist(const char *, command *);
 void cmd_cnew(const char *, command *);
 void cmd_copy(const char *, command *);
@@ -34,7 +35,6 @@ void cmd_list(const char *, command *);
 void cmd_new(const char *, command *);
 void cmd_passwd(const char *, command *);
 void cmd_quit(const char *, command *);
-void cmd_random(const char *, command *);
 void cmd_search(const char *, command *);
 void cmd_searchre(const char *, command *);
 void cmd_status(const char *, command *);
@@ -47,12 +47,14 @@ xmlNodePtr	find_key(int);
 void		_rl_push_buffer(void);
 char		*get_random_str(size_t, char);
 xmlChar		*parse_randoms(xmlChar *);
+xmlChar		*get_line(xmlChar *, int, int);
+xmlChar		*parse_newlines(xmlChar *, char);
 char		kc_password_read(char **, char);
-char		kc_setup_crypt(BIO *, int, char *, char *, char *, unsigned char *, unsigned char *, unsigned char *, int);
-BIO		*kc_setup_bio_chain(const char *);
-char		kc_db_writer(int, xmlDocPtr, BIO *, unsigned char *, unsigned char *);
+char		kc_setup_crypt(BIO *, int, struct db_parameters *, int);
+BIO		*kc_setup_bio_chain(const char *, const char);
+char		kc_db_writer(xmlDocPtr, BIO *, struct db_parameters *);
 char		kc_validate_xml(xmlDocPtr);
-unsigned int	kc_db_reader(char **, BIO *);
+int		kc_db_reader(char **, BIO *);
 
 
 #endif

@@ -19,7 +19,7 @@ case "$(uname -s)" in
 esac
 
 printf "0\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
-SHA1=$(printf "0\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" |$SHA1_BIN |cut -d' ' -f1)
+SHA1=$(printf "0\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." |$SHA1_BIN |cut -d' ' -f1)
 if [ "$SHA1" = 'e8e99293c6d1adf5980bbad56b4967def2aa2797' ];then
 	echo "$0 test ok (existing)!"
 else
@@ -28,7 +28,7 @@ else
 fi
 
 printf "2\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
-SHA1=$(printf "2\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" |$SHA1_BIN |cut -d' ' -f1)
+SHA1=$(printf "2\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." |$SHA1_BIN |cut -d' ' -f1)
 if [ "$SHA1" = '812e96292afbdf1b0cebb40a7db6a7ffa2e52dfe' ];then
 	echo "$0 test ok (nonexisting)!"
 else

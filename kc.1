@@ -17,7 +17,7 @@
 .\"ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 .\"(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 .\"SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-.Dd Mar 01, 2013
+.Dd Dec 13, 2013
 .Dt KC 1
 .Os
 .Sh NAME
@@ -87,16 +87,13 @@ The last new line gets stripped.
 KDF to use with the password. Valid parameters are:
 .Bl -tag -offset ||| -width |
 .It Ar sha1
-OpenSSL's PKCS5 PBKDF2 with SHA-1. This is the default.
+OpenSSL's PKCS5 PBKDF2 with SHA-1.
 .Nm
 uses 5000 rounds.
 .It Ar sha512
-OpenSSL's PKCS5 PBKDF2 with SHA-512.
+OpenSSL's PKCS5 PBKDF2 with SHA-512. This is the default.
 .Nm
 uses 5000 rounds.
-.Em This will be the default in the next
-.Nm
-.Em version!
 .It Ar bcrypt
 Bcrypt PBKDF based on Blowfish.
 .Nm
@@ -131,8 +128,7 @@ These commands are available in the CLI:
 .It Cm new Op name
 Create a new key in the current keychain. Both key and value will be prompted for, except when
 .Ar name
-is specified; then it will be used as the key's name, up until the first space in
-.Ar name .
+is specified; then it will be used as the key's name.
 .Pp
 Character sequences can be used in values:
 .Pp
@@ -240,7 +236,7 @@ You can combine the modifiers.
 Change the current keychain.
 .Ar keychain
 can be the keychain's index number or name. Index number takes priority when addressing a keychain.
-.It Cm cc Ar keychain name
+.It Cm cc Ar keychain_name
 Works like
 .Cm c ,
 but the keychain's name takes priority over its index number. (see command
@@ -249,13 +245,13 @@ but the keychain's name takes priority over its index number. (see command
 Delete a keychain.
 .Ar keychain
 can be the keychain's index number or name. Index number takes priority when addressing a keychain.
-.It Cm ccdel Ar keychain name
+.It Cm ccdel Ar keychain_name
 Works like
 .Cm cdel ,
 but the keychain's name takes priority over its index number. (see command
 .Cm cdel )
 .It Cm clear Op count
-Emulate a screen clearing. Scrolls 50 lines by default, which can be multiplied by
+Emulate a screen clearing. Scrolls a 100 lines by default, which can be multiplied by
 .Ar count
 times if specified.
 .It Cm clist
@@ -294,22 +290,43 @@ is the key's index number in the current keychain.
 .It Cm rm Ar index
 Alias of
 .Cm del .
-.It Cm passwd
-Change the database password. All changes will be written immediately.
+.It Cm passwd Op kdf Op cipher_mode
+Change the database password and optionally the KDF and cipher mode too. All changes will be written immediately.
+.Pp
+More information about the
+.Ar kdf
+and the
+.Ar cipher_mode
+optional arguments are in the
+.Fl P
+and
+.Fl m
+parameter descriptions.
 .It Cm help Op command
 Print application help or describe a
 .Ar command .
 .It Cm status
 Display information about the database.
-.It Cm xport Ar filename Op keychain
+.It Cm xport Ar filename Op keychain Op kdf Op cipher_mode
 Export the database to a
 .Nm
 compatible encrypted database file named
 .Ar filename
 (if no extension specified, ".kcd" will be appended).
-When specifying a keychain, export only that keychain.
+.Pp
+When specifying
+.Ar keychain ,
+export only that keychain.
 .Ar keychain
 can be the keychain's index number or name. Index number takes priority when addressing a keychain.
+.Pp
+Optional arguments
+.Ar kdf
+and
+.Ar cipher_mode
+can be used to specify a different KDF and/or cipher mode to be used while exporting the database. This doesn't change the current database's parameters, but when importing this exported database, the parameters must be the same (or specified explicitly when using the
+.Cm import
+command).
 (see command
 .Cm dump ,
 .Cm import
@@ -321,6 +338,7 @@ Dump the database to a
 compatible XML file named
 .Ar filename
 (if no extension specified, ".xml" will be appended).
+.Pp
 When specifying a keychain, dump only that keychain to the XML file.
 .Ar keychain
 can be the keychain's index number or name. Index number takes priority when addressing a keychain.
@@ -328,7 +346,7 @@ can be the keychain's index number or name. Index number takes priority when add
 .Cm xport )
 .Em NOTE :
 the created XML file will be plain text.
-.It Cm import Ar filename
+.It Cm import Ar filename Op kdf Op cipher_mode
 Import and overwrite the current database with the one from a
 .Nm
 compatible encrypted database file named
@@ -336,7 +354,13 @@ compatible encrypted database file named
 .Ar filename
 must be a proper
 .Nm
-database. (see command
+database.
+.Pp
+The
+.Ar kdf
+and
+.Ar cipher_mode
+optional arguments can be used to specify these parameters if they differ from the current database. (see command
 .Cm importxml ,
 .Cm xport
 and
@@ -447,43 +471,27 @@ to display that many random characters between the value's original characters w
 .Ss CIPHERS
 Databases are encrypted with AES-256 with one of the available cipher modes (see the
 .Fl m
-option). Ciphers use a 128 byte key, generated with a KDF (key derivation function) from the supplied password (see the
+option). Ciphers use a 128 byte key generated with a KDF (key derivation function) from the supplied password (see the
 .Em KDF
-section), and a 16 byte IV (initialization vector) that is read from the host's specific random device (
+section), and an IV (initialization vector) that is read from the host's specific random device (
 .Pa /dev/urandom
 on Linux and
 .Pa /dev/random
 on everything else ) as characters. See also the
 .Em CAVEATS
 section.
+On changing the cipher mode in use, see the
+.Fl m
+option and the
+.Cm passwd
+command.
 .Ss KDF
-The KDF converts the user supplied password with a generated 16 byte salt to a strong key that can be used safely during encryption. The default SHA-1 based PBKDF2 KDF uses 5000 rounds in
-.Nm . If one deems SHA-1 insecure and/or the rounds insufficient, one can use any other available KDF instead (see the
+The KDF converts the user supplied password with a generated salt to a strong key that can be used safely during encryption. Every SHA-* based PBKDF2 KDF uses 5000 rounds in
+.Nm . See the
 .Fl P
-option). However, see the next
-.Em NOTE
-section.
-.Pp
-.Em NOTE :
-Changing the KDF (ie.: the database key, essentially) with an existing database involves
-.Em (1)
-exporting the database to XML (see
-.Cm dump )
-.Em (2)
-creating a new database using the new KDF
-.Em (3)
-importing the XML document (see
-.Cm importxml )
-.Em (4)
-using the KDF with which the database was created from here on now. This is because changing the KDF changes the key the database was encrypted with.
-.Pp
-.Em NOTE 2 :
-In the next version of
-.Nm
-the SHA-512 based KDF will be the default, so one will have to explicitly specify
-.Fl P
-.Ar sha1
-(or eg. define an alias='kc -P sha1' in the shell) to open their old databases.
+option and the
+.Cm passwd
+command. Of course, changing the KDF with which the database was created/opened means that the new KDF must be used from then on. This is because changing the KDF changes the key the database was encrypted with.
 .Sh EXAMPLES
 .Bl -tag -offset ||| -width |
 .It Em pwsafe_to_kc.pl :
@@ -596,16 +604,6 @@ as the cipher mode, there is no specific sign if you enter a wrong password duri
 .Nm
 will not be able to open it.
 .Pp
-If you use
-.Cm xport
-to export to an encrypted
-.Nm
-database, it is not possible to choose a different cipher mode than the one being used with the current database. It is also not possible to choose a cipher mode during an
-.Cm import
-of an encrypted
-.Nm
-database, and the one being utilized by the current database will be used.
-.Pp
 There is no character conversion taking place for the input fields.
 .Sh AUTHOR
 .Nm
@@ -614,4 +612,4 @@ was written by
 <leva@ecentrum.hu>
 .Pp
 Source, information, bugs:
-http://keychain.googlecode.com
+https://github.com/levaidaniel/kc

@@ -27,37 +27,53 @@
 #include "commands.h"
 
 
+extern db_parameters	db_params;
 extern BIO		*bio_chain;
-
-extern char		*cipher_mode;
-extern char		*kdf;
-
-extern unsigned char	salt[17], iv[17], key[128];
 
 
 void
 cmd_passwd(const char *e_line, command *commands)
 {
-	char		*pass = NULL;
 	char		ret = -1;
+	char		*line = NULL, *kdf = NULL, *cipher_mode = NULL;
 
 
 	/* ask for the new password */
 	while (ret == -1)
-		ret = kc_password_read(&pass, 1);
+		ret = kc_password_read(&db_params.pass, 1);
 
 	if (ret == 0)	/* canceled */
 		return;
 
-	ret = kc_setup_crypt(bio_chain, 1, cipher_mode, kdf, pass, iv, salt, key, KC_SETUP_CRYPT_IV | KC_SETUP_CRYPT_SALT | KC_SETUP_CRYPT_KEY);
+	line = strdup(e_line);
 
-	if (pass)
-		memset(pass, '\0', PASSWORD_MAXLEN);
-	free(pass); pass = NULL;
+	strtok(line, " ");			/* remove the command from the line */
+
+	kdf = strtok(NULL, " ");		/* assign the command's first parameter (kdf) */
+	/* Changed KDF */
+	if (kdf) {
+		free(db_params.kdf); db_params.kdf = NULL;
+		db_params.kdf = strdup(kdf);
+	}
+
+	cipher_mode = strtok(NULL, " ");	/* assign the command's second parameter (cipher_mode) */
+	/* Changed cipher mode */
+	if (cipher_mode) {
+		free(db_params.cipher_mode); db_params.cipher_mode = NULL;
+		db_params.cipher_mode = strdup(cipher_mode);
+	}
+
+	free(line); line = NULL;
+
+	ret = kc_setup_crypt(bio_chain, 1, &db_params, KC_SETUP_CRYPT_IV | KC_SETUP_CRYPT_SALT | KC_SETUP_CRYPT_KEY);
+
+	if (db_params.pass)
+		memset(db_params.pass, '\0', PASSWORD_MAXLEN);
+	free(db_params.pass); db_params.pass = NULL;
 
 	if (ret) {
 		cmd_write(NULL, NULL);
 		puts("Password change OK");
 	} else
-		printf("Could not change password!");
+		puts("Could not change password!");
 } /* cmd_passwd() */

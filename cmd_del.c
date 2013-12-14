@@ -27,8 +27,8 @@
 #include "commands.h"
 
 
+extern db_parameters	db_params;
 extern xmlNodePtr	keychain;
-extern char		dirty;
 
 #ifndef _READLINE
 extern EditLine		*e;
@@ -119,7 +119,7 @@ cmd_del(const char *e_line, command *commands)
 
 			free(modified); modified = NULL;
 
-			dirty = 1;
+			db_params.dirty = 1;
 		}
 	} else
 		puts("Invalid index!");

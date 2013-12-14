@@ -39,10 +39,8 @@ extern EditLine		*e;
 extern History		*eh;
 #endif
 
+extern db_parameters	db_params;
 extern xmlDocPtr	db;
-
-extern char		*cipher_mode;
-extern char		*kdf;
 
 
 void
@@ -54,16 +52,24 @@ cmd_export(const char *e_line, command *commands)
 	xmlNodePtr	keychain = NULL, keychain_tmp = NULL, root_node_tmp = NULL;
 	xmlChar		*cname = NULL;
 
-	char		*export_filename = NULL, *line = NULL;
-	int		export_file = 0;
-	char		*cmd = NULL, dump = 0, ret = -1;
-	char		*pass = NULL;
-	unsigned char	iv[IV_LEN + 1], salt[SALT_LEN + 1], key[KEY_LEN];
+	db_parameters	db_params_new;
+
+	char		*line = NULL;
+	char		*cmd = NULL, *kdf = NULL, *cipher_mode = NULL, dump = 0, ret = -1;
 	struct stat	st;
 
 #ifndef _READLINE
 	int		e_count = 0;
 #endif
+
+
+	/* initial db_params for the exported database */
+	db_params_new.pass = NULL;
+	db_params_new.db_filename = NULL;
+	db_params_new.db_file = -1;
+	db_params_new.pass_filename = NULL;
+	db_params_new.dirty = 0;
+	db_params_new.readonly = 0;
 
 
 	line = strdup(e_line);
@@ -72,15 +78,30 @@ cmd_export(const char *e_line, command *commands)
 	if (strcmp(cmd, "dump") == 0)
 		dump = 1;
 
-	export_filename = strtok(NULL, " ");	/* assign the command's parameter */
-	if (!export_filename) {
+	db_params_new.db_filename = strtok(NULL, " ");	/* assign the command's first parameter */
+	if (!db_params_new.db_filename) {
 		puts(commands->usage);
 		free(line); line = NULL;
 		return;
 	}
-	export_filename = strdup(export_filename);
+	db_params_new.db_filename = strdup(db_params_new.db_filename);
 
-	cname = BAD_CAST strtok(NULL, " ");	/* assign the command's parameter */
+	cname = BAD_CAST strtok(NULL, " ");	/* assign the command's second parameter (keychain) */
+
+	kdf = strtok(NULL, " ");		/* assign the command's third parameter (kdf) */
+	/* Changed KDF? */
+	if (kdf)
+		db_params_new.kdf = kdf;
+	else
+		db_params_new.kdf = db_params.kdf;
+
+	cipher_mode = strtok(NULL, " ");	/* assign the command's fourth parameter (cipher_mode) */
+	/* Changed cipher mode? */
+	if (cipher_mode)
+		db_params_new.cipher_mode = cipher_mode;
+	else
+		db_params_new.cipher_mode = db_params.cipher_mode;
+
 	if (cname) {
 		/* A 'keychain' was specified, so export only that one.
 		 * We must create a new xmlDoc and copy the specified keychain to it.
@@ -90,7 +111,7 @@ cmd_export(const char *e_line, command *commands)
 		if (!keychain) {
 			printf("'%s' keychain not found.\n", cname);
 
-			free(export_filename); export_filename = NULL;
+			free(db_params_new.db_filename); db_params_new.db_filename = NULL;
 			free(line); line = NULL;
 			return;
 		}
@@ -100,7 +121,7 @@ cmd_export(const char *e_line, command *commands)
 		if (!db_tmp) {
 			puts("Could not create the new XML document for export!");
 
-			free(export_filename); export_filename = NULL;
+			free(db_params_new.db_filename); db_params_new.db_filename = NULL;
 			free(line); line = NULL;
 			return;
 		}
@@ -111,7 +132,7 @@ cmd_export(const char *e_line, command *commands)
 			puts("Could not create the new root node for export!");
 
 			xmlFreeDoc(db_tmp);
-			free(export_filename); export_filename = NULL;
+			free(db_params_new.db_filename); db_params_new.db_filename = NULL;
 			free(line); line = NULL;
 			return;
 		}
@@ -124,7 +145,7 @@ cmd_export(const char *e_line, command *commands)
 			puts("Could not duplicate keychain for export!");
 
 			xmlFreeDoc(db_tmp);
-			free(export_filename); export_filename = NULL;
+			free(db_params_new.db_filename); db_params_new.db_filename = NULL;
 			free(line); line = NULL;
 			return;
 		}
@@ -136,12 +157,12 @@ cmd_export(const char *e_line, command *commands)
 		db_tmp = db;
 
 	/* Check if the supplied filename contains an extension */
-	if (!strchr(export_filename, '.')) {
-		export_filename = realloc(export_filename, strlen(export_filename) + 4); malloc_check(export_filename);
-		strlcat(export_filename, dump ? ".xml" : ".kcd", strlen(export_filename) + 4 + 1);
+	if (!strchr(db_params_new.db_filename, '.')) {
+		db_params_new.db_filename = realloc(db_params_new.db_filename, strlen(db_params_new.db_filename) + 4); malloc_check(db_params_new.db_filename);
+		strlcat(db_params_new.db_filename, dump ? ".xml" : ".kcd", strlen(db_params_new.db_filename) + 4 + 1);
 	}
 
-	if(lstat(export_filename, &st) == 0) {	/* if export filename exists */
+	if(lstat(db_params_new.db_filename, &st) == 0) {	/* if export filename exists */
 #ifndef _READLINE
 		/* disable history temporarily */
 		if (el_set(e, EL_HIST, history, NULL) != 0) {
@@ -152,7 +173,7 @@ cmd_export(const char *e_line, command *commands)
 			perror("el_set(EL_PROMPT)");
 		}
 #endif
-		printf("Do you want to overwrite '%s'? <yes/no> ", export_filename);
+		printf("Do you want to overwrite '%s'? <yes/no> ", db_params_new.db_filename);
 
 #ifdef _READLINE
 		rl_redisplay();
@@ -176,102 +197,99 @@ cmd_export(const char *e_line, command *commands)
 #ifndef _READLINE
 			el_reset(e);
 #endif
-			free(export_filename); export_filename = NULL;
+			free(db_params_new.db_filename); db_params_new.db_filename = NULL;
 			free(line); line = NULL;
 			return;
 		}
 
 		if (strncmp(e_line, "yes", 3) != 0) {
-			free(export_filename); export_filename = NULL;
+			free(db_params_new.db_filename); db_params_new.db_filename = NULL;
 			free(line); line = NULL;
 			return;
 		}
 	}
 
 	if (dump) {
-		if (xmlSaveFormatFileEnc(export_filename, db_tmp, "UTF-8", XML_SAVE_FORMAT) > 0) {
-			if (chmod(export_filename, S_IRUSR | S_IWUSR) < 0)
+		if (xmlSaveFormatFileEnc(db_params_new.db_filename, db_tmp, "UTF-8", XML_SAVE_FORMAT) > 0) {
+			if (chmod(db_params_new.db_filename, S_IRUSR | S_IWUSR) < 0)
 				puts("Could not change permissions of dump file!");
 
 			puts("Dump OK");
 		} else
-			printf("Failed dumping to '%s'.\n", export_filename);
+			printf("Failed dumping to '%s'.\n", db_params_new.db_filename);
 	} else {
-		/* ask for the new password */
-		while (ret == -1)
-			ret = kc_password_read(&pass, 1);
-
-		if (ret == 0) {	/* canceled */
-			BIO_free_all(bio_chain);
-			free(export_filename); export_filename = NULL;
-			free(line); line = NULL;
-			return;
-		}
-
-
-		export_file = open(export_filename, O_RDWR | O_CREAT, 0600);
-		if (export_file < 0) {
+		db_params_new.db_file = open(db_params_new.db_filename, O_RDWR | O_CREAT, 0600);
+		if (db_params_new.db_file < 0) {
 			perror("open(database file)");
 
-			free(export_filename); export_filename = NULL;
+			free(db_params_new.db_filename); db_params_new.db_filename = NULL;
 			free(line); line = NULL;
-
-			if (pass)
-				memset(pass, '\0', PASSWORD_MAXLEN);
-			free(pass); pass = NULL;
-
 			return;
 		}
 
-		bio_chain = kc_setup_bio_chain(export_filename);
+		bio_chain = kc_setup_bio_chain(db_params_new.db_filename, 1);
 		if (!bio_chain) {
 			printf("Could not setup bio_chain!");
 
-			close(export_file);
-			free(export_filename); export_filename = NULL;
+			close(db_params_new.db_file);
+			free(db_params_new.db_filename); db_params_new.db_filename = NULL;
 			free(line); line = NULL;
-
-			if (pass)
-				memset(pass, '\0', PASSWORD_MAXLEN);
-			free(pass); pass = NULL;
-
 			return;
 		}
 
 
+		/* ask for the new password */
+		while (ret == -1)
+			ret = kc_password_read(&db_params_new.pass, 1);
+
+		if (ret == 0) {	/* canceled */
+			if (db_params_new.pass)
+				memset(db_params_new.pass, '\0', PASSWORD_MAXLEN);
+			free(db_params_new.pass); db_params_new.pass = NULL;
+
+			BIO_free_all(bio_chain);
+			free(db_params_new.db_filename); db_params_new.db_filename = NULL;
+			free(line); line = NULL;
+			return;
+		}
+
 		/* Generate iv/salt, setup cipher mode and turn on encrypting */
-		if (!kc_setup_crypt(bio_chain, 1, cipher_mode, kdf, pass, iv, salt, key, KC_SETUP_CRYPT_IV | KC_SETUP_CRYPT_SALT | KC_SETUP_CRYPT_KEY)) {
+		if (!kc_setup_crypt(bio_chain, 1, &db_params_new, KC_SETUP_CRYPT_IV | KC_SETUP_CRYPT_SALT | KC_SETUP_CRYPT_KEY)) {
 			printf("Could not setup encrypting!");
 
 			BIO_free_all(bio_chain);
-			close(export_file);
-			free(export_filename); export_filename = NULL;
+			close(db_params_new.db_file);
+			free(db_params_new.db_filename); db_params_new.db_filename = NULL;
 			free(line); line = NULL;
 
-			if (pass)
-				memset(pass, '\0', PASSWORD_MAXLEN);
-			free(pass); pass = NULL;
+			memset(db_params_new.key, '\0', KEY_LEN);
+
+			if (db_params_new.pass)
+				memset(db_params_new.pass, '\0', PASSWORD_MAXLEN);
+			free(db_params_new.pass); db_params_new.pass = NULL;
 
 			return;
 		}
 
-		if (pass)
-			memset(pass, '\0', PASSWORD_MAXLEN);
-		free(pass); pass = NULL;
+		memset(db_params_new.key, '\0', KEY_LEN);
+
+		if (db_params_new.pass)
+			memset(db_params_new.pass, '\0', PASSWORD_MAXLEN);
+		free(db_params_new.pass); db_params_new.pass = NULL;
 
 
-		if (kc_db_writer(export_file, db_tmp, bio_chain, iv, salt))
+		if (kc_db_writer(db_tmp, bio_chain, &db_params_new))
 			puts("Export OK");
 		else
-			printf("Failed exporting to '%s'!\n", export_filename);
+			printf("Failed exporting to '%s'!\n", db_params_new.db_filename);
 
 		BIO_free_all(bio_chain);
-		close(export_file);
+		close(db_params_new.db_file);
 	}
 
 	if (cname)
 		xmlFreeDoc(db_tmp);	/* if we saved a specific keychain, clean up the temporary xmlDoc and its tree. */
 
-	free(export_filename); export_filename = NULL;
+	free(db_params_new.db_filename); db_params_new.db_filename = NULL;
 	free(line); line = NULL;
 } /* cmd_export() */

@@ -27,7 +27,7 @@
 #include "commands.h"
 
 
-extern char		dirty;
+extern db_parameters	db_params;
 extern char		batchmode;
 
 #ifndef _READLINE
@@ -45,7 +45,7 @@ cmd_quit(const char *e_line, command *commands)
 	char		*line = NULL;
 
 
-	if (dirty  &&  !batchmode) {
+	if (db_params.dirty  &&  !batchmode) {
 #ifndef _READLINE
 		/* disable history */
 		if (el_set(e, EL_HIST, history, NULL) != 0) {

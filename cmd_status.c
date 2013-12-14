@@ -30,13 +30,9 @@
 unsigned int count_items(unsigned char);
 
 
+extern db_parameters	db_params;
 extern xmlDocPtr	db;
 extern xmlNodePtr	keychain;
-
-extern char		*cipher_mode;
-extern char		*db_filename;
-extern char		dirty;
-extern unsigned char	readonly;
 
 
 void
@@ -47,8 +43,8 @@ cmd_status(const char *e_line, command *commands)
 	xmlBufferPtr		xml_buf = NULL;
 
 
-	printf("Database file: %s", db_filename);
-	db_filename_realpath = realpath((const char*)db_filename, NULL);
+	printf("Database file: %s", db_params.db_filename);
+	db_filename_realpath = realpath((const char*)db_params.db_filename, NULL);
 	if (db_filename_realpath)
 		printf(" (%s)", db_filename_realpath);
 	printf("\n");
@@ -61,15 +57,17 @@ cmd_status(const char *e_line, command *commands)
 	xmlSaveClose(xml_save);
 	xmlBufferFree(xml_buf);
 
-	printf("Cipher mode: %s\n", cipher_mode);
+	printf("KDF: %s\n", db_params.kdf);
+
+	printf("Cipher mode: %s\n", db_params.cipher_mode);
 
 	printf("Keychains: %d\n", count_items(1));
 
 	printf("Items (all): %d\n", count_items(2));
 
-	printf("Read-only: %s\n", (readonly ? "yes" : "no"));
-	if (!readonly)
-		printf("Modified: %s\n", (dirty ? "yes" : "no"));
+	printf("Read-only: %s\n", (db_params.readonly ? "yes" : "no"));
+	if (!db_params.readonly)
+		printf("Modified: %s\n", (db_params.dirty ? "yes" : "no"));
 } /* cmd_status() */
 
 unsigned int

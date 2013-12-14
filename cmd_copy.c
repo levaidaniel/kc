@@ -27,8 +27,8 @@
 #include "commands.h"
 
 
+extern db_parameters	db_params;
 extern xmlNodePtr	keychain;
-extern char		dirty;
 
 
 void
@@ -124,7 +124,7 @@ cmd_copy(const char *e_line, command *commands)
 		xmlFree(name); name = NULL;
 		free(modified); modified = NULL;
 
-		dirty = 1;
+		db_params.dirty = 1;
 	}
 
 	free(line); line = NULL;

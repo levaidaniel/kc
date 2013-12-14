@@ -32,8 +32,10 @@
 #define	VERSION	"2.4-dev-GIT_VERSION"
 
 #define	PASSWORD_MAXLEN	256
-#define	IV_LEN		16
-#define	SALT_LEN	16
+#define	IV_LEN		64
+#define	IV_DIGEST_LEN	128
+#define	SALT_LEN	64
+#define	SALT_DIGEST_LEN	128
 #define	KEY_LEN		128
 
 #define	TIME_MAXLEN	11
@@ -43,6 +45,20 @@ enum {
 	KC_SETUP_CRYPT_SALT = 1 << 1,
 	KC_SETUP_CRYPT_KEY = 1 << 2
 };
+
+typedef struct db_parameters {
+	char		*db_filename;
+	int		db_file;
+	char		*pass_filename;
+	char 		*pass;
+	char		*kdf;
+	char		*cipher_mode;
+	unsigned char	iv[IV_DIGEST_LEN + 1];
+	unsigned char	salt[SALT_DIGEST_LEN + 1];
+	unsigned char	key[KEY_LEN];
+	unsigned char	dirty;
+	unsigned char	readonly;
+} db_parameters;
 
 #define	KC_DTD	"\
 <!ELEMENT kc (keychain)*> \

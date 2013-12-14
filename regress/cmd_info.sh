@@ -19,7 +19,7 @@ case "$(uname -s)" in
 esac
 
 
-SHA1=$(printf "info\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" |sed -e 's/^\(Modified: \).*$/\1/' |$SHA1_BIN |cut -d' ' -f1)
+SHA1=$(printf "info\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." |sed -e 's/^\(Modified: \).*$/\1/' |$SHA1_BIN |cut -d' ' -f1)
 if [ "$SHA1" = 'db6f86083e3da30ca234edbe29cfc01f3167488f' ];then
 	echo "$0 test ok (keychain description/created/modified)!"
 else
@@ -27,7 +27,7 @@ else
 	exit 1
 fi
 
-SHA1=$(printf "info 0\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" |$SHA1_BIN |cut -d' ' -f1)
+SHA1=$(printf "info 0\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." |$SHA1_BIN |cut -d' ' -f1)
 if [ "$SHA1" = '83b3b5c7809abd12d061eb0c03a39ec135845871' ];then
 	echo "$0 test ok (key created/modified)!"
 else

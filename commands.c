@@ -127,7 +127,7 @@ _rl_push_buffer(void)
 
 
 char *
-get_random_str(size_t length, char alnum)
+get_random_str(size_t length, char mode)
 {
         int		i = 0;
         int		rnd_file = -1;
@@ -154,34 +154,55 @@ get_random_str(size_t length, char alnum)
 
 	read(rnd_file, tmp, 1);
 	for (i=0; i < (int)length; i++) {
-		/* only alphanumeric was requested */
-		if (alnum)
-			while ( (*tmp < 65  ||  *tmp > 90)  &&
-				(*tmp < 97  ||  *tmp > 122)  &&
-				(*tmp < 48  ||  *tmp > 57)) {
+		switch (mode) {
+			case 0:
+			/* only alphanumeric was requested */
+				while ( (*tmp < 65  ||  *tmp > 90)  &&
+					(*tmp < 97  ||  *tmp > 122)  &&
+					(*tmp < 48  ||  *tmp > 57)) {
 
-				ret = read(rnd_file, tmp, 1);
-				if (ret < 0) {
-					perror("read(random device)");
+					ret = read(rnd_file, tmp, 1);
+					if (ret <= 0) {
+						perror("read(random device)");
 
-					free(rnd_str); rnd_str = NULL;
-					free(tmp); tmp = NULL;
-					return(NULL);
+						free(rnd_str); rnd_str = NULL;
+						free(tmp); tmp = NULL;
+						return(NULL);
+					}
 				}
-			}
-		else
+			break;
+			case 1:
 			/* give anything printable */
-			while (*tmp < 33  ||  *tmp > 126) {
+				while (*tmp < 33  ||  *tmp > 126) {
 
+					ret = read(rnd_file, tmp, 1);
+					if (ret <= 0) {
+						perror("read(random device)");
+
+						free(rnd_str); rnd_str = NULL;
+						free(tmp); tmp = NULL;
+						return(NULL);
+					}
+				}
+			break;
+			case 2:
+			/* give anything */
 				ret = read(rnd_file, tmp, 1);
-				if (ret < 0) {
+				if (ret <= 0) {
 					perror("read(random device)");
 
 					free(rnd_str); rnd_str = NULL;
 					free(tmp); tmp = NULL;
 					return(NULL);
 				}
-			}
+			break;
+			default:
+			/* invalid calling of the function */
+				free(rnd_str); rnd_str = NULL;
+				free(tmp); tmp = NULL;
+				return(NULL);
+			break;
+		}
 
 		rnd_str[i] = *tmp;              /* store the value */
 		*tmp = '\0';            /* reset the value */
@@ -247,9 +268,9 @@ parse_randoms(xmlChar *line)
 				/* replace with random characters */
 
 				if (line[i+1] == 'r'  ||  line[i+1] == 'R')
-					rand_str = get_random_str(4, 0);
-				else if (line[i+1] == 'a'  ||  line[i+1] == 'A')	/* generate only alphanumeric characters */
 					rand_str = get_random_str(4, 1);
+				else if (line[i+1] == 'a'  ||  line[i+1] == 'A')	/* generate only alphanumeric characters */
+					rand_str = get_random_str(4, 0);
 
 				if (rand_str) {
 					ret[j++] = rand_str[0];
@@ -276,6 +297,119 @@ parse_randoms(xmlChar *line)
 
 	return(ret);	/* return the result; we've worked hard on it. */
 } /* parse_randoms() */
+
+
+/*
+ * Get the idx'th line from the value.
+ */
+xmlChar *
+get_line(xmlChar *value_nl, int value_len, int idx)
+{
+	xmlChar	*line = NULL;
+
+	int	nl = 1, pos = 0, tmp = 0;
+	size_t	line_len = 0;
+
+
+	/* find out the start position (pos) of the requested line number (idx) */
+	for (pos = 0;(pos < value_len)  &&  (idx > nl); pos++) {
+		if (value_nl[pos] == '\n') {	/* we've found a newline */
+			nl++;
+		}
+	}
+
+	tmp = pos;
+	/* count the requested line length */
+	while (value_nl[pos] != '\n'  &&  value_nl[pos] != '\0') {
+		line_len++;
+		pos++;
+	}
+
+	pos = tmp;
+	tmp = 0;
+	line = malloc(line_len + 1); malloc_check(line);
+	/* copy out the requested line */
+	while (value_nl[pos] != '\n'  &&  value_nl[pos] != '\0'  &&  tmp < (int)line_len) {
+		line[tmp++] = value_nl[pos++];
+	}
+	line[(long)line_len] = '\0';
+
+	return(line);
+} /* get_line() */
+
+
+xmlChar *
+parse_newlines(xmlChar *line, char dir)		/* dir(direction): "\n" -> '\n' = 0, '\n' -> "\n" = 1 */
+{
+	xmlChar		*ret = NULL;
+	int		i = 0, j = 0;
+	size_t		nlnum = 0, ret_len = 0;
+
+
+	if (!line)
+		return(xmlStrdup(BAD_CAST ""));
+
+
+	if (dir) {
+		/*
+		 * count the number of '\n' characters in the string, and use it later to figure how many bytes
+		 * will be the new string, with replaced newline characters.
+		 */
+		for (i=0; i < (int)xmlStrlen(line); i++)
+			if (line[i] == '\n')	/* we got a winner... */
+				nlnum++;
+
+		ret_len = xmlStrlen(line) + nlnum + 1;
+	} else {
+		/*
+		 * count the number of "\n" sequences in the string, and use it later to figure how many bytes
+		 * will be the new string, with replaced newline sequences.
+		 */
+		for (i=0; i < (int)xmlStrlen(line); i++) {
+			if (line[i] == '\\') {	/* got an escape character, we better examine it... */
+				if (line[i+1] == '\\')	/* the "\\n" case. the newline is escaped, so honor it */
+					i += 2;		/* skip these. don't count them, because they are not newlines */
+				else if (line[i+1] == 'n')	/* we got a winner... */
+					nlnum++;
+			}
+		}
+
+		ret_len = xmlStrlen(line) - nlnum + 1;
+	}
+	ret = malloc(ret_len); malloc_check(ret);
+
+
+	if (dir) {
+		/* replace the real newline characters with newline sequences ("\n"); */
+		for (i=0; i < (int)xmlStrlen(line); i++) {
+			if (line[i] == '\n') {			/* we got a winner... */
+				ret[j++] = '\\';		/* replace with NL character */
+				ret[j++] = 'n';			/* replace with NL character */
+			} else
+				ret[j++] = line[i];			/* anything else will just go into the new string */
+		}
+	} else {
+		/* replace the newline sequences with real newline characters ('\n'); */
+		for (i=0; i < (int)xmlStrlen(line); i++) {
+			if (line[i] == '\\') {	/* got an escape character, we better examine it... */
+				if (line[i+1] == '\\') {	/* the "\\n" case. the newline is escaped, so honor it */
+					ret[j++] = line[i];	/* copy it as if nothing had happened */
+					ret[j++] = line[++i];
+				} else if (line[i+1] == 'n') {	/* we got a winner... */
+					ret[j++] = '\n';	/* replace with NL character */
+					i++;			/* skip the 'n' char from "\n" */
+				} else
+					ret[j++] = line[i];	/* anything else will just go into the new string */
+			} else
+				ret[j++] = line[i];		/* anything else will just go into the new string */
+		}
+	}
+
+	ret[(long)(ret_len - 1)] = '\0';		/* close that new string safe and secure. */
+
+
+	return(ret);	/* return the result; we've worked hard on it. */
+} /* parse_newlines() */
 
 
 char
@@ -354,15 +488,19 @@ kc_password_read(char **pass1, char new)
 
 
 char
-kc_setup_crypt(BIO *bio_chain, int enc, char *cipher_mode, char *kdf, char *pass,
-		unsigned char *iv, unsigned char *salt, unsigned char *key,
-		int flags)
+kc_setup_crypt(BIO *bio_chain, int enc, struct db_parameters *db_params, int flags)
 {
 	char	*iv_tmp = NULL, *salt_tmp = NULL;
+	int	i = 0;
+
+	EVP_MD_CTX	*mdctx = NULL;
+	unsigned char	digested[EVP_MAX_MD_SIZE];
+	unsigned int	digested_len = 0;
+	char		hex_tmp[3];
 
 
 	if ((flags & KC_SETUP_CRYPT_IV)) {
-		iv_tmp = get_random_str(IV_LEN, 0);
+		iv_tmp = get_random_str(IV_LEN, 2);
 		if (!iv_tmp) {
 			puts("IV generation failure!");
 
@@ -371,7 +509,7 @@ kc_setup_crypt(BIO *bio_chain, int enc, char *cipher_mode, char *kdf, char *pass
 	}
 
 	if ((flags & KC_SETUP_CRYPT_SALT)) {
-		salt_tmp = get_random_str(SALT_LEN, 0);
+		salt_tmp = get_random_str(SALT_LEN, 2);
 		if (!salt_tmp) {
 			puts("Salt generation failure!");
 
@@ -382,43 +520,90 @@ kc_setup_crypt(BIO *bio_chain, int enc, char *cipher_mode, char *kdf, char *pass
 
 
 	if ((flags & KC_SETUP_CRYPT_IV)) {
-		strlcpy((char *)iv, iv_tmp, IV_LEN + 1);
-		free(iv_tmp); iv_tmp = NULL;
+		/* Setup the digest context */
+		mdctx = EVP_MD_CTX_create();
+		if (!mdctx) {
+			puts("Could not create digest context for IV!");
 
-		if (getenv("KC_DEBUG"))
-			printf("iv='%s'\n", iv);
+			free(iv_tmp); iv_tmp = NULL;
+			free(salt_tmp); salt_tmp = NULL;
+			return(0);
+		}
+		EVP_DigestInit_ex(mdctx, EVP_sha512(), NULL);
+		EVP_DigestUpdate(mdctx, iv_tmp, IV_LEN);
+		EVP_DigestFinal(mdctx, digested, &digested_len);
+
+		/* Print the binary digest in hex as characters (numbers, effectively)
+		 * into the ..->iv variable.
+		 */
+		for (i = 0; i < digested_len; i++) {
+			snprintf(hex_tmp, 3, "%02x", digested[i]);
+
+			if (!i)
+				strlcpy((char *)db_params->iv, hex_tmp, IV_DIGEST_LEN + 1);
+			else
+				strlcat((char *)db_params->iv, hex_tmp, IV_DIGEST_LEN + 1);
+		}
+
+		free(iv_tmp); iv_tmp = NULL;
 	}
+	if (getenv("KC_DEBUG"))
+		printf("iv='%s'\n", db_params->iv);
+
 
 	if ((flags & KC_SETUP_CRYPT_SALT)) {
-		strlcpy((char *)salt, salt_tmp, SALT_LEN + 1);
-		free(salt_tmp); salt_tmp = NULL;
+		/* Setup the digest context */
+		mdctx = EVP_MD_CTX_create();
+		if (!mdctx) {
+			puts("Could not create digest context for IV!");
 
-		if (getenv("KC_DEBUG"))
-			printf("salt='%s'\n", salt);
+			free(iv_tmp); iv_tmp = NULL;
+			free(salt_tmp); salt_tmp = NULL;
+			return(0);
+		}
+		EVP_DigestInit_ex(mdctx, EVP_sha512(), NULL);
+		EVP_DigestUpdate(mdctx, salt_tmp, SALT_LEN);
+		EVP_DigestFinal(mdctx, digested, &digested_len);
+
+		/* Print the binary digest in hex as characters (numbers, effectively)
+		 * into the ..->salt variable.
+		 */
+		for (i = 0; i < digested_len; i++) {
+			snprintf(hex_tmp, 3, "%02x", digested[i]);
+
+			if (!i)
+				strlcpy((char *)db_params->salt, hex_tmp, SALT_DIGEST_LEN + 1);
+			else
+				strlcat((char *)db_params->salt, hex_tmp, SALT_DIGEST_LEN + 1);
+		}
+
+		free(salt_tmp); salt_tmp = NULL;
 	}
+	if (getenv("KC_DEBUG"))
+		printf("salt='%s'\n", db_params->salt);
 
 
 	if ((flags & KC_SETUP_CRYPT_KEY)) {
 		if (getenv("KC_DEBUG"))
 			printf("generating new key from pass and salt.\n");
 
-		/* generate a proper key for encoding/decoding BIO */
-		if (strcmp(kdf, "sha1") == 0)
-			PKCS5_PBKDF2_HMAC_SHA1(pass, (int)strlen(pass), salt, SALT_LEN + 1, 5000, KEY_LEN, key);
-		else if (strcmp(kdf, "sha512") == 0)
-			PKCS5_PBKDF2_HMAC(pass, (int)strlen(pass), salt, SALT_LEN + 1, 5000, EVP_sha512(), KEY_LEN, key);
-		else if (strcmp(kdf, "bcrypt") == 0)
-			bcrypt_pbkdf(pass, strlen(pass), salt, SALT_LEN, key, KEY_LEN, 10);
+		/* Generate a proper key from the user's password */
+		if (strcmp(db_params->kdf, "sha1") == 0)
+			PKCS5_PBKDF2_HMAC_SHA1(db_params->pass, (int)strlen(db_params->pass), db_params->salt, SALT_DIGEST_LEN + 1, 5000, KEY_LEN, db_params->key);
+		else if (strcmp(db_params->kdf, "sha512") == 0)
+			PKCS5_PBKDF2_HMAC(db_params->pass, (int)strlen(db_params->pass), db_params->salt, SALT_DIGEST_LEN + 1, 5000, EVP_sha512(), KEY_LEN, db_params->key);
+		else if (strcmp(db_params->kdf, "bcrypt") == 0)
+			bcrypt_pbkdf(db_params->pass, strlen(db_params->pass), db_params->salt, SALT_DIGEST_LEN + 1, db_params->key, KEY_LEN, 10);
 		else {
-			printf("Unknown kdf: %s!\n", kdf);
+			printf("Unknown kdf: %s!\n", db_params->kdf);
 			return(0);
 		}
 	}
 
 	if (getenv("KC_DEBUG"))
-		printf("crypt setup: using %s based KDF\n", kdf);
+		printf("crypt setup: using %s based KDF\n", db_params->kdf);
 
-	if (!key) {
+	if (!db_params->key) {
 		puts("Key generation failure!");
 
 		return(0);
@@ -435,19 +620,19 @@ kc_setup_crypt(BIO *bio_chain, int enc, char *cipher_mode, char *kdf, char *pass
 
 
 	/* reconfigure encoding with the key and IV */
-	if (strcmp(cipher_mode, "cfb128") == 0)
-		BIO_set_cipher(bio_chain, EVP_aes_256_cfb128(), key, iv, enc);
-	else if (strcmp(cipher_mode, "ofb") == 0)
-		BIO_set_cipher(bio_chain, EVP_aes_256_ofb(), key, iv, enc);
-	else if (strcmp(cipher_mode, "cbc") == 0)
-		BIO_set_cipher(bio_chain, EVP_aes_256_cbc(), key, iv, enc);
+	if (strcmp(db_params->cipher_mode, "cfb128") == 0)
+		BIO_set_cipher(bio_chain, EVP_aes_256_cfb128(), db_params->key, db_params->iv, enc);
+	else if (strcmp(db_params->cipher_mode, "ofb") == 0)
+		BIO_set_cipher(bio_chain, EVP_aes_256_ofb(), db_params->key, db_params->iv, enc);
+	else if (strcmp(db_params->cipher_mode, "cbc") == 0)
+		BIO_set_cipher(bio_chain, EVP_aes_256_cbc(), db_params->key, db_params->iv, enc);
 	else {
-		printf("Unknown cipher mode: %s!\n", cipher_mode);
+		printf("Unknown cipher mode: %s!\n", db_params->cipher_mode);
 		return(0);
 	}
 
 	if (getenv("KC_DEBUG"))
-		printf("crypt setup: using %s cipher mode\n", cipher_mode);
+		printf("crypt setup: using %s cipher mode\n", db_params->cipher_mode);
 
 
 	return(1);
@@ -455,7 +640,7 @@ kc_setup_crypt(BIO *bio_chain, int enc, char *cipher_mode, char *kdf, char *pass
 
 
 BIO *
-kc_setup_bio_chain(const char *db_filename)
+kc_setup_bio_chain(const char *db_filename, const char write)
 {
 	BIO	*bio_file = NULL;
 	BIO	*bio_b64 = NULL;
@@ -463,7 +648,10 @@ kc_setup_bio_chain(const char *db_filename)
 	BIO	*bio_chain = NULL;
 
 
-	bio_file = BIO_new_file(db_filename, "r+");
+	if (write)
+		bio_file = BIO_new_file(db_filename, "w+");
+	else
+		bio_file = BIO_new_file(db_filename, "r");
 	if (!bio_file) {
 		perror("BIO_new_file()");
 		return(NULL);
@@ -490,12 +678,12 @@ kc_setup_bio_chain(const char *db_filename)
 
 
 char
-kc_db_writer(int db_file, xmlDocPtr db, BIO *bio_chain, unsigned char *iv, unsigned char *salt)
+kc_db_writer(xmlDocPtr db, BIO *bio_chain, struct db_parameters *db_params)
 {
-	xmlSaveCtxtPtr		xml_save = NULL;
-	xmlBufferPtr		xml_buf = NULL;
+	xmlSaveCtxtPtr	xml_save = NULL;
+	xmlBufferPtr	xml_buf = NULL;
 
-	int			ret = 0, remaining = 0;
+	int		ret = 0, remaining = 0;
 
 
 	xml_buf = xmlBufferCreate();
@@ -509,33 +697,61 @@ kc_db_writer(int db_file, xmlDocPtr db, BIO *bio_chain, unsigned char *iv, unsig
 		xmlSaveClose(xml_save);
 
 
-		/* rewrite the database */
-		if (ftruncate(db_file, 0) != 0) {
-			if (getenv("KC_DEBUG"))
-				perror("db file truncate");
-
-			return(0);
-		}
-		lseek(db_file, 0, SEEK_SET);
-
-		/* write the IV and salt first */
-		if (write(db_file, iv, IV_LEN) != IV_LEN) {
-			if (getenv("KC_DEBUG"))
-				perror("write() IV_LEN");
-
-			return(0);
-		}
+		/* write the IV */
 		if (getenv("KC_DEBUG"))
-			puts("wrote iv to database file");
+			puts("writing IV");
 
-		if (write(db_file, salt, SALT_LEN) != SALT_LEN) {
-			if (getenv("KC_DEBUG"))
-				perror("write() SALT_LEN");
+		remaining = IV_DIGEST_LEN;
+		while (remaining > 0) {
+			ret = write(db_params->db_file, db_params->iv, remaining);
 
+			if (ret < 0) {
+				perror("writing IV to database file");
+				return(0);
+			}
+
+			remaining -= ret;
+
+			if (getenv("KC_DEBUG")) {
+				printf("wrote: %d\n", ret);
+				printf("remaining: %d\n", remaining);
+			}
+		}
+		/* Write a newline at the end */
+		ret = write(db_params->db_file, "\n", 1);
+		if (ret != 1) {
+			perror("writing IV to database file");
 			return(0);
 		}
+
+
+		/* write the salt */
 		if (getenv("KC_DEBUG"))
-			puts("wrote salt to database file");
+			puts("writing salt");
+
+		remaining = SALT_DIGEST_LEN;
+		while (remaining > 0) {
+			ret = write(db_params->db_file, db_params->salt, remaining);
+
+			if (ret < 0) {
+				perror("writing salt to database file");
+				return(0);
+			}
+
+			remaining -= ret;
+
+			if (getenv("KC_DEBUG")) {
+				printf("wrote: %d\n", ret);
+				printf("remaining: %d\n", remaining);
+			}
+		}
+		/* Write a newline at the end */
+		ret = write(db_params->db_file, "\n", 1);
+		if (ret != 1) {
+			perror("writing salt to database file");
+			return(0);
+		}
+
 
 		/* we must reset the cipher BIO to work after subsequent calls to kc_db_writer() */
 		if (BIO_reset(bio_chain) != 0) {
@@ -546,12 +762,16 @@ kc_db_writer(int db_file, xmlDocPtr db, BIO *bio_chain, unsigned char *iv, unsig
 		}
 
 		/* seek after the IV and salt */
-		if (BIO_seek(bio_chain, IV_LEN + SALT_LEN) != 0) {
+		if (BIO_seek(bio_chain, IV_DIGEST_LEN + SALT_DIGEST_LEN + 2) != 0) {
 			if (getenv("KC_DEBUG"))
 				printf("%s(): BIO_seek() error\n", __func__);
 
 			return(0);
 		}
+
+		/* Write the database */
+		if (getenv("KC_DEBUG"))
+			puts("writing database");
 
 		remaining = xmlBufferLength(xml_buf);
 		while (remaining > 0) {
@@ -580,6 +800,8 @@ kc_db_writer(int db_file, xmlDocPtr db, BIO *bio_chain, unsigned char *iv, unsig
 			}
 		}
 
+
+		/* Flush the written stuff */
 		do {
 			if (BIO_flush(bio_chain) == 1) {
 				if (getenv("KC_DEBUG"))
@@ -668,19 +890,30 @@ kc_validate_xml(xmlDocPtr db)
 } /* kc_validate_xml() */
 
 
-unsigned int
+int
 kc_db_reader(char **buf, BIO *bio_chain)
 {
-	unsigned int	pos = 0;
+	int		pos = 0;
 	size_t		buf_size = 1024;
 	ssize_t		ret = -1;
 
 
-	/* seek after the IV and salt */
-	BIO_seek(bio_chain, IV_LEN + SALT_LEN);	/* It is possible that this is an empty database file, and we can not seek after anything yet. In this case we just create a new database, later. */
+	/* Seek after the IV and salt */
+	if (getenv("KC_DEBUG"))
+		puts("skipping over IV and salt while reading db");
 
-	/* read in the database file to a buffer */
+	BIO_seek(bio_chain, IV_DIGEST_LEN + SALT_DIGEST_LEN + 2);
+
+	if (getenv("KC_DEBUG"))
+		printf("skipped over %d bytes\n", BIO_tell(bio_chain));
+
+
+	/* Read the database */
 	*buf = calloc(1, buf_size); malloc_check(*buf);
+
+	if (getenv("KC_DEBUG"))
+		puts("reading database");
+
 	pos = 0;
 	do {
 		/* if we've reached the size of 'buf', grow it */
@@ -723,12 +956,15 @@ kc_db_reader(char **buf, BIO *bio_chain)
 				puts("There was an error while trying to read the database!");
 			break;
 			default:
-				pos += (unsigned int)ret;
+				pos += ret;
 				if (getenv("KC_DEBUG"))
 					printf("pos: %d\n", pos);
 			break;
 		}
 	} while (ret > 0);
+
+	if (getenv("KC_DEBUG"))
+		printf("read %d bytes\n", pos);
 
 
 	return(pos);

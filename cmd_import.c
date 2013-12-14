@@ -23,7 +23,7 @@
 */
 
 
-/*#include <sys/stat.h>*/
+#include <sys/stat.h>
 #ifndef _LINUX
 #include <fcntl.h>
 #else
@@ -34,12 +34,9 @@
 #include "commands.h"
 
 
+extern db_parameters	db_params;
 extern xmlDocPtr	db;
 extern xmlNodePtr	keychain;
-extern char		*cipher_mode;
-extern char		*kdf;
-
-extern char		dirty;
 
 
 void
@@ -47,18 +44,29 @@ cmd_import(const char *e_line, command *commands)
 {
 	BIO		*bio_chain = NULL;
 
+	struct stat	st;
+
+	db_parameters	db_params_new;
+
 	xmlDocPtr	db_new = NULL;
 	xmlNodePtr	db_root = NULL, db_root_new = NULL, entry_new = NULL,
 			keychain_new = NULL, keychain_cur = NULL;
 	xmlChar		*cname = NULL;
 
-	char		*cmd = NULL, append = 0, xml = 0;
-	char		*line = NULL, *import_filename = NULL;
-	char		*rbuf = NULL;
-	unsigned char	iv[IV_LEN + 1], salt[SALT_LEN + 1], key[KEY_LEN];
-	char		*pass = NULL;
+	char		*cmd = NULL, *kdf = NULL, *cipher_mode = NULL, append = 0, xml = 0;
+	char		*line = NULL;
+	char		*buf = NULL;
 	ssize_t		ret = -1;
-	int		import_file = 0;
+	int		pos = 0;
+
+
+	/* initial db_params parameters of the imported database */
+	db_params_new.pass = NULL;
+	db_params_new.db_filename = NULL;
+	db_params_new.db_file = -1;
+	db_params_new.pass_filename = NULL;
+	db_params_new.dirty = 0;
+	db_params_new.readonly = 0;
 
 
 	line = strdup(e_line);
@@ -70,25 +78,39 @@ cmd_import(const char *e_line, command *commands)
 	if (strcmp(cmd + 6, "xml") == 0)
 		xml = 1;
 
-	import_filename = strtok(NULL, " ");	/* assign the command's parameter */
-	if (!import_filename) {
+	db_params_new.db_filename = strtok(NULL, " ");	/* assign the command's parameter */
+	if (!db_params_new.db_filename) {
 		puts(commands->usage);
 
 		free(line); line = NULL;
 		return;
 	}
 
+	kdf = strtok(NULL, " ");		/* assign the command's second parameter (kdf) */
+	/* Changed KDF? */
+	if (kdf)
+		db_params_new.kdf = kdf;
+	else
+		db_params_new.kdf = db_params.kdf;
+
+	cipher_mode = strtok(NULL, " ");	/* assign the command's third parameter (cipher_mode) */
+	/* Changed cipher mode? */
+	if (cipher_mode)
+		db_params_new.cipher_mode = cipher_mode;
+	else
+		db_params_new.cipher_mode = db_params.cipher_mode;
+
 
 	if (xml) {
 		/* plain text XML database import */
 
 		if (getenv("KC_DEBUG"))
-			db_new = xmlReadFile(import_filename, "UTF-8", XML_PARSE_NONET | XML_PARSE_PEDANTIC);
+			db_new = xmlReadFile(db_params_new.db_filename, "UTF-8", XML_PARSE_NONET | XML_PARSE_PEDANTIC);
 		else
-			db_new = xmlReadFile(import_filename, "UTF-8", XML_PARSE_NONET | XML_PARSE_NOERROR | XML_PARSE_NOWARNING);
+			db_new = xmlReadFile(db_params_new.db_filename, "UTF-8", XML_PARSE_NONET | XML_PARSE_NOERROR | XML_PARSE_NOWARNING);
 
 		if (!db_new) {
-			xmlGenericError(xmlGenericErrorContext, "Failed to parse XML from '%s'.\n", import_filename);
+			xmlGenericError(xmlGenericErrorContext, "Failed to parse XML from '%s'.\n", db_params_new.db_filename);
 
 			free(line); line = NULL;
 			return;
@@ -96,68 +118,153 @@ cmd_import(const char *e_line, command *commands)
 	} else {
 		/* encrypted database import */
 
-		import_file = open(import_filename, O_RDONLY);
-		if (import_file < 0) {
-			perror("Could not open import file");
+		/* This should be identical with what is in kc.c */
+		if(stat(db_params_new.db_filename, &st) == 0) {
+
+			printf("Opening '%s'\n",db_params_new.db_filename);
+
+			if(!S_ISLNK(st.st_mode)  &&  !S_ISREG(st.st_mode)) {
+				printf("'%s' is not a regular file or a link!\n", db_params_new.db_filename);
+
+				free(line); line = NULL;
+				return;
+			}
+
+			if(st.st_size == 0) {
+				printf("'%s' is an empty file!\n", db_params_new.db_filename);
+
+				free(line); line = NULL;
+				return;
+			}
+
+			if(st.st_size <= IV_DIGEST_LEN + SALT_DIGEST_LEN + 2) {
+				printf("'%s' is suspiciously small file!\n", db_params_new.db_filename);
+
+				free(line); line = NULL;
+				return;
+			}
+
+			db_params_new.db_file = open(db_params_new.db_filename, O_RDONLY);
+			if (db_params_new.db_file < 0) {
+				perror("open(database file)");
+
+				free(line); line = NULL;
+				return;
+			}
+
+			/* read the IV */
+			buf = malloc(IV_DIGEST_LEN + 1); malloc_check(buf);
+			ret = 0; pos = 0;
+			do {
+				ret = read(db_params_new.db_file, buf, IV_DIGEST_LEN);
+				pos += ret;
+			} while (ret > 0  &&  pos < IV_DIGEST_LEN);
+
+			if (ret < 0) {
+				perror("read IV(database file)");
+
+				close(db_params_new.db_file);
+				free(buf); buf = NULL;
+				free(line); line = NULL;
+				return;
+			}
+			if (pos != IV_DIGEST_LEN) {
+				puts("Could not read IV from database file!");
+
+				close(db_params_new.db_file);
+				free(buf); buf = NULL;
+				free(line); line = NULL;
+				return;
+			} else
+				strlcpy((char *)db_params_new.iv, (const char *)buf, IV_DIGEST_LEN + 1);
+
+			free(buf); buf = NULL;
+
+			if (getenv("KC_DEBUG"))
+				printf("iv='%s'\n", db_params_new.iv);
+
+			/* Fast-forward one byte after the current position,
+			 * to skip the newline.
+			 */
+			lseek(db_params_new.db_file, 1, SEEK_CUR);
+
+			/* read the salt */
+			buf = malloc(SALT_DIGEST_LEN + 1); malloc_check(buf);
+			ret = 0; pos = 0;
+			do {
+				ret = read(db_params_new.db_file, buf, SALT_DIGEST_LEN);
+				pos += ret;
+			} while (ret > 0  &&  pos < SALT_DIGEST_LEN);
+
+			if (ret < 0) {
+				perror("read salt(database file)");
+
+				close(db_params_new.db_file);
+				free(buf); buf = NULL;
+				free(line); line = NULL;
+				return;
+			}
+			if (pos != SALT_DIGEST_LEN) {
+				puts("Could not read salt from database file!");
+
+				close(db_params_new.db_file);
+				free(buf); buf = NULL;
+				free(line); line = NULL;
+				return;
+			} else
+				strlcpy((char *)db_params_new.salt, (const char *)buf, SALT_DIGEST_LEN + 1);
+
+			free(buf); buf = NULL;
+
+			if (getenv("KC_DEBUG"))
+				printf("salt='%s'\n", db_params_new.salt);
+
+
+			if (close(db_params_new.db_file) < 0) {
+				perror("close after reading IV/salt(database file)");
+
+				free(line); line = NULL;
+				return;
+			}
+		} else {
+			perror("Could not open database file");
 
 			free(line); line = NULL;
 			return;
 		}
-		/* read the IV */
-		rbuf = malloc(IV_LEN + 1); malloc_check(rbuf);
 
-		ret = read(import_file, rbuf, IV_LEN);
-		if (ret < 0)
-			perror("read(import file)");
-		else
-			strlcpy((char *)iv, (const char *)rbuf, IV_LEN + 1);
-
-		free(rbuf); rbuf = NULL;
-
-		/* read the salt */
-		rbuf = malloc(SALT_LEN + 1); malloc_check(rbuf);
-
-		ret = read(import_file, rbuf, SALT_LEN);
-		if (ret < 0)
-			perror("read(import file)");
-		else
-			strlcpy((char *)salt, (const char *)rbuf, SALT_LEN + 1);
-
-		free(rbuf); rbuf = NULL;
-
-
-		bio_chain = kc_setup_bio_chain(import_filename);
+		bio_chain = kc_setup_bio_chain(db_params_new.db_filename, 0);
 		if (!bio_chain) {
 			printf("Could not setup bio_chain!");
 
-			close(import_file);
 			free(line); line = NULL;
 			return;
 		}
 
 		/* ask for the password */
-		kc_password_read(&pass, 0);
+		kc_password_read(&db_params_new.pass, 0);
 
 		/* Setup cipher mode and turn on decrypting */
-		ret = kc_setup_crypt(bio_chain, 0, cipher_mode, kdf, pass, iv, salt, key, KC_SETUP_CRYPT_KEY);
+		ret = kc_setup_crypt(bio_chain, 0, &db_params_new, KC_SETUP_CRYPT_KEY);
 
-		/* from here on now, we don't need to store the password text anymore */
-		if (pass)
-			memset(pass, '\0', PASSWORD_MAXLEN);
-		free(pass); pass = NULL;
+		/* from here on now, we don't need to store the key or the password text anymore */
+		memset(db_params_new.key, '\0', KEY_LEN);
+
+		if (db_params_new.pass)
+			memset(db_params_new.pass, '\0', PASSWORD_MAXLEN);
+		free(db_params_new.pass); db_params_new.pass = NULL;
 
 		/* kc_setup_crypt() check from a few lines above */
 		if (!ret) {
 			printf("Could not setup decrypting!");
 
 			BIO_free_all(bio_chain);
-			close(import_file);
 			free(line); line = NULL;
 			return;
 		}
 
 
-		ret = kc_db_reader(&rbuf, bio_chain);
+		ret = kc_db_reader(&buf, bio_chain);
 		if (getenv("KC_DEBUG"))
 			printf("read %d bytes\n", (int)ret);
 
@@ -165,21 +272,19 @@ cmd_import(const char *e_line, command *commands)
 			puts("Failed to decrypt import file!");
 
 			BIO_free_all(bio_chain);
-			close(import_file);
-			free(rbuf); rbuf = NULL;
+			free(buf); buf = NULL;
 			free(line); line = NULL;
 			return;
 		}
 
 		BIO_free_all(bio_chain);
-		close(import_file);
 
 		if (getenv("KC_DEBUG"))
-			db_new = xmlReadMemory(rbuf, (int)ret, NULL, "UTF-8", XML_PARSE_NONET | XML_PARSE_RECOVER);
+			db_new = xmlReadMemory(buf, (int)ret, NULL, "UTF-8", XML_PARSE_NONET | XML_PARSE_RECOVER);
 		else
-			db_new = xmlReadMemory(rbuf, (int)ret, NULL, "UTF-8", XML_PARSE_NONET | XML_PARSE_NOERROR | XML_PARSE_NOWARNING | XML_PARSE_RECOVER);
+			db_new = xmlReadMemory(buf, (int)ret, NULL, "UTF-8", XML_PARSE_NONET | XML_PARSE_NOERROR | XML_PARSE_NOWARNING | XML_PARSE_RECOVER);
 
-		free(rbuf); rbuf = NULL;
+		free(buf); buf = NULL;
 
 		if (!db_new) {
 			puts("Could not parse XML document!");
@@ -191,7 +296,7 @@ cmd_import(const char *e_line, command *commands)
 
 
 	if (!kc_validate_xml(db_new)) {
-		printf("Not a valid kc XML structure ('%s')!\n", import_filename);
+		printf("Not a valid kc XML structure ('%s')!\n", db_params_new.db_filename);
 
 		xmlFreeDoc(db_new);
 		free(line); line = NULL;
@@ -267,7 +372,7 @@ cmd_import(const char *e_line, command *commands)
 		db = db_new;
 	}
 
-	dirty = 1;
+	db_params.dirty = 1;
 
 	if (append)
 		puts("Append OK");

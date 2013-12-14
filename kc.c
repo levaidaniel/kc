@@ -44,22 +44,15 @@ char		*cmd_generator(const char *, int);
 #endif
 
 
+db_parameters	db_params;
 BIO		*bio_chain = NULL;
-
-char		*cipher_mode = "cbc";
-char		*kdf = "sha1";
-
-unsigned char	iv[IV_LEN + 1], salt[SALT_LEN + 1], key[KEY_LEN];
 
 command		*commands_first = NULL;
 
 xmlDocPtr	db = NULL;
 xmlNodePtr	keychain = NULL;
 
-int		db_file = 0;
-char		*db_filename = NULL;
-
-unsigned char	dirty = 0, batchmode = 0, readonly = 0;
+unsigned char	batchmode = 0;
 
 #ifndef _READLINE
 EditLine	*e = NULL;
@@ -84,8 +77,6 @@ main(int argc, char *argv[])
 	char		*buf = NULL;
 	ssize_t		ret = -1;
 	unsigned int	pos = 0;
-	char		*pass = NULL;
-	char		*pass_filename = NULL;
 	int		pass_file = -1;
 	int		kc_setup_crypt_flags = 0;
 
@@ -100,22 +91,35 @@ main(int argc, char *argv[])
 	size_t		len = 0;
 
 
+	/* db_param defaults */
+	db_params.pass = NULL;
+	db_params.db_filename = NULL;
+	db_params.db_file = -1;
+	db_params.pass_filename = NULL;
+	db_params.dirty = 0;
+	db_params.readonly = 0;
+	db_params.kdf = malloc(7); malloc_check(db_params.kdf);
+	strlcpy(db_params.kdf, "sha512", 7);
+	db_params.cipher_mode = malloc(4); malloc_check(db_params.cipher_mode);
+	strlcpy(db_params.cipher_mode, "cbc", 4);
+
+
 	while ((c = getopt(argc, argv, "k:rp:P:m:bvh")) != -1)
 		switch (c) {
 			case 'k':
-				db_filename = optarg;
+				db_params.db_filename = optarg;
 			break;
 			case 'r':
-				readonly = 1;
+				db_params.readonly = 1;
 			break;
 			case 'p':
-				pass_filename = optarg;
+				db_params.pass_filename = optarg;
 			break;
 			case 'P':
-				kdf = optarg;
+				db_params.kdf = strdup(optarg);
 			break;
 			case 'm':
-				cipher_mode = optarg;
+				db_params.cipher_mode = strdup(optarg);
 			break;
 			case 'b':
 				batchmode = 1;
@@ -131,7 +135,7 @@ main(int argc, char *argv[])
 					"-k <file>: Use file as database. The default is ~/.kc/default.kcd .\n"
 					"-r: Open the database in read-only mode.\n"
 					"-p <file>: Read password from file.\n"
-					"-P <kdf>: KDF to use: sha1 (default), sha512, bcrypt.\n"
+					"-P <kdf>: KDF to use: sha512 (default), sha1, bcrypt.\n"
 					"-m <mode>: Cipher mode: cbc (default), cfb128, ofb.\n"
 					"-b: Batch mode: disable some features to enable commands from standard input.\n"
 					"-v: Display version.\n"
@@ -141,67 +145,162 @@ main(int argc, char *argv[])
 		}
 
 
-	/* Check if cipher mode is valid */
-	if (	strcmp(cipher_mode, "cfb128") != 0  &&
-		strcmp(cipher_mode, "ofb") != 0  &&
-		strcmp(cipher_mode, "cbc") != 0) {
-
-		printf("Unknown cipher mode: %s!\n", cipher_mode);
-
-		quit(EXIT_FAILURE);
-	}
-
-	/* Check if kdf is valid */
-	if (	strcmp(kdf, "sha1") != 0  &&
-		strcmp(kdf, "sha512") != 0  &&
-		strcmp(kdf, "bcrypt") != 0) {
-
-		printf("Unknown kdf: %s!\n", kdf);
-
-		quit(EXIT_FAILURE);
-	}
-
-
-	if (!db_filename) {
+	if (!db_params.db_filename) {
 		/* using default database */
 
 		env_home = getenv("HOME");
 
 		len = strlen(env_home) + 1 + strlen(default_db_dir) + 1;
-		db_filename = malloc(len); malloc_check(db_filename);
+		db_params.db_filename = malloc(len); malloc_check(db_params.db_filename);
 
 		/* default db directory (create it, if it doesn't exist) */
-		snprintf(db_filename, len, "%s/%s", env_home, default_db_dir);
+		snprintf(db_params.db_filename, len, "%s/%s", env_home, default_db_dir);
 
-		if(stat(db_filename, &st) == 0) {
+		if(stat(db_params.db_filename, &st) == 0) {
 			if(!S_ISDIR(st.st_mode)) {
-				printf("'%s' is not a directory!\n", db_filename);
+				printf("'%s' is not a directory!\n", db_params.db_filename);
 				quit(EXIT_FAILURE);
 			}
 		} else {
 			if (getenv("KC_DEBUG"))
-				printf("creating '%s' directory\n", db_filename);
+				printf("creating '%s' directory\n", db_params.db_filename);
 
-			if(mkdir(db_filename, 0777) != 0) {
-				printf("Could not create '%s': %s\n", db_filename, strerror(errno));
+			if(mkdir(db_params.db_filename, 0777) != 0) {
+				printf("Could not create '%s': %s\n", db_params.db_filename, strerror(errno));
 				quit(EXIT_FAILURE);
 			}
 		}
 
 		/* default db filename */
 		len += 1 + strlen(default_db_filename);
-		db_filename = realloc(db_filename, len); malloc_check(db_filename);
+		db_params.db_filename = realloc(db_params.db_filename, len); malloc_check(db_params.db_filename);
 
-		snprintf(db_filename, len, "%s/%s/%s", env_home, default_db_dir, default_db_filename);
+		snprintf(db_params.db_filename, len, "%s/%s/%s", env_home, default_db_dir, default_db_filename);
 	}
 
-	if (pass_filename) {	/* we were given a password file name */
+	/* This should be identical with what is in cmd_import.c */
+	/* if db_filename exists */
+	if(stat(db_params.db_filename, &st) == 0) {
+
+		printf("Opening '%s'\n",db_params.db_filename);
+
+		if(!S_ISLNK(st.st_mode)  &&  !S_ISREG(st.st_mode)) {
+			printf("'%s' is not a regular file or a link!\n", db_params.db_filename);
+			quit(EXIT_FAILURE);
+		}
+
+		if(st.st_size == 0) {
+			printf("'%s' is an empty file!\n", db_params.db_filename);
+			quit(EXIT_FAILURE);
+		}
+
+		if(st.st_size <= IV_DIGEST_LEN + SALT_DIGEST_LEN + 2) {
+			printf("'%s' is suspiciously small file!\n", db_params.db_filename);
+			quit(EXIT_FAILURE);
+		}
+
+		db_params.db_file = open(db_params.db_filename, O_RDWR);
+		if (db_params.db_file < 0) {
+			perror("open(database file)");
+			quit(EXIT_FAILURE);
+		}
+
+		/* read the IV */
+		buf = malloc(IV_DIGEST_LEN + 1); malloc_check(buf);
+		ret = 0; pos = 0;
+		do {
+			ret = read(db_params.db_file, buf, IV_DIGEST_LEN);
+			pos += ret;
+		} while (ret > 0  &&  pos < IV_DIGEST_LEN);
+
+		if (ret < 0) {
+			perror("read IV(database file)");
+			quit(EXIT_FAILURE);
+		}
+		if (pos != IV_DIGEST_LEN) {
+			puts("Could not read IV from database file!");
+			quit(EXIT_FAILURE);
+		} else
+			strlcpy((char *)db_params.iv, (const char *)buf, IV_DIGEST_LEN + 1);
+
+		free(buf); buf = NULL;
+
+		if (getenv("KC_DEBUG"))
+			printf("iv='%s'\n", db_params.iv);
+
+		/* Fast-forward one byte after the current position,
+		 * to skip the newline.
+		 */
+		lseek(db_params.db_file, 1, SEEK_CUR);
+
+		/* read the salt */
+		buf = malloc(SALT_DIGEST_LEN + 1); malloc_check(buf);
+		ret = 0; pos = 0;
+		do {
+			ret = read(db_params.db_file, buf, SALT_DIGEST_LEN);
+			pos += ret;
+		} while (ret > 0  &&  pos < SALT_DIGEST_LEN);
+
+		if (ret < 0) {
+			perror("read salt(database file)");
+			quit(EXIT_FAILURE);
+		}
+		if (pos != SALT_DIGEST_LEN) {
+			puts("Could not read salt from database file!");
+			quit(EXIT_FAILURE);
+		} else
+			strlcpy((char *)db_params.salt, (const char *)buf, SALT_DIGEST_LEN + 1);
+
+		free(buf); buf = NULL;
+
+		if (getenv("KC_DEBUG"))
+			printf("salt='%s'\n", db_params.salt);
+
+
+		kc_setup_crypt_flags = KC_SETUP_CRYPT_KEY;
+	} else {
+		printf("Creating '%s'\n", db_params.db_filename);
+
+		db_params.db_file = open(db_params.db_filename, O_RDWR | O_CREAT, 0600);
+		if (db_params.db_file < 0) {
+			perror("open to create(database file)");
+			quit(EXIT_FAILURE);
+		}
+
+
+		kc_setup_crypt_flags = KC_SETUP_CRYPT_IV | KC_SETUP_CRYPT_SALT | KC_SETUP_CRYPT_KEY;
+	}
+
+	printf("Using '%s' database.\n", db_params.db_filename);
+
+
+	if (!db_params.readonly)
+		if (flock(db_params.db_file, LOCK_NB | LOCK_EX) < 0) {
+			if (getenv("KC_DEBUG"))
+				puts("flock(database file)");
+
+			puts("Could not lock the database file!\nMaybe another instance is using that database?");
+			quit(EXIT_FAILURE);
+		}
+
+
+	bio_chain = kc_setup_bio_chain(db_params.db_filename, 0);
+	if (!bio_chain) {
+		puts("Could not setup bio_chain!");
+		quit(EXIT_FAILURE);
+	}
+	if (getenv("KC_DEBUG"))
+		print_bio_chain(bio_chain);
+
+
+	/* Get the password one way or another */
+	if (db_params.pass_filename) {	/* we were given a password file name */
 		if (getenv("KC_DEBUG"))
 			puts("opening password file");
 
-		if(stat(pass_filename, &st) == 0) {
+		if(stat(db_params.pass_filename, &st) == 0) {
 			if(!S_ISLNK(st.st_mode)  &&  !S_ISREG(st.st_mode)) {
-				printf("'%s' is not a regular file or a link!\n", pass_filename);
+				printf("'%s' is not a regular file or a link!\n", db_params.pass_filename);
 				quit(EXIT_FAILURE);
 			}
 		} else {
@@ -210,19 +309,19 @@ main(int argc, char *argv[])
 		}
 
 		/* read in the password from the specified file */
-		pass_file = open(pass_filename, O_RDONLY);
+		pass_file = open(db_params.pass_filename, O_RDONLY);
 		if (pass_file < 0) {
 			perror("open(password file)");
 			quit(EXIT_FAILURE);
 		}
 
-		pass = malloc(PASSWORD_MAXLEN + 1); malloc_check(pass);
+		db_params.pass = malloc(PASSWORD_MAXLEN + 1); malloc_check(db_params.pass);
 		pos = 0;
 		/* We read PASSWORD_MAXLEN plus one byte, to see if the password in the
 		 * password file is longer than PASSWORD_MAXLEN.
 		 */
 		while (ret  &&  pos <= PASSWORD_MAXLEN) {
-			ret = read(pass_file, pass + pos, PASSWORD_MAXLEN + 1 - pos);
+			ret = read(pass_file, db_params.pass + pos, PASSWORD_MAXLEN + 1 - pos);
 			if (ret < 0) {
 				perror("read(password file)");
 				quit(EXIT_FAILURE);
@@ -234,130 +333,55 @@ main(int argc, char *argv[])
 			quit(EXIT_FAILURE);
 		}
 
-		if (pass[pos - 1] == '\n')	/* if the last read character is a newline, strip it */
-			pass[--pos] = '\0';
+		if (db_params.pass[pos - 1] == '\n')	/* if the last read character is a newline, strip it */
+			db_params.pass[--pos] = '\0';
 
 		if (pos > PASSWORD_MAXLEN) {
-			printf("WARNING: the password in '%s' is longer than the maximum allowed length (%d) of a password, and it was truncated to %d characters!\n\n", pass_filename, PASSWORD_MAXLEN, PASSWORD_MAXLEN);
+			printf("WARNING: the password in '%s' is longer than the maximum allowed length (%d) of a password, and it was truncated to %d characters!\n\n", db_params.pass_filename, PASSWORD_MAXLEN, PASSWORD_MAXLEN);
 			pos = PASSWORD_MAXLEN;
 		}
 
-		pass[pos] = '\0';
+		db_params.pass[pos] = '\0';
 
 		if (close(pass_file) < 0)
 			perror("close(password file)");
 	} else {
-		printf("Using '%s' database.\n", db_filename);
+		if(stat(db_params.db_filename, &st) != 0) {
+			perror("stat while password ask(database file)");
+			quit(EXIT_FAILURE);
+		}
 
-		if(stat(db_filename, &st) == 0)		/* if db_filename exists */
-			/* ask for the password */
-			kc_password_read(&pass, 0);
-		else {
+		if(st.st_size == 0) {
 			/* ask for the new password */
 			do {
-				ret = kc_password_read(&pass, 1);
+				ret = kc_password_read(&db_params.pass, 1);
 			} while (ret == -1);
 
 			if (ret == 0)
 				quit(EXIT_FAILURE);
+		} else {
+			/* ask for the password */
+			kc_password_read(&db_params.pass, 0);
 		}
 	}
-
-	if(stat(db_filename, &st) == 0) {	/* if db_filename exists */
-		if(!S_ISLNK(st.st_mode)  &&  !S_ISREG(st.st_mode)) {
-			printf("'%s' is not a regular file or a link!\n", db_filename);
-			quit(EXIT_FAILURE);
-		}
-		printf("Opening '%s'\n", db_filename);
-
-		db_file = open(db_filename, O_RDWR);
-		if (db_file < 0) {
-			perror("open(database file)");
-			quit(EXIT_FAILURE);
-		}
-
-		/* read the IV */
-		buf = malloc(IV_LEN + 1); malloc_check(buf);
-
-		ret = read(db_file, buf, IV_LEN);
-		if (ret < 0)
-			perror("read(database file)");
-		else
-			strlcpy((char *)iv, (const char *)buf, IV_LEN + 1);
-
-		free(buf); buf = NULL;
-
-		/* read the salt */
-		buf = malloc(SALT_LEN + 1); malloc_check(buf);
-
-		ret = read(db_file, buf, SALT_LEN);
-		if (ret < 0)
-			perror("read(database file)");
-		else
-			strlcpy((char *)salt, (const char *)buf, SALT_LEN + 1);
-
-		free(buf); buf = NULL;
-
-
-		kc_setup_crypt_flags = KC_SETUP_CRYPT_KEY;
-	} else {
-		printf("Creating '%s'\n", db_filename);
-
-		db_file = open(db_filename, O_RDWR | O_CREAT, 0600);
-		if (db_file < 0) {
-			perror("open(database file)");
-			quit(EXIT_FAILURE);
-		}
-
-		kc_setup_crypt_flags = KC_SETUP_CRYPT_IV | KC_SETUP_CRYPT_SALT | KC_SETUP_CRYPT_KEY;
-	}
-
-
-	bio_chain = kc_setup_bio_chain(db_filename);
-	if (!bio_chain) {
-		puts("Could not setup bio_chain!");
-		quit(EXIT_FAILURE);
-	}
-	if (getenv("KC_DEBUG"))
-		print_bio_chain(bio_chain);
 
 
 	/* Optionally generate iv/salt.
 	 * Setup cipher mode and turn on decrypting */
-	if (!kc_setup_crypt(bio_chain, 0, cipher_mode, kdf, pass, iv, salt, key, kc_setup_crypt_flags)) {
+	if (!kc_setup_crypt(bio_chain, 0, &db_params, kc_setup_crypt_flags)) {
 		puts("Could not setup decrypting!");
 		quit(EXIT_FAILURE);
 	}
 
-
-	if (pass)
-		memset(pass, '\0', PASSWORD_MAXLEN);
-	free(pass); pass = NULL;
-
-
-	if (!readonly)
-		if (flock(db_file, LOCK_NB | LOCK_EX) < 0) {
-			if (getenv("KC_DEBUG"))
-				puts("flock(database file)");
-
-			puts("Could not lock the database file!\nMaybe another instance is using that database?");
-			quit(EXIT_FAILURE);
-		}
+	if (db_params.pass)
+		memset(db_params.pass, '\0', PASSWORD_MAXLEN);
+	free(db_params.pass); db_params.pass = NULL;
 
 
 	pos = kc_db_reader(&buf, bio_chain);
-	if (getenv("KC_DEBUG"))
-		printf("read %d bytes\n", pos);
 
 	if (BIO_get_cipher_status(bio_chain) == 0  &&  pos > 0) {
 		puts("Failed to decrypt database file!");
-		quit(EXIT_FAILURE);
-	}
-
-
-	/* turn on encrypting */
-	if (!kc_setup_crypt(bio_chain, 1, cipher_mode, kdf, NULL, iv, NULL, key, 0)) {
-		puts("Could not setup encrypting!");
 		quit(EXIT_FAILURE);
 	}
 
@@ -410,7 +434,7 @@ main(int argc, char *argv[])
 		if (!db) {
 			puts("Could not parse XML document!");
 
-			if (strcmp(cipher_mode, "cbc") != 0)
+			if (strcmp(db_params.cipher_mode, "cbc") != 0)
 				puts("If you have specified cfb128 or ofb for chipher mode, this could also mean that either you have entered a wrong password or specified a cipher mode other than that the database was encrypted with!");
 
 			quit(EXIT_FAILURE);
@@ -418,7 +442,7 @@ main(int argc, char *argv[])
 
 		/* Validate the XML structure against our kc.dtd */
 		if (!kc_validate_xml(db)) {
-			printf("Not a valid kc XML structure ('%s')!\n", db_filename);
+			printf("Not a valid kc XML structure ('%s')!\n", db_params.db_filename);
 			quit(EXIT_FAILURE);
 		}
 
@@ -525,7 +549,7 @@ main(int argc, char *argv[])
 	/* create the command list */
 	commands_init(&commands_first);
 
-	if (readonly)
+	if (db_params.readonly)
 		puts("Database is read-only!");
 
 	/* command loop */
@@ -642,7 +666,7 @@ prompt_str(void)
 	prompt_len = 1 + (size_t)xmlStrlen(cname) + 2 + sizeof(prompt_context) + 2 + 1;
 	prompt = realloc(prompt, prompt_len); malloc_check(prompt);
 
-	snprintf(prompt, prompt_len, "<%s%% %s%c ", cname, prompt_context, (readonly ? '|':'>'));
+	snprintf(prompt, prompt_len, "<%s%% %s%c ", cname, prompt_context, (db_params.readonly ? '|':'>'));
 	xmlFree(cname); cname = NULL;
 
 	return(prompt);
@@ -949,14 +973,18 @@ version(void)
 #endif
 		" support.");
 	puts("Written by LEVAI Daniel <leva@ecentrum.hu>");
-	puts("Source, information, bugs: http://keychain.googlecode.com");
+	puts("Source, information, bugs: https://github.com/levaidaniel/kc");
 } /* help */
 
 
 void
 quit(int retval)
 {
-	memset(key, '\0', KEY_LEN);
+	memset(db_params.key, '\0', KEY_LEN);
+
+	if (db_params.pass)
+		memset(db_params.pass, '\0', PASSWORD_MAXLEN);
+	free(db_params.pass); db_params.pass = NULL;
 
 	if (getenv("KC_DEBUG"))
 		puts("exiting...");
@@ -967,8 +995,8 @@ quit(int retval)
 			puts("closed bio_chain");
 	}
 
-	if (db_file) {
-		if (close(db_file) == 0) {
+	if (db_params.db_file > 0) {
+		if (close(db_params.db_file) == 0) {
 			if (getenv("KC_DEBUG"))
 				puts("closed database file");
 		} else

@@ -38,18 +38,16 @@
 	(lines > 1 ? digit_length(idx) + digit_length(lines) + 4 : 0)
 
 
-xmlChar	*get_line(xmlChar *, int, int);
-xmlChar	*parse_newlines(xmlChar *, char);
 size_t	digit_length(int);
 
 
+extern db_parameters	db_params;
 extern char		batchmode;
 
 #ifndef _READLINE
 extern EditLine		*e;
 #endif
 
-extern int		db_file;
 extern BIO		*bio_chain;
 
 
@@ -120,7 +118,7 @@ cmd_getnum(int idx, size_t spice)
 				line_randomed = calloc(1, line_randomed_len); malloc_check(line_randomed);
 
 				/* begin with the random string */
-				rand_str = get_random_str(spice, 0);
+				rand_str = get_random_str(spice, 1);
 				if (!rand_str) {
 					xmlFree(key); key = NULL;
 					xmlFree(value_nl); value_nl = NULL;
@@ -138,7 +136,7 @@ cmd_getnum(int idx, size_t spice)
 					xmlFree(tmp); tmp = NULL;
 
 					/* append a random string */
-					rand_str = get_random_str(spice, 0);
+					rand_str = get_random_str(spice, 1);
 					if (!rand_str) {
 						xmlFree(key); key = NULL;
 						xmlFree(value_nl); value_nl = NULL;
@@ -223,6 +221,7 @@ cmd_getnum(int idx, size_t spice)
 							idx = rc - 48;
 						break;
 					case 't':
+						/* This is duplicated in cmd_clipboard.c */
 						/* Copy value to tmux paste buffer */
 
 						switch (child = fork()) {
@@ -236,8 +235,8 @@ cmd_getnum(int idx, size_t spice)
 								if (bio_chain)
 									BIO_free_all(bio_chain);
 
-								if (db_file) {
-									if (close(db_file) == -1) {
+								if (db_params.db_file) {
+									if (close(db_params.db_file) == -1) {
 										perror("child: close(database file)");
 										exit(EXIT_FAILURE);
 									}
@@ -264,6 +263,7 @@ cmd_getnum(int idx, size_t spice)
 						break;
 					case 'x':
 					case 'X':
+						/* This is duplicated in cmd_clipboard.c */
 						/* Copy value to X11 clipboard, using xclip(1) */
 
 						pipe(pipefd);
@@ -280,8 +280,8 @@ cmd_getnum(int idx, size_t spice)
 								if (bio_chain)
 									BIO_free_all(bio_chain);
 
-								if (db_file) {
-									if (close(db_file) == -1) {
+								if (db_params.db_file) {
+									if (close(db_params.db_file) == -1) {
 										perror("child: close(database file)");
 										exit(EXIT_FAILURE);
 									}
@@ -340,119 +340,6 @@ cmd_getnum(int idx, size_t spice)
 	} else
 		puts("Invalid index!");
 } /* cmd_getnum() */
-
-
-/*
- * Get the idx'th line from the value.
- */
-xmlChar *
-get_line(xmlChar *value_nl, int value_len, int idx)
-{
-	xmlChar	*line = NULL;
-
-	int	nl = 1, pos = 0, tmp = 0;
-	size_t	line_len = 0;
-
-
-	/* find out the start position (pos) of the requested line number (idx) */
-	for (pos = 0;(pos < value_len)  &&  (idx > nl); pos++) {
-		if (value_nl[pos] == '\n') {	/* we've found a newline */
-			nl++;
-		}
-	}
-
-	tmp = pos;
-	/* count the requested line length */
-	while (value_nl[pos] != '\n'  &&  value_nl[pos] != '\0') {
-		line_len++;
-		pos++;
-	}
-
-	pos = tmp;
-	tmp = 0;
-	line = malloc(line_len + 1); malloc_check(line);
-	/* copy out the requested line */
-	while (value_nl[pos] != '\n'  &&  value_nl[pos] != '\0'  &&  tmp < (int)line_len) {
-		line[tmp++] = value_nl[pos++];
-	}
-	line[(long)line_len] = '\0';
-
-	return(line);
-} /* get_line() */
-
-
-xmlChar *
-parse_newlines(xmlChar *line, char dir)		/* dir(direction): "\n" -> '\n' = 0, '\n' -> "\n" = 1 */
-{
-	xmlChar		*ret = NULL;
-	int		i = 0, j = 0;
-	size_t		nlnum = 0, ret_len = 0;
-
-
-	if (!line)
-		return(xmlStrdup(BAD_CAST ""));
-
-
-	if (dir) {
-		/*
-		 * count the number of '\n' characters in the string, and use it later to figure how many bytes
-		 * will be the new string, with replaced newline characters.
-		 */
-		for (i=0; i < (int)xmlStrlen(line); i++)
-			if (line[i] == '\n')	/* we got a winner... */
-				nlnum++;
-
-		ret_len = xmlStrlen(line) + nlnum + 1;
-	} else {
-		/*
-		 * count the number of "\n" sequences in the string, and use it later to figure how many bytes
-		 * will be the new string, with replaced newline sequences.
-		 */
-		for (i=0; i < (int)xmlStrlen(line); i++) {
-			if (line[i] == '\\') {	/* got an escape character, we better examine it... */
-				if (line[i+1] == '\\')	/* the "\\n" case. the newline is escaped, so honor it */
-					i += 2;		/* skip these. don't count them, because they are not newlines */
-				else if (line[i+1] == 'n')	/* we got a winner... */
-					nlnum++;
-			}
-		}
-
-		ret_len = xmlStrlen(line) - nlnum + 1;
-	}
-	ret = malloc(ret_len); malloc_check(ret);
-
-
-	if (dir) {
-		/* replace the real newline characters with newline sequences ("\n"); */
-		for (i=0; i < (int)xmlStrlen(line); i++) {
-			if (line[i] == '\n') {			/* we got a winner... */
-				ret[j++] = '\\';		/* replace with NL character */
-				ret[j++] = 'n';			/* replace with NL character */
-			} else
-				ret[j++] = line[i];			/* anything else will just go into the new string */
-		}
-	} else {
-		/* replace the newline sequences with real newline characters ('\n'); */
-		for (i=0; i < (int)xmlStrlen(line); i++) {
-			if (line[i] == '\\') {	/* got an escape character, we better examine it... */
-				if (line[i+1] == '\\') {	/* the "\\n" case. the newline is escaped, so honor it */
-					ret[j++] = line[i];	/* copy it as if nothing had happened */
-					ret[j++] = line[++i];
-				} else if (line[i+1] == 'n') {	/* we got a winner... */
-					ret[j++] = '\n';	/* replace with NL character */
-					i++;			/* skip the 'n' char from "\n" */
-				} else
-					ret[j++] = line[i];	/* anything else will just go into the new string */
-			} else
-				ret[j++] = line[i];		/* anything else will just go into the new string */
-		}
-	}
-
-	ret[(long)(ret_len - 1)] = '\0';		/* close that new string safe and secure. */
-
-
-	return(ret);	/* return the result; we've worked hard on it. */
-} /* parse_newlines() */
 
 
 size_t

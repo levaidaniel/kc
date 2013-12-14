@@ -27,8 +27,8 @@
 #include "commands.h"
 
 
+extern db_parameters	db_params;
 extern xmlNodePtr	keychain;
-extern char		dirty;
 
 #ifndef _READLINE
 extern EditLine		*e;
@@ -122,7 +122,7 @@ cmd_cdel(const char *e_line, command *commands)
 				printf("Deleted keychain: %s\n", cname);
 				puts("Keychain indices have been changed. Make sure to 'clist', before using them again!");
 
-				dirty = 1;
+				db_params.dirty = 1;
 			}
 			xmlFree(cname); cname = NULL;
 		}

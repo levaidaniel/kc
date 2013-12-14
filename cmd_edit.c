@@ -27,8 +27,8 @@
 #include "commands.h"
 
 
+extern db_parameters	db_params;
 extern xmlNodePtr	keychain;
-extern char		dirty;
 extern char		prompt_context[30];
 extern xmlChar		*_rl_helper_var;
 
@@ -163,7 +163,7 @@ cmd_edit(const char *e_line, command *commands)
 
 		strlcpy(prompt_context, "", sizeof(prompt_context));
 
-		dirty = 1;
+		db_params.dirty = 1;
 	} else
 		puts("Invalid index!");
 } /* cmd_edit() */

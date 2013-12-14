@@ -27,7 +27,7 @@
 #include "commands.h"
 
 
-extern unsigned char	readonly;
+extern db_parameters	db_params;
 
 
 /* create a linked list for the commands.
@@ -41,7 +41,7 @@ commands_init(command **commands)
 	*commands = (command *)malloc(sizeof(command)); malloc_check(*commands);
 	first = *commands;
 
-	if (!readonly) {
+	if (!db_params.readonly) {
 		(*commands)->name = "append";
 		(*commands)->usage = "append <filename>";
 		(*commands)->help = "Append new and merge existing keychains to the database from a kc compatible encrypted database file named 'filename'. 'filename' must be a proper kc database.\nSee command 'appendxml', 'xport' and 'import'.";
@@ -118,8 +118,8 @@ commands_init(command **commands)
 		(*commands) = (*commands)->next;
 
 		(*commands)->name = "import";
-		(*commands)->usage = "import <filename>";
-		(*commands)->help = "Import and overwrite the current database with the one from a kc compatible encrypted database file named 'filename'. 'filename' must be a proper kc database.\nSee command 'importxml', 'xport' and 'append'.";
+		(*commands)->usage = "import <filename> [kdf [cipher mode]]";
+		(*commands)->help = "Import and overwrite the current database with the one from a kc compatible encrypted database file named 'filename'. 'filename' must be a proper kc database. 'kdf' and 'cipher mode' can be used to specify these parameters if they differ from the current database.\nSee command 'importxml', 'xport' and 'append'.";
 		(*commands)->fn = cmd_import;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
@@ -159,8 +159,8 @@ commands_init(command **commands)
 		(*commands) = (*commands)->next;
 
 		(*commands)->name = "passwd";
-		(*commands)->usage = "passwd";
-		(*commands)->help = "Change the database password. All changes will be written immediately.";
+		(*commands)->usage = "passwd [kdf [cipher mode]]";
+		(*commands)->help = "Change the database password and optionally the KDF and cipher mode too. All changes will be written immediately.";
 		(*commands)->fn = cmd_passwd;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
@@ -209,7 +209,7 @@ commands_init(command **commands)
 
 	(*commands)->name = "clear";
 	(*commands)->usage = "clear [count]";
-	(*commands)->help = "Emulate a screen clearing. Scrolls 50 lines by default, which can be multiplied by 'count' times if specified.";
+	(*commands)->help = "Emulate a screen clearing. Scrolls a 100 lines by default, which can be multiplied by 'count' times if specified.";
 	(*commands)->fn = cmd_clear;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
@@ -281,13 +281,6 @@ commands_init(command **commands)
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
-	(*commands)->name = "random";
-	(*commands)->usage = "random [length]";
-	(*commands)->help = "Print a random string with 'length' length. The default 'length' is 8.";
-	(*commands)->fn = cmd_random;
-	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
-	(*commands) = (*commands)->next;
-
 	(*commands)->name = "search";
 	(*commands)->usage = "search[modifier(s)] <string>";
 	(*commands)->help = "Search for 'string' in key names in the current keychain.\nOptional modifiers:\n '!' suffix (eg.: search!): show non-matching keys.\n '*' suffix (eg.: search*): search in every keychain.\n 'i' suffix (eg.: searchi): case of characters doesn't matter.\nYou can combine the modifiers.";
@@ -302,6 +295,13 @@ commands_init(command **commands)
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
+	(*commands)->name = "tmux";
+	(*commands)->usage = "tmux <index>";
+	(*commands)->help = "Copy the value of 'index' to tmux's paste buffer. 'index' is the key's index number in the current keychain.";
+	(*commands)->fn = cmd_clipboard;
+	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
+	(*commands) = (*commands)->next;
+
 	(*commands)->name = "version";
 	(*commands)->usage = "version";
 	(*commands)->help = "Display the program version.";
@@ -309,9 +309,23 @@ commands_init(command **commands)
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
+	(*commands)->name = "xclip";
+	(*commands)->usage = "xclip <index>";
+	(*commands)->help = "Copy the value of 'index' to the PRIMARY X11 selection. 'index' is the key's index number in the current keychain.";
+	(*commands)->fn = cmd_clipboard;
+	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
+	(*commands) = (*commands)->next;
+
+	(*commands)->name = "Xclip";
+	(*commands)->usage = "Xclip <index>";
+	(*commands)->help = "Copy the value of 'index' to the CLIPBOARD X11 selection. 'index' is the key's index number in the current keychain.";
+	(*commands)->fn = cmd_clipboard;
+	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
+	(*commands) = (*commands)->next;
+
 	(*commands)->name = "xport";
-	(*commands)->usage = "xport <filename> [keychain]";
-	(*commands)->help = "Export the database to a kc compatible encrypted database file named 'filename' (if no extension specified, \".kcd\" will be appended). When specifying a keychain, export only that keychain. 'keychain' can be the keychain's index number or name. Index number takes priority when addressing a keychain.\nSee command 'dump', 'import' and 'append'";
+	(*commands)->usage = "xport <filename> [keychain [kdf [cipher mode]]]";
+	(*commands)->help = "Export the database to a kc compatible encrypted database file named 'filename' (if no extension specified, \".kcd\" will be appended). When specifying 'keychain', export only that keychain. 'keychain' can be the keychain's index number or name. Index number takes priority when addressing a keychain. 'kdf' and 'cipher mode' can be used to specify a different KDF and/or cipher mode to use while exporting the database.\nSee command 'dump', 'import' and 'append'.";
 	(*commands)->fn = cmd_export;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;

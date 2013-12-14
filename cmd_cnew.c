@@ -27,8 +27,8 @@
 #include "commands.h"
 
 
+extern db_parameters	db_params;
 extern xmlNodePtr	keychain;
-extern char		dirty;
 extern char		prompt_context[30];
 
 #ifndef _READLINE
@@ -156,7 +156,7 @@ cmd_cnew(const char *e_line, command *commands)
 		 * so we must reproduce this */
 		xmlAddChild(keychain->parent, xmlNewText(BAD_CAST "\n"));
 
-		dirty = 1;
+		db_params.dirty = 1;
 	} else {
 		printf("Keychain '%s' already exists!\n", name);
 	}

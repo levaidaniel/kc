@@ -27,8 +27,8 @@
 #include "commands.h"
 
 
+extern db_parameters	db_params;
 extern xmlNodePtr	keychain;
-extern char		dirty;
 extern char		prompt_context[30];
 
 #ifndef _READLINE
@@ -45,7 +45,7 @@ cmd_new(const char *e_line, command *commands)
 
 	char		*created = NULL;
 	char		*line = NULL;
-	int		idx = 0;
+	int		idx = 0, i = 0;
 
 #ifndef _READLINE
 	int		e_count = 0;
@@ -61,10 +61,24 @@ cmd_new(const char *e_line, command *commands)
 
 	line = strdup(e_line);
 
-	strtok(line, " ");				/* remove the command from the line */
-	key = xmlStrdup(BAD_CAST strtok(NULL, " "));	/* assign the command's first parameter (name) */
+	/* Search for the first space in the command line, to see if
+	 * a key name was specified. If it was, the space will be right
+	 * after the command's name.
+	 */
+	for (i = 0; line[i] != ' '  &&  line[i] != '\0'; i++) {}
+
+	/* Search for the first non-space character after the first space
+	 * after thecommand name; this will be start of the key's name
+	 * (if it's been specified).
+	 * If no keyname was specified, then it will a zero sized string,
+	 * and we check for that.
+	 */
+	for (; line[i] == ' '; i++) {}
+
+	key = xmlStrdup(BAD_CAST &line[i]);
 	free(line); line = NULL;
-	if (!key) {					/* if we didn't get a name as a parameter */
+
+	if (xmlStrlen(key) <= 0) {	/* if we didn't get a name as a parameter */
 		strlcpy(prompt_context, "NEW key", sizeof(prompt_context));
 
 #ifndef _READLINE
@@ -165,5 +179,5 @@ cmd_new(const char *e_line, command *commands)
 	/* make the XML document prettttyyy */
 	xmlAddChild(keychain, xmlNewText(BAD_CAST "\n\t"));
 
-	dirty = 1;
+	db_params.dirty = 1;
 } /* cmd_new() */
