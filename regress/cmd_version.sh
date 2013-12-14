@@ -14,7 +14,7 @@ else
 	exit 1
 fi
 
-if printf "version\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e '^Compiled with (Readline|Editline)(, PCRE)* support\.$';then
+if printf "version\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e '^Compiled with (Readline|Editline)(, PCRE)*(, SCRYPT)* support\.$';then
 	echo "$0 test ok (compile options)!"
 else
 	echo "$0 test failed (compile options)!"

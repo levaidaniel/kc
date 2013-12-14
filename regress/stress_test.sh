@@ -39,7 +39,7 @@ case "$(uname -s)" in
 	;;
 esac
 
-if ./kc -v |grep -E -q -e '^Compiled with Readline(, PCRE)* support\.$';then
+if ./kc -v |grep -E -q -e '^Compiled with Readline(, PCRE)*(, SCRYPT)* support\.$';then
 	export READLINE=readline
 fi
 

@@ -34,6 +34,9 @@ endif
 ifdef HAVE_PCRE
 CFLAGS +=	`pkg-config --cflags libpcre` -D_HAVE_PCRE
 endif
+ifdef HAVE_LIBSCRYPT
+CFLAGS +=	-D_HAVE_LIBSCRYPT
+endif
 
 LDADD +=	`pkg-config --libs libcrypto`
 LDADD +=	`pkg-config --libs libbsd`
@@ -45,6 +48,9 @@ LDADD +=	-lreadline -ltermcap
 endif
 ifdef HAVE_PCRE
 LDADD +=	`pkg-config --libs libpcre`
+endif
+ifdef HAVE_LIBSCRYPT
+LDADD +=	-lscrypt
 endif
 
 

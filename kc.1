@@ -97,7 +97,11 @@ uses 5000 rounds.
 .It Ar bcrypt
 Bcrypt PBKDF based on Blowfish.
 .Nm
-uses 10 rounds. On Linux, a bundled bcrypt implementation from OpenBSD is used.
+uses 10 rounds, and this is slightly slower than the SHA-* variants. On Linux, a bundled bcrypt implementation from OpenBSD is used.
+.It Ar scrypt
+If compiled with libscrypt
+.Nm
+can use the scrypt KDF. Note that this is "very" slow, even compared to bcrypt, but therein lies the algorithm's strength.
 .El
 .Pp
 More information is in the

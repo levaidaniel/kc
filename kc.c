@@ -136,7 +136,7 @@ main(int argc, char *argv[])
 					"-k <file>: Use file as database. The default is ~/.kc/default.kcd .\n"
 					"-r: Open the database in read-only mode.\n"
 					"-p <file>: Read password from file.\n"
-					"-P <kdf>: KDF to use: sha512 (default), sha1, bcrypt.\n"
+					"-P <kdf>: KDF to use: sha512 (default), sha1, bcrypt, scrypt (if compiled with libscrypt).\n"
 					"-m <mode>: Cipher mode: cbc (default), cfb128, ofb.\n"
 					"-b: Batch mode: disable some features to enable commands from standard input.\n"
 					"-v: Display version.\n"
@@ -971,6 +971,9 @@ version(void)
 #endif
 #ifdef	_HAVE_PCRE
 		", PCRE"
+#endif
+#ifdef	_HAVE_LIBSCRYPT
+		", SCRYPT"
 #endif
 		" support.");
 	puts("Written by LEVAI Daniel <leva@ecentrum.hu>");

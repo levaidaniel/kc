@@ -34,6 +34,10 @@
 #include "bcrypt/bcrypt_pbkdf.h"
 #endif
 
+#ifdef _HAVE_LIBSCRYPT
+#include <libscrypt.h>
+#endif
+
 #include "common.h"
 
 
@@ -594,6 +598,10 @@ kc_setup_crypt(BIO *bio_chain, int enc, struct db_parameters *db_params, int fla
 			PKCS5_PBKDF2_HMAC(db_params->pass, (int)strlen(db_params->pass), db_params->salt, SALT_DIGEST_LEN + 1, 5000, EVP_sha512(), KEY_LEN, db_params->key);
 		else if (strcmp(db_params->kdf, "bcrypt") == 0)
 			bcrypt_pbkdf(db_params->pass, strlen(db_params->pass), db_params->salt, SALT_DIGEST_LEN + 1, db_params->key, KEY_LEN, 10);
+#ifdef _HAVE_LIBSCRYPT
+		else if (strcmp(db_params->kdf, "scrypt") == 0)
+			libscrypt_scrypt((const unsigned char *)db_params->pass, strlen(db_params->pass), db_params->salt, SALT_DIGEST_LEN + 1, SCRYPT_N, SCRYPT_r, SCRYPT_p, db_params->key, KEY_LEN);
+#endif
 		else {
 			printf("Unknown kdf: %s!\n", db_params->kdf);
 			return(0);
