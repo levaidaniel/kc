@@ -154,7 +154,7 @@ cmd_import(const char *e_line, command *commands)
 
 			/* read the IV */
 			buf = malloc(IV_DIGEST_LEN + 1); malloc_check(buf);
-			ret = 0; pos = 0;
+			pos = 0;
 			do {
 				ret = read(db_params_new.db_file, buf + pos, IV_DIGEST_LEN - pos);
 				pos += ret;
@@ -191,7 +191,7 @@ cmd_import(const char *e_line, command *commands)
 
 			/* read the salt */
 			buf = malloc(SALT_DIGEST_LEN + 1); malloc_check(buf);
-			ret = 0; pos = 0;
+			pos = 0;
 			do {
 				ret = read(db_params_new.db_file, buf + pos, SALT_DIGEST_LEN - pos);
 				pos += ret;
