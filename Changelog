@@ -1,4 +1,45 @@
 2.4.0:
+The new encrypted database format is incompatible with older versions!
+However, the XML format has not been changed, so a dump/importxml is
+adequate, to use the new program version:
+
+This example presumes that the default database filename is being used.
+Substitute the filename if necessary!
+
+========================= 8< =========================
+
+=> Execute the old kc (< v2.4), and dump the database to an XML file before
+   upgrading
+$ kc -k ~/.kc/default.kcd
+Password:
+<example_chain% > dump kcdump
+Dump OK
+<example_chain% > quit
+$ ls kcdump.xml
+kcdump.xml
+
+=> Backup(!) (and move away) the old database file
+$ mv ~/.kc/default.kcd ~/.kc/default.kcd-backup
+
+=> Upgrade kc to v2.4
+[However you handle this: from source, packages etc...]
+
+=> Execute the new kc (>= v2.4) and create a new, empty database file, then
+   import the previously dumped XML file.
+$ kc
+Creating '/home/user/.kc/default.kcd'
+Using '/home/user/.kc/default.kcd' database.
+New password (empty to cancel):
+New password again (empty to cancel):
+<default% > importxml kcdump.xml
+Import OK
+<example_chain% > write
+Save OK
+<example_chain% > quit
+
+$ shred --remove kcdump.xml   [or equivalent, eg.: rm(1) -P]
+
+========================= 8< =========================
 
 Bug fixes:
 - Fix logic flaw in saving the new database file. There was no file lock on
