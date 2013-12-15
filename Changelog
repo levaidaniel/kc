@@ -42,8 +42,6 @@ $ shred --remove kcdump.xml   [or equivalent, eg.: rm(1) -P]
 ========================= 8< =========================
 
 Bug fixes:
-- Fix logic flaw in saving the new database file. There was no file lock on
-  the newly saved database file after invoking the 'write' command.
 
 Functional changes, improvements:
 - Introduce new hotkeys while in value displaying, for copying 'values'
