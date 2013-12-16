@@ -45,7 +45,7 @@ cmd_cnew(const char *e_line, command *commands)
 
 	char		*created = NULL;
 	char		*line = NULL;
-	int		idx = 0;
+	long int	idx = 0;
 #ifndef _READLINE
 	int		e_count = 0;
 #endif
@@ -150,7 +150,7 @@ cmd_cnew(const char *e_line, command *commands)
 
 			db_node = db_node->next;
 		}
-		printf("Created keychain: %d. %s\n", idx - 1, name);
+		printf("Created keychain: %ld. %s\n", idx - 1, name);
 
 		/* XXX reloading a saved document inserts a 'text' element between each visible node (why?)
 		 * so we must reproduce this */

@@ -45,21 +45,53 @@ cmd_edit(const char *e_line, command *commands)
 	xmlChar		*key = NULL, *value_rR = NULL, *value = NULL;
 
 	char		*modified = NULL;
+	char		*line = NULL, *cmd = NULL, *inv = NULL;
 
 #ifndef _READLINE
 	int		e_count = 0;
 #endif
-	int		idx = 0;
+	long int	idx = 0;
 
 
-	if (sscanf(e_line, "%*s %d", &idx) <= 0) {
+	line = strdup(e_line);
+
+
+	cmd = strtok(line, " ");
+	if (!cmd) {
 		puts(commands->usage);
+
+		free(line); line = NULL;
 		return;
 	}
+
+
+	cmd = strtok(NULL, " ");	/* first parameter, the index number */
+	if (!cmd) {
+		puts(commands->usage);
+
+		free(line); line = NULL;
+		return;
+	}
+
+	errno = 0;
+	idx = strtol((const char *)cmd, &inv, 10);
+	if (inv[0] != '\0'  ||  errno != 0) {
+		puts(commands->usage);
+
+		free(line); line = NULL;
+		return;
+	}
+
 	if (idx < 0) {
 		puts(commands->usage);
+
+		free(line); line = NULL;
 		return;
 	}
+
+
+	free(line); line = NULL;
+
 
 	db_node = find_key(idx);
 	if (db_node) {
@@ -153,7 +185,7 @@ cmd_edit(const char *e_line, command *commands)
 		/* Update the keychain's modified timestamp */
 		xmlSetProp(keychain, BAD_CAST "modified", BAD_CAST modified);
 
-		printf("Modified key: %d. %s\n", idx, key);
+		printf("Modified key: %ld. %s\n", idx, key);
 
 		xmlFree(key); key = NULL;
 		xmlFree(value_rR); value_rR = NULL;

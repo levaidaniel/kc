@@ -52,12 +52,12 @@ extern BIO		*bio_chain;
 
 
 void
-cmd_getnum(const int idx, const int spice)
+cmd_getnum(const long int idx, const long int spice)
 {
 	xmlNodePtr	db_node = NULL;
 	xmlChar		*key = NULL, *value = NULL, *value_nl = NULL, *line = NULL, *line_randomed = NULL, *tmp = NULL;
 
-	int		lines = 0, i = 0, value_len = 0, line_len = 0, line_randomed_len = 0, erase_len = 0, line_req = 1;
+	long int	lines = 0, i = 0, value_len = 0, line_len = 0, line_randomed_len = 0, erase_len = 0, line_req = 1;
 	char		rc = 0;
 	char		*rand_str = NULL;
 	char		**fork_argv = NULL;
@@ -105,7 +105,7 @@ cmd_getnum(const int idx, const int spice)
 
 			/* if multi-line, prefix the line with a line number */
 			if (lines > 1)
-				printf("[%d/%d] ", line_req, lines);
+				printf("[%ld/%ld] ", line_req, lines);
 
 			/* get a line out from the value */
 			line = get_line(value_nl, line_req);
@@ -127,7 +127,7 @@ cmd_getnum(const int idx, const int spice)
 				}
 				strlcat((char *)line_randomed, rand_str, line_randomed_len);
 				free(rand_str); rand_str = NULL;
-				for (i=0;i < line_len;i++) {
+				for (i = 0; i < line_len; i++) {
 					/* append a character from the line */
 					tmp = xmlUTF8Strsub(line, i, 1);
 					strlcat((char *)line_randomed, (const char *)tmp, line_randomed_len);
@@ -171,7 +171,7 @@ cmd_getnum(const int idx, const int spice)
 				/* erase (overwrite) the previously written value with spaces */
 				printf("\r");
 				erase_len = ERASE_LEN;
-				for (i=0; i < erase_len; i++)
+				for (i = 0; i < erase_len; i++)
 					putchar(' ');
 
 				printf("\r");
@@ -341,13 +341,13 @@ cmd_getnum(const int idx, const int spice)
 
 
 int
-digit_length(int idx)
+digit_length(int digit)
 {
 	int	length = 1;
 
 
-	while ((idx / 10) != 0) {
-		idx /= 10;
+	while ((digit / 10) != 0) {
+		digit /= 10;
 		length++;
 	}
 

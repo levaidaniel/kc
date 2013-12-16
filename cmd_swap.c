@@ -39,19 +39,79 @@ cmd_swap(const char *e_line, command *commands)
 {
 	xmlNodePtr	key_src = NULL, key_dst = NULL, key_finish = NULL;
 
-	char		cmd[7], *modified = NULL;
+	char		*modified = NULL;
 	char		insert = 0;
-	int		idx_src = 0, idx_dst = 0;
+	char		*line = NULL, *cmd = NULL, *inv = NULL;
+	long int	idx_src = 0, idx_dst = 0;
 
 
-	if (sscanf(e_line, "%s %d %d", cmd, &idx_src, &idx_dst) < 3) {
+	line = strdup(e_line);
+
+
+	cmd = strtok(line, " ");	/* command name */
+	if (!cmd) {
 		puts(commands->usage);
+
+		free(line); line = NULL;
 		return;
 	}
-	if (idx_src < 0  ||  idx_dst < 0) {
+
+	if (strcmp(cmd, "insert") == 0)
+		insert = 1;
+
+
+	cmd = strtok(NULL, " ");	/* first parameter, the source index number */
+	if (!cmd) {
 		puts(commands->usage);
+
+		free(line); line = NULL;
 		return;
 	}
+
+	errno = 0;
+	idx_src = strtol((const char *)cmd, &inv, 10);
+	if (inv[0] != '\0'  ||  errno != 0) {
+		puts(commands->usage);
+
+		free(line); line = NULL;
+		return;
+	}
+
+	if (idx_src < 0) {
+		puts(commands->usage);
+
+		free(line); line = NULL;
+		return;
+	}
+
+
+	cmd = strtok(NULL, " ");	/* second parameter, the destination index number */
+	if (!cmd) {
+		puts(commands->usage);
+
+		free(line); line = NULL;
+		return;
+	}
+
+	errno = 0;
+	idx_dst = strtol((const char *)cmd, &inv, 10);
+	if (inv[0] != '\0'  ||  errno != 0) {
+		puts(commands->usage);
+
+		free(line); line = NULL;
+		return;
+	}
+
+	if (idx_dst < 0) {
+		puts(commands->usage);
+
+		free(line); line = NULL;
+		return;
+	}
+
+
+	free(line); line = NULL;
+
 
 	/* No funny stuff!!! :) */
 	if (idx_src == idx_dst) {
@@ -70,8 +130,6 @@ cmd_swap(const char *e_line, command *commands)
 		return;
 	}
 
-	if (strcmp(cmd, "insert") == 0)
-		insert = 1;
 
 	if (!swap_keys(&key_src, &key_dst)) {
 		if (insert)
@@ -139,9 +197,9 @@ cmd_swap(const char *e_line, command *commands)
 	free(modified); modified = NULL;
 
 	if (insert)
-		printf("Key %d was inserted at %d\n", idx_src, idx_dst);
+		printf("Key %ld was inserted at %ld\n", idx_src, idx_dst);
 	else
-		printf("Key %d was swapped with %d\n", idx_src, idx_dst);
+		printf("Key %ld was swapped with %ld\n", idx_src, idx_dst);
 
 	puts("Key indices may have been changed. Make sure to 'list', before using them again!");
 

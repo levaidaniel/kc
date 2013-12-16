@@ -585,9 +585,8 @@ main(int argc, char *argv[])
 void
 cmd_match(const char *e_line)
 {
-	int		idx = 0, spice = 0;
-	int		ret = 0;
-	char		*line = NULL, *cmd = NULL;
+	long int	idx = 0, spice = 0;
+	char		*line = NULL, *cmd = NULL, *inv = NULL;
 	command		*commands = commands_first;
 
 
@@ -596,25 +595,37 @@ cmd_match(const char *e_line)
 	else
 		return;
 
-	/*
-	 * special case, if only a number was entered,
+
+	cmd = strtok(line, " ");	/* get the command name or index number */
+	if (!cmd) {	/* probably an empty line */
+		free(line); line = NULL;
+		return;
+	}
+
+	errno = 0;
+	idx = strtol((const char *)cmd, &inv, 10);
+
+	/* Special case, if only a number was entered,
 	 * we display the appropriate entry, and if there
-	 * is another number after it, use it as spice for jamming
+	 * is another number after it, use it as spice for jamming.
 	 */
-	ret = sscanf(line, "%d %d", &idx, &spice);
-	if (ret >= 1) {
-		if (spice > 10)	/* 10 is the limit of spice */
-			spice = 10;
+	if (inv[0] == '\0'  &&  errno == 0) {
+		/* We also check for a spice */
+		cmd = strtok(NULL, " ");
+		if (cmd) {
+			errno = 0;
+			spice = strtol((const char *)cmd, &inv, 10);
+
+			if (inv[0] == '\0'  &&  errno == 0) {
+				if (spice > 5)	/* 5 is the limit of spice */
+					spice = 5;
+			} else
+				spice = 5;
+		}
 
 		/* We got a key index, display the value */
 		cmd_getnum(idx, spice);
 	} else {
-		cmd = strtok(line, " ");
-		if (!cmd) {	/* probably an empty line */
-			free(line); line = NULL;
-			return;
-		}
-
 		while(commands) {
 			/* Find an exact match */
 			if (strcmp(commands->name, cmd) == 0)
@@ -910,7 +921,7 @@ cmd_generator(const char *text, int state)
 	xmlChar		*cname = NULL;
 
 	command		*commands = commands_first;
-	int		idx = 0;
+	long int	idx = 0;
 
 
 	/* only search for a command name if this is not an already completed command

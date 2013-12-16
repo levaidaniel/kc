@@ -40,7 +40,8 @@ cmd_search(const char *e_line, command *commands)
 	const xmlChar	*search = NULL;
 
 	char		chain = 0, searchall = 0, searchinv = 0, icase = 0;
-	int		hits = 0, idx = 0, offset = 0;
+	long int	idx = 0;
+	int		hits = 0, offset = 0;
 
 
 	/* Command name */
@@ -132,7 +133,7 @@ cmd_search(const char *e_line, command *commands)
 				if (searchall)
 					printf("%s%% ", xmlGetProp(search_keychain, BAD_CAST "name"));	/* prefix the name with the keychain name */
 
-				printf("%d. ", idx);	/* prefix the name with the index number */
+				printf("%ld. ", idx);	/* prefix the name with the index number */
 				printf("%s\n", key);	/* this is the name of the entry */
 				xmlFree(key); key = NULL;
 			} else

@@ -51,14 +51,13 @@ xmlChar			*_rl_helper_var = NULL;
 
 
 xmlNodePtr
-find_keychain(const xmlChar *cname_find, char name)	/* name: 1 = keychain's name takes priority over its index number */
+find_keychain(const xmlChar *cname_find, unsigned char name)	/* name: 1 = keychain's name takes priority over its index number */
 {
 	xmlNodePtr	db_node = NULL;
 	xmlChar		*cname = NULL;
 
 	char		*inv = NULL;
-	int		i = 0;
-	long int	idx = 0;
+	long int	idx = 0, i = 0;
 
 
 	if (xmlStrlen(cname_find) == 0)
@@ -100,11 +99,11 @@ find_keychain(const xmlChar *cname_find, char name)	/* name: 1 = keychain's name
 
 
 xmlNodePtr
-find_key(const int idx)
+find_key(const long int idx)
 {
 	xmlNodePtr	db_node = NULL;
 
-	int		i = 0;
+	long int	i = 0;
 
 
 	/* A little speedup if the keychain has *lots* of keys */
@@ -311,11 +310,11 @@ parse_randoms(const xmlChar *line)
  * Get the idx'th line from the value.
  */
 xmlChar *
-get_line(const xmlChar *value_nl, const unsigned int idx)
+get_line(const xmlChar *value_nl, const long int idx)
 {
 	xmlChar	*line = NULL;
 
-	int	nl = 1, pos = 0, tmp = 0, length = 0;
+	long int	nl = 1, pos = 0, tmp = 0, length = 0;
 
 
 	length = xmlStrlen(value_nl);

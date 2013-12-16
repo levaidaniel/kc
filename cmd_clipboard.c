@@ -36,9 +36,10 @@ void
 cmd_clipboard(const char *e_line, command *commands)
 {
 	xmlNodePtr	db_node = NULL;
-	xmlChar		*value = NULL, *value_nl = NULL, *line = NULL;
-	char		cmd[6];
-	int		idx = 0, lines = 0, i = 0, line_req = 1, line_len = 0, value_len = 0;
+	xmlChar		*value = NULL, *value_nl = NULL, *value_line = NULL;
+	char		*cmd_line = NULL, *cmd = NULL, *inv = NULL;
+	long int	idx = 0, line_req = 1;
+	int		lines = 0, i = 0, value_line_len = 0, value_len = 0;
 	unsigned char	app = 0;	/* 1=tmux, 2=xclip PRIMARY, 3=xclip CLIPBOARD */
 
 	char		**fork_argv = NULL;
@@ -46,12 +47,13 @@ cmd_clipboard(const char *e_line, command *commands)
 	int		pipefd[2];
 
 
-	if (sscanf(e_line, "%s %d %d", cmd, &idx, &line_req) < 2) {
+	cmd_line = strdup(e_line);
+
+	cmd = strtok(cmd_line, " ");
+	if (!cmd) {
 		puts(commands->usage);
-		return;
-	}
-	if (idx < 0) {
-		puts(commands->usage);
+
+		free(cmd_line); cmd_line = NULL;
 		return;
 	}
 
@@ -64,8 +66,56 @@ cmd_clipboard(const char *e_line, command *commands)
 
 	if (app == 0) {
 		puts(commands->usage);
+
+		free(cmd_line); cmd_line = NULL;
 		return;
 	}
+
+
+	cmd = strtok(NULL, " ");	/* first parameter, the index number */
+	if (!cmd) {
+		puts(commands->usage);
+
+		free(cmd_line); cmd_line = NULL;
+		return;
+	}
+
+	errno = 0;
+	idx = strtol((const char *)cmd, &inv, 10);
+	if (inv[0] != '\0'  ||  errno != 0) {
+		puts(commands->usage);
+
+		free(cmd_line); cmd_line = NULL;
+		return;
+	}
+	if (idx < 0) {
+		puts(commands->usage);
+
+		free(cmd_line); cmd_line = NULL;
+		return;
+	}
+
+
+	cmd = strtok(NULL, " ");	/* second, optional parameter, the requested line number */
+	if (cmd) {
+		errno = 0;
+		line_req = strtol((const char *)cmd, &inv, 10);
+		if (inv[0] != '\0'  ||  errno != 0) {
+			puts(commands->usage);
+
+			free(cmd_line); cmd_line = NULL;
+			return;
+		}
+		if (line_req < 1) {
+			puts(commands->usage);
+
+			free(cmd_line); cmd_line = NULL;
+			return;
+		}
+	}
+
+	free(cmd_line); cmd_line = NULL;
+
 
 	db_node = find_key(idx);
 	if (db_node) {
@@ -87,8 +137,8 @@ cmd_clipboard(const char *e_line, command *commands)
 			line_req = lines;
 
 		/* get a line out from the value */
-		line = get_line(value_nl, line_req);
-		line_len = xmlStrlen(line);
+		value_line = get_line(value_nl, line_req);
+		value_line_len = xmlStrlen(value_line);
 
 		/* This is duplicated in cmd_getnum.c */
 		switch (app) {
@@ -116,7 +166,7 @@ cmd_clipboard(const char *e_line, command *commands)
 						fork_argv[0] = "tmux";
 						fork_argv[1] = "set-buffer";
 						fork_argv[2] = "--";
-						fork_argv[3] = (char *)line;
+						fork_argv[3] = (char *)value_line;
 						fork_argv[4] = NULL;
 
 						if (execvp(fork_argv[0], fork_argv) == -1)
@@ -178,7 +228,7 @@ cmd_clipboard(const char *e_line, command *commands)
 						/* Write the value to the pipe's write end, which will
 						 * appear in the child's stdin (pipe's read end). */
 						close(pipefd[0]);
-						write(pipefd[1], line, line_len);
+						write(pipefd[1], value_line, value_line_len);
 						close(pipefd[1]);
 
 						break;
@@ -190,6 +240,6 @@ cmd_clipboard(const char *e_line, command *commands)
 		puts("Invalid index!");
 
 
-	xmlFree(line); line = NULL;
+	xmlFree(value_line); value_line = NULL;
 	xmlFree(value_nl); value_nl = NULL;
 } /* cmd_clipboard() */

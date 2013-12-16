@@ -37,11 +37,15 @@ cmd_info(const char *e_line, command *commands)
 	xmlChar		*name = NULL, *created = NULL, *modified = NULL, *description = NULL;
 
 	char		key = 0;
-	int		idx = 0;
+	long int	idx = 0;
 	time_t		created_time = 0, modified_time = 0;
 
 
-	if (sscanf(e_line, "%*s %d", &idx) > 0) {
+	if (sscanf(e_line, "%*s %ld", &idx) > 0) {
+		if (errno != 0) {
+			puts(commands->usage);
+			return;
+		}
 		if (idx < 0) {
 			puts(commands->usage);
 			return;

@@ -43,9 +43,8 @@ cmd_list(const char *e_line, command *commands)
 	xmlNodePtr	db_node = NULL;
 	xmlChar		*key = NULL;
 
-	int		idx = 0, pager = 20, pager_show = 0, offset = 0;
-
-	char		*line = NULL;
+	long int	idx = 0, offset = 0, pager = 20, pager_show = 0;
+	char		*line = NULL, *cmd = NULL, *inv = NULL;
 	char		rc = 0;
 
 
@@ -54,14 +53,52 @@ cmd_list(const char *e_line, command *commands)
 		printf("#BEGIN\n");
 	}
 
+
 	line = strdup(e_line);
 
-	sscanf(e_line, "%*s %d %d", &pager, &offset);
 
+	cmd = strtok(line, " ");
+	if (!cmd) {
+		puts(commands->usage);
+
+		free(line); line = NULL;
+		return;
+	}
+
+
+	cmd = strtok(NULL, " ");	/* first, optional parameter, the pager number */
+	if (cmd) {
+		errno = 0;
+		pager = strtol((const char *)cmd, &inv, 10);
+		if (inv[0] != '\0'  ||  errno != 0) {
+			puts(commands->usage);
+
+			free(line); line = NULL;
+			return;
+		}
+	}
 	if (pager > 100  ||  pager < 0)
 		pager = 20;
 
 	pager_show = pager;
+
+
+	cmd = strtok(NULL, " ");	/* second, optional parameter, the offset number */
+	if (cmd) {
+		errno = 0;
+		offset = strtol((const char *)cmd, &inv, 10);
+		if (inv[0] != '\0'  ||  errno != 0) {
+			puts(commands->usage);
+
+			free(line); line = NULL;
+			return;
+		}
+	}
+	if (offset < 0)
+		offset = 0;
+
+
+	free(line); line = NULL;
 
 
 	if (!batchmode) {
@@ -72,7 +109,6 @@ cmd_list(const char *e_line, command *commands)
 		}
 		if (el_set(e, EL_UNBUFFERED, 1) != 0) {
 			perror("el_set(EL_UNBUFFERED)");
-			free(line); line = NULL;
 			return;
 		}
 #else
@@ -140,7 +176,7 @@ cmd_list(const char *e_line, command *commands)
 		}
 
 		key = xmlGetProp(db_node, BAD_CAST "name");
-		printf("%d. %s\n", idx++, key);
+		printf("%ld. %s\n", idx++, key);
 		xmlFree(key); key = NULL;
 
 		db_node = db_node->next;
@@ -160,8 +196,6 @@ cmd_list(const char *e_line, command *commands)
 
 	if (idx == 0)
 		puts("Empty keychain.");
-
-	free(line); line = NULL;
 
 	if (getenv("KC_DEBUG"))
 		printf("#END\n");

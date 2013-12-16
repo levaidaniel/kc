@@ -43,21 +43,53 @@ cmd_del(const char *e_line, command *commands)
 	xmlChar		*key = NULL;
 
 	char		*modified = NULL;
-	int		idx = 0;
+	char		*line = NULL, *cmd = NULL, *inv = NULL;
+	long int	idx = 0;
 
 #ifndef _READLINE
 	int		e_count = 0;
 #endif
 
 
-	if (sscanf(e_line, "%*s %d", &idx) <= 0) {
+	line = strdup(e_line);
+
+
+	cmd = strtok(line, " ");
+	if (!cmd) {
 		puts(commands->usage);
+
+		free(line); line = NULL;
 		return;
 	}
+
+
+	cmd = strtok(NULL, " ");	/* first parameter, the index number */
+	if (!cmd) {
+		puts(commands->usage);
+
+		free(line); line = NULL;
+		return;
+	}
+
+	errno = 0;
+	idx = strtol((const char *)cmd, &inv, 10);
+	if (inv[0] != '\0'  ||  errno != 0) {
+		puts(commands->usage);
+
+		free(line); line = NULL;
+		return;
+	}
+
 	if (idx < 0) {
 		puts(commands->usage);
+
+		free(line); line = NULL;
 		return;
 	}
+
+
+	free(line); line = NULL;
+
 
 	db_node = find_key(idx);
 	if (db_node) {
@@ -108,7 +140,7 @@ cmd_del(const char *e_line, command *commands)
 			xmlUnlinkNode(db_node);
 			xmlFreeNode(db_node);
 
-			printf("Deleted key: %d. %s\n", idx, key);
+			printf("Deleted key: %ld. %s\n", idx, key);
 			puts("Key indices have been changed. Make sure to 'list', before using them again!");
 			xmlFree(key); key = NULL;
 

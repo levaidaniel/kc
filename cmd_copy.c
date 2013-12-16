@@ -37,41 +37,64 @@ cmd_copy(const char *e_line, command *commands)
 	xmlNodePtr	key = NULL, key_new = NULL, keychain_dest = NULL, db_node_prev = NULL;
 	xmlChar		*cname = NULL, *name = NULL;
 
-	char		*line = NULL, *modified = NULL;
-
-	char		*cmd = NULL, *idx_str = NULL, move = 0;
-	int		idx = 0;
+	char		*modified = NULL;
+	char		*line = NULL, *cmd = NULL, *inv = NULL;
+	unsigned char	move = 0;
+	long int	idx = 0;
 
 
 	line = strdup(e_line);
 
-	cmd = strtok(line, " ");		/* get the command name */
-	if (	strcmp(cmd, "move") == 0  ||
-		strcmp(cmd, "mv") == 0)
+
+	cmd = strtok(line, " ");	/* get the command name */
+	if (!cmd) {
+		puts(commands->usage);
+
+		free(line); line = NULL;
+		return;
+	}
+	if (strcmp(cmd, "move") == 0  ||  strcmp(cmd, "mv") == 0)
 		move = 1;
 
-	idx_str = strtok(NULL, " ");
-	cname = BAD_CAST strtok(NULL, " ");	/* assign the command's parameter */
-	if (!cname  ||  !idx_str) {
+
+	cmd = strtok(NULL, " ");	/* first parameter, the index number */
+	if (!cmd) {
 		puts(commands->usage);
+
 		free(line); line = NULL;
 		return;
 	}
 
-	if (sscanf(idx_str, "%d", &idx) <= 0) {
+	errno = 0;
+	idx = strtol((const char *)cmd, &inv, 10);
+	if (inv[0] != '\0'  ||  errno != 0) {
 		puts(commands->usage);
+
 		free(line); line = NULL;
 		return;
 	}
+
 	if (idx < 0) {
 		puts(commands->usage);
+
 		free(line); line = NULL;
 		return;
 	}
+
+
+	cname = BAD_CAST strtok(NULL, " ");	/* second parameter, the destination keychain */
+	if (!cname) {
+		puts(commands->usage);
+
+		free(line); line = NULL;
+		return;
+	}
+
 
 	keychain_dest = find_keychain(cname, 0);
 	if (!keychain_dest) {
 		puts("Keychain not found.");
+
 		free(line); line = NULL;
 		return;
 	}
@@ -79,6 +102,7 @@ cmd_copy(const char *e_line, command *commands)
 	key = find_key(idx);
 	if (!key) {
 		puts("Invalid index!");
+
 		free(line); line = NULL;
 		return;
 	} else {
@@ -120,7 +144,7 @@ cmd_copy(const char *e_line, command *commands)
 
 
 		name = xmlGetProp(key, BAD_CAST "name");
-		printf("Key '%d. %s' was %s to keychain: %s\n", idx, name, move ? "moved" : "copied", cname);
+		printf("Key '%ld. %s' was %s to keychain: %s\n", idx, name, move ? "moved" : "copied", cname);
 		xmlFree(name); name = NULL;
 		free(modified); modified = NULL;
 
