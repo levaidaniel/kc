@@ -52,16 +52,16 @@ printf "ccdel 10\nyes\nwrite\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
 printf "c -1\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
 SHA1=$(printf "c -1\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." |$SHA1_BIN |cut -d' ' -f1)
 if [ "${SHA1}" = 'f00ecea88ac8e16851779e4230ffd0871c453d40' ];then
-	echo "$0 test ok (change '-1' chain #1)!"
+	echo "$0 test ok (change nonexistent '-1' chain #1)!"
 else
-	echo "$0 test failed (change '-1' chain #1)!"
+	echo "$0 test failed (change nonexistent '-1' chain #1)!"
 	exit 1
 fi
 
 printf "cnew -1\ndescription\nwrite\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
-printf "c -1\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
-SHA1=$(printf "c -1\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." |$SHA1_BIN |cut -d' ' -f1)
-if [ "${SHA1}" = '04a985ea13d80214fbf9f24f3d044a9bafdfa865' ];then
+printf "c -1\nlist\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
+SHA1=$(printf "c -1\nlist\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<(default|-1)% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." |$SHA1_BIN |cut -d' ' -f1)
+if [ "${SHA1}" = '373d31f0b14700a8dc3199404d069b8a2e80a2f6' ];then
 	echo "$0 test ok (change '-1' chain #2)!"
 else
 	echo "$0 test failed (change '-1' chain #2)!"
