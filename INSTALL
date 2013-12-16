@@ -6,6 +6,7 @@ Prerequisites:
 
 Optional:
 - libpcre >= 8.12
+- libscrypt >= 1.14
 
 
 Compile:
@@ -20,6 +21,7 @@ Compile:
 
 Options:
 HAVE_PCRE=y	This will turn on regexp support in searches, and needs libcpre.
+HAVE_LIBSCRYPT=y	This will turn on scrypt KDF support.
 
 EDITLINE=y	Use libedit as the line editing function. This needs libedit.
 READLINE=y	Use readline as the line editing function. This needs libreadline.
