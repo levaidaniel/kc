@@ -46,7 +46,8 @@ Bug fixes:
 Functional changes, improvements:
 - New -P option to specify the KDF to use when dealing with database passwords.
   Previously, only SHA-1 PBKDF2 was used. Now the supported KDFs include
-  SHA-1 and SHA-512 PBKDF2, blowfish based bcrypt, and scrypt.
+  SHA-1 and SHA-512 PBKDF2, blowfish based bcrypt, and scrypt if kc was
+  compiled with libscrypt.
 
 - The new default KDF is SHA-512 based PBKDF2 (the old one was SHA-1). This also
   breaks compatibility with older databases, but could have been worked around
