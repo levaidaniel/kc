@@ -83,7 +83,7 @@ cmd_quit(const char *e_line, command *commands)
 			line = strdup(e_line);
 
 #ifndef _READLINE
-			line[(long)(strlen(line) - 1)] = '\0';	/* remove the newline */
+			line[strlen(line) - 1] = '\0';	/* remove the newline */
 #endif
 
 			if (strcasecmp(line, "yes") == 0  ||  strcasecmp(line, "y") == 0) {

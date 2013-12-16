@@ -34,11 +34,11 @@
  */
 #define		ERASE_LEN \
 	strlen((const char *)key) + 3 + \
-	(spice ? line_len + line_len * spice + spice : line_len) + \
+	(spice > 0 ? line_len + line_len * spice + spice : line_len) + \
 	(lines > 1 ? digit_length(idx) + digit_length(lines) + 4 : 0)
 
 
-size_t	digit_length(int);
+int	digit_length(int);
 
 
 extern db_parameters	db_params;
@@ -52,13 +52,12 @@ extern BIO		*bio_chain;
 
 
 void
-cmd_getnum(int idx, size_t spice)
+cmd_getnum(const int idx, const int spice)
 {
 	xmlNodePtr	db_node = NULL;
 	xmlChar		*key = NULL, *value = NULL, *value_nl = NULL, *line = NULL, *line_randomed = NULL, *tmp = NULL;
 
-	int		lines = 0, i = 0, value_len = 0;
-	size_t		line_len = 0, line_randomed_len = 0, erase_len = 0;
+	int		lines = 0, i = 0, value_len = 0, line_len = 0, line_randomed_len = 0, erase_len = 0, line_req = 1;
 	char		rc = 0;
 	char		*rand_str = NULL;
 	char		**fork_argv = NULL;
@@ -98,7 +97,6 @@ cmd_getnum(int idx, size_t spice)
 		rl_prep_terminal(1);
 #endif
 
-		idx = 1;	/* from hereafter 'idx' will be our requested line number */
 		while (rc != 'q'  &&  rc != 4) {	/* quit for 'q' or EOT */
 			if (batchmode)
 				puts("");
@@ -107,13 +105,13 @@ cmd_getnum(int idx, size_t spice)
 
 			/* if multi-line, prefix the line with a line number */
 			if (lines > 1)
-				printf("[%d/%d] ", idx, lines);
+				printf("[%d/%d] ", line_req, lines);
 
 			/* get a line out from the value */
-			line = get_line(value_nl, value_len, idx);
-			line_len = strlen((const char *)line);
+			line = get_line(value_nl, line_req);
+			line_len = xmlStrlen(line);
 
-			if (spice) {	/* if random padding is requested */
+			if (spice > 0) {	/* if random padding is requested */
 				line_randomed_len = line_len + line_len * spice + spice + 1;
 				line_randomed = calloc(1, line_randomed_len); malloc_check(line_randomed);
 
@@ -129,7 +127,7 @@ cmd_getnum(int idx, size_t spice)
 				}
 				strlcat((char *)line_randomed, rand_str, line_randomed_len);
 				free(rand_str); rand_str = NULL;
-				for (i=0;i < (int)line_len;i++) {
+				for (i=0;i < line_len;i++) {
 					/* append a character from the line */
 					tmp = xmlUTF8Strsub(line, i, 1);
 					strlcat((char *)line_randomed, (const char *)tmp, line_randomed_len);
@@ -148,7 +146,7 @@ cmd_getnum(int idx, size_t spice)
 					strlcat((char *)line_randomed, rand_str, line_randomed_len);
 					free(rand_str); rand_str = NULL;
 				}
-				line_randomed[(long)(line_randomed_len - 1)] = '\0';
+				line_randomed[line_randomed_len - 1] = '\0';
 
 				xmlFree(line); line = NULL;
 				line = line_randomed;
@@ -173,7 +171,7 @@ cmd_getnum(int idx, size_t spice)
 				/* erase (overwrite) the previously written value with spaces */
 				printf("\r");
 				erase_len = ERASE_LEN;
-				for (i=0; i < (int)erase_len; i++)
+				for (i=0; i < erase_len; i++)
 					putchar(' ');
 
 				printf("\r");
@@ -192,8 +190,8 @@ cmd_getnum(int idx, size_t spice)
 					case '}':
 					case 10:	/* editline */
 					case 13:	/* readline */
-						if (idx < lines)
-							idx++;
+						if (line_req < lines)
+							line_req++;
 						break;
 					/* line backward */
 					case 'b':
@@ -204,8 +202,8 @@ cmd_getnum(int idx, size_t spice)
 					case '[':
 					case '{':
 					case 8:
-						if (idx - 1 > 0)
-							idx--;
+						if (line_req - 1 > 0)
+							line_req--;
 						break;
 					/* jump to the requested line */
 					case '1':
@@ -218,7 +216,7 @@ cmd_getnum(int idx, size_t spice)
 					case '8':
 					case '9':
 						if ((rc - 48) <= lines)
-							idx = rc - 48;
+							line_req = rc - 48;
 						break;
 					case 't':
 						/* This is duplicated in cmd_clipboard.c */
@@ -342,10 +340,10 @@ cmd_getnum(int idx, size_t spice)
 } /* cmd_getnum() */
 
 
-size_t
+int
 digit_length(int idx)
 {
-	size_t	length = 1;
+	int	length = 1;
 
 
 	while ((idx / 10) != 0) {

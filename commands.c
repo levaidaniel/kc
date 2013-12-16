@@ -51,23 +51,24 @@ xmlChar			*_rl_helper_var = NULL;
 
 
 xmlNodePtr
-find_keychain(xmlChar *cname_find, char name)	/* name: 1 = keychain's name takes priority over its index number */
+find_keychain(const xmlChar *cname_find, char name)	/* name: 1 = keychain's name takes priority over its index number */
 {
 	xmlNodePtr	db_node = NULL;
 	xmlChar		*cname = NULL;
 
 	char		*inv = NULL;
 	int		i = 0;
-	long		idx = -1;
+	long int	idx = 0;
 
+
+	if (xmlStrlen(cname_find) == 0)
+		return(NULL);
 
 	/* check if we got a number */
 	idx = strtol((const char *)cname_find, &inv, 10);
 
 	/* if we didn't get a number, or are forced to search for the keychain's name */
-	if (	strncmp(inv, "\0", 1) != 0  ||
-		name == 1)
-
+	if (inv[0] != '\0'  ||  name == 1)
 		idx = -1;
 
 
@@ -99,21 +100,24 @@ find_keychain(xmlChar *cname_find, char name)	/* name: 1 = keychain's name takes
 
 
 xmlNodePtr
-find_key(int idx)
+find_key(const int idx)
 {
 	xmlNodePtr	db_node = NULL;
 
-	int		i = -1;
+	int		i = 0;
 
+
+	/* A little speedup if the keychain has *lots* of keys */
+	if (idx < 0)
+		return(NULL);
 
 	db_node = keychain->children;
-
-	while (db_node  &&  i < idx) {
+	while (db_node) {
 		if (db_node->type == XML_ELEMENT_NODE)	/* we only care about ELEMENT nodes */
-			i++;
+			if (i++ == idx)
+				break;
 
-		if (i != idx)	/* if we've found it, don't jump to the next sibling */
-			db_node = db_node->next;
+		db_node = db_node->next;
 	}
 
 	return(db_node);
@@ -131,18 +135,18 @@ _rl_push_buffer(void)
 
 
 char *
-get_random_str(size_t length, char mode)
+get_random_str(const unsigned int length, const unsigned char mode)
 {
-        int		i = 0;
-        int		rnd_file = -1;
- #ifndef _LINUX
-        char		*rnd_dev = "/dev/random";
- #else
-        char		*rnd_dev = "/dev/urandom";
- #endif
-        char		*tmp = NULL;
-        ssize_t		ret = -1;
-        char		*rnd_str = NULL;
+	int		i = 0;
+	int		rnd_file = -1;
+#ifndef _LINUX
+	char		*rnd_dev = "/dev/random";
+#else
+	char		*rnd_dev = "/dev/urandom";
+#endif
+	char		*tmp = NULL;
+	ssize_t		ret = -1;
+	char		*rnd_str = NULL;
 
 
 	rnd_file = open(rnd_dev, O_RDONLY);
@@ -153,11 +157,11 @@ get_random_str(size_t length, char mode)
 	}
 
 
-	rnd_str = malloc((size_t)length + 1); malloc_check(rnd_str);
+	rnd_str = malloc(length + 1); malloc_check(rnd_str);
 	tmp = malloc(1); malloc_check(tmp);
 
 	read(rnd_file, tmp, 1);
-	for (i=0; i < (int)length; i++) {
+	for (i=0; i < length; i++) {
 		switch (mode) {
 			case 0:
 			/* only alphanumeric was requested */
@@ -214,7 +218,7 @@ get_random_str(size_t length, char mode)
 
 	free(tmp); tmp = NULL;
 
-	rnd_str[(long)length] = '\0';
+	rnd_str[length] = '\0';
 
 	close(rnd_file);
 
@@ -224,23 +228,23 @@ get_random_str(size_t length, char mode)
 
 
 xmlChar *
-parse_randoms(xmlChar *line)
+parse_randoms(const xmlChar *line)
 {
-	xmlChar		*ret = NULL;
-	char		*rand_str = NULL;
-	int		i = 0, j = 0;
-	size_t		ret_len = 0;
+	xmlChar	*ret = NULL;
+	char	*rand_str = NULL;
+	int	i = 0, j = 0, ret_len = 0, line_len = 0;
 
 
 	if (!line)
 		return(xmlStrdup(BAD_CAST ""));
 
 
+	line_len = xmlStrlen(line);
 	/*
 	 * count the number of "\r" and "\R" sequences in the string, and use it later to figure how many bytes
 	 * will be the new string, with replaced random sequences.
 	 */
-	for (i=0; i < (int)xmlStrlen(line); i++) {
+	for (i=0; i < line_len; i++) {
 		if (line[i] == '\\') {		/* the "\\r" or "\\R" case. the sequence is escaped, so honor it */
 			if (line[i+1] == '\\') {		/* the "\\r" or "\\R" case. the sequence is escaped, so honor it */
 				i += 2;
@@ -261,7 +265,7 @@ parse_randoms(xmlChar *line)
 
 
 	/* replace the random sequences with real random characters */
-	for (i=0; i < (int)xmlStrlen(line); i++) {
+	for (i=0; i < line_len; i++) {
 		if (line[i] == '\\') {	/* got an escape character, we better examine it... */
 			if (line[i+1] == '\\') {	/* the "\\r" or "\\R" case. the sequence is escaped, so honor it */
 				ret[j++] = line[i];	/* copy it as if nothing had happened */
@@ -296,7 +300,7 @@ parse_randoms(xmlChar *line)
 			ret[j++] = line[i];		/* anything else will just go into the new string */
 	}
 
-	ret[(long)(ret_len - 1)] = '\0';	/* close that new string safe and secure. */
+	ret[(ret_len - 1)] = '\0';	/* close that new string safe and secure. */
 
 
 	return(ret);	/* return the result; we've worked hard on it. */
@@ -307,69 +311,71 @@ parse_randoms(xmlChar *line)
  * Get the idx'th line from the value.
  */
 xmlChar *
-get_line(xmlChar *value_nl, int value_len, int idx)
+get_line(const xmlChar *value_nl, const unsigned int idx)
 {
 	xmlChar	*line = NULL;
 
-	int	nl = 1, pos = 0, tmp = 0;
-	size_t	line_len = 0;
+	int	nl = 1, pos = 0, tmp = 0, length = 0;
 
+
+	length = xmlStrlen(value_nl);
 
 	/* find out the start position (pos) of the requested line number (idx) */
-	for (pos = 0;(pos < value_len)  &&  (idx > nl); pos++) {
+	for (pos = 0;(pos < length)  &&  (idx > nl); pos++) {
 		if (value_nl[pos] == '\n') {	/* we've found a newline */
 			nl++;
 		}
 	}
 
 	tmp = pos;
+	length = 0;
 	/* count the requested line length */
 	while (value_nl[pos] != '\n'  &&  value_nl[pos] != '\0') {
-		line_len++;
+		length++;
 		pos++;
 	}
 
 	pos = tmp;
 	tmp = 0;
-	line = malloc(line_len + 1); malloc_check(line);
+	line = malloc(length + 1); malloc_check(line);
 	/* copy out the requested line */
-	while (value_nl[pos] != '\n'  &&  value_nl[pos] != '\0'  &&  tmp < (int)line_len) {
+	while (value_nl[pos] != '\n'  &&  value_nl[pos] != '\0'  &&  tmp < length) {
 		line[tmp++] = value_nl[pos++];
 	}
-	line[(long)line_len] = '\0';
+	line[length] = '\0';
 
 	return(line);
 } /* get_line() */
 
 
 xmlChar *
-parse_newlines(xmlChar *line, char dir)		/* dir(direction): "\n" -> '\n' = 0, '\n' -> "\n" = 1 */
+parse_newlines(const xmlChar *line, const unsigned char dir)		/* dir(direction): "\n" -> '\n' = 0, '\n' -> "\n" = 1 */
 {
 	xmlChar		*ret = NULL;
-	int		i = 0, j = 0;
-	size_t		nlnum = 0, ret_len = 0;
+	int		i = 0, j = 0, nlnum = 0, ret_len = 0, line_len = 0;
 
 
 	if (!line)
 		return(xmlStrdup(BAD_CAST ""));
 
+	line_len = xmlStrlen(line);
 
 	if (dir) {
 		/*
 		 * count the number of '\n' characters in the string, and use it later to figure how many bytes
 		 * will be the new string, with replaced newline characters.
 		 */
-		for (i=0; i < (int)xmlStrlen(line); i++)
+		for (i=0; i < line_len; i++)
 			if (line[i] == '\n')	/* we got a winner... */
 				nlnum++;
 
-		ret_len = xmlStrlen(line) + nlnum + 1;
+		ret_len = line_len + nlnum + 1;
 	} else {
 		/*
 		 * count the number of "\n" sequences in the string, and use it later to figure how many bytes
 		 * will be the new string, with replaced newline sequences.
 		 */
-		for (i=0; i < (int)xmlStrlen(line); i++) {
+		for (i=0; i < line_len; i++) {
 			if (line[i] == '\\') {	/* got an escape character, we better examine it... */
 				if (line[i+1] == '\\')	/* the "\\n" case. the newline is escaped, so honor it */
 					i += 2;		/* skip these. don't count them, because they are not newlines */
@@ -378,14 +384,14 @@ parse_newlines(xmlChar *line, char dir)		/* dir(direction): "\n" -> '\n' = 0, '\
 			}
 		}
 
-		ret_len = xmlStrlen(line) - nlnum + 1;
+		ret_len = line_len - nlnum + 1;
 	}
 	ret = malloc(ret_len); malloc_check(ret);
 
 
 	if (dir) {
 		/* replace the real newline characters with newline sequences ("\n"); */
-		for (i=0; i < (int)xmlStrlen(line); i++) {
+		for (i=0; i < line_len; i++) {
 			if (line[i] == '\n') {			/* we got a winner... */
 				ret[j++] = '\\';		/* replace with NL character */
 				ret[j++] = 'n';			/* replace with NL character */
@@ -394,7 +400,7 @@ parse_newlines(xmlChar *line, char dir)		/* dir(direction): "\n" -> '\n' = 0, '\
 		}
 	} else {
 		/* replace the newline sequences with real newline characters ('\n'); */
-		for (i=0; i < (int)xmlStrlen(line); i++) {
+		for (i=0; i < line_len; i++) {
 			if (line[i] == '\\') {	/* got an escape character, we better examine it... */
 				if (line[i+1] == '\\') {	/* the "\\n" case. the newline is escaped, so honor it */
 					ret[j++] = line[i];	/* copy it as if nothing had happened */
@@ -409,7 +415,7 @@ parse_newlines(xmlChar *line, char dir)		/* dir(direction): "\n" -> '\n' = 0, '\
 		}
 	}
 
-	ret[(long)(ret_len - 1)] = '\0';		/* close that new string safe and secure. */
+	ret[ret_len - 1] = '\0';		/* close that new string safe and secure. */
 
 
 	return(ret);	/* return the result; we've worked hard on it. */
@@ -417,7 +423,7 @@ parse_newlines(xmlChar *line, char dir)		/* dir(direction): "\n" -> '\n' = 0, '\
 
 
 char
-kc_password_read(char **pass1, char new)
+kc_password_read(char **pass1, const unsigned char new)
 {
 	/*
 	 * returns:
@@ -492,7 +498,7 @@ kc_password_read(char **pass1, char new)
 
 
 char
-kc_setup_crypt(BIO *bio_chain, int enc, struct db_parameters *db_params, int flags)
+kc_setup_crypt(BIO *bio_chain, const unsigned int enc, struct db_parameters *db_params, const unsigned int flags)
 {
 	char	*iv_tmp = NULL, *salt_tmp = NULL;
 	int	i = 0;
@@ -648,7 +654,7 @@ kc_setup_crypt(BIO *bio_chain, int enc, struct db_parameters *db_params, int fla
 
 
 BIO *
-kc_setup_bio_chain(const char *db_filename, const char write)
+kc_setup_bio_chain(const char *db_filename, const unsigned char write)
 {
 	BIO	*bio_file = NULL;
 	BIO	*bio_b64 = NULL;
@@ -901,8 +907,7 @@ kc_validate_xml(xmlDocPtr db)
 int
 kc_db_reader(char **buf, BIO *bio_chain)
 {
-	int		pos = 0;
-	size_t		buf_size = 1024;
+	int		pos = 0, buf_size = 1024;
 	ssize_t		ret = -1;
 
 
@@ -930,7 +935,7 @@ kc_db_reader(char **buf, BIO *bio_chain)
 			*buf = realloc(*buf, buf_size); malloc_check(*buf);
 		}
 
-		ret = BIO_read(bio_chain, *buf + pos, (int)(buf_size - pos));
+		ret = BIO_read(bio_chain, *buf + pos, buf_size - pos);
 		if (getenv("KC_DEBUG"))
 			printf("BIO_read(): %d\n", (unsigned int)ret);
 		switch (ret) {

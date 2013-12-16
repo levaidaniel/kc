@@ -38,8 +38,7 @@ cmd_clipboard(const char *e_line, command *commands)
 	xmlNodePtr	db_node = NULL;
 	xmlChar		*value = NULL, *value_nl = NULL, *line = NULL;
 	char		cmd[6];
-	int		idx = 0, lines = 0, i = 0, line_req = 1;
-	size_t		line_len = 0;
+	int		idx = 0, lines = 0, i = 0, line_req = 1, line_len = 0, value_len = 0;
 	unsigned char	app = 0;	/* 1=tmux, 2=xclip PRIMARY, 3=xclip CLIPBOARD */
 
 	char		**fork_argv = NULL;
@@ -75,7 +74,8 @@ cmd_clipboard(const char *e_line, command *commands)
 		xmlFree(value); value = NULL;
 
 		/* count how many (new)lines are in the string */
-		for (i=0; i < xmlStrlen(value_nl); i++)
+		value_len = xmlStrlen(value_nl);
+		for (i=0; i < value_len; i++)
 			if (value_nl[i] == '\n')
 				lines++;
 		lines++;
@@ -87,8 +87,8 @@ cmd_clipboard(const char *e_line, command *commands)
 			line_req = lines;
 
 		/* get a line out from the value */
-		line = get_line(value_nl, xmlStrlen(value_nl), line_req);
-		line_len = strlen((const char *)line);
+		line = get_line(value_nl, line_req);
+		line_len = xmlStrlen(line);
 
 		/* This is duplicated in cmd_getnum.c */
 		switch (app) {

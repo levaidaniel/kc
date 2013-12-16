@@ -564,7 +564,7 @@ main(int argc, char *argv[])
 			if (strlen(e_line) > 0) {
 				line = strdup(e_line);
 #ifndef _READLINE
-				line[(long)(strlen(line) - 1)] = '\0';		/* remove the newline character from the end */
+				line[strlen(line) - 1] = '\0';		/* remove the newline character from the end */
 				history(eh, &eh_ev, H_ENTER, line);
 #else
 				add_history(line);
@@ -585,9 +585,10 @@ main(int argc, char *argv[])
 void
 cmd_match(const char *e_line)
 {
-	int	idx = -1, space = -1;
-	char	*line = NULL, *cmd = NULL;
-	command	*commands = commands_first;
+	int		idx = 0, spice = 0;
+	int		ret = 0;
+	char		*line = NULL, *cmd = NULL;
+	command		*commands = commands_first;
 
 
 	if (e_line)
@@ -598,14 +599,15 @@ cmd_match(const char *e_line)
 	/*
 	 * special case, if only a number was entered,
 	 * we display the appropriate entry, and if there
-	 * is another number after it, use it as space for jamming
+	 * is another number after it, use it as spice for jamming
 	 */
-	sscanf(line, "%d %d", &idx, &space);
-	if (idx >= 0) {
-		if (space >= 0)
-			cmd_getnum(idx, (size_t)space);
-		else
-			cmd_getnum(idx, 0);
+	ret = sscanf(line, "%d %d", &idx, &spice);
+	if (ret >= 1) {
+		if (spice > 10)	/* 10 is the limit of spice */
+			spice = 10;
+
+		/* We got a key index, display the value */
+		cmd_getnum(idx, spice);
 	} else {
 		cmd = strtok(line, " ");
 		if (!cmd) {	/* probably an empty line */
@@ -657,14 +659,14 @@ el_prompt_null(void)
 const char *
 prompt_str(void)
 {
-	size_t		prompt_len = 0;
+	int		prompt_len = 0;
 	static char	*prompt = NULL;
 	xmlChar		*cname = NULL;
 
 
 	cname = xmlGetProp(keychain, BAD_CAST "name");
 
-	prompt_len = 1 + (size_t)xmlStrlen(cname) + 2 + sizeof(prompt_context) + 2 + 1;
+	prompt_len = 1 + xmlStrlen(cname) + 2 + sizeof(prompt_context) + 2 + 1;
 	prompt = realloc(prompt, prompt_len); malloc_check(prompt);
 
 	snprintf(prompt, prompt_len, "<%s%% %s%c ", cname, prompt_context, (db_params.readonly ? '|':'>'));
@@ -722,9 +724,7 @@ el_tab_complete(EditLine *e)
 			*complete_max = NULL;
 	const LineInfo	*el_lineinfo = NULL;
 	command		*commands = commands_first;
-	int		hits = 0, i = 0, j = 0, ref = 0, match_max = 0;
-	size_t		word_len = 0;
-	long		line_buf_len = 0;
+	int		hits = 0, i = 0, j = 0, ref = 0, match_max = 0, word_len = 0, line_buf_len = 0;
 
 
 	el_lineinfo = el_line(e);
@@ -734,8 +734,8 @@ el_tab_complete(EditLine *e)
 	 * because el_lineinfo->buffer is not NUL terminated
 	 */
 	line_buf_len = el_lineinfo->lastchar - el_lineinfo->buffer;
-	line_buf = malloc((size_t)line_buf_len + 1); malloc_check(line_buf);
-	memcpy(line_buf, el_lineinfo->buffer, (size_t)line_buf_len);
+	line_buf = malloc(line_buf_len + 1); malloc_check(line_buf);
+	memcpy(line_buf, el_lineinfo->buffer, line_buf_len);
 	line_buf[line_buf_len] = '\0';
 
 
@@ -839,7 +839,7 @@ el_tab_complete(EditLine *e)
 			 * (remaining: the ones without the part (at the beginning)
 			 * that we've entered already)
 			 */
-			el_push(e, match[0] + (int)word_len);
+			el_push(e, match[0] + word_len);
 
 			/* if this is not an already completed word
 			 * (ie. there is no space at the end), then
