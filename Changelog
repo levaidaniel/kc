@@ -79,6 +79,9 @@ Functional changes, improvements:
 - 'xport' command can now specify KDF and cipher mode.
 - 'import' command can now specify KDF and cipher mode.
 
+- The 'new' command's first parameter (if specified), the key, now works with
+  spaces.
+
 - IV and salt sizes were increased.
 
 - Project moved to github.
