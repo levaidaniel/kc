@@ -44,6 +44,16 @@ $ shred --remove kcdump.xml   [or equivalent, eg.: rm(1) -P]
 Bug fixes:
 
 Functional changes, improvements:
+- New -P option to specify the KDF to use when dealing with database passwords.
+  Previously, only SHA-1 PBKDF2 was used. Now the supported KDFs include
+  SHA-1 and SHA-512 PBKDF2, blowfish based bcrypt, and scrypt.
+
+- The new default KDF is SHA-512 based PBKDF2 (the old one was SHA-1). This also
+  breaks compatibility with older databases, but could have been worked around
+  easily with the new -P option (open db with -P sha1, and change password
+  with also changing the KDF to sha512), but would have been futile, because as
+  mentioned above, the encrypted db format also has changed.
+
 - Introduce new hotkeys while in value displaying, for copying 'values'
   to various clipboards:
 
@@ -60,3 +70,17 @@ Functional changes, improvements:
 
   Removal of the 'values' from the clipboards are not being dealt with (!!!),
   it should be the user's responsibility.
+
+- New commands 'tmux', 'xclip', 'Xclip'. They provide the functions previously
+  described, but without opening the key. This works directly from the CLI.
+  Line number can also be specified if dealing with multi-line values.
+
+- 'passwd' command can now change KDF and cipher mode.
+- 'xport' command can now specify KDF and cipher mode.
+- 'import' command can now specify KDF and cipher mode.
+
+- IV and salt sizes were increased.
+
+- Project moved to github.
+
+- General documentation improvements and extensions.
