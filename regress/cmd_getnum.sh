@@ -36,4 +36,31 @@ else
 	exit 1
 fi
 
+echo "9999999999999999999999999999999999999999999999999999999999999999" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
+SHA1=$(echo "9999999999999999999999999999999999999999999999999999999999999999" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." |$SHA1_BIN |cut -d' ' -f1)
+if [ "$SHA1" = '812e96292afbdf1b0cebb40a7db6a7ffa2e52dfe' ];then
+	echo "$0 test ok (too big)!"
+else
+	echo "$0 test failed (too big)!"
+	exit 1
+fi
+
+echo "-99999999999999999999999999999999999999999999999999999999999999" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
+SHA1=$(echo "-9999999999999999999999999999999999999999999999999999999999999999" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." |$SHA1_BIN |cut -d' ' -f1)
+if [ "$SHA1" = '812e96292afbdf1b0cebb40a7db6a7ffa2e52dfe' ];then
+	echo "$0 test ok (too small #1)!"
+else
+	echo "$0 test failed (too small #1)!"
+	exit 1
+fi
+
+echo "-1" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
+SHA1=$(echo "-1" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." |$SHA1_BIN |cut -d' ' -f1)
+if [ "$SHA1" = '812e96292afbdf1b0cebb40a7db6a7ffa2e52dfe' ];then
+	echo "$0 test ok (too small #2)!"
+else
+	echo "$0 test failed (too small #2)!"
+	exit 1
+fi
+
 exit 0
