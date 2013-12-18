@@ -50,7 +50,7 @@ cmd_edit(const char *e_line, command *commands)
 #ifndef _READLINE
 	int		e_count = 0;
 #endif
-	long int	idx = 0;
+	unsigned long int	idx = 0;
 
 
 	line = strdup(e_line);
@@ -74,15 +74,8 @@ cmd_edit(const char *e_line, command *commands)
 	}
 
 	errno = 0;
-	idx = strtol((const char *)cmd, &inv, 10);
-	if (inv[0] != '\0'  ||  errno != 0) {
-		puts(commands->usage);
-
-		free(line); line = NULL;
-		return;
-	}
-
-	if (idx < 0) {
+	idx = strtoul((const char *)cmd, &inv, 10);
+	if (inv[0] != '\0'  ||  errno != 0  ||  cmd[0] == '-') {
 		puts(commands->usage);
 
 		free(line); line = NULL;
@@ -185,7 +178,7 @@ cmd_edit(const char *e_line, command *commands)
 		/* Update the keychain's modified timestamp */
 		xmlSetProp(keychain, BAD_CAST "modified", BAD_CAST modified);
 
-		printf("Modified key: %ld. %s\n", idx, key);
+		printf("Modified key: %lu. %s\n", idx, key);
 
 		xmlFree(key); key = NULL;
 		xmlFree(value_rR); value_rR = NULL;

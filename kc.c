@@ -585,9 +585,9 @@ main(int argc, char *argv[])
 void
 cmd_match(const char *e_line)
 {
-	long int	idx = 0, spice = 0;
-	char		*line = NULL, *cmd = NULL, *inv = NULL;
-	command		*commands = commands_first;
+	unsigned long int	idx = 0, spice = 0;
+	char			*line = NULL, *cmd = NULL, *inv = NULL;
+	command			*commands = commands_first;
 
 
 	if (e_line)
@@ -603,20 +603,22 @@ cmd_match(const char *e_line)
 	}
 
 	errno = 0;
-	idx = strtol((const char *)cmd, &inv, 10);
+	idx = strtoul((const char *)cmd, &inv, 10);
 
 	/* Special case, if only a number was entered,
 	 * we display the appropriate entry, and if there
 	 * is another number after it, use it as spice for jamming.
 	 */
-	if (inv[0] == '\0'  &&  errno == 0) {
+		/* Because there is no way to tell if the number was negative with strtoul(),
+		 * check for the minus sign. This is sooo great... */
+	if (inv[0] == '\0'  &&  errno == 0  &&  cmd[0] != '-') {
 		/* We also check for a spice */
 		cmd = strtok(NULL, " ");
 		if (cmd) {
 			errno = 0;
-			spice = strtol((const char *)cmd, &inv, 10);
+			spice = strtoul((const char *)cmd, &inv, 10);
 
-			if (inv[0] == '\0'  &&  errno == 0) {
+			if (inv[0] == '\0'  &&  errno == 0  &&  cmd[0] != '-') {
 				if (spice > 5)	/* 5 is the limit of spice */
 					spice = 5;
 			} else

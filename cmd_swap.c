@@ -39,10 +39,10 @@ cmd_swap(const char *e_line, command *commands)
 {
 	xmlNodePtr	key_src = NULL, key_dst = NULL, key_finish = NULL;
 
-	char		*modified = NULL;
-	char		insert = 0;
-	char		*line = NULL, *cmd = NULL, *inv = NULL;
-	long int	idx_src = 0, idx_dst = 0;
+	char			*modified = NULL;
+	char			insert = 0;
+	char			*line = NULL, *cmd = NULL, *inv = NULL;
+	unsigned long int	idx_src = 0, idx_dst = 0;
 
 
 	line = strdup(e_line);
@@ -69,15 +69,8 @@ cmd_swap(const char *e_line, command *commands)
 	}
 
 	errno = 0;
-	idx_src = strtol((const char *)cmd, &inv, 10);
-	if (inv[0] != '\0'  ||  errno != 0) {
-		puts(commands->usage);
-
-		free(line); line = NULL;
-		return;
-	}
-
-	if (idx_src < 0) {
+	idx_src = strtoul((const char *)cmd, &inv, 10);
+	if (inv[0] != '\0'  ||  errno != 0  ||  cmd[0] == '-') {
 		puts(commands->usage);
 
 		free(line); line = NULL;
@@ -94,15 +87,8 @@ cmd_swap(const char *e_line, command *commands)
 	}
 
 	errno = 0;
-	idx_dst = strtol((const char *)cmd, &inv, 10);
-	if (inv[0] != '\0'  ||  errno != 0) {
-		puts(commands->usage);
-
-		free(line); line = NULL;
-		return;
-	}
-
-	if (idx_dst < 0) {
+	idx_dst = strtoul((const char *)cmd, &inv, 10);
+	if (inv[0] != '\0'  ||  errno != 0  ||  cmd[0] == '-') {
 		puts(commands->usage);
 
 		free(line); line = NULL;

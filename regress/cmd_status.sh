@@ -30,9 +30,9 @@ else
 fi
 
 if [ "$kdf" = 'KDF: sha512' ];then
-	echo "$0 test ok (cipher mode)!"
+	echo "$0 test ok (kdf)!"
 else
-	echo "$0 test failed (cipher mode)!"
+	echo "$0 test failed (kdf)!"
 	exit 1
 fi
 

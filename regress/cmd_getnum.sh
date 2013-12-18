@@ -56,7 +56,7 @@ fi
 
 echo "-1" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
 SHA1=$(echo "-1" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = '812e96292afbdf1b0cebb40a7db6a7ffa2e52dfe' ];then
+if [ "$SHA1" = 'ceec076e4de962780a23b5160d7038fb41b914ec' ];then
 	echo "$0 test ok (too small #2)!"
 else
 	echo "$0 test failed (too small #2)!"

@@ -36,18 +36,32 @@ cmd_info(const char *e_line, command *commands)
 	xmlNodePtr	db_node = NULL;
 	xmlChar		*name = NULL, *created = NULL, *modified = NULL, *description = NULL;
 
-	char		key = 0;
-	long int	idx = 0;
-	time_t		created_time = 0, modified_time = 0;
+	char			key = 0;
+	char			*line = NULL, *cmd = NULL, *inv = NULL;
+	unsigned long int	idx = 0;
+	time_t			created_time = 0, modified_time = 0;
 
 
-	if (sscanf(e_line, "%*s %ld", &idx) > 0) {
-		if (errno != 0) {
+	line = strdup(e_line);
+
+
+	cmd = strtok(line, " ");
+	if (!cmd) {
+		puts(commands->usage);
+
+		free(line); line = NULL;
+		return;
+	}
+
+
+	cmd = strtok(NULL, " ");	/* first optional parameter, the index number */
+	if (cmd) {
+		errno = 0;
+		idx = strtoul((const char *)cmd, &inv, 10);
+		if (inv[0] != '\0'  ||  errno != 0  ||  cmd[0] == '-') {
 			puts(commands->usage);
-			return;
-		}
-		if (idx < 0) {
-			puts(commands->usage);
+
+			free(line); line = NULL;
 			return;
 		}
 
@@ -55,6 +69,10 @@ cmd_info(const char *e_line, command *commands)
 		key = 1;
 	} else
 		db_node = keychain;
+
+
+
+	free(line); line = NULL;
 
 
 	if (db_node) {

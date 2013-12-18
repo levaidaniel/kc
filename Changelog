@@ -85,6 +85,11 @@ Functional changes, improvements:
 
 - IV and salt sizes were increased.
 
+- Maximum number of keys and keychains are now determined at compile time (the
+  maximum of an unsigned long integer on the specific platform, minus one).
+  This is a theoretical limit; I'm pretty sure the XML handling gets funky way
+  before this limit is reached :).
+
 - Project moved to github.
 
 - General documentation improvements and extensions.

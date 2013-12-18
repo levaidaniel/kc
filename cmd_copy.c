@@ -37,10 +37,10 @@ cmd_copy(const char *e_line, command *commands)
 	xmlNodePtr	key = NULL, key_new = NULL, keychain_dest = NULL, db_node_prev = NULL;
 	xmlChar		*cname = NULL, *name = NULL;
 
-	char		*modified = NULL;
-	char		*line = NULL, *cmd = NULL, *inv = NULL;
-	unsigned char	move = 0;
-	long int	idx = 0;
+	char			*modified = NULL;
+	char			*line = NULL, *cmd = NULL, *inv = NULL;
+	unsigned char		move = 0;
+	unsigned long int	idx = 0;
 
 
 	line = strdup(e_line);
@@ -66,15 +66,8 @@ cmd_copy(const char *e_line, command *commands)
 	}
 
 	errno = 0;
-	idx = strtol((const char *)cmd, &inv, 10);
-	if (inv[0] != '\0'  ||  errno != 0) {
-		puts(commands->usage);
-
-		free(line); line = NULL;
-		return;
-	}
-
-	if (idx < 0) {
+	idx = strtoul((const char *)cmd, &inv, 10);
+	if (inv[0] != '\0'  ||  errno != 0  ||  cmd[0] == '-') {
 		puts(commands->usage);
 
 		free(line); line = NULL;
@@ -144,7 +137,7 @@ cmd_copy(const char *e_line, command *commands)
 
 
 		name = xmlGetProp(key, BAD_CAST "name");
-		printf("Key '%ld. %s' was %s to keychain: %s\n", idx, name, move ? "moved" : "copied", cname);
+		printf("Key '%lu. %s' was %s to keychain: %s\n", idx, name, move ? "moved" : "copied", cname);
 		xmlFree(name); name = NULL;
 		free(modified); modified = NULL;
 

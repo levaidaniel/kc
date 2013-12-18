@@ -52,7 +52,7 @@ extern BIO		*bio_chain;
 
 
 void
-cmd_getnum(const long int idx, const long int spice)
+cmd_getnum(const unsigned long int idx, const unsigned long int spice)
 {
 	xmlNodePtr	db_node = NULL;
 	xmlChar		*key = NULL, *value = NULL, *value_nl = NULL, *line = NULL, *line_randomed = NULL, *tmp = NULL;

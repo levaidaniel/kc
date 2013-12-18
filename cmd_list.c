@@ -43,9 +43,9 @@ cmd_list(const char *e_line, command *commands)
 	xmlNodePtr	db_node = NULL;
 	xmlChar		*key = NULL;
 
-	long int	idx = 0, offset = 0, pager = 20, pager_show = 0;
-	char		*line = NULL, *cmd = NULL, *inv = NULL;
-	char		rc = 0;
+	unsigned long int	pager = 20, offset = 0, idx = 0, pager_show = 0;
+	char			*line = NULL, *cmd = NULL, *inv = NULL;
+	char			rc = 0;
 
 
 	if (getenv("KC_DEBUG")) {
@@ -69,15 +69,15 @@ cmd_list(const char *e_line, command *commands)
 	cmd = strtok(NULL, " ");	/* first, optional parameter, the pager number */
 	if (cmd) {
 		errno = 0;
-		pager = strtol((const char *)cmd, &inv, 10);
-		if (inv[0] != '\0'  ||  errno != 0) {
+		pager = strtoul((const char *)cmd, &inv, 10);
+		if (inv[0] != '\0'  ||  errno != 0  ||  cmd[0] == '-') {
 			puts(commands->usage);
 
 			free(line); line = NULL;
 			return;
 		}
 	}
-	if (pager > 100  ||  pager < 0)
+	if (pager > 100)
 		pager = 20;
 
 	pager_show = pager;
@@ -86,16 +86,14 @@ cmd_list(const char *e_line, command *commands)
 	cmd = strtok(NULL, " ");	/* second, optional parameter, the offset number */
 	if (cmd) {
 		errno = 0;
-		offset = strtol((const char *)cmd, &inv, 10);
-		if (inv[0] != '\0'  ||  errno != 0) {
+		offset = strtoul((const char *)cmd, &inv, 10);
+		if (inv[0] != '\0'  ||  errno != 0  ||  cmd[0] == '-') {
 			puts(commands->usage);
 
 			free(line); line = NULL;
 			return;
 		}
 	}
-	if (offset < 0)
-		offset = 0;
 
 
 	free(line); line = NULL;
@@ -118,7 +116,7 @@ cmd_list(const char *e_line, command *commands)
 
 
 	db_node = keychain->children;
-	while (db_node) {
+	while (db_node  &&  idx < ULONG_MAX) {
 		/* We only care about ELEMENT nodes */
 		if (db_node->type != XML_ELEMENT_NODE) {
 			db_node = db_node->next;

@@ -8,7 +8,10 @@
 #include <errno.h>
 #include <string.h>
 #ifdef _LINUX
+#include <limits.h>
 #include <bsd/string.h>
+#else
+#include <sys/limits.h>
 #endif
 
 #include <libxml/parser.h>

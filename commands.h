@@ -27,7 +27,7 @@ void cmd_copy(const char *, command *);
 void cmd_del(const char *, command *);
 void cmd_edit(const char *, command *);
 void cmd_export(const char *, command *);
-void cmd_getnum(const long int, const long int);
+void cmd_getnum(const unsigned long int, const unsigned long int);
 void cmd_help(const char *, command *);
 void cmd_import(const char *, command *);
 void cmd_info(const char *, command *);
@@ -43,7 +43,7 @@ void cmd_version(const char *, command *);
 void cmd_write(const char *, command *);
 
 xmlNodePtr	find_keychain(const xmlChar *, unsigned char);
-xmlNodePtr	find_key(const long int);
+xmlNodePtr	find_key(const unsigned long int);
 void		_rl_push_buffer(void);
 char		*get_random_str(const unsigned int, const unsigned char);
 xmlChar		*parse_randoms(const xmlChar *);

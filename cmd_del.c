@@ -42,9 +42,9 @@ cmd_del(const char *e_line, command *commands)
 	xmlNodePtr	db_node = NULL, db_node_prev = NULL;
 	xmlChar		*key = NULL;
 
-	char		*modified = NULL;
-	char		*line = NULL, *cmd = NULL, *inv = NULL;
-	long int	idx = 0;
+	char			*modified = NULL;
+	char			*line = NULL, *cmd = NULL, *inv = NULL;
+	unsigned long int	idx = 0;
 
 #ifndef _READLINE
 	int		e_count = 0;
@@ -72,15 +72,8 @@ cmd_del(const char *e_line, command *commands)
 	}
 
 	errno = 0;
-	idx = strtol((const char *)cmd, &inv, 10);
-	if (inv[0] != '\0'  ||  errno != 0) {
-		puts(commands->usage);
-
-		free(line); line = NULL;
-		return;
-	}
-
-	if (idx < 0) {
+	idx = strtoul((const char *)cmd, &inv, 10);
+	if (inv[0] != '\0'  ||  errno != 0  ||  cmd[0] == '-') {
 		puts(commands->usage);
 
 		free(line); line = NULL;
@@ -140,7 +133,7 @@ cmd_del(const char *e_line, command *commands)
 			xmlUnlinkNode(db_node);
 			xmlFreeNode(db_node);
 
-			printf("Deleted key: %ld. %s\n", idx, key);
+			printf("Deleted key: %lu. %s\n", idx, key);
 			puts("Key indices have been changed. Make sure to 'list', before using them again!");
 			xmlFree(key); key = NULL;
 

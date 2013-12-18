@@ -35,12 +35,12 @@ extern BIO		*bio_chain;
 void
 cmd_clipboard(const char *e_line, command *commands)
 {
-	xmlNodePtr	db_node = NULL;
-	xmlChar		*value = NULL, *value_nl = NULL, *value_line = NULL;
-	char		*cmd_line = NULL, *cmd = NULL, *inv = NULL;
-	long int	idx = 0, line_req = 1;
-	int		lines = 0, i = 0, value_line_len = 0, value_len = 0;
-	unsigned char	app = 0;	/* 1=tmux, 2=xclip PRIMARY, 3=xclip CLIPBOARD */
+	xmlNodePtr		db_node = NULL;
+	xmlChar			*value = NULL, *value_nl = NULL, *value_line = NULL;
+	char			*cmd_line = NULL, *cmd = NULL, *inv = NULL;
+	unsigned long int	idx = 0;
+	long int		line_req = 1, lines = 0, i = 0, value_line_len = 0, value_len = 0;
+	unsigned char		app = 0;	/* 1=tmux, 2=xclip PRIMARY, 3=xclip CLIPBOARD */
 
 	char		**fork_argv = NULL;
 	int		child;
@@ -81,14 +81,8 @@ cmd_clipboard(const char *e_line, command *commands)
 	}
 
 	errno = 0;
-	idx = strtol((const char *)cmd, &inv, 10);
-	if (inv[0] != '\0'  ||  errno != 0) {
-		puts(commands->usage);
-
-		free(cmd_line); cmd_line = NULL;
-		return;
-	}
-	if (idx < 0) {
+	idx = strtoul((const char *)cmd, &inv, 10);
+	if (inv[0] != '\0'  ||  errno != 0  ||  cmd[0] == '-') {
 		puts(commands->usage);
 
 		free(cmd_line); cmd_line = NULL;
@@ -100,7 +94,7 @@ cmd_clipboard(const char *e_line, command *commands)
 	if (cmd) {
 		errno = 0;
 		line_req = strtol((const char *)cmd, &inv, 10);
-		if (inv[0] != '\0'  ||  errno != 0) {
+		if (inv[0] != '\0'  ||  errno != 0  ||  cmd[0] == '-') {
 			puts(commands->usage);
 
 			free(cmd_line); cmd_line = NULL;

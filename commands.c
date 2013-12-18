@@ -56,39 +56,45 @@ find_keychain(const xmlChar *cname_find, unsigned char name)	/* name: 1 = keycha
 	xmlNodePtr	db_node = NULL;
 	xmlChar		*cname = NULL;
 
-	char		*inv = NULL;
-	long int	idx = 0, i = 0;
+	char			*inv = NULL;
+	unsigned long int	idx = 0, i = 0;
 
 
 	if (xmlStrlen(cname_find) == 0)
 		return(NULL);
 
 	/* check if we got a number */
-	idx = strtol((const char *)cname_find, &inv, 10);
+	errno = 0;
+	idx = strtoul((const char *)cname_find, &inv, 10);
 
-	/* if we didn't get a number, or are forced to search for the keychain's name */
-	if (inv[0] != '\0'  ||  name == 1)
-		idx = -1;
+	/* If we didn't get a number.
+	 * name == 1 means forced searching for the name of the keychain, instead of the index number.
+	 *
+	 * Because there is no way to tell if the number was negative with strtoul(),
+	 * check for the minus sign. This is sooo great...
+	 */
+	if (inv[0] != '\0'  ||  errno != 0  ||  cname_find[0] == '-')
+		name = 1;
 
 
 	db_node = keychain->parent->children;
 
-	while (db_node) {
+	while (db_node  &&  i < ULONG_MAX) {
 		if (db_node->type != XML_ELEMENT_NODE) {	/* we only care about ELEMENT nodes */
 			db_node = db_node->next;
 			continue;
 		}
 
-		if (idx >= 0) {		/* if an index number was given in the parameter */
-			if (i++ == idx)
-				break;
-		} else {		/* if keychain name was given in the parameter */
+		if (name) {		/* if we are searching for the keychain's name */
 			cname = xmlGetProp(db_node, BAD_CAST "name");
 			if (xmlStrcmp(cname, cname_find) == 0) {
 				xmlFree(cname); cname = NULL;
 				break;
 			}
 			xmlFree(cname); cname = NULL;
+		} else {		/* if we are searching for the nth index */
+			if (i++ == idx)
+				break;
 		}
 
 		db_node = db_node->next;
@@ -99,19 +105,15 @@ find_keychain(const xmlChar *cname_find, unsigned char name)	/* name: 1 = keycha
 
 
 xmlNodePtr
-find_key(const long int idx)
+find_key(const unsigned long int idx)
 {
 	xmlNodePtr	db_node = NULL;
 
-	long int	i = 0;
+	unsigned long int	i = 0;
 
-
-	/* A little speedup if the keychain has *lots* of keys */
-	if (idx < 0)
-		return(NULL);
 
 	db_node = keychain->children;
-	while (db_node) {
+	while (db_node  &&  i < ULONG_MAX) {
 		if (db_node->type == XML_ELEMENT_NODE)	/* we only care about ELEMENT nodes */
 			if (i++ == idx)
 				break;

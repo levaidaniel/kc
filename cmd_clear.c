@@ -31,12 +31,42 @@ void
 cmd_clear(const char *e_line, command *commands)
 {
 	int	count = 0, i = 0, j = 0;
+	char	*cmd = NULL, *line = NULL, *inv = NULL;
 
 
-	if (sscanf(e_line, "%*s %d", &count) <= 0)
+	line = strdup(e_line);
+
+
+	cmd = strtok(line, " ");
+	if (!cmd) {
+		puts(commands->usage);
+
+		free(line); line = NULL;
+		return;
+	}
+
+
+	cmd = strtok(NULL, " ");	/* first optional parameter, the multiplier */
+	if (cmd) {
+		errno = 0;
+		count = strtoul((const char *)cmd, &inv, 10);
+		if (inv[0] != '\0'  ||  errno != 0  ||  cmd[0] == '-') {
+			puts(commands->usage);
+
+			free(line); line = NULL;
+			return;
+		}
+	} else
 		count = 1;
 
-	if (count > 10  ||  count <= 0)
+
+	free(line); line = NULL;
+
+
+	if (count == 0)
+		count++;
+
+	if (count > 10)
 		count = 10;
 
 
