@@ -6,11 +6,12 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
-#include <string.h>
+
 #ifdef _LINUX
-#include <limits.h>
 #include <bsd/string.h>
+#include <limits.h>
 #else
+#include <string.h>
 #include <sys/limits.h>
 #endif
 
