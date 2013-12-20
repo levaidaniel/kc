@@ -40,7 +40,7 @@ extern History		*eh;
 void
 cmd_new(const char *e_line, command *commands)
 {
-	xmlNodePtr	db_node = NULL, db_node_prev = NULL, db_node_new = NULL;
+	xmlNodePtr	db_node = NULL;
 	xmlChar		*key = NULL, *value_rR = NULL, *value = NULL;
 
 	char			*created = NULL;
@@ -51,6 +51,13 @@ cmd_new(const char *e_line, command *commands)
 #ifndef _READLINE
 	int		e_count = 0;
 #endif
+
+
+	if ((idx = count_elements(keychain->children)) >= ITEMS_MAX - 1) {
+		printf("Can not create the key: maximum number of keys reached, %lu.\n", ITEMS_MAX - 1);
+
+		return;
+	}
 
 
 #ifndef _READLINE
@@ -162,32 +169,12 @@ cmd_new(const char *e_line, command *commands)
 	/* Update the keychain's modified timestamp */
 	xmlSetProp(keychain, BAD_CAST "modified", BAD_CAST created);
 
-	/* Get the index of the newly added (last) entry */
-	db_node_new = db_node;	/* save the newly created node for the maximum keys check later */
-	db_node = keychain->children;
-	while (db_node  &&  idx < ULONG_MAX) {
-		if (db_node->type == XML_ELEMENT_NODE)	/* we only care about ELEMENT nodes */
-			idx++;
+	printf("Created key: %lu. %s\n", idx, key);
 
-		db_node = db_node->next;
-	}
-	if (idx == ULONG_MAX) {
-		printf("Could not create the key: maximum number of keys reached, %lu\n", ULONG_MAX);
+	/* make the XML document prettttyyy */
+	xmlAddChild(keychain, xmlNewText(BAD_CAST "\n\t"));
 
-		db_node_prev = db_node_new->prev;
-		xmlUnlinkNode(db_node_prev);	/* remove the adjacent 'text' node, which is the indent and newline */
-		xmlFreeNode(db_node_prev);
-
-		xmlUnlinkNode(db_node_new);
-		xmlFreeNode(db_node_new);
-	} else {
-		printf("Created key: %lu. %s\n", idx - 1, key);
-
-		/* make the XML document prettttyyy */
-		xmlAddChild(keychain, xmlNewText(BAD_CAST "\n\t"));
-
-		db_params.dirty = 1;
-	}
+	db_params.dirty = 1;
 
 
 	xmlFree(key); key = NULL;

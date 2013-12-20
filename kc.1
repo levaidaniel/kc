@@ -17,7 +17,7 @@
 .\"ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 .\"(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 .\"SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-.Dd Dec 13, 2013
+.Dd Dec 20, 2013
 .Dt KC 1
 .Os
 .Sh NAME
@@ -311,26 +311,32 @@ Print application help or describe a
 .Ar command .
 .It Cm status
 Display information about the database.
-.It Cm xport Ar filename Op keychain Op kdf Op cipher_mode
+.It Cm xport Ar filename Op kdf Op cipher_mode Op keychain
 Export the database to a
 .Nm
 compatible encrypted database file named
 .Ar filename
 (if no extension specified, ".kcd" will be appended).
 .Pp
-When specifying
-.Ar keychain ,
-export only that keychain.
-.Ar keychain
-can be the keychain's index number or name. Index number takes priority when addressing a keychain.
-.Pp
 Optional arguments
 .Ar kdf
 and
 .Ar cipher_mode
-can be used to specify a different KDF and/or cipher mode to be used while exporting the database. This doesn't change the current database's parameters, but when importing this exported database, the parameters must be the same (or specified explicitly when using the
+can be used to specify a different KDF and/or cipher mode to be used while exporting the database. This doesn't change the current database's parameters, but when importing this exported database, the parameters in use must be the same (or specified explicitly when using the
 .Cm import
 command).
+.Pp
+When specifying
+.Ar keychain ,
+export only that keychain.
+.Ar keychain
+can be the keychain's index number or name. Index number takes priority when addressing a keychain. If you don't want to change the KDF or the cipher mode, but want to export a specific keychain, just specify the same values for
+.Ar kdf
+and
+.Ar cipher_mode
+as the ones currently in use (use command
+.Cm status
+to acquire these informations).
 (see command
 .Cm dump ,
 .Cm import
@@ -390,7 +396,11 @@ compatible encrypted database file named
 .Ar filename
 must be a proper
 .Nm
-database. (see command
+database. See the
+.Em LIMITS
+section for information about how
+.Nm
+deals with limits reached while appending. (see command
 .Cm appendxml ,
 .Cm xport
 and
@@ -403,7 +413,11 @@ compatible XML file named
 .Ar filename
 must contain a properly formatted
 .Nm
-XML document. (see command
+XML document. See the
+.Em LIMITS
+section for information about how
+.Nm
+deals with limits reached while appending. (see command
 .Cm append ,
 .Cm xport
 and
@@ -520,6 +534,11 @@ The KDF converts the user supplied password with a generated salt to a strong ke
 option and the
 .Cm passwd
 command. Of course, changing the KDF with which the database was created/opened means that the new KDF must be used from then on. This is because changing the KDF changes the key the database was encrypted with.
+.Sh LIMITS
+.Nm
+has limits when it deals with keychains and keys in keychains. The maximum number of elements for both is the upper limit an unsigned long integer can store on the running platfrom, minus one. These limits are enforced every time a new keychain or key is being created (or moved, copied, etc...). Appending is done in a non-atomic fashion. This means that
+.Nm
+will not create a keychain if it would not fit in the limit, and it will not append keys to an existing keychain if they would not fit in the limit. However, for example, if a database that is being appended contains a keychain whose keys could not fit in the existing keychain, and also contains a keychain whose keys could fit in the existing keychain, then the one that could fit will be appended, and the one that could not will not be appended. This means that appending is atomic on the keychain level (or keys level, if you like), and not atomic on the database level.
 .Sh EXAMPLES
 .Bl -tag -offset ||| -width |
 .It Em pwsafe_to_kc.pl :

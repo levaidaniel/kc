@@ -9,8 +9,6 @@ echo "test => $0"
 database_name=$(echo "status" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." |grep -E -e '^Database file:' |sed -e 's/ (.*)$//')
 cipher_mode=$(echo "status" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." |grep -E -e '^Cipher mode:')
 kdf=$(echo "status" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." |grep -E -e '^KDF:')
-keychains=$(echo "status" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." |grep -E -e '^Keychains: ')
-items_all=$(echo "status" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." |grep -E -e '^Items \(all\): ')
 read_only=$(echo "status" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." |grep -E -e '^Read-only: ')
 modified=$(echo "status" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." |grep -E -e '^Modified: ')
 xml_size=$(echo "status" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." |grep -E -e '^XML structure size \(bytes\): ')
@@ -33,20 +31,6 @@ if [ "$kdf" = 'KDF: sha512' ];then
 	echo "$0 test ok (kdf)!"
 else
 	echo "$0 test failed (kdf)!"
-	exit 1
-fi
-
-if [ "$keychains" = 'Keychains: 3' ];then
-	echo "$0 test ok (keychains)!"
-else
-	echo "$0 test failed (keychains)!"
-	exit 1
-fi
-
-if [ "$items_all" = 'Items (all): 5' ];then
-	echo "$0 test ok (items all)!"
-else
-	echo "$0 test failed (items all)!"
 	exit 1
 fi
 

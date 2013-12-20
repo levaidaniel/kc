@@ -92,6 +92,14 @@ cmd_copy(const char *e_line, command *commands)
 		return;
 	}
 
+	if (count_elements(keychain_dest) >= ITEMS_MAX - 1) {
+		printf("Can not copy/move the key to keychain: maximum number of keys reached, %lu.\n", ITEMS_MAX - 1);
+
+		free(line); line = NULL;
+		return;
+	}
+
+
 	key = find_key(idx);
 	if (!key) {
 		puts("Invalid index!");

@@ -59,6 +59,8 @@ cmd_import(const char *e_line, command *commands)
 	ssize_t		ret = -1;
 	int		pos = 0;
 
+	unsigned long int	count_keychains = 0, count_keys = 0, count_keys_new = 0;
+
 
 	/* initial db_params parameters of the imported database */
 	db_params_new.pass = NULL;
@@ -101,6 +103,9 @@ cmd_import(const char *e_line, command *commands)
 		db_params_new.cipher_mode = db_params.cipher_mode;
 
 
+	puts("Reading database...");
+
+
 	if (xml) {
 		/* plain text XML database import */
 
@@ -110,7 +115,11 @@ cmd_import(const char *e_line, command *commands)
 			db_new = xmlReadFile(db_params_new.db_filename, "UTF-8", XML_PARSE_NONET | XML_PARSE_NOERROR | XML_PARSE_NOWARNING);
 
 		if (!db_new) {
-			xmlGenericError(xmlGenericErrorContext, "Failed to parse XML from '%s'.\n", db_params_new.db_filename);
+			xmlGenericError(xmlGenericErrorContext, "Failed to parse XML from '%s'", db_params_new.db_filename);
+			if (errno == 0)
+				puts("");
+			else
+				printf(": %s\n", strerror(errno));
 
 			free(line); line = NULL;
 			return;
@@ -297,6 +306,9 @@ cmd_import(const char *e_line, command *commands)
 	}
 
 
+	puts("Checking database...");
+
+
 	if (!kc_validate_xml(db_new)) {
 		printf("Not a valid kc XML structure ('%s')!\n", db_params_new.db_filename);
 
@@ -306,23 +318,29 @@ cmd_import(const char *e_line, command *commands)
 	}
 
 
+	db_root = xmlDocGetRootElement(db);		/* the existing db root */
+	db_root_new = xmlDocGetRootElement(db_new);	/* the new db root */
+	if (db_root_new->children->next == NULL) {
+		puts("Can not import an empty database!");
+
+		xmlFreeDoc(db_new);
+		free(line); line = NULL;
+		return;
+	}
+
+
+	puts("Counting keys and keychains...");
+
 	if (append) {
-		db_root = xmlDocGetRootElement(db);	/* the existing db root */
-		db_root_new = xmlDocGetRootElement(db_new);
-
-		if (db_root_new->children->next == NULL) {
-			puts("Won't append from an empty database!");
-
-			xmlFreeDoc(db_new);
-			free(line); line = NULL;
-			return;
-		}
-
-		/* extract the keychain from the document being appended */
+		/* Extract the keychain from the document being appended */
 		keychain_new = db_root_new->children->next;
 
-		/* We would like to append every keychain that is in the source file,
-		 * hence the loop. */
+		/* Count the keychains in the current database */
+		count_keychains = count_elements(keychain->parent->children);
+
+		/* We would like to append every keychain that is in the source database,
+		 * hence the loop.
+		 */
 		while (keychain_new) {
 			if (keychain_new->type == XML_ELEMENT_NODE) {	/* we only care about ELEMENT nodes */
 				cname = xmlGetProp(keychain_new, BAD_CAST "name");
@@ -335,22 +353,44 @@ cmd_import(const char *e_line, command *commands)
 				 * keychain.
 				 */
 				if (keychain_cur) {
-					entry_new = keychain_new->children->next;
-					while (entry_new) {
-						if (entry_new->type == XML_ELEMENT_NODE) {	/* we only care about ELEMENT nodes */
-							xmlAddChild(keychain_cur, xmlNewText(BAD_CAST "\t"));
-							xmlAddChild(keychain_cur, xmlCopyNode(entry_new, 1));
-							xmlAddChild(keychain_cur, xmlNewText(BAD_CAST "\n\t"));
-						}
+					/* Range check
+					 * See, if the new keys would fit into the existing keychain.
+					 */
+					count_keys = count_elements(keychain_cur->children->next);
+					count_keys_new = count_elements(keychain_new->children->next);
+					while (count_keys_new > 0  &&  count_keys < ITEMS_MAX - 1) {
+						count_keys++;
+						count_keys_new--;
+					}
 
-						entry_new = entry_new->next;
+					if (count_keys_new == 0  &&  count_keys <= ITEMS_MAX - 1) {
+						entry_new = keychain_new->children->next;
+						while (entry_new) {
+							if (entry_new->type == XML_ELEMENT_NODE) {	/* we only care about ELEMENT nodes */
+								xmlAddChild(keychain_cur, xmlNewText(BAD_CAST "\t"));
+								xmlAddChild(keychain_cur, xmlCopyNode(entry_new, 1));
+								xmlAddChild(keychain_cur, xmlNewText(BAD_CAST "\n\t"));
+							}
+
+							entry_new = entry_new->next;
+						}
+					} else {
+						printf("Keys from keychain '%s' would not fit in the existing keychain; did not append.\n", xmlGetProp(keychain_new, BAD_CAST "name"));
 					}
 				} else {
-					/* create a non-existing keychain */
+					/* Range check
+					 * See, if the new keychain would fit into the current database.
+					 */
+					if (count_keychains + 1 <= ITEMS_MAX - 1) {
+						/* Create a non-existing keychain */
+						xmlAddChild(db_root, xmlNewText(BAD_CAST "\t"));
+						xmlAddChild(db_root, xmlCopyNode(keychain_new, 1));
+						xmlAddChild(db_root, xmlNewText(BAD_CAST "\n"));
 
-					xmlAddChild(db_root, xmlNewText(BAD_CAST "\t"));
-					xmlAddChild(db_root, xmlCopyNode(keychain_new, 1));
-					xmlAddChild(db_root, xmlNewText(BAD_CAST "\n"));
+						count_keychains++;
+					} else {
+						printf("Can not create new keychain: maximum number of keychains reached, %lu.\n", ITEMS_MAX - 1);
+					}
 				}
 			}
 
@@ -358,28 +398,49 @@ cmd_import(const char *e_line, command *commands)
 		}
 
 		xmlFreeDoc(db_new);
-	} else {
-		db_root_new = xmlDocGetRootElement(db_new);
-		if (db_root_new->children->next == NULL) {
-			puts("Won't import an empty database!");
 
-			xmlFreeDoc(db_new);
+		puts("Append finished.");
+	} else {
+		/* Range checks */
+
+		keychain_new = db_root_new->children->next;
+
+		/* Iterate through keychains and count the keys in them */
+		while (keychain_new  &&  count_keychains < ITEMS_MAX) {
+			/* Count the keys in the keychain */
+			if (count_elements(keychain_new->children) >= ITEMS_MAX - 1) {
+				printf("Can not import: maximum number of keys reached, %lu.\n", ITEMS_MAX - 1);
+
+				free(line); line = NULL;
+				xmlFreeDoc(db_new);
+				return;
+			}
+
+			if (keychain_new->type == XML_ELEMENT_NODE)	/* we only care about ELEMENT nodes */
+				count_keychains++;
+
+			keychain_new = keychain_new->next;
+		}
+
+		/* Finished scanning the keys in the new keychains, now lets evaluate the number of keychains */
+		if (count_keychains >= ITEMS_MAX - 1) {
+			printf("Can not import: maximum number of keychains reached, %lu.\n", ITEMS_MAX - 1);
+
 			free(line); line = NULL;
+			xmlFreeDoc(db_new);
 			return;
 		}
+
 
 		keychain = db_root_new->children->next;
 
 		xmlFreeDoc(db);
 		db = db_new;
+
+		puts("Import finished.");
 	}
 
 	db_params.dirty = 1;
-
-	if (append)
-		puts("Append OK");
-	else
-		puts("Import OK");
 
 	free(line); line = NULL;
 } /* cmd_import() */

@@ -40,7 +40,7 @@ extern History		*eh;
 void
 cmd_cnew(const char *e_line, command *commands)
 {
-	xmlNodePtr	db_node = NULL, db_node_prev = NULL, db_node_new = NULL;
+	xmlNodePtr	db_node = NULL;
 	xmlChar		*name = NULL, *description = NULL;
 
 	char			*created = NULL;
@@ -49,6 +49,13 @@ cmd_cnew(const char *e_line, command *commands)
 #ifndef _READLINE
 	int		e_count = 0;
 #endif
+
+
+	if ((idx = count_elements(keychain->parent->children)) >= ITEMS_MAX - 1) {
+		printf("Can not create the keychain: maximum number of keychains reached, %lu.\n", ITEMS_MAX - 1);
+
+		return;
+	}
 
 
 	line = strdup(e_line);
@@ -142,33 +149,13 @@ cmd_cnew(const char *e_line, command *commands)
 		/* make the XML document prettttyyy */
 		xmlAddChild(db_node, xmlNewText(BAD_CAST "\n\t"));
 
-		/* Get the index of the newly added (last) entry */
-		db_node_new = db_node;	/* save the newly created node for the maximum keychains check later */
-		db_node = keychain;
-		while (db_node  &&  idx < ULONG_MAX) {
-			if (db_node->type == XML_ELEMENT_NODE)	/* we only care about ELEMENT nodes */
-				idx++;
+		printf("Created keychain: %lu. %s\n", idx, name);
 
-			db_node = db_node->next;
-		}
-		if (idx == ULONG_MAX) {
-			printf("Could not create the keychain: maximum number of keychains reached, %lu\n", ULONG_MAX);
+		/* XXX reloading a saved document inserts a 'text' element between each visible node (why?)
+		 * so we must reproduce this */
+		xmlAddChild(keychain->parent, xmlNewText(BAD_CAST "\n"));
 
-			db_node_prev = db_node_new->prev;
-			xmlUnlinkNode(db_node_prev);	/* remove the adjacent 'text' node, which is the indent and newline */
-			xmlFreeNode(db_node_prev);
-
-			xmlUnlinkNode(db_node_new);
-			xmlFreeNode(db_node_new);
-		} else {
-			printf("Created keychain: %lu. %s\n", idx - 1, name);
-
-			/* XXX reloading a saved document inserts a 'text' element between each visible node (why?)
-			 * so we must reproduce this */
-			xmlAddChild(keychain->parent, xmlNewText(BAD_CAST "\n"));
-
-			db_params.dirty = 1;
-		}
+		db_params.dirty = 1;
 	} else {
 		printf("Keychain '%s' already exists!\n", name);
 	}

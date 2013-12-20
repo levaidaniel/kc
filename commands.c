@@ -79,7 +79,7 @@ find_keychain(const xmlChar *cname_find, unsigned char name)	/* name: 1 = keycha
 
 	db_node = keychain->parent->children;
 
-	while (db_node  &&  i < ULONG_MAX) {
+	while (db_node  &&  i < ITEMS_MAX) {
 		if (db_node->type != XML_ELEMENT_NODE) {	/* we only care about ELEMENT nodes */
 			db_node = db_node->next;
 			continue;
@@ -113,7 +113,7 @@ find_key(const unsigned long int idx)
 
 
 	db_node = keychain->children;
-	while (db_node  &&  i < ULONG_MAX) {
+	while (db_node  &&  i < ITEMS_MAX) {
 		if (db_node->type == XML_ELEMENT_NODE)	/* we only care about ELEMENT nodes */
 			if (i++ == idx)
 				break;
@@ -421,6 +421,24 @@ parse_newlines(const xmlChar *line, const unsigned char dir)		/* dir(direction):
 
 	return(ret);	/* return the result; we've worked hard on it. */
 } /* parse_newlines() */
+
+
+unsigned long int
+count_elements(xmlNodePtr db_node)
+{
+	unsigned long int	count = 0;
+
+
+	while (db_node  &&  count < ITEMS_MAX) {
+		if (db_node->type == XML_ELEMENT_NODE)	/* we only care about ELEMENT nodes */
+			count++;
+
+		db_node = db_node->next;
+	}
+
+
+	return(count);
+} /* count_items() */
 
 
 char

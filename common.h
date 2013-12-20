@@ -44,6 +44,9 @@
 
 #define	TIME_MAXLEN	11
 
+#define	ITEMS_MAX	ULONG_MAX
+
+
 enum {
 	KC_SETUP_CRYPT_IV = 1,
 	KC_SETUP_CRYPT_SALT = 1 << 1,
@@ -64,6 +67,7 @@ typedef struct db_parameters {
 	unsigned char	readonly;
 } db_parameters;
 
+
 #define	KC_DTD	"\
 <!ELEMENT kc (keychain)*> \
 \
@@ -81,6 +85,7 @@ typedef struct db_parameters {
 	created CDATA #IMPLIED \
 	modified CDATA #IMPLIED> \
 "
+
 
 #ifndef _READLINE
 const char	*el_prompt_null(void);

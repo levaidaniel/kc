@@ -44,7 +44,7 @@ cmd_clist(const char *e_line, command *commands)
 	if (getenv("KC_DEBUG"))
 		printf("#BEGIN\n");
 
-	while (db_node  &&  idx < ULONG_MAX) {
+	while (db_node  &&  idx < ITEMS_MAX) {
 		if (db_node->type == XML_ELEMENT_NODE) {	/* we only care about ELEMENT nodes */
 			name = xmlGetProp(db_node, BAD_CAST "name");
 			printf("%ld. %s\n", idx++, name);

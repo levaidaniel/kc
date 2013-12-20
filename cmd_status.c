@@ -27,9 +27,6 @@
 #include "commands.h"
 
 
-unsigned int count_items(unsigned char);
-
-
 extern db_parameters	db_params;
 extern xmlDocPtr	db;
 extern xmlNodePtr	keychain;
@@ -61,44 +58,7 @@ cmd_status(const char *e_line, command *commands)
 
 	printf("Cipher mode: %s\n", db_params.cipher_mode);
 
-	printf("Keychains: %d\n", count_items(1));
-
-	printf("Items (all): %d\n", count_items(2));
-
 	printf("Read-only: %s\n", (db_params.readonly ? "yes" : "no"));
 	if (!db_params.readonly)
 		printf("Modified: %s\n", (db_params.dirty ? "yes" : "no"));
 } /* cmd_status() */
-
-unsigned int
-count_items(unsigned char mode)	/* mode: 1=list keychains; 2=list items in a keychain */
-{
-	xmlNodePtr	first = keychain->parent->children;
-	xmlNodePtr	db_node = NULL;
-
-	unsigned int	count = 0;
-
-
-	while (first) {
-		if (first->type == XML_ELEMENT_NODE) {	/* we only care about ELEMENT nodes */
-			switch (mode) {
-				case 1:
-					count++;
-					break;
-				case 2:
-					db_node = first->children;
-					while (db_node) {
-						if (db_node->type == XML_ELEMENT_NODE)	/* we only care about ELEMENT nodes */
-							count++;
-
-						db_node = db_node->next;
-					}
-					break;
-			}
-		}
-
-		first = first->next;
-	}
-
-	return(count);
-} /* count_items() */

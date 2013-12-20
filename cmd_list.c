@@ -116,7 +116,7 @@ cmd_list(const char *e_line, command *commands)
 
 
 	db_node = keychain->children;
-	while (db_node  &&  idx < ULONG_MAX) {
+	while (db_node  &&  idx < ITEMS_MAX) {
 		/* We only care about ELEMENT nodes */
 		if (db_node->type != XML_ELEMENT_NODE) {
 			db_node = db_node->next;

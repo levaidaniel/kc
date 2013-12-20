@@ -77,7 +77,10 @@ Functional changes, improvements:
   Line number can also be specified if dealing with multi-line values.
 
 - 'passwd' command can now change KDF and cipher mode.
-- 'xport' command can now specify KDF and cipher mode.
+
+- 'xport' command can now specify KDF and cipher mode, and its parameters'
+  orders have changed.
+
 - 'import' command can now specify KDF and cipher mode.
 
 - The 'new' command's first parameter (if specified), the key, now works with

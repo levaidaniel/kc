@@ -44,14 +44,14 @@ commands_init(command **commands)
 	if (!db_params.readonly) {
 		(*commands)->name = "append";
 		(*commands)->usage = "append <filename>";
-		(*commands)->help = "Append new and merge existing keychains to the database from a kc compatible encrypted database file named 'filename'. 'filename' must be a proper kc database.\nSee command 'appendxml', 'xport' and 'import'.";
+		(*commands)->help = "Append new and merge existing keychains to the database from a kc compatible encrypted database file named 'filename'. 'filename' must be a proper kc database. Please consult the manual about the key limits and how kc applies them during appending.\nSee command 'appendxml', 'xport' and 'import'.";
 		(*commands)->fn = cmd_import;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
 
 		(*commands)->name = "appendxml";
 		(*commands)->usage = "appendxml <filename>";
-		(*commands)->help = "Append new and merge existing keychains to the database from a kc compatible XML file named 'filename'. 'filename' must contain a properly formatted kc XML document.\nSee command 'append', 'xport' and 'import'.";
+		(*commands)->help = "Append new and merge existing keychains to the database from a kc compatible XML file named 'filename'. 'filename' must contain a properly formatted kc XML document. Please consult the manual about the key limits and how kc applies them during appending.\nSee command 'append', 'xport' and 'import'.";
 		(*commands)->fn = cmd_import;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
@@ -324,7 +324,7 @@ commands_init(command **commands)
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "xport";
-	(*commands)->usage = "xport <filename> [keychain [kdf [cipher mode]]]";
+	(*commands)->usage = "xport <filename> [kdf [cipher mode [keychain]]]";
 	(*commands)->help = "Export the database to a kc compatible encrypted database file named 'filename' (if no extension specified, \".kcd\" will be appended). When specifying 'keychain', export only that keychain. 'keychain' can be the keychain's index number or name. Index number takes priority when addressing a keychain. 'kdf' and 'cipher mode' can be used to specify a different KDF and/or cipher mode to use while exporting the database.\nSee command 'dump', 'import' and 'append'.";
 	(*commands)->fn = cmd_export;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);

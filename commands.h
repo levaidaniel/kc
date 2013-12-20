@@ -49,6 +49,7 @@ char		*get_random_str(const unsigned int, const unsigned char);
 xmlChar		*parse_randoms(const xmlChar *);
 xmlChar		*get_line(const xmlChar *, const long int);
 xmlChar		*parse_newlines(const xmlChar *, const unsigned char);
+unsigned long int count_elements(xmlNodePtr);
 char		kc_password_read(char **, const unsigned char);
 char		kc_setup_crypt(BIO *, const unsigned int, struct db_parameters *, const unsigned int);
 BIO		*kc_setup_bio_chain(const char *, const unsigned char);
