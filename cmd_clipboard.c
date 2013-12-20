@@ -36,7 +36,7 @@ void
 cmd_clipboard(const char *e_line, command *commands)
 {
 	xmlNodePtr		db_node = NULL;
-	xmlChar			*value = NULL, *value_nl = NULL, *value_line = NULL;
+	xmlChar			*key = NULL, *value = NULL, *value_nl = NULL, *value_line = NULL;
 	char			*cmd_line = NULL, *cmd = NULL, *inv = NULL;
 	unsigned long int	idx = 0;
 	long int		line_req = 1, lines = 0, i = 0, value_line_len = 0, value_len = 0;
@@ -114,6 +114,7 @@ cmd_clipboard(const char *e_line, command *commands)
 	db_node = find_key(idx);
 	if (db_node) {
 		value = xmlGetProp(db_node, BAD_CAST "value");
+		key = xmlGetProp(db_node, BAD_CAST "name");
 		value_nl = parse_newlines(value, 0);
 		xmlFree(value); value = NULL;
 
@@ -170,6 +171,7 @@ cmd_clipboard(const char *e_line, command *commands)
 
 						break;
 					default: /* Parent */
+						printf("Key '%s' was copied to tmux paste buffer.\n", key);
 						break;
 				}
 
@@ -225,6 +227,8 @@ cmd_clipboard(const char *e_line, command *commands)
 						write(pipefd[1], value_line, value_line_len);
 						close(pipefd[1]);
 
+						printf("Key '%s' was copied to X11 clipboard.\n", key);
+
 						break;
 				}
 
@@ -234,6 +238,7 @@ cmd_clipboard(const char *e_line, command *commands)
 		puts("Invalid index!");
 
 
+	xmlFree(key); key = NULL;
 	xmlFree(value_line); value_line = NULL;
 	xmlFree(value_nl); value_nl = NULL;
 } /* cmd_clipboard() */
