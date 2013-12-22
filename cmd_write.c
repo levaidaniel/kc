@@ -23,16 +23,16 @@
 */
 
 
-#include <sys/stat.h>
-#include <sys/param.h>
-#ifndef _LINUX
-#include <fcntl.h>
-#else
-#include <sys/file.h>
-#endif
-
 #include "common.h"
 #include "commands.h"
+
+#ifdef BSD
+#include <fcntl.h>
+#endif
+
+#ifdef __linux__
+#include <sys/file.h>
+#endif
 
 
 extern db_parameters	db_params;

@@ -5,6 +5,10 @@ PROG =		kc
 MANDIR =	${LOCALBASE}/man/man
 MAN =		kc.1
 
+ifdef BUILD_BCRYPT
+SUBDIR +=	bcrypt
+endif
+
 SRCS =		kc.c malloc_check.c
 SRCS +=		cmd_c.c cmd_cdel.c cmd_clear.c cmd_clipboard.c cmd_clist.c cmd_cnew.c cmd_copy.c \
 		cmd_cedit.c cmd_del.c cmd_edit.c cmd_export.c cmd_getnum.c \
@@ -24,6 +28,9 @@ CFLAGS +=	`pkg-config --cflags libpcre` -D_HAVE_PCRE
 .ifdef HAVE_LIBSCRYPT
 CFLAGS +=	-D_HAVE_LIBSCRYPT
 .endif
+.ifdef BUILD_BCRYPT  ||  OPENBSD
+CFLAGS +=	-D_HAVE_BCRYPT
+.endif
 
 LDADD +=	-lcrypto -lutil
 LDADD +=	`pkg-config --libs libxml-2.0`
@@ -40,6 +47,10 @@ LDADD +=	-lscrypt
 .endif
 
 CLEANFILES +=	regress/test*
+
+ifdef BUILD_BCRYPT
+CLEANFILES +=	${BCRYPT_DIR}/*.o
+endif
 
 test:
 	sh regress/run_tests.sh

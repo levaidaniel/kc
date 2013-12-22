@@ -22,7 +22,10 @@
 #include <stdlib.h>
 #include "blf.h"
 #include "sha2.h"
+#include <string.h>
+#ifdef __linux__
 #include <bsd/string.h>
+#endif
 
 /*
  * pkcs #5 pbkdf2 implementation using the "bcrypt" hash

@@ -23,17 +23,19 @@
 */
 
 
-#include <signal.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#ifndef _LINUX
-#include <fcntl.h>
-#else
-#include <sys/file.h>
-#endif
-
 #include "common.h"
 #include "commands.h"
+
+#include <signal.h>
+#include <sys/types.h>
+
+#ifdef BSD
+#include <fcntl.h>
+#endif
+
+#ifdef __linux__
+#include <sys/file.h>
+#endif
 
 
 void		print_bio_chain(BIO *);

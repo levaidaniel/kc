@@ -3,7 +3,9 @@ PROG =		kc
 DESTDIR ?=	
 PREFIX ?=	usr/local
 
+ifdef BUILD_BCRYPT
 BCRYPT_DIR =	bcrypt
+endif
 
 SRCS =		kc.c malloc_check.c
 SRCS +=		cmd_c.c cmd_cdel.c cmd_clear.c cmd_clipboard.c cmd_clist.c cmd_cnew.c cmd_copy.c \
@@ -20,14 +22,15 @@ OBJS +=		cmd_c.o cmd_cdel.o cmd_clear.o cmd_clipboard.o cmd_clist.o cmd_cnew.o c
 		cmd_swap.o cmd_version.o cmd_write.o \
 		commands.o commands_init.o
 
+ifdef BUILD_BCRYPT
 BCRYPT_OBJS =	${BCRYPT_DIR}/bcrypt_pbkdf.o ${BCRYPT_DIR}/blf.o ${BCRYPT_DIR}/explicit_bzero.o ${BCRYPT_DIR}/sha2.o
+endif
 
 
 CFLAGS +=	-pedantic -Wall -g
 CFLAGS +=	`pkg-config --cflags libcrypto`
 CFLAGS +=	`pkg-config --cflags libbsd`
 CFLAGS +=	`pkg-config --cflags libxml-2.0`
-CFLAGS +=	-D_LINUX
 ifndef EDITLINE
 CFLAGS +=	-D_READLINE
 endif
@@ -36,6 +39,9 @@ CFLAGS +=	`pkg-config --cflags libpcre` -D_HAVE_PCRE
 endif
 ifdef HAVE_LIBSCRYPT
 CFLAGS +=	-D_HAVE_LIBSCRYPT
+endif
+ifdef BUILD_BCRYPT
+CFLAGS +=	-D_HAVE_BCRYPT
 endif
 
 LDADD +=	`pkg-config --libs libcrypto`
@@ -54,6 +60,7 @@ LDADD +=	-lscrypt
 endif
 
 
+ifdef BUILD_BCRYPT
 all: bcrypt ${PROG}
 
 .PHONY: bcrypt
@@ -65,6 +72,12 @@ bcrypt-clean:
 
 clean: bcrypt-clean
 	rm -f *.o kc regress/test*
+else
+all: ${PROG}
+
+clean:
+	rm -f *.o kc regress/test*
+endif
 
 install: all
 	install -D -s -o root -m 755 kc ${DESTDIR}/${PREFIX}/bin/kc

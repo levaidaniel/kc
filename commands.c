@@ -23,11 +23,18 @@
 */
 
 
-#ifndef _LINUX
+#include "common.h"
+
+#ifdef BSD
 #include <fcntl.h>
 #include <readpassphrase.h>
+#endif
+
+#ifdef __OpenBSD__
 #include <util.h>
-#else
+#endif
+
+#ifdef __linux__
 #include <sys/file.h>
 #include <bsd/readpassphrase.h>
 #include <stdint.h>
@@ -37,8 +44,6 @@
 #ifdef _HAVE_LIBSCRYPT
 #include <libscrypt.h>
 #endif
-
-#include "common.h"
 
 
 extern xmlNodePtr	keychain;
@@ -140,10 +145,10 @@ get_random_str(const unsigned int length, const unsigned char mode)
 {
 	int		i = 0;
 	int		rnd_file = -1;
-#ifndef _LINUX
-	char		*rnd_dev = "/dev/random";
-#else
+#ifdef __linux__
 	char		*rnd_dev = "/dev/urandom";
+#else
+	char		*rnd_dev = "/dev/random";
 #endif
 	char		*tmp = NULL;
 	ssize_t		ret = -1;
@@ -621,8 +626,10 @@ kc_setup_crypt(BIO *bio_chain, const unsigned int enc, struct db_parameters *db_
 			PKCS5_PBKDF2_HMAC_SHA1(db_params->pass, (int)strlen(db_params->pass), db_params->salt, SALT_DIGEST_LEN + 1, 5000, KEY_LEN, db_params->key);
 		else if (strcmp(db_params->kdf, "sha512") == 0)
 			PKCS5_PBKDF2_HMAC(db_params->pass, (int)strlen(db_params->pass), db_params->salt, SALT_DIGEST_LEN + 1, 5000, EVP_sha512(), KEY_LEN, db_params->key);
+#ifdef _HAVE_BCRYPT
 		else if (strcmp(db_params->kdf, "bcrypt") == 0)
 			bcrypt_pbkdf(db_params->pass, strlen(db_params->pass), db_params->salt, SALT_DIGEST_LEN + 1, db_params->key, KEY_LEN, 16);
+#endif
 #ifdef _HAVE_LIBSCRYPT
 		else if (strcmp(db_params->kdf, "scrypt") == 0)
 			libscrypt_scrypt((const unsigned char *)db_params->pass, strlen(db_params->pass), db_params->salt, SALT_DIGEST_LEN + 1, SCRYPT_N, SCRYPT_r, SCRYPT_p, db_params->key, KEY_LEN);
