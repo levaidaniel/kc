@@ -15,7 +15,7 @@ fi
 export KC_DB='regress/test.kcd'
 export KC_PASSFILE='regress/testpass'
 
-COUNTER=0
+COUNTER=1
 
 TESTS=$(ls -1 regress/*.sh |grep -F -v -e"stress_test.sh" -e"run_tests.sh" |wc -l)
 trap '
