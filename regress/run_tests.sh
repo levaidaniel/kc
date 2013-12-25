@@ -18,7 +18,13 @@ export KC_PASSFILE='regress/testpass'
 COUNTER=0
 
 TESTS=$(ls -1 regress/*.sh |grep -F -v -e"stress_test.sh" -e"run_tests.sh" |wc -l)
-trap 'printf "\nTest #$COUNTER (out of $TESTS) failed! :(\n" 1>&2' ERR
+trap '
+if [ $? -eq 0 ];then
+	printf "\nAll tests were ok! :)\n"
+else
+	printf "\nTest #$COUNTER (out of $TESTS) failed! :(\n" 1>&2
+fi
+' EXIT
 
 
 sh regress/create_db.sh; COUNTER=$(( COUNTER + 1 ))
@@ -58,5 +64,3 @@ sh regress/maxpassword.sh; COUNTER=$(( COUNTER + 1 ))
 sh regress/cmd_passwd.sh; COUNTER=$(( COUNTER + 1 ))
 
 sh regress/cmd_status.sh; COUNTER=$(( COUNTER + 1 ))
-
-printf "\nAll tests were ok! :)\n"
