@@ -1,15 +1,17 @@
 2.4.0:
-The new encrypted database format is incompatible with older versions!
-However, the XML format has not been changed, so a dump/importxml is
-adequate, to use the new program version:
+The new encrypted database format is incompatible with older (< 2.4.0)
+versions!
+However, the XML format has not been changed, so a dump/importxml is adequate,
+to use the new program version:
 
-This example presumes that the default database filename is being used.
-Substitute the filename if necessary!
+This example presumes that the default database filename is being used (ie.:
+substitute the database filename if necessary).
 
 ========================= 8< =========================
 
-=> Execute the old kc (< v2.4), and dump the database to an XML file before
-   upgrading
+(1) =>	Execute the old kc (< v2.4), and dump the database to an XML file before
+	upgrading
+
 $ kc -k ~/.kc/default.kcd
 Password:
 <example_chain% > dump kcdump
@@ -18,14 +20,20 @@ Dump OK
 $ ls kcdump.xml
 kcdump.xml
 
-=> Backup(!) (and move away) the old database file
+
+(2) =>	Backup(!) (and move away) the old database file
+
 $ mv ~/.kc/default.kcd ~/.kc/default.kcd-backup
 
-=> Upgrade kc to v2.4
+
+(3) =>	Upgrade kc to v2.4
+
 [However you handle this: from source, packages etc...]
 
-=> Execute the new kc (>= v2.4) and create a new, empty database file, then
-   import the previously dumped XML file.
+
+(4a) =>	Execute the new kc (>= v2.4) and create a new, empty database file, then
+	import the previously dumped XML file.
+
 $ kc
 Creating '/home/user/.kc/default.kcd'
 Using '/home/user/.kc/default.kcd' database.
@@ -37,11 +45,12 @@ Import OK
 Save OK
 <example_chain% > quit
 
+(4b) =>	Reopen the new database and check for any anomalies just to be sure :)
+
 $ shred --remove kcdump.xml   [or equivalent, eg.: rm(1) -P]
 
 ========================= 8< =========================
 
-Bug fixes:
 
 Functional changes, improvements:
 - New -P option to specify the KDF to use when dealing with database passwords.
@@ -54,6 +63,9 @@ Functional changes, improvements:
   easily with the new -P option (open db with -P sha1, and change password
   with also changing the KDF to sha512), but would have been futile, because as
   mentioned above, the encrypted db format also has changed.
+  Also, OpenSSL versions before 1.0.0 does not include the function needed
+  with the new default KDF, so kc now strongly depends on OpenSSL 1.0.0 or
+  newer.
 
 - Introduce new hotkeys while in value displaying, for copying 'values'
   to various clipboards:
@@ -73,8 +85,8 @@ Functional changes, improvements:
   it should be the user's responsibility.
 
 - New commands 'tmux', 'xclip', 'Xclip'. They provide the functions previously
-  described, but without opening the key. This works directly from the CLI.
-  Line number can also be specified if dealing with multi-line values.
+  described, but without opening the key; this works directly from the CLI.
+  A line number can also be specified when dealing with multi-line values.
 
 - 'passwd' command can now change KDF and cipher mode.
 
