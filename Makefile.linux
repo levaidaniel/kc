@@ -3,9 +3,7 @@ PROG =		kc
 DESTDIR ?=	
 PREFIX ?=	usr/local
 
-ifdef BUILD_BCRYPT
 BCRYPT_DIR =	bcrypt
-endif
 
 SRCS =		kc.c malloc_check.c
 SRCS +=		cmd_c.c cmd_cdel.c cmd_clear.c cmd_clipboard.c cmd_clist.c cmd_cnew.c cmd_copy.c \
@@ -22,7 +20,7 @@ OBJS +=		cmd_c.o cmd_cdel.o cmd_clear.o cmd_clipboard.o cmd_clist.o cmd_cnew.o c
 		cmd_swap.o cmd_version.o cmd_write.o \
 		commands.o commands_init.o
 
-ifdef BUILD_BCRYPT
+ifdef BUNDLED_BCRYPT
 BCRYPT_OBJS =	${BCRYPT_DIR}/bcrypt_pbkdf.o ${BCRYPT_DIR}/blf.o ${BCRYPT_DIR}/explicit_bzero.o ${BCRYPT_DIR}/sha2.o
 endif
 
@@ -40,8 +38,8 @@ endif
 ifdef HAVE_LIBSCRYPT
 CFLAGS +=	-D_HAVE_LIBSCRYPT
 endif
-ifdef BUILD_BCRYPT
-CFLAGS +=	-D_HAVE_BCRYPT
+ifdef BUNDLED_BCRYPT
+CFLAGS +=	-D_BUNDLED_BCRYPT
 endif
 
 LDADD +=	`pkg-config --libs libcrypto`
@@ -59,33 +57,31 @@ ifdef HAVE_LIBSCRYPT
 LDADD +=	-lscrypt
 endif
 
+CLEANFILES =	${PROG} *.o regress/test*
 
-ifdef BUILD_BCRYPT
+
+ifdef BUNDLED_BCRYPT
 all: bcrypt ${PROG}
 
 .PHONY: bcrypt
 bcrypt:
 	${MAKE} -C ${BCRYPT_DIR} -f Makefile.linux
 
-bcrypt-clean:
-	rm -f ${BCRYPT_DIR}/*.o
-
-clean: bcrypt-clean
-	rm -f *.o kc regress/test*
+CLEANFILES +=	${BCRYPT_DIR}/*.o
 else
 all: ${PROG}
-
-clean:
-	rm -f *.o kc regress/test*
 endif
 
+clean:
+	rm -f ${CLEANFILES}
+
 install: all
-	install -D -s -o root -m 755 kc ${DESTDIR}/${PREFIX}/bin/kc
-	install -D -o root -m 644 kc.1 ${DESTDIR}/${PREFIX}/man/man1/kc.1
+	install -D -s -o root -m 755 ${PROG} ${DESTDIR}/${PREFIX}/bin/${PROG}
+	install -D -o root -m 644 ${PROG}.1 ${DESTDIR}/${PREFIX}/man/man1/${PROG}.1
 
 test: all
 	sh regress/run_tests.sh
 
-${PROG}: ${OBJS}
+${PROG}: ${OBJS} ${BCRYPT_OBJS}
 	${CC} -o ${PROG} ${LDADD} \
 		${OBJS} ${BCRYPT_OBJS}

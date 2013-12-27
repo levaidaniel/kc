@@ -1,6 +1,7 @@
 tags
 kc
 kc.1.manlint
+kc.1.gz
 compile.sh
 release.sh
 scan-build

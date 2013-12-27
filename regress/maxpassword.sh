@@ -5,7 +5,7 @@ set -e
 
 echo "test => $0"
 
-OLDPASSWORD=$(< ${KC_PASSFILE})
+OLDPASSWORD=$(cat ${KC_PASSFILE})
 LONGPASSWORD=${OLDPASSWORD}${OLDPASSWORD}'weuhaoifoixaomwxoiughcs'
 
 if printf "passwd\n${LONGPASSWORD}\n${LONGPASSWORD}\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE};then

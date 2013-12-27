@@ -5,7 +5,7 @@ set -e
 
 echo "test => $0"
 
-PASSWORD=$(< ${KC_PASSFILE})
+PASSWORD=$(cat ${KC_PASSFILE})
 NEWPASSWORD='123abc321ABC'
 
 if printf "passwd\n${NEWPASSWORD}\n${NEWPASSWORD}\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE};then

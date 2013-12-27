@@ -38,6 +38,9 @@
 #include <sys/file.h>
 #include <bsd/readpassphrase.h>
 #include <stdint.h>
+#endif
+
+#ifdef _BUNDLED_BCRYPT
 #include "bcrypt/bcrypt_pbkdf.h"
 #endif
 
@@ -626,10 +629,8 @@ kc_setup_crypt(BIO *bio_chain, const unsigned int enc, struct db_parameters *db_
 			PKCS5_PBKDF2_HMAC_SHA1(db_params->pass, (int)strlen(db_params->pass), db_params->salt, SALT_DIGEST_LEN + 1, 5000, KEY_LEN, db_params->key);
 		else if (strcmp(db_params->kdf, "sha512") == 0)
 			PKCS5_PBKDF2_HMAC(db_params->pass, (int)strlen(db_params->pass), db_params->salt, SALT_DIGEST_LEN + 1, 5000, EVP_sha512(), KEY_LEN, db_params->key);
-#ifdef _HAVE_BCRYPT
 		else if (strcmp(db_params->kdf, "bcrypt") == 0)
 			bcrypt_pbkdf(db_params->pass, strlen(db_params->pass), db_params->salt, SALT_DIGEST_LEN + 1, db_params->key, KEY_LEN, 16);
-#endif
 #ifdef _HAVE_LIBSCRYPT
 		else if (strcmp(db_params->kdf, "scrypt") == 0)
 			libscrypt_scrypt((const unsigned char *)db_params->pass, strlen(db_params->pass), db_params->salt, SALT_DIGEST_LEN + 1, SCRYPT_N, SCRYPT_r, SCRYPT_p, db_params->key, KEY_LEN);

@@ -5,9 +5,7 @@ PROG =		kc
 MANDIR =	${LOCALBASE}/man/man
 MAN =		kc.1
 
-.ifdef BUILD_BCRYPT
-SUBDIR +=	bcrypt
-.endif
+BCRYPT_DIR =	bcrypt
 
 SRCS =		kc.c malloc_check.c
 SRCS +=		cmd_c.c cmd_cdel.c cmd_clear.c cmd_clipboard.c cmd_clist.c cmd_cnew.c cmd_copy.c \
@@ -28,11 +26,14 @@ CFLAGS +=	`pkg-config --cflags libpcre` -D_HAVE_PCRE
 .ifdef HAVE_LIBSCRYPT
 CFLAGS +=	-D_HAVE_LIBSCRYPT
 .endif
-.ifdef BUILD_BCRYPT  ||  OS_OPENBSD
-CFLAGS +=	-D_HAVE_BCRYPT
+.ifdef BUNDLED_BCRYPT
+CFLAGS +=	-D_BUNDLED_BCRYPT
 .endif
 
-LDADD +=	-lcrypto -lutil
+LDADD +=	-lcrypto
+.ifdef OS_OPENBSD
+LDADD +=	-lutil
+.endif
 LDADD +=	`pkg-config --libs libxml-2.0`
 .ifdef READLINE
 LDADD +=	-lreadline -ltermcap
@@ -48,9 +49,17 @@ LDADD +=	-lscrypt
 
 CLEANFILES +=	regress/test*
 
-.ifdef BUILD_BCRYPT
-CLEANFILES +=	${BCRYPT_DIR}/*.o
+.ifdef BUNDLED_BCRYPT
+all: bcrypt ${PROG}
+
+.PHONY: bcrypt
+bcrypt:
+	cd ${BCRYPT_DIR}  &&  ${MAKE}
+
+OBJS +=		${BCRYPT_DIR}/bcrypt_pbkdf.o ${BCRYPT_DIR}/blf.o ${BCRYPT_DIR}/explicit_bzero.o ${BCRYPT_DIR}/sha2.o
 .endif
+
+all: ${PROG}
 
 test:
 	sh regress/run_tests.sh
