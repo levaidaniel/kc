@@ -101,8 +101,10 @@ main(int argc, char *argv[])
 	db_params.pass_filename = NULL;
 	db_params.dirty = 0;
 	db_params.readonly = 0;
+
 	db_params.kdf = malloc(7); malloc_check(db_params.kdf);
 	strlcpy(db_params.kdf, "sha512", 7);
+
 	db_params.cipher_mode = malloc(4); malloc_check(db_params.cipher_mode);
 	strlcpy(db_params.cipher_mode, "cbc", 4);
 
@@ -119,9 +121,11 @@ main(int argc, char *argv[])
 				db_params.pass_filename = optarg;
 			break;
 			case 'P':
+				free(db_params.kdf); db_params.kdf = NULL;
 				db_params.kdf = strdup(optarg);
 			break;
 			case 'm':
+				free(db_params.cipher_mode); db_params.cipher_mode = NULL;
 				db_params.cipher_mode = strdup(optarg);
 			break;
 			case 'b':
@@ -134,15 +138,15 @@ main(int argc, char *argv[])
 			case 'h':
 				/* FALLTHROUGH */
 			default:
-				printf(	"%s [-k <database file>] [-r] [-p <password file>] [-m <cipher mode>] [-b] [-v] [-h]\n\n"
-					"-k <file>: Use file as database. The default is ~/.kc/default.kcd .\n"
+				printf(	"%s [-k <database file>] [-r] [-p <password file>] [-m <cipher mode>] [-b] [-v] [-h]\n\n", argv[0]);
+				printf(	"-k <file>: Use file as database. The default is ~/.kc/default.kcd .\n"
 					"-r: Open the database in read-only mode.\n"
 					"-p <file>: Read password from file.\n"
 					"-P <kdf>: KDF to use: sha512 (default), sha1, bcrypt, scrypt (if compiled with libscrypt).\n"
 					"-m <mode>: Cipher mode: cbc (default), cfb128, ofb.\n"
 					"-b: Batch mode: disable some features to enable commands from standard input.\n"
 					"-v: Display version.\n"
-					"-h: This help.\n", argv[0]);
+					"-h: This help.\n");
 				exit(EXIT_SUCCESS);
 			break;
 		}
