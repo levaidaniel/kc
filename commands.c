@@ -685,15 +685,20 @@ kc_setup_crypt(BIO *bio_chain, const unsigned int enc, struct db_parameters *db_
 	}
 
 
-	/* reconfigure encoding with the key and IV */
-	if (strcmp(db_params->cipher_mode, "cfb128") == 0)
-		BIO_set_cipher(bio_chain, EVP_aes_256_cfb128(), db_params->key, db_params->iv, enc);
-	else if (strcmp(db_params->cipher_mode, "ofb") == 0)
-		BIO_set_cipher(bio_chain, EVP_aes_256_ofb(), db_params->key, db_params->iv, enc);
-	else if (strcmp(db_params->cipher_mode, "cbc") == 0)
-		BIO_set_cipher(bio_chain, EVP_aes_256_cbc(), db_params->key, db_params->iv, enc);
-	else {
-		printf("Unknown cipher mode: %s!\n", db_params->cipher_mode);
+	/* reconfigure {en,de}cryption with the key and IV */
+	if (strcmp(db_params->cipher, "aes256") == 0) {
+		if (strcmp(db_params->cipher_mode, "cfb128") == 0)
+			BIO_set_cipher(bio_chain, EVP_aes_256_cfb128(), db_params->key, db_params->iv, enc);
+		else if (strcmp(db_params->cipher_mode, "ofb") == 0)
+			BIO_set_cipher(bio_chain, EVP_aes_256_ofb(), db_params->key, db_params->iv, enc);
+		else if (strcmp(db_params->cipher_mode, "cbc") == 0)
+			BIO_set_cipher(bio_chain, EVP_aes_256_cbc(), db_params->key, db_params->iv, enc);
+		else {
+			printf("Unknown cipher mode: %s!\n", db_params->cipher_mode);
+			return(0);
+		}
+	} else {
+		printf("Unknown encryption cipher: %s!\n", db_params->cipher);
 		return(0);
 	}
 

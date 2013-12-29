@@ -61,6 +61,7 @@ cmd_write(const char *e_line, command *commands)
 	db_params_tmp.dirty = 0;
 	db_params_tmp.readonly = 0;
 	db_params_tmp.kdf = db_params.kdf;
+	db_params_tmp.cipher = db_params.cipher;
 	db_params_tmp.cipher_mode = db_params.cipher_mode;
 	strlcpy((char *)db_params_tmp.iv, (const char *)db_params.iv, IV_DIGEST_LEN + 1);
 	if (strcmp((const char *)db_params_tmp.iv, (const char *)db_params.iv) != 0) {

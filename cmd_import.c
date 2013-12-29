@@ -71,6 +71,7 @@ cmd_import(const char *e_line, command *commands)
 	db_params_new.db_file = -1;
 	db_params_new.pass_filename = NULL;
 	db_params_new.kdf = strdup(db_params.kdf);
+	db_params_new.cipher = strdup(db_params.cipher);
 	db_params_new.cipher_mode = strdup(db_params.cipher_mode);
 	db_params_new.dirty = 0;
 	db_params_new.readonly = 0;
@@ -82,7 +83,7 @@ cmd_import(const char *e_line, command *commands)
 	free(line); line = NULL;
 
 	optind = 1;
-	while ((c = getopt(largc, largv, "k:P:m:")) != -1)
+	while ((c = getopt(largc, largv, "k:P:e:m:")) != -1)
 		switch (c) {
 			case 'k':
 				db_params_new.db_filename = strdup(optarg);
@@ -90,6 +91,10 @@ cmd_import(const char *e_line, command *commands)
 			case 'P':
 				free(db_params_new.kdf); db_params_new.kdf = NULL;
 				db_params_new.kdf = strdup(optarg);
+			break;
+			case 'e':
+				free(db_params_new.cipher); db_params_new.cipher = NULL;
+				db_params_new.cipher = strdup(optarg);
 			break;
 			case 'm':
 				free(db_params_new.cipher_mode); db_params_new.cipher_mode = NULL;
@@ -435,6 +440,7 @@ cmd_import(const char *e_line, command *commands)
 
 exiting:
 	free(db_params_new.kdf); db_params_new.kdf = NULL;
+	free(db_params_new.cipher); db_params_new.cipher = NULL;
 	free(db_params_new.cipher_mode); db_params_new.cipher_mode = NULL;
 	free(db_params_new.db_filename); db_params_new.db_filename = NULL;
 } /* cmd_import() */

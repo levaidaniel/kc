@@ -105,11 +105,14 @@ main(int argc, char *argv[])
 	db_params.kdf = malloc(7); malloc_check(db_params.kdf);
 	strlcpy(db_params.kdf, "sha512", 7);
 
+	db_params.cipher = malloc(7); malloc_check(db_params.cipher);
+	strlcpy(db_params.cipher, "aes256", 7);
+
 	db_params.cipher_mode = malloc(4); malloc_check(db_params.cipher_mode);
 	strlcpy(db_params.cipher_mode, "cbc", 4);
 
 
-	while ((c = getopt(argc, argv, "k:rp:P:m:bvh")) != -1)
+	while ((c = getopt(argc, argv, "k:rp:P:e:m:bvh")) != -1)
 		switch (c) {
 			case 'k':
 				db_params.db_filename = optarg;
@@ -123,6 +126,10 @@ main(int argc, char *argv[])
 			case 'P':
 				free(db_params.kdf); db_params.kdf = NULL;
 				db_params.kdf = strdup(optarg);
+			break;
+			case 'e':
+				free(db_params.cipher); db_params.cipher = NULL;
+				db_params.cipher = strdup(optarg);
 			break;
 			case 'm':
 				free(db_params.cipher_mode); db_params.cipher_mode = NULL;
@@ -143,6 +150,7 @@ main(int argc, char *argv[])
 					"-r: Open the database in read-only mode.\n"
 					"-p <file>: Read password from file.\n"
 					"-P <kdf>: KDF to use: sha512 (default), sha1, bcrypt, scrypt (if compiled with libscrypt).\n"
+					"-e <cipher>: Encryption cipher: aes256 (default).\n"
 					"-m <mode>: Cipher mode: cbc (default), cfb128, ofb.\n"
 					"-b: Batch mode: disable some features to enable commands from standard input.\n"
 					"-v: Display version.\n"

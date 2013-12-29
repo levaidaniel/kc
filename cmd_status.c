@@ -50,15 +50,16 @@ cmd_status(const char *e_line, command *commands)
 	xml_save = xmlSaveToBuffer(xml_buf, "UTF-8", XML_SAVE_FORMAT);
 	xmlSaveDoc(xml_save, db);
 	xmlSaveFlush(xml_save);
-	printf("XML structure size (bytes): %d\n", (int)xmlBufferLength(xml_buf));
+	printf("XML structure size: %d bytes\n", (int)xmlBufferLength(xml_buf));
 	xmlSaveClose(xml_save);
 	xmlBufferFree(xml_buf);
 
-	printf("KDF: %s\n", db_params.kdf);
+	printf("Password handling: %s\n", db_params.kdf);
 
-	printf("Cipher mode: %s\n", db_params.cipher_mode);
+	printf("Encryption: %s, %s\n", db_params.cipher, db_params.cipher_mode);
 
 	printf("Read-only: %s\n", (db_params.readonly ? "yes" : "no"));
+
 	if (!db_params.readonly)
 		printf("Modified: %s\n", (db_params.dirty ? "yes" : "no"));
 } /* cmd_status() */

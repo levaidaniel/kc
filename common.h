@@ -63,6 +63,7 @@ typedef struct db_parameters {
 	char		*pass_filename;
 	char 		*pass;
 	char		*kdf;
+	char		*cipher;
 	char		*cipher_mode;
 	unsigned char	iv[IV_DIGEST_LEN + 1];
 	unsigned char	salt[SALT_DIGEST_LEN + 1];
