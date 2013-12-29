@@ -55,8 +55,10 @@ cmd_export(const char *e_line, command *commands)
 
 	db_parameters	db_params_new;
 
+	int		c = 0, largc = 0;
+	char		**largv = NULL;
 	char		*line = NULL;
-	char		*cmd = NULL, *kdf = NULL, *cipher_mode = NULL, dump = 0, ret = -1;
+	char		dump = 0, ret = -1;
 	struct stat	st;
 
 #ifndef _READLINE
@@ -69,39 +71,48 @@ cmd_export(const char *e_line, command *commands)
 	db_params_new.db_filename = NULL;
 	db_params_new.db_file = -1;
 	db_params_new.pass_filename = NULL;
+	db_params_new.kdf = strdup(db_params.kdf);
+	db_params_new.cipher_mode = strdup(db_params.cipher_mode);
 	db_params_new.dirty = 0;
 	db_params_new.readonly = 0;
 
 
+	/* Parse the arguments */
 	line = strdup(e_line);
+	larg(line, &largv, &largc);
+	free(line); line = NULL;
 
-	cmd = strtok(line, " ");		/* get the command name */
-	if (strcmp(cmd, "dump") == 0)
+	optind = 1;
+	while ((c = getopt(largc, largv, "k:c:P:m:")) != -1)
+		switch (c) {
+			case 'k':
+				db_params_new.db_filename = strdup(optarg);
+			break;
+			case 'c':
+				cname = BAD_CAST strdup(optarg);
+			break;
+			case 'P':
+				free(db_params_new.kdf); db_params_new.kdf = NULL;
+				db_params_new.kdf = strdup(optarg);
+			break;
+			case 'm':
+				free(db_params_new.cipher_mode); db_params_new.cipher_mode = NULL;
+				db_params_new.cipher_mode = strdup(optarg);
+			break;
+		}
+
+	if (strcmp(largv[0], "dump") == 0)
 		dump = 1;
 
-	db_params_new.db_filename = strtok(NULL, " ");	/* assign the command's first parameter */
+
+	free(largv); largv = NULL;
+
 	if (!db_params_new.db_filename) {
 		puts(commands->usage);
-		free(line); line = NULL;
-		return;
+
+		goto exiting;
 	}
-	db_params_new.db_filename = strdup(db_params_new.db_filename);
 
-	cname = BAD_CAST strtok(NULL, " ");	/* assign the command's second parameter (keychain) */
-
-	kdf = strtok(NULL, " ");		/* assign the command's third parameter (kdf) */
-	/* Changed KDF? */
-	if (kdf)
-		db_params_new.kdf = kdf;
-	else
-		db_params_new.kdf = db_params.kdf;
-
-	cipher_mode = strtok(NULL, " ");	/* assign the command's fourth parameter (cipher_mode) */
-	/* Changed cipher mode? */
-	if (cipher_mode)
-		db_params_new.cipher_mode = cipher_mode;
-	else
-		db_params_new.cipher_mode = db_params.cipher_mode;
 
 	if (cname) {
 		/* A 'keychain' was specified, so export only that one.
@@ -112,9 +123,7 @@ cmd_export(const char *e_line, command *commands)
 		if (!keychain) {
 			printf("'%s' keychain not found.\n", cname);
 
-			free(db_params_new.db_filename); db_params_new.db_filename = NULL;
-			free(line); line = NULL;
-			return;
+			goto exiting;
 		}
 
 		/* create the new document */
@@ -122,9 +131,7 @@ cmd_export(const char *e_line, command *commands)
 		if (!db_tmp) {
 			puts("Could not create the new XML document for export!");
 
-			free(db_params_new.db_filename); db_params_new.db_filename = NULL;
-			free(line); line = NULL;
-			return;
+			goto exiting;
 		}
 
 		/* A new root node */
@@ -132,10 +139,7 @@ cmd_export(const char *e_line, command *commands)
 		if (!root_node_tmp) {
 			puts("Could not create the new root node for export!");
 
-			xmlFreeDoc(db_tmp);
-			free(db_params_new.db_filename); db_params_new.db_filename = NULL;
-			free(line); line = NULL;
-			return;
+			goto exiting;
 		}
 		xmlDocSetRootElement(db_tmp, root_node_tmp);
 
@@ -145,10 +149,7 @@ cmd_export(const char *e_line, command *commands)
 		if (!keychain_tmp) {
 			puts("Could not duplicate keychain for export!");
 
-			xmlFreeDoc(db_tmp);
-			free(db_params_new.db_filename); db_params_new.db_filename = NULL;
-			free(line); line = NULL;
-			return;
+			goto exiting;
 		}
 		xmlAddChild(root_node_tmp, keychain_tmp);
 
@@ -198,16 +199,11 @@ cmd_export(const char *e_line, command *commands)
 #ifndef _READLINE
 			el_reset(e);
 #endif
-			free(db_params_new.db_filename); db_params_new.db_filename = NULL;
-			free(line); line = NULL;
-			return;
+			goto exiting;
 		}
 
-		if (strncmp(e_line, "yes", 3) != 0) {
-			free(db_params_new.db_filename); db_params_new.db_filename = NULL;
-			free(line); line = NULL;
-			return;
-		}
+		if (strncmp(e_line, "yes", 3) != 0)
+			goto exiting;
 	}
 
 	if (dump) {
@@ -223,9 +219,7 @@ cmd_export(const char *e_line, command *commands)
 		if (db_params_new.db_file < 0) {
 			perror("open(database file)");
 
-			free(db_params_new.db_filename); db_params_new.db_filename = NULL;
-			free(line); line = NULL;
-			return;
+			goto exiting;
 		}
 
 		bio_chain = kc_setup_bio_chain(db_params_new.db_filename, 1);
@@ -233,9 +227,7 @@ cmd_export(const char *e_line, command *commands)
 			printf("Could not setup bio_chain!");
 
 			close(db_params_new.db_file);
-			free(db_params_new.db_filename); db_params_new.db_filename = NULL;
-			free(line); line = NULL;
-			return;
+			goto exiting;
 		}
 
 
@@ -249,9 +241,8 @@ cmd_export(const char *e_line, command *commands)
 			free(db_params_new.pass); db_params_new.pass = NULL;
 
 			BIO_free_all(bio_chain);
-			free(db_params_new.db_filename); db_params_new.db_filename = NULL;
-			free(line); line = NULL;
-			return;
+			close(db_params_new.db_file);
+			goto exiting;
 		}
 
 		/* Generate iv/salt, setup cipher mode and turn on encrypting */
@@ -260,8 +251,6 @@ cmd_export(const char *e_line, command *commands)
 
 			BIO_free_all(bio_chain);
 			close(db_params_new.db_file);
-			free(db_params_new.db_filename); db_params_new.db_filename = NULL;
-			free(line); line = NULL;
 
 			memset(db_params_new.key, '\0', KEY_LEN);
 
@@ -269,7 +258,7 @@ cmd_export(const char *e_line, command *commands)
 				memset(db_params_new.pass, '\0', PASSWORD_MAXLEN);
 			free(db_params_new.pass); db_params_new.pass = NULL;
 
-			return;
+			goto exiting;
 		}
 
 		memset(db_params_new.key, '\0', KEY_LEN);
@@ -288,9 +277,12 @@ cmd_export(const char *e_line, command *commands)
 		close(db_params_new.db_file);
 	}
 
-	if (cname)
+exiting:
+	if (cname  &&  db_tmp)
 		xmlFreeDoc(db_tmp);	/* if we saved a specific keychain, clean up the temporary xmlDoc and its tree. */
 
+	free(cname); cname = NULL;
+	free(db_params_new.kdf); db_params_new.kdf = NULL;
+	free(db_params_new.cipher_mode); db_params_new.cipher_mode = NULL;
 	free(db_params_new.db_filename); db_params_new.db_filename = NULL;
-	free(line); line = NULL;
 } /* cmd_export() */

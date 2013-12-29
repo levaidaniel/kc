@@ -449,6 +449,31 @@ count_elements(xmlNodePtr db_node)
 } /* count_items() */
 
 
+/* Create a local argv/argc pair that contains the given
+ * options (to be later used with getopt(3)).
+ */
+void
+larg(char *line, char ***largv, int *largc)
+{
+	char	**_largv = NULL, *arg = NULL;
+	int	_largc = 0;
+
+
+	_largv = malloc(sizeof(char *)); malloc_check(_largv);
+	_largv[_largc] = strdup(strtok(line, " "));
+	while ((arg = strtok(NULL, " "))) {
+		_largv = realloc(_largv, (++_largc + 1) * sizeof(char *)); malloc_check(_largv);
+		_largv[_largc] = strdup(arg);
+	}
+	_largv = realloc(_largv, (++_largc + 1) * sizeof(char *)); malloc_check(_largv);
+	_largv[_largc] = NULL;
+
+
+	*largv = _largv;
+	*largc = _largc;
+} /* larg() */
+
+
 char
 kc_password_read(char **pass1, const unsigned char new)
 {

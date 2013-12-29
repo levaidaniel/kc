@@ -159,8 +159,8 @@ commands_init(command **commands)
 		(*commands) = (*commands)->next;
 
 		(*commands)->name = "passwd";
-		(*commands)->usage = "passwd [kdf [cipher mode]]";
-		(*commands)->help = "Change the database password and optionally the KDF and cipher mode too. All changes will be written immediately.";
+		(*commands)->usage = "passwd [-P <kdf>]";
+		(*commands)->help = "Change the database password and optionally the KDF. All changes will be written immediately.";
 		(*commands)->fn = cmd_passwd;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
@@ -324,7 +324,7 @@ commands_init(command **commands)
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "xport";
-	(*commands)->usage = "xport <filename> [kdf [cipher mode [keychain]]]";
+	(*commands)->usage = "xport -k <filename> [-P kdf [-m cipher mode [-c keychain]]]";
 	(*commands)->help = "Export the database to a kc compatible encrypted database file named 'filename' (if no extension specified, \".kcd\" will be appended). When specifying 'keychain', export only that keychain. 'keychain' can be the keychain's index number or name. Index number takes priority when addressing a keychain. 'kdf' and 'cipher mode' can be used to specify a different KDF and/or cipher mode to use while exporting the database.\nSee command 'dump', 'import' and 'append'.";
 	(*commands)->fn = cmd_export;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);

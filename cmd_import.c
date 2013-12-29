@@ -54,9 +54,11 @@ cmd_import(const char *e_line, command *commands)
 			keychain_new = NULL, keychain_cur = NULL;
 	xmlChar		*cname = NULL;
 
-	char		*cmd = NULL, *kdf = NULL, *cipher_mode = NULL, append = 0, xml = 0;
+	int		c = 0, largc = 0;
+	char		**largv = NULL;
 	char		*line = NULL;
 	char		*buf = NULL;
+	char		append = 0, xml = 0;
 	ssize_t		ret = -1;
 	int		pos = 0;
 
@@ -68,40 +70,47 @@ cmd_import(const char *e_line, command *commands)
 	db_params_new.db_filename = NULL;
 	db_params_new.db_file = -1;
 	db_params_new.pass_filename = NULL;
+	db_params_new.kdf = strdup(db_params.kdf);
+	db_params_new.cipher_mode = strdup(db_params.cipher_mode);
 	db_params_new.dirty = 0;
 	db_params_new.readonly = 0;
 
 
+	/* Parse the arguments */
 	line = strdup(e_line);
+	larg(line, &largv, &largc);
+	free(line); line = NULL;
 
-	cmd = strtok(line, " ");		/* get the command name */
-	if (strncmp(cmd, "append", 6) == 0)	/* command is 'append' or 'appendxml' */
+	optind = 1;
+	while ((c = getopt(largc, largv, "k:P:m:")) != -1)
+		switch (c) {
+			case 'k':
+				db_params_new.db_filename = strdup(optarg);
+			break;
+			case 'P':
+				free(db_params_new.kdf); db_params_new.kdf = NULL;
+				db_params_new.kdf = strdup(optarg);
+			break;
+			case 'm':
+				free(db_params_new.cipher_mode); db_params_new.cipher_mode = NULL;
+				db_params_new.cipher_mode = strdup(optarg);
+			break;
+		}
+
+	if (strncmp(largv[0], "append", 6) == 0)	/* command is 'append' or 'appendxml' */
 		append = 1;
 
-	if (strcmp(cmd + 6, "xml") == 0)
+	if (strcmp(largv[0] + 6, "xml") == 0)
 		xml = 1;
 
-	db_params_new.db_filename = strtok(NULL, " ");	/* assign the command's parameter */
+
+	free(largv); largv = NULL;
+
 	if (!db_params_new.db_filename) {
 		puts(commands->usage);
 
-		free(line); line = NULL;
-		return;
+		goto exiting;
 	}
-
-	kdf = strtok(NULL, " ");		/* assign the command's second parameter (kdf) */
-	/* Changed KDF? */
-	if (kdf)
-		db_params_new.kdf = kdf;
-	else
-		db_params_new.kdf = db_params.kdf;
-
-	cipher_mode = strtok(NULL, " ");	/* assign the command's third parameter (cipher_mode) */
-	/* Changed cipher mode? */
-	if (cipher_mode)
-		db_params_new.cipher_mode = cipher_mode;
-	else
-		db_params_new.cipher_mode = db_params.cipher_mode;
 
 
 	puts("Reading database...");
@@ -122,8 +131,7 @@ cmd_import(const char *e_line, command *commands)
 			else
 				printf(": %s\n", strerror(errno));
 
-			free(line); line = NULL;
-			return;
+			goto exiting;
 		}
 	} else {
 		/* encrypted database import */
@@ -136,30 +144,26 @@ cmd_import(const char *e_line, command *commands)
 			if(!S_ISLNK(st.st_mode)  &&  !S_ISREG(st.st_mode)) {
 				printf("'%s' is not a regular file or a link!\n", db_params_new.db_filename);
 
-				free(line); line = NULL;
-				return;
+				goto exiting;
 			}
 
 			if(st.st_size == 0) {
 				printf("'%s' is an empty file!\n", db_params_new.db_filename);
 
-				free(line); line = NULL;
-				return;
+				goto exiting;
 			}
 
 			if(st.st_size <= IV_DIGEST_LEN + SALT_DIGEST_LEN + 2) {
 				printf("'%s' is suspiciously small file!\n", db_params_new.db_filename);
 
-				free(line); line = NULL;
-				return;
+				goto exiting;
 			}
 
 			db_params_new.db_file = open(db_params_new.db_filename, O_RDONLY);
 			if (db_params_new.db_file < 0) {
 				perror("open(database file)");
 
-				free(line); line = NULL;
-				return;
+				goto exiting;
 			}
 
 			/* read the IV */
@@ -176,16 +180,14 @@ cmd_import(const char *e_line, command *commands)
 
 				close(db_params_new.db_file);
 				free(buf); buf = NULL;
-				free(line); line = NULL;
-				return;
+				goto exiting;
 			}
 			if (pos != IV_DIGEST_LEN) {
 				puts("Could not read IV from database file!");
 
 				close(db_params_new.db_file);
 				free(buf); buf = NULL;
-				free(line); line = NULL;
-				return;
+				goto exiting;
 			} else
 				strlcpy((char *)db_params_new.iv, (const char *)buf, IV_DIGEST_LEN + 1);
 
@@ -213,16 +215,14 @@ cmd_import(const char *e_line, command *commands)
 
 				close(db_params_new.db_file);
 				free(buf); buf = NULL;
-				free(line); line = NULL;
-				return;
+				goto exiting;
 			}
 			if (pos != SALT_DIGEST_LEN) {
 				puts("Could not read salt from database file!");
 
 				close(db_params_new.db_file);
 				free(buf); buf = NULL;
-				free(line); line = NULL;
-				return;
+				goto exiting;
 			} else
 				strlcpy((char *)db_params_new.salt, (const char *)buf, SALT_DIGEST_LEN + 1);
 
@@ -235,22 +235,19 @@ cmd_import(const char *e_line, command *commands)
 			if (close(db_params_new.db_file) < 0) {
 				perror("close after reading IV/salt(database file)");
 
-				free(line); line = NULL;
-				return;
+				goto exiting;
 			}
 		} else {
 			perror("Could not open database file");
 
-			free(line); line = NULL;
-			return;
+			goto exiting;
 		}
 
 		bio_chain = kc_setup_bio_chain(db_params_new.db_filename, 0);
 		if (!bio_chain) {
 			printf("Could not setup bio_chain!");
 
-			free(line); line = NULL;
-			return;
+			goto exiting;
 		}
 
 		/* ask for the password */
@@ -271,8 +268,7 @@ cmd_import(const char *e_line, command *commands)
 			printf("Could not setup decrypting!");
 
 			BIO_free_all(bio_chain);
-			free(line); line = NULL;
-			return;
+			goto exiting;
 		}
 
 
@@ -285,8 +281,7 @@ cmd_import(const char *e_line, command *commands)
 
 			BIO_free_all(bio_chain);
 			free(buf); buf = NULL;
-			free(line); line = NULL;
-			return;
+			goto exiting;
 		}
 
 		BIO_free_all(bio_chain);
@@ -301,8 +296,7 @@ cmd_import(const char *e_line, command *commands)
 		if (!db_new) {
 			puts("Could not parse XML document!");
 
-			free(line); line = NULL;
-			return;
+			goto exiting;
 		}
 	}
 
@@ -314,8 +308,7 @@ cmd_import(const char *e_line, command *commands)
 		printf("Not a valid kc XML structure ('%s')!\n", db_params_new.db_filename);
 
 		xmlFreeDoc(db_new);
-		free(line); line = NULL;
-		return;
+		goto exiting;
 	}
 
 
@@ -325,8 +318,7 @@ cmd_import(const char *e_line, command *commands)
 		puts("Can not import an empty database!");
 
 		xmlFreeDoc(db_new);
-		free(line); line = NULL;
-		return;
+		goto exiting;
 	}
 
 
@@ -412,9 +404,8 @@ cmd_import(const char *e_line, command *commands)
 			if (count_elements(keychain_new->children) >= ITEMS_MAX - 1) {
 				printf("Can not import: maximum number of keys reached, %lu.\n", ITEMS_MAX - 1);
 
-				free(line); line = NULL;
 				xmlFreeDoc(db_new);
-				return;
+				goto exiting;
 			}
 
 			if (keychain_new->type == XML_ELEMENT_NODE)	/* we only care about ELEMENT nodes */
@@ -427,9 +418,8 @@ cmd_import(const char *e_line, command *commands)
 		if (count_keychains >= ITEMS_MAX - 1) {
 			printf("Can not import: maximum number of keychains reached, %lu.\n", ITEMS_MAX - 1);
 
-			free(line); line = NULL;
 			xmlFreeDoc(db_new);
-			return;
+			goto exiting;
 		}
 
 
@@ -443,5 +433,8 @@ cmd_import(const char *e_line, command *commands)
 
 	db_params.dirty = 1;
 
-	free(line); line = NULL;
+exiting:
+	free(db_params_new.kdf); db_params_new.kdf = NULL;
+	free(db_params_new.cipher_mode); db_params_new.cipher_mode = NULL;
+	free(db_params_new.db_filename); db_params_new.db_filename = NULL;
 } /* cmd_import() */

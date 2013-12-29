@@ -34,8 +34,10 @@ extern BIO		*bio_chain;
 void
 cmd_passwd(const char *e_line, command *commands)
 {
-	char		ret = -1;
-	char		*line = NULL, *kdf = NULL, *cipher_mode = NULL;
+	int	c = 0, largc = 0;
+	char	**largv = NULL;
+	char	ret = -1;
+	char	*line = NULL;
 
 
 	/* ask for the new password */
@@ -45,25 +47,23 @@ cmd_passwd(const char *e_line, command *commands)
 	if (ret == 0)	/* canceled */
 		return;
 
+
+	/* Parse the arguments */
 	line = strdup(e_line);
-
-	strtok(line, " ");			/* remove the command from the line */
-
-	kdf = strtok(NULL, " ");		/* assign the command's first parameter (kdf) */
-	/* Changed KDF */
-	if (kdf) {
-		free(db_params.kdf); db_params.kdf = NULL;
-		db_params.kdf = strdup(kdf);
-	}
-
-	cipher_mode = strtok(NULL, " ");	/* assign the command's second parameter (cipher_mode) */
-	/* Changed cipher mode */
-	if (cipher_mode) {
-		free(db_params.cipher_mode); db_params.cipher_mode = NULL;
-		db_params.cipher_mode = strdup(cipher_mode);
-	}
-
+	larg(line, &largv, &largc);
 	free(line); line = NULL;
+
+	optind = 1;
+	while ((c = getopt(largc, largv, "P:")) != -1)
+		switch (c) {
+			case 'P':
+				free(db_params.kdf); db_params.kdf = NULL;
+				db_params.kdf = strdup(optarg);
+			break;
+		}
+
+	free(largv); largv = NULL;
+
 
 	ret = kc_setup_crypt(bio_chain, 1, &db_params, KC_SETUP_CRYPT_IV | KC_SETUP_CRYPT_SALT | KC_SETUP_CRYPT_KEY);
 

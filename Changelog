@@ -88,12 +88,13 @@ Functional changes, improvements:
   described, but without opening the key; this works directly from the CLI.
   A line number can also be specified when dealing with multi-line values.
 
-- 'passwd' command can now change KDF and cipher mode.
+- 'passwd' command can now change KDF.
 
-- 'xport' command can now specify KDF and cipher mode, and its parameters'
-  orders have changed.
+- 'xport' command can now specify KDF and cipher mode, and it now has options
+  and arguments to specify its every parameter.
 
-- 'import' command can now specify KDF and cipher mode.
+- 'import' command can now specify KDF and cipher mode, and it now has options
+  and arguments to specify its every parameter.
 
 - The 'new' command's first parameter (if specified), the key, now works with
   spaces.

@@ -294,8 +294,8 @@ is the key's index number in the current keychain.
 .It Cm rm Ar index
 Alias of
 .Cm del .
-.It Cm passwd Op kdf Op cipher_mode
-Change the database password and optionally the KDF and cipher mode too. All changes will be written immediately.
+.It Cm passwd Op Fl P Ar kdf
+Change the database password and optionally the KDF. All changes will be written immediately.
 .Pp
 More information about the
 .Ar kdf
@@ -311,7 +311,7 @@ Print application help or describe a
 .Ar command .
 .It Cm status
 Display information about the database.
-.It Cm xport Ar filename Op kdf Op cipher_mode Op keychain
+.It Cm xport Fl k Ar filename Op Fl P Ar kdf Op Fl m Ar cipher_mode Op Fl c Ar keychain
 Export the database to a
 .Nm
 compatible encrypted database file named
@@ -330,19 +330,12 @@ When specifying
 .Ar keychain ,
 export only that keychain.
 .Ar keychain
-can be the keychain's index number or name. Index number takes priority when addressing a keychain. If you don't want to change the KDF or the cipher mode, but want to export a specific keychain, just specify the same values for
-.Ar kdf
-and
-.Ar cipher_mode
-as the ones currently in use (use command
-.Cm status
-to acquire these informations).
-(see command
+can be the keychain's index number or name. Index number takes priority when addressing a keychain. (see command
 .Cm dump ,
 .Cm import
 and
 .Cm append )
-.It Cm dump Ar filename Op keychain
+.It Cm dump Fl k Ar filename Op Fl c Ar keychain
 Dump the database to a
 .Nm
 compatible XML file named
@@ -356,7 +349,7 @@ can be the keychain's index number or name. Index number takes priority when add
 .Cm xport )
 .Em NOTE :
 the created XML file will be plain text.
-.It Cm import Ar filename Op kdf Op cipher_mode
+.It Cm import Fl k Ar filename Op Fl P Ar kdf Op Fl m Ar cipher_mode
 Import and overwrite the current database with the one from a
 .Nm
 compatible encrypted database file named
@@ -370,12 +363,12 @@ The
 .Ar kdf
 and
 .Ar cipher_mode
-optional arguments can be used to specify these parameters if they differ from the current database. (see command
+optional arguments can be used to specify these parameters if they differ from the current database's. (see command
 .Cm importxml ,
 .Cm xport
 and
 .Cm append )
-.It Cm importxml Ar filename
+.It Cm importxml Fl k Ar filename
 Import and overwrite the current database with the one from a
 .Nm
 compatible XML file named
@@ -388,7 +381,7 @@ XML document. (see command
 .Cm xport
 and
 .Cm append )
-.It Cm append Ar filename
+.It Cm append Fl k Ar filename Op Fl P Ar kdf Op Fl m Ar cipher_mode
 Append new and merge existing keychains to the database from a
 .Nm
 compatible encrypted database file named
@@ -396,7 +389,14 @@ compatible encrypted database file named
 .Ar filename
 must be a proper
 .Nm
-database. See the
+database.
+.Pp
+The
+.Ar kdf
+and
+.Ar cipher_mode
+optional arguments can be used to specify these parameters if they differ from the current database's.
+See the
 .Em LIMITS
 section for information about how
 .Nm
@@ -405,7 +405,7 @@ deals with limits reached while appending. (see command
 .Cm xport
 and
 .Cm import )
-.It Cm appendxml Ar filename
+.It Cm appendxml Fl k Ar filename
 Append new and merge existing keychains to the database from a
 .Nm
 compatible XML file named

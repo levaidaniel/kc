@@ -26,14 +26,14 @@ fi
 
 echo "${PASSWORD}" > ${KC_PASSFILE}
 
-if printf "passwd bcrypt\n${PASSWORD}\n${PASSWORD}\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE};then
+if printf "passwd -P bcrypt\n${PASSWORD}\n${PASSWORD}\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE};then
 	echo "$0 test ok (passwd bcrypt #1)!"
 else
 	echo "$0 test failed (passwd bcrypt #1)!"
 	exit 1
 fi
 
-if printf "passwd sha512\n${PASSWORD}\n${PASSWORD}\n" |./kc -b -k ${KC_DB} -P bcrypt -p ${KC_PASSFILE};then
+if printf "passwd -P sha512\n${PASSWORD}\n${PASSWORD}\n" |./kc -b -k ${KC_DB} -P bcrypt -p ${KC_PASSFILE};then
 	echo "$0 test ok (passwd bcrypt #2)!"
 else
 	echo "$0 test failed (passwd bcrypt #2)!"
