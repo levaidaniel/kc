@@ -135,10 +135,12 @@ cmd_search(const char *e_line, command *commands)
 
 				printf("%ld. ", idx);	/* prefix the name with the index number */
 				printf("%s\n", key);	/* this is the name of the entry */
-				xmlFree(key); key = NULL;
 			} else
 				if (getenv("KC_DEBUG"))
 					puts("");
+
+
+			xmlFree(key); key = NULL;
 
 			idx++;
 
