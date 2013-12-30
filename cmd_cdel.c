@@ -40,7 +40,7 @@ void
 cmd_cdel(const char *e_line, command *commands)
 {
 	xmlNodePtr	db_node = NULL, db_node_tmp = NULL;
-	xmlChar		*cname = NULL;
+	xmlChar		*cname = NULL, *cname2 = NULL;
 
 	char		*cmd = NULL, name = 0;
 	char		*line = NULL;
@@ -64,14 +64,11 @@ cmd_cdel(const char *e_line, command *commands)
 	}
 
 	db_node = find_keychain(cname, name);
-	free(line); line = NULL;
 	if (db_node) {
 		/* don't allow to delete the current keychain. this saves us trouble. */
-		if (	xmlStrcmp(	xmlGetProp(keychain, BAD_CAST "name"),
-					xmlGetProp(db_node, BAD_CAST "name")) == 0) {
-
-			puts("Can not delete the current keychain!");
-		} else {
+		cname = xmlGetProp(keychain, BAD_CAST "name");
+		cname2 = xmlGetProp(db_node, BAD_CAST "name");
+		if (xmlStrcmp(cname, cname2) != 0) {
 #ifndef _READLINE
 			/* disable history temporarily */
 			if (el_set(e, EL_HIST, history, NULL) != 0) {
@@ -82,6 +79,7 @@ cmd_cdel(const char *e_line, command *commands)
 				perror("el_set(EL_PROMPT)");
 			}
 #endif
+			xmlFree(cname); cname = NULL;
 			cname = xmlGetProp(db_node, BAD_CAST "name");
 
 			printf("Do you really want to delete '%s'? <yes/no> ", cname);
@@ -108,6 +106,7 @@ cmd_cdel(const char *e_line, command *commands)
 #ifndef _READLINE
 				el_reset(e);
 #endif
+				free(line); line = NULL;
 				return;
 			}
 
@@ -124,10 +123,15 @@ cmd_cdel(const char *e_line, command *commands)
 
 				db_params.dirty = 1;
 			}
-			xmlFree(cname); cname = NULL;
-		}
-	} else {
-		printf("'%s' keychain not found.\n", cname);
-	}
+		} else
+			puts("Can not delete the current keychain!");
 
+
+		xmlFree(cname); cname = NULL;
+	} else
+		printf("'%s' keychain not found.\n", cname);
+
+
+	free(line); line = NULL;
+	xmlFree(cname2); cname2 = NULL;
 } /* cmd_cdel() */
