@@ -943,6 +943,7 @@ kc_validate_xml(xmlDocPtr db)
 		if (getenv("KC_DEBUG"))
 			xmlGenericError(xmlGenericErrorContext, "Could not allocate a new validation context.\n");
 
+		xmlFreeDtd(dtd);
 		return(0);
 	}
 
@@ -952,11 +953,13 @@ kc_validate_xml(xmlDocPtr db)
 			xmlGenericError(xmlGenericErrorContext, "Validation failed against kc DTD.\n");
 
 		xmlFreeValidCtxt(valid_ctx);
+		xmlFreeDtd(dtd);
 		return(0);
 	}
 
 
 	xmlFreeValidCtxt(valid_ctx);
+	xmlFreeDtd(dtd);
 
 
 	return(1);
