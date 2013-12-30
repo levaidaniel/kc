@@ -593,7 +593,8 @@ kc_setup_crypt(BIO *bio_chain, const unsigned int enc, struct db_parameters *db_
 		}
 		EVP_DigestInit_ex(mdctx, EVP_sha512(), NULL);
 		EVP_DigestUpdate(mdctx, iv_tmp, IV_LEN);
-		EVP_DigestFinal(mdctx, digested, &digested_len);
+		EVP_DigestFinal_ex(mdctx, digested, &digested_len);
+		EVP_MD_CTX_destroy(mdctx);
 
 		/* Print the binary digest in hex as characters (numbers, effectively)
 		 * into the ..->iv variable.
@@ -625,7 +626,8 @@ kc_setup_crypt(BIO *bio_chain, const unsigned int enc, struct db_parameters *db_
 		}
 		EVP_DigestInit_ex(mdctx, EVP_sha512(), NULL);
 		EVP_DigestUpdate(mdctx, salt_tmp, SALT_LEN);
-		EVP_DigestFinal(mdctx, digested, &digested_len);
+		EVP_DigestFinal_ex(mdctx, digested, &digested_len);
+		EVP_MD_CTX_destroy(mdctx);
 
 		/* Print the binary digest in hex as characters (numbers, effectively)
 		 * into the ..->salt variable.
