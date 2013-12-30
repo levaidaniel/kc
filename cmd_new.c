@@ -76,9 +76,9 @@ cmd_new(const char *e_line, command *commands)
 	for (i = 0; line[i] != ' '  &&  line[i] != '\0'; i++) {}
 
 	/* Search for the first non-space character after the first space
-	 * after thecommand name; this will be start of the key's name
+	 * after the command name; this will be start of the key's name
 	 * (if it's been specified).
-	 * If no keyname was specified, then it will a zero sized string,
+	 * If no keyname was specified, then it will be a zero sized string,
 	 * and we check for that.
 	 */
 	for (; line[i] == ' '; i++) {}
@@ -86,7 +86,7 @@ cmd_new(const char *e_line, command *commands)
 	key = xmlStrdup(BAD_CAST &line[i]);
 	free(line); line = NULL;
 
-	if (xmlStrlen(key) <= 0) {	/* if we didn't get a name as a parameter */
+	if (xmlStrlen(key) <= 0) {	/* if we didn't get a keyname as a parameter */
 		strlcpy(prompt_context, "NEW key", sizeof(prompt_context));
 
 #ifndef _READLINE
