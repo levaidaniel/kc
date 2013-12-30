@@ -320,9 +320,10 @@ cmd_getnum(const unsigned long int idx, const unsigned long int spice)
 						break;
 				}
 			}
+
+			xmlFree(line); line = NULL;
 		}
 
-		xmlFree(line); line = NULL;
 		xmlFree(key); key = NULL;
 		xmlFree(value_nl); value_nl = NULL;
 
