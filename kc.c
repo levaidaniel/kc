@@ -868,6 +868,8 @@ el_tab_complete(EditLine *e)
 			 */
 			el_push(e, match[0] + word_len);
 
+			free(match[0]); match[0] = NULL;
+
 			/* if this is not an already completed word
 			 * (ie. there is no space at the end), then
 			 * put a space after the completed word
@@ -914,10 +916,12 @@ el_tab_complete(EditLine *e)
 			 */
 			el_push(e, complete_max);
 
+			free(complete_max); complete_max = NULL;
+
 			puts("");
 			for (i = 0; i < hits; i++) {
 				printf("%s ", match[i]);
-				free(match[i]);
+				free(match[i]); match[i] = NULL;
 			}
 			puts("");
 		break;
