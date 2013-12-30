@@ -45,6 +45,7 @@ cmd_status(const char *e_line, command *commands)
 	if (db_filename_realpath)
 		printf(" (%s)", db_filename_realpath);
 	printf("\n");
+	free(db_filename_realpath); db_filename_realpath = NULL;
 
 	xml_buf = xmlBufferCreate();
 	xml_save = xmlSaveToBuffer(xml_buf, "UTF-8", XML_SAVE_FORMAT);
