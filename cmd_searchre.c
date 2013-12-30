@@ -160,10 +160,12 @@ cmd_searchre(const char *e_line, command *commands)
 
 				printf("%ld. ", idx);	/* prefix the name with the index number */
 				printf("%s\n", key);	/* this is the name of the entry */
-				xmlFree(key); key = NULL;
 			} else
 				if (getenv("KC_DEBUG"))
 					puts("");
+
+
+			xmlFree(key); key = NULL;
 
 			idx++;
 
@@ -175,6 +177,9 @@ cmd_searchre(const char *e_line, command *commands)
 		else
 			search_keychain = NULL;		/* force the quit from the loop */
 	}
+
+	pcre_free(re);
+	pcre_free_study(re_study);
 
 	if (hits > 0) {
 		if (hits > 5  &&  !batchmode)
