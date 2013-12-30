@@ -135,7 +135,6 @@ cmd_del(const char *e_line, command *commands)
 
 			printf("Deleted key: %lu. %s\n", idx, key);
 			puts("Key indices have been changed. Make sure to 'list', before using them again!");
-			xmlFree(key); key = NULL;
 
 			/* Update the keychain's modified timestamp */
 			modified = malloc(TIME_MAXLEN); malloc_check(modified);
@@ -146,6 +145,8 @@ cmd_del(const char *e_line, command *commands)
 
 			db_params.dirty = 1;
 		}
+
+		xmlFree(key); key = NULL;
 	} else
 		puts("Invalid index!");
 } /* cmd_del() */
