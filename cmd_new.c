@@ -87,6 +87,8 @@ cmd_new(const char *e_line, command *commands)
 	free(line); line = NULL;
 
 	if (xmlStrlen(key) <= 0) {	/* if we didn't get a keyname as a parameter */
+		xmlFree(key); key = NULL;
+
 		strlcpy(prompt_context, "NEW key", sizeof(prompt_context));
 
 #ifndef _READLINE
