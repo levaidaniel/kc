@@ -43,14 +43,14 @@ commands_init(command **commands)
 
 	if (!db_params.readonly) {
 		(*commands)->name = "append";
-		(*commands)->usage = "append <filename>";
+		(*commands)->usage = "append -k <filename> [-P kdf [-m cipher mode]]";
 		(*commands)->help = "Append new and merge existing keychains to the database from a kc compatible encrypted database file named 'filename'. 'filename' must be a proper kc database. Please consult the manual about the key limits and how kc applies them during appending.\nSee command 'appendxml', 'xport' and 'import'.";
 		(*commands)->fn = cmd_import;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
 
 		(*commands)->name = "appendxml";
-		(*commands)->usage = "appendxml <filename>";
+		(*commands)->usage = "appendxml -k <filename>";
 		(*commands)->help = "Append new and merge existing keychains to the database from a kc compatible XML file named 'filename'. 'filename' must contain a properly formatted kc XML document. Please consult the manual about the key limits and how kc applies them during appending.\nSee command 'append', 'xport' and 'import'.";
 		(*commands)->fn = cmd_import;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
@@ -118,14 +118,14 @@ commands_init(command **commands)
 		(*commands) = (*commands)->next;
 
 		(*commands)->name = "import";
-		(*commands)->usage = "import <filename> [kdf [cipher mode]]";
+		(*commands)->usage = "import -k <filename> [-P kdf [-m cipher mode]]";
 		(*commands)->help = "Import and overwrite the current database with the one from a kc compatible encrypted database file named 'filename'. 'filename' must be a proper kc database. 'kdf' and 'cipher mode' can be used to specify these parameters if they differ from the current database.\nSee command 'importxml', 'xport' and 'append'.";
 		(*commands)->fn = cmd_import;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
 
 		(*commands)->name = "importxml";
-		(*commands)->usage = "importxml <filename>";
+		(*commands)->usage = "importxml -k <filename>";
 		(*commands)->help = "Import and overwrite the current database with the one from a kc compatible XML file named 'filename'. 'filename' must contain a properly formatted kc XML document.\nSee command 'import', 'xport' and 'append'.";
 		(*commands)->fn = cmd_import;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
@@ -235,7 +235,7 @@ commands_init(command **commands)
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "dump";
-	(*commands)->usage = "dump <filename> [keychain]";
+	(*commands)->usage = "dump -k <filename> [-c keychain]";
 	(*commands)->help = "Dump the database to a kc compatible XML file named 'filename' (if no extension specified, \".xml\" will be appended). When specifying a keychain, dump only that keychain to the XML file. 'keychain' can be the keychain's index number or name. Index number takes priority when addressing a keychain.\nSee command 'xport'\n\nNOTE: the created XML file will be plain text.";
 	(*commands)->fn = cmd_export;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
