@@ -54,7 +54,7 @@ cmd_search(const char *e_line, command *commands)
 		offset += 6;
 
 	/* Modifiers */
-	for (; (e_line[offset] != ' '  &&  offset < strlen(e_line)); offset++)
+	for (; (offset < strlen(e_line)  &&  e_line[offset] != ' '); offset++)
 		switch (e_line[offset]) {
 			case '!':
 				searchinv = 1;
