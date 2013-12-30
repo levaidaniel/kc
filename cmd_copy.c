@@ -126,6 +126,7 @@ cmd_copy(const char *e_line, command *commands)
 			xmlFreeNode(db_node_prev);
 
 			xmlUnlinkNode(key);	/* remove the node itself */
+			xmlFreeNode(key);
 		}
 
 		/* add the new entry to the destination keychain */
@@ -144,7 +145,7 @@ cmd_copy(const char *e_line, command *commands)
 		xmlSetProp(keychain_dest, BAD_CAST "modified", BAD_CAST modified);
 
 
-		name = xmlGetProp(key, BAD_CAST "name");
+		name = xmlGetProp(key_new, BAD_CAST "name");
 		printf("Key '%lu. %s' was %s to keychain: %s\n", idx, name, move ? "moved" : "copied", cname);
 		xmlFree(name); name = NULL;
 		free(modified); modified = NULL;
