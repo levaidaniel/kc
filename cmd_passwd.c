@@ -62,6 +62,9 @@ cmd_passwd(const char *e_line, command *commands)
 			break;
 		}
 
+	for (c = 0; c <= largc; c++) {
+		free(largv[c]); largv[c] = NULL;
+	}
 	free(largv); largv = NULL;
 
 

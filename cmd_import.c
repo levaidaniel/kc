@@ -109,6 +109,9 @@ cmd_import(const char *e_line, command *commands)
 		xml = 1;
 
 
+	for (c = 0; c <= largc; c++) {
+		free(largv[c]); largv[c] = NULL;
+	}
 	free(largv); largv = NULL;
 
 	if (!db_params_new.db_filename) {
