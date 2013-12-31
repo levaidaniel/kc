@@ -235,7 +235,7 @@ cmd_export(const char *e_line, command *commands)
 
 		bio_chain = kc_setup_bio_chain(db_params_new.db_filename, 1);
 		if (!bio_chain) {
-			printf("Could not setup bio_chain!");
+			puts("Could not setup bio_chain!");
 
 			close(db_params_new.db_file);
 			goto exiting;
@@ -258,7 +258,7 @@ cmd_export(const char *e_line, command *commands)
 
 		/* Generate iv/salt, setup cipher mode and turn on encrypting */
 		if (!kc_setup_crypt(bio_chain, 1, &db_params_new, KC_SETUP_CRYPT_IV | KC_SETUP_CRYPT_SALT | KC_SETUP_CRYPT_KEY)) {
-			printf("Could not setup encrypting!");
+			puts("Could not setup encrypting!");
 
 			BIO_free_all(bio_chain);
 			close(db_params_new.db_file);
