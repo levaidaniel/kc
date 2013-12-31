@@ -41,7 +41,7 @@ cmd_searchre(const char *e_line, command *commands)
 {
 #ifdef	_HAVE_PCRE
 	xmlNodePtr	db_node = NULL, search_keychain = NULL;
-	xmlChar		*key = NULL;
+	xmlChar		*key = NULL, *cname = NULL;
 
 	pcre		*re = NULL;
 	pcre_extra	*re_study = NULL;
@@ -155,8 +155,11 @@ cmd_searchre(const char *e_line, command *commands)
 
 				hits++;
 
-				if (searchall)
-					printf("%s%% ", xmlGetProp(search_keychain, BAD_CAST "name"));	/* prefix the name with the keychain name */
+				if (searchall) {
+					cname = xmlGetProp(search_keychain, BAD_CAST "name");
+					printf("%s%% ", cname);	/* prefix the name with the keychain name */
+					xmlFree(cname); cname = NULL;
+				}
 
 				printf("%ld. ", idx);	/* prefix the name with the index number */
 				printf("%s\n", key);	/* this is the name of the entry */
