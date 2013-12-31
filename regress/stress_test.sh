@@ -39,7 +39,11 @@ case "$(uname -s)" in
 	;;
 esac
 
-if ./kc -v |grep -E -q -e '^Compiled with Readline(, PCRE)*(, SCRYPT)* support\.$';then
+
+KC_RUN=${KC_RUN:-'./kc'}
+
+
+if ${KC_RUN} -v |grep -E -q -e '^Compiled with Readline(, PCRE)*(, SCRYPT)* support\.$';then
 	export READLINE=readline
 fi
 
@@ -80,11 +84,11 @@ while [ $i -lt ${loop} ];do
 	fi
 
 	i=$(( $i + 1 ))
-done |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} >/dev/null
+done |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} >/dev/null
 echo # new line
 
 if [ ${CHECK_DURING_MODIFY} -gt 0 ];then
-	SHA1=$(printf "list\n" |KC_DEBUG=yes ./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
+	SHA1=$(printf "list\n" |KC_DEBUG=yes ${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
 	if [ "$SHA1" == 'ff93f58b1306ae81a5a59acc032d554b7a303683' ];then
 		echo "$0 test ok (#${loop} new entry)!"
 	else
@@ -113,11 +117,11 @@ while [ $i -lt $(( ${loop} + 2 )) ];do
 	fi
 
 	i=$(( $i + 1 ))
-done |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} >/dev/null
+done |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} >/dev/null
 echo # new line
 
 if [ ${CHECK_DURING_MODIFY} -gt 0 ];then
-	SHA1=$(printf "list\n" |KC_DEBUG=yes ./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
+	SHA1=$(printf "list\n" |KC_DEBUG=yes ${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
 	if [ "$SHA1" == 'ff93f58b1306ae81a5a59acc032d554b7a303683' ];then
 		echo "$0 test ok (#${loop} inserts)!"
 	else
@@ -151,11 +155,11 @@ while [ $i -lt $(( ${loop} + ${offset} )) ];do
 	fi
 
 	i=$(( $i + 1 ))
-done |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} >/dev/null
+done |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} >/dev/null
 echo # new line
 
 if [ ${CHECK_DURING_MODIFY} -gt 0 ];then
-	SHA1=$(printf "list\n" |KC_DEBUG=yes ./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
+	SHA1=$(printf "list\n" |KC_DEBUG=yes ${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
 	if [ "$SHA1" == '3d599f58ab63ea98d63df6a5c346aaa85848b93c' ];then
 		echo "$0 test ok (#${loop} entry edit)!"
 	else
@@ -191,10 +195,10 @@ while [ $i -ge ${offset} ];do
 	fi
 
 	i=$(( $i - 1 ))
-done |./kc -b -k ${KC_DB} -p ${KC_PASSFILE} >/dev/null
+done |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} >/dev/null
 echo # new line
 
-SHA1=$(printf "list\n" |KC_DEBUG=yes ./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
+SHA1=$(printf "list\n" |KC_DEBUG=yes ${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
 if [ "$SHA1" = '846e795e8eb1b3c4ab07753f915c619ce1ff4bec' ];then
 	echo $0 test ok!
 else

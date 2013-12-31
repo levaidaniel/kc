@@ -5,7 +5,7 @@ set -e
 
 echo "test => $0"
 
-if echo "quit" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE};then
+if echo "quit" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE};then
 	echo $0 test ok!
 	exit 0
 else

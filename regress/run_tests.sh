@@ -8,7 +8,9 @@ if [ $(basename $(pwd))  = 'regress' ];then
 	exit 1
 fi
 
-if ./kc -v |grep -E -q -e '^Compiled with Readline(, PCRE)*(, SCRYPT)* support\.$';then
+export KC_RUN=${KC_RUN:-'./kc'}
+
+if ${KC_RUN} -v |grep -E -q -e '^Compiled with Readline(, PCRE)*(, SCRYPT)* support\.$';then
 	export READLINE=readline
 fi
 
@@ -17,7 +19,7 @@ export KC_PASSFILE='regress/testpass'
 
 COUNTER=1
 
-TESTS=$(ls -1 regress/*.sh |grep -F -v -e"stress_test.sh" -e"run_tests.sh" |wc -l)
+TESTS=$(ls -1 regress/*.sh |grep -F -v -e"stress_test.sh" -e"run_tests.sh" |wc -l |tr -d ' ')
 trap '
 if [ $? -eq 0 ];then
 	printf "\nAll tests were ok! :)\n"

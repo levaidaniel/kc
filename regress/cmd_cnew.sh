@@ -18,9 +18,9 @@ case "$(uname -s)" in
 	;;
 esac
 
-printf "cnew newchain\ndescription\nwrite\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
+printf "cnew newchain\ndescription\nwrite\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}
 
-SHA1=$(printf "list\n" |KC_DEBUG=yes ./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
+SHA1=$(printf "list\n" |KC_DEBUG=yes ${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
 if [ "$SHA1" = '2be8e57ad61913b1ff23c9043a832f055281d115' ];then
 	echo $0 test ok!
 else

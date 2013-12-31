@@ -27,11 +27,11 @@ fi
 PASSWORD=aabbccdd112233
 
 
-printf "del 0\nyes\nwrite\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
-printf "del 0\nyes\nwrite\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
-printf "append -k regress/test_export.kcd -P bcrypt -m cfb128\n${PASSWORD}\nwrite\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
+printf "del 0\nyes\nwrite\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}
+printf "del 0\nyes\nwrite\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}
+printf "append -k regress/test_export.kcd -P bcrypt -m cfb128\n${PASSWORD}\nwrite\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}
 
-SHA1=$(printf "list\n" |KC_DEBUG=yes ./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
+SHA1=$(printf "list\n" |KC_DEBUG=yes ${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
 if [ "$SHA1" = '7eafce9a48fa0ca4d35ae582c63c35149b81502a' ];then
 	echo "$0 test ok (append)!"
 else
@@ -40,11 +40,11 @@ else
 fi
 
 
-printf "del 0\nyes\nwrite\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
-printf "del 0\nyes\nwrite\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
-printf "import -k regress/test_export.kcd -P bcrypt -m cfb128\n${PASSWORD}\nwrite\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
+printf "del 0\nyes\nwrite\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}
+printf "del 0\nyes\nwrite\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}
+printf "import -k regress/test_export.kcd -P bcrypt -m cfb128\n${PASSWORD}\nwrite\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}
 
-SHA1=$(printf "list\n" |KC_DEBUG=yes ./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
+SHA1=$(printf "list\n" |KC_DEBUG=yes ${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
 if [ "$SHA1" = 'f7fb5577878b3d1ceaf8aa14ea9c273a36b03d15' ];then
 	echo "$0 test ok (import)!"
 else
@@ -53,11 +53,11 @@ else
 fi
 
 
-printf "del 0\nyes\nwrite\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
-printf "del 0\nyes\nwrite\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
-printf "appendxml -k regress/test_dump.xml\nwrite\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
+printf "del 0\nyes\nwrite\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}
+printf "del 0\nyes\nwrite\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}
+printf "appendxml -k regress/test_dump.xml\nwrite\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}
 
-SHA1=$(printf "list\n" |KC_DEBUG=yes ./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
+SHA1=$(printf "list\n" |KC_DEBUG=yes ${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
 if [ "$SHA1" = '7eafce9a48fa0ca4d35ae582c63c35149b81502a' ];then
 	echo "$0 test ok (appendxml)!"
 else
@@ -66,11 +66,11 @@ else
 fi
 
 
-printf "del 0\nyes\nwrite\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
-printf "del 0\nyes\nwrite\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
-printf "importxml -k regress/test_dump.xml\nwrite\n" |./kc -b -k ${KC_DB} -p ${KC_PASSFILE}
+printf "del 0\nyes\nwrite\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}
+printf "del 0\nyes\nwrite\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}
+printf "importxml -k regress/test_dump.xml\nwrite\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}
 
-SHA1=$(printf "list\n" |KC_DEBUG=yes ./kc -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
+SHA1=$(printf "list\n" |KC_DEBUG=yes ${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
 if [ "$SHA1" = 'f7fb5577878b3d1ceaf8aa14ea9c273a36b03d15' ];then
 	echo "$0 test ok (importxml)!"
 else
