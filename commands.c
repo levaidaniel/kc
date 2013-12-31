@@ -455,22 +455,17 @@ count_elements(xmlNodePtr db_node)
 void
 larg(char *line, char ***largv, int *largc)
 {
-	char	**_largv = NULL, *arg = NULL;
-	int	_largc = 0;
+	char	*arg = NULL;
 
 
-	_largv = malloc(sizeof(char *)); malloc_check(_largv);
-	_largv[_largc] = strdup(strtok(line, " "));
+	*largv = malloc(sizeof(char *)); malloc_check(*largv);
+	(*largv)[*largc] = strdup(strtok(line, " "));
 	while ((arg = strtok(NULL, " "))) {
-		_largv = realloc(_largv, (++_largc + 1) * sizeof(char *)); malloc_check(_largv);
-		_largv[_largc] = strdup(arg);
+		*largv = realloc(*largv, (++(*largc) + 1) * sizeof(char *)); malloc_check(*largv);
+		(*largv)[*largc] = strdup(arg);
 	}
-	_largv = realloc(_largv, (++_largc + 1) * sizeof(char *)); malloc_check(_largv);
-	_largv[_largc] = NULL;
-
-
-	*largv = _largv;
-	*largc = _largc;
+	*largv = realloc(*largv, (++(*largc) + 1) * sizeof(char *)); malloc_check(*largv);
+	(*largv)[*largc] = NULL;
 } /* larg() */
 
 
