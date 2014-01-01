@@ -42,10 +42,11 @@ cmd_quit(const char *e_line, command *commands)
 #ifndef _READLINE
 	int		e_count = 0;
 #endif
-	char		*line = NULL;
 
 
 	if (db_params.dirty  &&  !batchmode) {
+		printf("Do you want to save the changes? <yes/no> ");
+
 #ifndef _READLINE
 		/* disable history */
 		if (el_set(e, EL_HIST, history, NULL) != 0) {
@@ -55,51 +56,43 @@ cmd_quit(const char *e_line, command *commands)
 		if (el_set(e, EL_PROMPT, el_prompt_null) != 0) {
 			perror("el_set(EL_PROMPT)");
 		}
-#endif
 
-		while (1) {
-#ifndef _READLINE
-			printf("Do you want to write the changes? <yes/y/no/n> ");
-			e_line = el_gets(e, &e_count);
+		e_line = el_gets(e, &e_count);
 
-			/* re-enable the default prompt */
-			if (el_set(e, EL_PROMPT, prompt_str) != 0) {
-				perror("el_set(EL_PROMPT)");
-			}
-			/* re-enable history */
-			if (el_set(e, EL_HIST, history, eh) != 0) {
-				perror("el_set(EL_HIST)");
-			}
+		/* re-enable the default prompt */
+		if (el_set(e, EL_PROMPT, prompt_str) != 0) {
+			perror("el_set(EL_PROMPT)");
+		}
+		/* re-enable history */
+		if (el_set(e, EL_HIST, history, eh) != 0) {
+			perror("el_set(EL_HIST)");
+		}
 #else
-			e_line = readline("Do you want to write the changes? <yes/y/no/n> ");
+		rl_redisplay();
+		e_line = readline("");
 #endif
-			if (!e_line) {
+
+		if (!e_line) {
 #ifndef _READLINE
-				el_reset(e);
+			el_reset(e);
 #endif
+			return;
+		}
+
+		if (strncasecmp(e_line, "yes", 3) == 0) {
+			cmd_write(NULL, NULL);
+
+			if (db_params.dirty) {
+				puts("Database write was not successful; can not save and exit!");
 				return;
 			}
-
-			line = strdup(e_line);
-
-#ifndef _READLINE
-			line[strlen(line) - 1] = '\0';	/* remove the newline */
-#endif
-
-			if (strcasecmp(line, "yes") == 0  ||  strcasecmp(line, "y") == 0) {
-				cmd_write(NULL, NULL);
-				break;
-			}
-
-			if (strcasecmp(line, "no") == 0  ||  strcasecmp(line, "n") == 0) {
-				puts("Changes were NOT saved.");
-				break;
-			}
-
-			free(line); line = NULL;
+		} else if (strncasecmp(e_line, "no", 2) == 0) {
+			puts("Changes were NOT saved.");
+		} else {
+			puts("Invalid answer, not exiting.");
+			return;
 		}
 	}
-	free(line); line = NULL;
 
 	quit(EXIT_SUCCESS);
 } /* cmd_quit() */
