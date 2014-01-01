@@ -176,6 +176,8 @@ cmd_export(const char *e_line, command *commands)
 	}
 
 	if(lstat(db_params_new.db_filename, &st) == 0) {	/* if export filename exists */
+		printf("Do you want to overwrite '%s'? <yes/no> ", db_params_new.db_filename);
+
 #ifndef _READLINE
 		/* disable history temporarily */
 		if (el_set(e, EL_HIST, history, NULL) != 0) {
@@ -185,14 +187,7 @@ cmd_export(const char *e_line, command *commands)
 		if (el_set(e, EL_PROMPT, el_prompt_null) != 0) {
 			perror("el_set(EL_PROMPT)");
 		}
-#endif
-		printf("Do you want to overwrite '%s'? <yes/no> ", db_params_new.db_filename);
 
-#ifdef _READLINE
-		rl_redisplay();
-#endif
-
-#ifndef _READLINE
 		e_line = el_gets(e, &e_count);
 
 		/* re-enable the default prompt */
@@ -204,8 +199,10 @@ cmd_export(const char *e_line, command *commands)
 			perror("el_set(EL_HIST)");
 		}
 #else
+		rl_redisplay();
 		e_line = readline("");
 #endif
+
 		if (!e_line) {
 #ifndef _READLINE
 			el_reset(e);

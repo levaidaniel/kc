@@ -86,6 +86,10 @@ cmd_del(const char *e_line, command *commands)
 
 	db_node = find_key(idx);
 	if (db_node) {
+		key = xmlGetProp(db_node, BAD_CAST "name");
+
+		printf("Do you really want to delete '%s'? <yes/no> ", key);
+
 #ifndef _READLINE
 		/* disable history temporarily */
 		if (el_set(e, EL_HIST, history, NULL) != 0) {
@@ -95,16 +99,7 @@ cmd_del(const char *e_line, command *commands)
 		if (el_set(e, EL_PROMPT, el_prompt_null) != 0) {
 			perror("el_set(EL_PROMPT)");
 		}
-#endif
-		key = xmlGetProp(db_node, BAD_CAST "name");
 
-		printf("Do you really want to delete '%s'? <yes/no> ", key);
-
-#ifdef _READLINE
-		rl_redisplay();
-#endif
-
-#ifndef _READLINE
 		e_line = el_gets(e, &e_count);
 
 		/* re-enable the default prompt */
@@ -116,8 +111,10 @@ cmd_del(const char *e_line, command *commands)
 			perror("el_set(EL_HIST)");
 		}
 #else
+		rl_redisplay();
 		e_line = readline("");
 #endif
+
 		if (!e_line) {
 #ifndef _READLINE
 			el_reset(e);
