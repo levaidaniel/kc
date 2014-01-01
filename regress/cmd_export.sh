@@ -22,7 +22,7 @@ rm -f regress/test_export.kcd
 
 PASSWORD=aabbccdd112233
 
-printf "xport -k regress/test_export -P bcrypt -m cfb128\n${PASSWORD}\n${PASSWORD}\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}
+printf "export -k regress/test_export -P bcrypt -m cfb128\n${PASSWORD}\n${PASSWORD}\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}
 
 if [ ! -r "regress/test_export.kcd" ];then
 	echo "$0 test failed (unreadable export file)!"
@@ -30,9 +30,9 @@ if [ ! -r "regress/test_export.kcd" ];then
 fi
 
 if printf "${PASSWORD}" |${KC_RUN} -b -k regress/test_export.kcd -P bcrypt -m cfb128;then
-	echo "$0 test ok (xport)!"
+	echo "$0 test ok (export)!"
 else
-	echo "$0 test failed (xport)!"
+	echo "$0 test failed (export)!"
 	exit 1
 fi
 

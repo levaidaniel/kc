@@ -90,8 +90,9 @@ Functional changes, improvements:
 
 - 'passwd' command can now change KDF.
 
-- 'xport' command can now specify KDF and cipher mode, and it now has options
-  and arguments to specify its every parameter.
+- 'xport' command has been renamed, and it's now called 'export'.
+  Also, the command can now specify KDF and cipher mode, and it now has
+  options and arguments to specify its every parameter.
 
 - 'import' command can now specify KDF and cipher mode, and it now has options
   and arguments to specify its every parameter.

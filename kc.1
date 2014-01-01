@@ -318,7 +318,7 @@ Print application help or describe a
 .Ar command .
 .It Cm status
 Display information about the database.
-.It Cm xport Fl k Ar filename Op Fl P Ar kdf Op Fl e Ar cipher Op Fl m Ar cipher_mode Op Fl c Ar keychain
+.It Cm export Fl k Ar filename Op Fl P Ar kdf Op Fl e Ar cipher Op Fl m Ar cipher_mode Op Fl c Ar keychain
 Export the database to a
 .Nm
 compatible encrypted database file named
@@ -354,7 +354,7 @@ When specifying a keychain, dump only that keychain to the XML file.
 .Ar keychain
 can be the keychain's index number or name. Index number takes priority when addressing a keychain.
 (see command
-.Cm xport )
+.Cm export )
 .Em NOTE :
 the created XML file will be plain text.
 .It Cm import Fl k Ar filename Op Fl P Ar kdf Op Fl e Ar cipher Op Fl m Ar cipher_mode
@@ -374,7 +374,7 @@ and
 .Ar cipher_mode
 optional arguments can be used to specify these parameters if they differ from the current database's. (see command
 .Cm importxml ,
-.Cm xport
+.Cm export
 and
 .Cm append )
 .It Cm importxml Fl k Ar filename
@@ -387,7 +387,7 @@ must contain a properly formatted
 .Nm
 XML document. (see command
 .Cm import ,
-.Cm xport
+.Cm export
 and
 .Cm append )
 .It Cm append Fl k Ar filename Op Fl P Ar kdf Op Fl m Ar cipher_mode
@@ -411,7 +411,7 @@ section for information about how
 .Nm
 deals with limits reached while appending. (see command
 .Cm appendxml ,
-.Cm xport
+.Cm export
 and
 .Cm import )
 .It Cm appendxml Fl k Ar filename
@@ -428,7 +428,7 @@ section for information about how
 .Nm
 deals with limits reached while appending. (see command
 .Cm append ,
-.Cm xport
+.Cm export
 and
 .Cm import )
 .It Cm info Op index
