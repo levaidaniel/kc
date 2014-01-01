@@ -241,6 +241,13 @@ commands_init(command **commands)
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
+	(*commands)->name = "export";
+	(*commands)->usage = "export -k <filename> [-P kdf [-m cipher mode [-c keychain]]]";
+	(*commands)->help = "Export the database to a kc compatible encrypted database file named 'filename' (if no extension specified, \".kcd\" will be appended). When specifying 'keychain', export only that keychain. 'keychain' can be the keychain's index number or name. Index number takes priority when addressing a keychain. 'kdf' and 'cipher mode' can be used to specify a different KDF and/or cipher mode to use while exporting the database.\nSee command 'dump', 'import' and 'append'.";
+	(*commands)->fn = cmd_export;
+	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
+	(*commands) = (*commands)->next;
+
 	(*commands)->name = "help";
 	(*commands)->usage = "help [command]";
 	(*commands)->help = "Print application help or describe a 'command'.";
@@ -320,13 +327,6 @@ commands_init(command **commands)
 	(*commands)->usage = "Xclip <index> [line]";
 	(*commands)->help = "Copy the value of 'index' to the CLIPBOARD X11 selection (aka.: CTRL+c - CTRL+v). 'index' is the key's index number in the current keychain. 'line' can be used to specify the line number to copy, if 'index' is a multiline value (defaults to 1).";
 	(*commands)->fn = cmd_clipboard;
-	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
-	(*commands) = (*commands)->next;
-
-	(*commands)->name = "export";
-	(*commands)->usage = "export -k <filename> [-P kdf [-m cipher mode [-c keychain]]]";
-	(*commands)->help = "Export the database to a kc compatible encrypted database file named 'filename' (if no extension specified, \".kcd\" will be appended). When specifying 'keychain', export only that keychain. 'keychain' can be the keychain's index number or name. Index number takes priority when addressing a keychain. 'kdf' and 'cipher mode' can be used to specify a different KDF and/or cipher mode to use while exporting the database.\nSee command 'dump', 'import' and 'append'.";
-	(*commands)->fn = cmd_export;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
