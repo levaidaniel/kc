@@ -5,8 +5,8 @@ set -e
 
 echo "test => $0"
 
-if ! ${KC_RUN} -v |grep -E -q -e '^Compiled with (Readline|Editline)(, PCRE)*(, SCRYPT)* support\.$';then
-	echo "$0 - Not running without PCRE support compiled in!"
+if ! ${KC_RUN} -v |grep -E -q -e '^Compiled with (Readline|Editline)(, PCRE)+(, SCRYPT)* support\.$';then
+	echo "$0 - No PCRE support was compiled in; *not testing*!"
 	exit 0
 fi
 
