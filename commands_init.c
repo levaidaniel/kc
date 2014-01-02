@@ -58,7 +58,7 @@ commands_init(command **commands)
 
 		(*commands)->name = "cdel";
 		(*commands)->usage = "cdel <keychain>";
-		(*commands)->help = "Delete a keychain. 'keychain' can be the keychain's index number or name. Index number takes priority when addressing a keychain.";
+		(*commands)->help = "Delete a keychain. 'keychain' can be the keychain's index number or name. Index number takes priority when addressing a keychain.\nSee command 'ccdel'";
 		(*commands)->fn = cmd_cdel;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
@@ -188,7 +188,7 @@ commands_init(command **commands)
 
 	(*commands)->name = "c";
 	(*commands)->usage = "c <keychain>";
-	(*commands)->help = "Change the current keychain. 'keychain' can be the keychain's index number or name. Index number takes priority when addressing a keychain.";
+	(*commands)->help = "Change the current keychain. 'keychain' can be the keychain's index number or name. Index number takes priority when addressing a keychain.\nSee command 'cc'";
 	(*commands)->fn = cmd_c;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
