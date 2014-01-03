@@ -38,8 +38,8 @@ cmd_clipboard(const char *e_line, command *commands)
 	xmlNodePtr		db_node = NULL;
 	xmlChar			*key = NULL, *value = NULL, *value_nl = NULL, *value_line = NULL;
 	char			*cmd_line = NULL, *cmd = NULL, *inv = NULL;
-	unsigned long int	idx = 0;
-	long int		line_req = 1, lines = 0, i = 0, value_line_len = 0, value_len = 0;
+	unsigned long int	idx = 0, line_req = 1, lines = 0, i = 0;
+	long int		value_line_len = 0, value_len = 0;
 	unsigned char		app = 0;	/* 1=tmux, 2=xclip PRIMARY, 3=xclip CLIPBOARD */
 
 	char		**fork_argv = NULL;
@@ -93,7 +93,7 @@ cmd_clipboard(const char *e_line, command *commands)
 	cmd = strtok(NULL, " ");	/* second, optional parameter, the requested line number */
 	if (cmd) {
 		errno = 0;
-		line_req = strtol((const char *)cmd, &inv, 10);
+		line_req = strtoul((const char *)cmd, &inv, 10);
 		if (inv[0] != '\0'  ||  errno != 0  ||  cmd[0] == '-') {
 			puts(commands->usage);
 
