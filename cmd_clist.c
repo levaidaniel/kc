@@ -36,7 +36,7 @@ cmd_clist(const char *e_line, command *commands)
 	xmlNodePtr	db_node = NULL;
 	xmlChar		*name = NULL;
 
-	long int	idx = 0;
+	unsigned long int	idx = 0;
 
 
 	db_node = keychain->parent->children;
@@ -47,7 +47,7 @@ cmd_clist(const char *e_line, command *commands)
 	while (db_node  &&  idx < ITEMS_MAX) {
 		if (db_node->type == XML_ELEMENT_NODE) {	/* we only care about ELEMENT nodes */
 			name = xmlGetProp(db_node, BAD_CAST "name");
-			printf("%ld. %s\n", idx++, name);
+			printf("%lu. %s\n", idx++, name);
 			xmlFree(name); name = NULL;
 		}
 

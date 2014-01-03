@@ -183,9 +183,9 @@ cmd_swap(const char *e_line, command *commands)
 	free(modified); modified = NULL;
 
 	if (insert)
-		printf("Key %ld was inserted at %ld\n", idx_src, idx_dst);
+		printf("Key %lu was inserted at %lu\n", idx_src, idx_dst);
 	else
-		printf("Key %ld was swapped with %ld\n", idx_src, idx_dst);
+		printf("Key %lu was swapped with %lu\n", idx_src, idx_dst);
 
 	puts("Key indices may have been changed. Make sure to 'list', before using them again!");
 

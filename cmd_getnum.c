@@ -38,7 +38,7 @@
 	(lines > 1 ? digit_length(idx) + digit_length(lines) + 4 : 0)
 
 
-int	digit_length(int);
+unsigned long int	digit_length(unsigned long int);
 
 
 extern db_parameters	db_params;
@@ -57,7 +57,8 @@ cmd_getnum(const unsigned long int idx, const unsigned long int spice)
 	xmlNodePtr	db_node = NULL;
 	xmlChar		*key = NULL, *value = NULL, *value_nl = NULL, *line = NULL, *line_randomed = NULL, *tmp = NULL;
 
-	long int	lines = 0, i = 0, value_len = 0, line_len = 0, line_randomed_len = 0, erase_len = 0, line_req = 1;
+	long int		i = 0, value_len = 0, line_len = 0, line_randomed_len = 0, erase_len = 0;
+	unsigned long int	lines = 0, line_req = 1;
 	char		rc = 0;
 	char		*rand_str = NULL;
 	char		**fork_argv = NULL;
@@ -105,7 +106,7 @@ cmd_getnum(const unsigned long int idx, const unsigned long int spice)
 
 			/* if multi-line, prefix the line with a line number */
 			if (lines > 1)
-				printf("[%ld/%ld] ", line_req, lines);
+				printf("[%lu/%lu] ", line_req, lines);
 
 			/* get a line out from the value */
 			line = get_line(value_nl, line_req);
@@ -341,10 +342,10 @@ cmd_getnum(const unsigned long int idx, const unsigned long int spice)
 } /* cmd_getnum() */
 
 
-int
-digit_length(int digit)
+unsigned long int
+digit_length(unsigned long int digit)
 {
-	int	length = 1;
+	unsigned long int	length = 1;
 
 
 	while ((digit / 10) != 0) {

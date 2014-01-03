@@ -174,7 +174,7 @@ cmd_list(const char *e_line, command *commands)
 		}
 
 		key = xmlGetProp(db_node, BAD_CAST "name");
-		printf("%ld. %s\n", idx++, key);
+		printf("%lu. %s\n", idx++, key);
 		xmlFree(key); key = NULL;
 
 		db_node = db_node->next;

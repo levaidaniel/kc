@@ -320,7 +320,7 @@ parse_randoms(const xmlChar *line)
  * Get the idx'th line from the value.
  */
 xmlChar *
-get_line(const xmlChar *value_nl, const long int idx)
+get_line(const xmlChar *value_nl, const unsigned long int idx)
 {
 	xmlChar	*line = NULL;
 

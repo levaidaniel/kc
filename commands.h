@@ -47,7 +47,7 @@ xmlNodePtr	find_key(const unsigned long int);
 void		_rl_push_buffer(void);
 char		*get_random_str(const unsigned int, const unsigned char);
 xmlChar		*parse_randoms(const xmlChar *);
-xmlChar		*get_line(const xmlChar *, const long int);
+xmlChar		*get_line(const xmlChar *, const unsigned long int);
 xmlChar		*parse_newlines(const xmlChar *, const unsigned char);
 unsigned long int count_elements(xmlNodePtr);
 void		larg(char *, char ***, int *);

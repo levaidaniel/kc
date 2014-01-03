@@ -51,8 +51,8 @@ cmd_searchre(const char *e_line, command *commands)
 
 	const char	*pattern = NULL;
 	char		chain = 0, searchall = 0, searchinv = 0, icase = 0;
-	long int	idx = 0;
 	int		search = -1, hits = 0, offset = 0;
+	unsigned long int	idx = 0;
 
 
 	/* Command name */
@@ -161,7 +161,7 @@ cmd_searchre(const char *e_line, command *commands)
 					xmlFree(cname); cname = NULL;
 				}
 
-				printf("%ld. ", idx);	/* prefix the name with the index number */
+				printf("%lu. ", idx);	/* prefix the name with the index number */
 				printf("%s\n", key);	/* this is the name of the entry */
 			} else
 				if (getenv("KC_DEBUG"))
