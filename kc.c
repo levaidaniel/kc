@@ -635,8 +635,12 @@ cmd_match(const char *e_line)
 			if (inv[0] == '\0'  &&  errno == 0  &&  cmd[0] != '-') {
 				if (spice > 5)	/* 5 is the limit of spice */
 					spice = 5;
-			} else
-				spice = 5;
+			} else {
+				puts("<number> [spice]");
+
+				free(line); line = NULL;
+				return;
+			}
 		}
 
 		/* We got a key index, display the value */
