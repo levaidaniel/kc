@@ -28,9 +28,9 @@ else
 fi
 
 if [ "$encryption" = 'Encryption: aes256, cbc' ];then
-	echo "$0 test ok (cipher mode)!"
+	echo "$0 test ok (cipher and mode)!"
 else
-	echo "$0 test failed (cipher mode)!"
+	echo "$0 test failed (cipher and mode)!"
 	exit 1
 fi
 
