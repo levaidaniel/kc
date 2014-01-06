@@ -28,6 +28,8 @@ else
 fi
 ' EXIT
 
+export SHA1_INVALID_INDEX='812e96292afbdf1b0cebb40a7db6a7ffa2e52dfe'
+export SHA1_KEYCHAIN_NOT_FOUND='f00ecea88ac8e16851779e4230ffd0871c453d40'
 
 sh regress/create_db.sh; COUNTER=$(( COUNTER + 1 ))	# 1
 sh regress/cmd_quit.sh; COUNTER=$(( COUNTER + 1 ))	# 2

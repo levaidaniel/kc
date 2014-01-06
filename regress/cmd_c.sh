@@ -30,7 +30,7 @@ fi
 printf "cnew 10\ndescription\nwrite\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}
 printf "c 10\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}
 SHA1=$(printf "c 10\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." |$SHA1_BIN |cut -d' ' -f1)
-if [ "${SHA1}" = 'f00ecea88ac8e16851779e4230ffd0871c453d40' ];then
+if [ "${SHA1}" = "${SHA1_KEYCHAIN_NOT_FOUND}" ];then
 	echo "$0 test ok (change chain #2)!"
 else
 	echo "$0 test failed (change chain #2)!"
@@ -51,7 +51,7 @@ printf "ccdel 10\nyes\nwrite\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}
 
 printf "c -1\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}
 SHA1=$(printf "c -1\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." |$SHA1_BIN |cut -d' ' -f1)
-if [ "${SHA1}" = 'f00ecea88ac8e16851779e4230ffd0871c453d40' ];then
+if [ "${SHA1}" = "${SHA1_KEYCHAIN_NOT_FOUND}" ];then
 	echo "$0 test ok (change nonexistent '-1' chain #1)!"
 else
 	echo "$0 test failed (change nonexistent '-1' chain #1)!"
@@ -72,7 +72,7 @@ printf "ccdel -1\nyes\nwrite\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}
 
 printf "c 999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}
 SHA1=$(printf "c 999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = 'f00ecea88ac8e16851779e4230ffd0871c453d40' ];then
+if [ "${SHA1}" = "${SHA1_KEYCHAIN_NOT_FOUND}" ];then
 	echo "$0 test ok (nonexistent too big chain)!"
 else
 	echo "$0 test failed (nonexistent too big chain)!"
@@ -81,7 +81,7 @@ fi
 
 printf "c -999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}
 SHA1=$(printf "c -999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = 'f00ecea88ac8e16851779e4230ffd0871c453d40' ];then
+if [ "${SHA1}" = "${SHA1_KEYCHAIN_NOT_FOUND}" ];then
 	echo "$0 test ok (nonexistent too small chain)!"
 else
 	echo "$0 test failed (nonexistent too small chain)!"
@@ -91,7 +91,7 @@ fi
 
 printf "c nonexistent\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}
 SHA1=$(printf "c nonexistent\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = 'f00ecea88ac8e16851779e4230ffd0871c453d40' ];then
+if [ "${SHA1}" = "${SHA1_KEYCHAIN_NOT_FOUND}" ];then
 	echo "$0 test ok (nonexistent chain)!"
 else
 	echo "$0 test failed (nonexistent chain)!"

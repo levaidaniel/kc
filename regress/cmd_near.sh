@@ -62,7 +62,7 @@ else
 	exit 1
 fi
 
-if [ "$NEAR93_SHA1" = '812e96292afbdf1b0cebb40a7db6a7ffa2e52dfe' ];then
+if [ "$NEAR93_SHA1" = "${SHA1_INVALID_INDEX}" ];then
 	echo "$0 test ok (near 9 3)!"
 else
 	echo "$0 test failed (near 9 3)!"
