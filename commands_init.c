@@ -275,6 +275,13 @@ commands_init(command **commands)
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
 
+	(*commands)->name = "near";
+	(*commands)->usage = "near index [context]";
+	(*commands)->help = "Display the keyname of key at 'index' position, and also print the surrounding keys' name in at most 'context' vicinity. Only the keys' names and index numbers get displayed.";
+	(*commands)->fn = cmd_near;
+	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
+	(*commands) = (*commands)->next;
+
 	(*commands)->name = "quit";
 	(*commands)->usage = "quit";
 	(*commands)->help = "Quit the program. If the database has been modified, then ask if it should be saved.";

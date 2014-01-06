@@ -56,3 +56,4 @@ sh regress/cmd_write.sh; COUNTER=$(( COUNTER + 1 ))	# 24
 sh regress/maxpassword.sh; COUNTER=$(( COUNTER + 1 ))	# 25
 sh regress/cmd_passwd.sh; COUNTER=$(( COUNTER + 1 ))	# 26
 sh regress/cmd_status.sh; COUNTER=$(( COUNTER + 1 ))	# 27
+sh regress/cmd_near.sh; COUNTER=$(( COUNTER + 1 ))	# 28

@@ -215,6 +215,12 @@ suffix (eg.: /*): search in every keychain.
 suffix (eg.: /i): case of characters doesn't matter.
 .Pp
 You can combine the modifiers.
+.It Cm near Ar index Op context
+Display the keyname of key at
+.Ar index
+position, and also print the surrounding keys' name in at most
+.Ar context
+vicinity. Only the keys' names and index numbers get displayed.
 .It Cm csearch Ar string
 Search for
 .Ar string

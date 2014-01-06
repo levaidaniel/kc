@@ -32,6 +32,7 @@ void cmd_help(const char *, command *);
 void cmd_import(const char *, command *);
 void cmd_info(const char *, command *);
 void cmd_list(const char *, command *);
+void cmd_near(const char *, command *);
 void cmd_new(const char *, command *);
 void cmd_passwd(const char *, command *);
 void cmd_quit(const char *, command *);

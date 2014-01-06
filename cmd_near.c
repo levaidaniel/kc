@@ -111,8 +111,7 @@ cmd_near(const char *e_line, command *commands)
 			continue;
 		}
 
-		printf("?%lu\n", idx - context); /* XXX */
-		if (i >= idx - context) {
+		if (i >= idx - (context > idx ? idx : context)) {
 			key = xmlGetProp(db_node, BAD_CAST "name");
 			printf(" %lu. %s\n", i, key);
 			xmlFree(key); key = NULL;
@@ -126,10 +125,10 @@ cmd_near(const char *e_line, command *commands)
 
 	/* The requested key ... */
 	while (db_node  &&  db_node->type != XML_ELEMENT_NODE)
-		db_node = db_node->next;
+		db_node = db_node->next;	/* The very next element node */
 
 	key = xmlGetProp(db_node, BAD_CAST "name");
-	printf("=%lu. %s\n", i, key);
+	printf("=%lu. %s\n", i++, key);
 	xmlFree(key); key = NULL;
 
 
@@ -141,7 +140,7 @@ cmd_near(const char *e_line, command *commands)
 			continue;
 		}
 
-		if (i <= idx + context  &&  i > idx) {
+		if (i <= idx + context) {
 			key = xmlGetProp(db_node, BAD_CAST "name");
 			printf(" %lu. %s\n", i, key);
 			xmlFree(key); key = NULL;
