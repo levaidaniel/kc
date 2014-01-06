@@ -127,10 +127,19 @@ cmd_near(const char *e_line, command *commands)
 	while (db_node  &&  db_node->type != XML_ELEMENT_NODE)
 		db_node = db_node->next;	/* The very next element node */
 
+
+	/* Just to be safe... */
+	if (!db_node)
+		return;
+
+
 	key = xmlGetProp(db_node, BAD_CAST "name");
-	printf("=%lu. %s\n", i++, key);
+	printf("=%lu. %s\n", i, key);
 	xmlFree(key); key = NULL;
 
+
+	i++;
+	db_node = db_node->next;
 
 	/* After ... */
 	while (db_node) {

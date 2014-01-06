@@ -27,35 +27,35 @@ NEAR33_SHA1=$(printf "near 3 3\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |g
 NEAR73_SHA1=$(printf "near 7 3\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." |$SHA1_BIN |cut -d' ' -f1)
 NEAR93_SHA1=$(printf "near 9 3\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." |$SHA1_BIN |cut -d' ' -f1)
 
-if [ "$NEAR0_SHA1" = 'd8ed4d666ce137c19fcc145781978ac84d46221b' ];then
+if [ "$NEAR0_SHA1" = 'e50b1ff17587d994b1221339f92c5f0e6eb9b410' ];then
 	echo "$0 test ok (near 0)!"
 else
 	echo "$0 test failed (near 0)!"
 	exit 1
 fi
 
-if [ "$NEAR1_SHA1" = 'c7b7d0f35a12b8aea88daf3689524a91bc42e402' ];then
+if [ "$NEAR1_SHA1" = 'a4da4ae646200bd3363529520caf4b05fe616a9a' ];then
 	echo "$0 test ok (near 1)!"
 else
 	echo "$0 test failed (near 1)!"
 	exit 1
 fi
 
-if [ "$NEAR12_SHA1" = '8a317ddf8e0ed067872f017d96774eff83562218' ];then
+if [ "$NEAR12_SHA1" = 'aa0e1ebc0fbcb796648a738c60c18fd3c487267b' ];then
 	echo "$0 test ok (near 1 2)!"
 else
 	echo "$0 test failed (near 1 2)!"
 	exit 1
 fi
 
-if [ "$NEAR33_SHA1" = 'd67d4ace25a94a0dd50a059dc8c4c5e99189c38c' ];then
+if [ "$NEAR33_SHA1" = 'ca979ba5b064492a4d95bf0372d205296e104e3a' ];then
 	echo "$0 test ok (near 3 3)!"
 else
 	echo "$0 test failed (near 3 3)!"
 	exit 1
 fi
 
-if [ "$NEAR73_SHA1" = '01583da4c9a6b7ce5f447b7c3f47578e8f24a82b' ];then
+if [ "$NEAR73_SHA1" = 'd7f861ecdf6d6f158932744b6f184b5f7280729e' ];then
 	echo "$0 test ok (near 7 3)!"
 else
 	echo "$0 test failed (near 7 3)!"
