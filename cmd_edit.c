@@ -102,8 +102,6 @@ cmd_edit(const char *e_line, command *commands)
 
 #ifndef _READLINE
 		el_push(e, (const char *)key);
-		xmlFree(key); key = NULL;
-
 		e_line = el_gets(e, &e_count);
 #else
 		_rl_helper_var = key;
@@ -111,6 +109,8 @@ cmd_edit(const char *e_line, command *commands)
 		e_line = readline(prompt_str());
 		rl_pre_input_hook = NULL;
 #endif
+		xmlFree(key); key = NULL;
+
 		if (e_line) {
 			key = xmlStrdup(BAD_CAST e_line);
 #ifndef _READLINE
