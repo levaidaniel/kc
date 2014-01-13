@@ -14,7 +14,11 @@ struct command {
 
 void commands_init(command **);
 
+#ifndef _READLINE
 void cmd_match(const char *);
+#else
+void cmd_match(char *);
+#endif
 
 void cmd_c(const char *, command *);
 void cmd_cdel(const char *, command *);

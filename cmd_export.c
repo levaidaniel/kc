@@ -210,8 +210,12 @@ cmd_export(const char *e_line, command *commands)
 			goto exiting;
 		}
 
-		if (strncmp(e_line, "yes", 3) != 0)
+		if (strncmp(e_line, "yes", 3) != 0) {
+#ifdef _READLINE
+			free((char *)e_line); e_line = NULL;
+#endif
 			goto exiting;
+		}
 	}
 
 	if (dump) {

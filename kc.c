@@ -70,8 +70,10 @@ main(int argc, char *argv[])
 {
 #ifndef _READLINE
 	int		e_count = 0;
-#endif
 	const char	*e_line = NULL;
+#else
+	char		*e_line = NULL;
+#endif
 	char		*line = NULL;
 
 	char		*created = NULL;
@@ -576,11 +578,12 @@ main(int argc, char *argv[])
 #endif
 		if (e_line) {
 			if (strlen(e_line) > 0) {
-				line = strdup(e_line);
 #ifndef _READLINE
+				line = strdup(e_line);
 				line[strlen(line) - 1] = '\0';		/* remove the newline character from the end */
 				history(eh, &eh_ev, H_ENTER, line);
 #else
+				line = e_line; e_line = NULL;
 				add_history(line);
 #endif
 				cmd_match(line);
@@ -597,7 +600,11 @@ main(int argc, char *argv[])
 
 
 void
+#ifndef _READLINE
 cmd_match(const char *e_line)
+#else
+cmd_match(char *e_line)
+#endif
 {
 	unsigned long int	idx = 0, spice = 0;
 	char			*line = NULL, *cmd = NULL, *inv = NULL;

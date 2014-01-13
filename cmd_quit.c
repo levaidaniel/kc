@@ -84,12 +84,18 @@ cmd_quit(const char *e_line, command *commands)
 
 			if (db_params.dirty) {
 				puts("Database write was not successful; can not save and exit!");
+#ifdef _READLINE
+				free((char *)e_line); e_line = NULL;
+#endif
 				return;
 			}
 		} else if (strncasecmp(e_line, "no", 2) == 0) {
 			puts("Changes were NOT saved.");
 		} else {
 			puts("Invalid answer, not exiting.");
+#ifdef _READLINE
+			free((char *)e_line); e_line = NULL;
+#endif
 			return;
 		}
 	}

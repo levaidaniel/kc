@@ -80,6 +80,8 @@ cmd_cedit(const char *e_line, command *commands)
 		name = xmlStrdup(BAD_CAST e_line);
 #ifndef _READLINE
 		name[xmlStrlen(name) - 1] = '\0';	/* remove the newline */
+#else
+		free((char *)e_line); e_line = NULL;
 #endif
 	} else {
 #ifndef _READLINE
@@ -126,6 +128,8 @@ cmd_cedit(const char *e_line, command *commands)
 		description = xmlStrdup(BAD_CAST e_line);
 #ifndef _READLINE
 		description[xmlStrlen(description) - 1] = '\0';	/* remove the newline */
+#else
+		free((char *)e_line); e_line = NULL;
 #endif
 	} else {
 #ifndef _READLINE

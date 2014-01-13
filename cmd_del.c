@@ -143,6 +143,9 @@ cmd_del(const char *e_line, command *commands)
 			db_params.dirty = 1;
 		}
 
+#ifdef _READLINE
+		free((char *)e_line); e_line = NULL;
+#endif
 		xmlFree(key); key = NULL;
 	} else
 		puts("Invalid index!");

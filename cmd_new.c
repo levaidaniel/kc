@@ -100,6 +100,8 @@ cmd_new(const char *e_line, command *commands)
 			key = xmlStrdup(BAD_CAST e_line);
 #ifndef _READLINE
 			key[xmlStrlen(key) - 1] = '\0';	/* remove the newline */
+#else
+			free((char *)e_line); e_line = NULL;
 #endif
 		} else {
 #ifndef _READLINE
@@ -135,6 +137,8 @@ cmd_new(const char *e_line, command *commands)
 		value_rR = xmlStrdup(BAD_CAST e_line);
 #ifndef _READLINE
 		value_rR[xmlStrlen(value_rR) - 1] = '\0';	/* remove the newline */
+#else
+		free((char *)e_line); e_line = NULL;
 #endif
 	} else {
 #ifndef _READLINE
