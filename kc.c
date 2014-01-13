@@ -577,19 +577,22 @@ main(int argc, char *argv[])
 		e_line = readline(prompt_str());
 #endif
 		if (e_line) {
-			if (strlen(e_line) > 0) {
 #ifndef _READLINE
-				line = strdup(e_line);
+			line = strdup(e_line);
+#else
+			line = e_line; e_line = NULL;
+#endif
+			if (strlen(line) > 0) {
+#ifndef _READLINE
 				line[strlen(line) - 1] = '\0';		/* remove the newline character from the end */
 				history(eh, &eh_ev, H_ENTER, line);
 #else
-				line = e_line; e_line = NULL;
 				add_history(line);
 #endif
 				cmd_match(line);
-
-				free(line); line = NULL;
 			}
+
+			free(line); line = NULL;
 		} else
 			cmd_quit(NULL, NULL);
 	} while (1);
