@@ -426,6 +426,7 @@ main(int argc, char *argv[])
 		snprintf(created, TIME_MAXLEN, "%d", (int)time(NULL));
 
 		xmlNewProp(keychain, BAD_CAST "created", BAD_CAST created);
+		free(created); created = NULL;
 
 
 		xmlAddChild(keychain, xmlNewText(BAD_CAST "\n\t"));
