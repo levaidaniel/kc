@@ -20,15 +20,25 @@ Compile:
   $ gmake -f Makefile.linux install
 
 Options:
-HAVE_PCRE=y	This will turn on regexp support in searches, and needs libcpre.
+HAVE_PCRE=y		This will turn on regexp support in searches, and needs libcpre.
 HAVE_LIBSCRYPT=y	This will turn on scrypt KDF support.
+BUNDLED_BCRYPT=y	To use the packaged bcrypt implementation (that comes
+			from OpenBSD). Basically, this must be used everywhere
+			but on OpenBSD.
+OS_OPENBSD=y		Only in Makefile, and currently this only makes the
+			binary link against OpenBSD's libutil (to use the
+			bcrypt_pbkdf() function).
 
 EDITLINE=y	Use libedit as the line editing function. This needs libedit.
 READLINE=y	Use readline as the line editing function. This needs libreadline.
 
 		Makefile.linux uses Readline and Makefile uses Editline by default.
 
-Example:
-  $ make HAVE_PCRE=yes && make install
-or
-  $ gmake -f Makefile.linux HAVE_PCRE=1 EDITLINE=1 && gmake -f Makefile.linux install
+Linux example:
+  $ gmake -f Makefile.linux HAVE_PCRE=1 BUNDLED_BCRYPT=yes HAVE_LIBSCRYPT=1 && gmake -f Makefile.linux install
+
+OpenBSD example:
+  $ make HAVE_PCRE=yes OS_OPENBSD=1 && make install
+
+FreeBSD example:
+  $ make HAVE_PCRE=yes HAVE_LIBSCRYPT=1 BUNDLED_BCRYPT=y && make install
