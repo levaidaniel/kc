@@ -469,16 +469,12 @@ main(int argc, char *argv[])
 			puts("Could not find root node!");
 			quit(EXIT_FAILURE);
 		}
-		if (!db_root->children) {
+		if (!db_root->children  ||  !db_root->children->next) {
 			puts("Could not find first keychain!");
 			quit(EXIT_FAILURE);
 		}
 
 		keychain = db_root->children->next;
-		if (!keychain) {
-			puts("Could not find first keychain!");
-			quit(EXIT_FAILURE);
-		}
 	}
 	free(buf); buf = NULL;
 
