@@ -19,6 +19,11 @@ Compile:
   $ gmake -f Makefile.linux <OPTIONS>
   $ gmake -f Makefile.linux install
 
+- Cygwin:
+  $ patch -p1 <  <Makefile.linux patch from github wiki>
+  $ make -f Makefile.linux <OPTIONS>
+  $ make -f Makefile.linux install
+
 Options:
 HAVE_PCRE=y		This will turn on regexp support in searches, and needs libcpre.
 HAVE_LIBSCRYPT=y	This will turn on scrypt KDF support.
