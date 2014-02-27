@@ -6,7 +6,7 @@ set -e
 echo "test => $0"
 
 case "$(uname -s)" in
-	Linux)
+	Linux|CYGWIN*)
 		SHA1_BIN=$(which sha1sum)
 	;;
 	*BSD)

@@ -11,7 +11,7 @@ if ! ${KC_RUN} -v |grep -E -q -e '^Compiled with (Readline|Editline)(, PCRE)+(, 
 fi
 
 case "$(uname -s)" in
-	Linux)
+	Linux|CYGWIN*)
 		SHA1_BIN=$(which sha1sum)
 	;;
 	*BSD)
