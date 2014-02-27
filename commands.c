@@ -34,7 +34,7 @@
 #include <util.h>
 #endif
 
-#ifdef __linux__
+#if defined(__linux__)  ||  defined(__CYGWIN__)
 #include <sys/file.h>
 #include <bsd/readpassphrase.h>
 #include <stdint.h>
@@ -148,7 +148,7 @@ get_random_str(const unsigned int length, const unsigned char mode)
 {
 	int		i = 0;
 	int		rnd_file = -1;
-#ifdef __linux__
+#if defined(__linux__)  ||  defined(__CYGWIN__)
 	char		*rnd_dev = "/dev/urandom";
 #else
 	char		*rnd_dev = "/dev/random";

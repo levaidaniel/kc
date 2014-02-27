@@ -9,7 +9,7 @@
 #include <sys/stat.h>
 #include <sys/param.h>
 
-#ifdef __linux__
+#if defined(__linux__)  ||  defined(__CYGWIN__)
 #include <bsd/string.h>
 #include <limits.h>
 #endif

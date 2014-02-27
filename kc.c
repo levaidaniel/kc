@@ -33,7 +33,7 @@
 #include <fcntl.h>
 #endif
 
-#ifdef __linux__
+#if defined(__linux__)  ||  defined(__CYGWIN__)
 #include <sys/file.h>
 #endif
 
