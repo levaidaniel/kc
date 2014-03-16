@@ -90,9 +90,9 @@ bcrypt_hash(uint8_t *sha2pass, uint8_t *sha2salt, uint8_t *out)
 	}
 
 	/* zap */
-	memset(ciphertext, 0, sizeof(ciphertext));
-	memset(cdata, 0, sizeof(cdata));
-	memset(&state, 0, sizeof(state));
+	explicit_bzero(ciphertext, sizeof(ciphertext));
+	explicit_bzero(cdata, sizeof(cdata));
+	explicit_bzero(&state, sizeof(state));
 }
 
 int
@@ -158,8 +158,8 @@ bcrypt_pbkdf(const unsigned char *pass, size_t passlen, const uint8_t *salt, siz
 	}
 
 	/* zap */
-	memset(&ctx, 0, sizeof(ctx));
-	memset(out, 0, sizeof(out));
+	explicit_bzero(&ctx, sizeof(ctx));
+	explicit_bzero(out, sizeof(out));
 
 	return 0;
 }
