@@ -59,6 +59,29 @@ compatible XML database, which can be imported using the
 .Cm importxml
 command.
 .Pp
+When saving the database (
+.Cm write
+command)
+.Nm
+will create a temporary file (under the same directory as the opened database file), and will first try to save the whole database to that temporary database file. When this succeeds, only then will
+.Nm
+replace the old database with the new one, so you will always have a usable (but potentially older) version of you database file intact.
+.Pp
+.Em NOTE :
+It is considered a good practice, to periodically manually backup the database file(s) you use with
+.Nm .
+This could just mean a simple:
+.Bd -literal -offset |||
+$ cp ~/.kc/default ~/.kc/default-bkp
+.Ed
+.Pp
+.Nm
+doesn't try excessively hard to recover from hard and/or non-recoverable errors (OS, memory, disk etc...), and in some cases this could mean that it will simply exit with an appropriate error message. No need to worry, but keep this in mind like you would with a common word processor or text editor and save (
+.Cm write
+) periodically, for example when you edit many keys at once. See also the
+.Em CAVEATS
+section regarding this.
+.Pp
 .Em NOTE :
 Currently there is no character set conversion taking place in the program. In this case this means you must be ready to display anything you type in. If somehow you still end up with texts you can not display properly, and for whatever reason you can not edit them in
 .Nm ,
@@ -669,6 +692,9 @@ as the cipher mode, there is no specific sign if you enter a wrong password duri
 will not be able to open it.
 .Pp
 There is no character conversion taking place for the input fields.
+.Pp
+.Nm
+will exit without saving the database (with a corresponding error message) when an out-of-memory condition arises.
 .Sh AUTHOR
 .Nm
 was written by
