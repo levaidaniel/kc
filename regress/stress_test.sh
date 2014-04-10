@@ -40,7 +40,7 @@ case "$(uname -s)" in
 esac
 
 
-KC_RUN=${KC_RUN:-'./kc'}
+export KC_RUN=${KC_RUN:-'./kc'}
 
 
 if ${KC_RUN} -v |grep -E -q -e '^Compiled with Readline(, PCRE)*(, SCRYPT)* support\.$';then
