@@ -244,8 +244,10 @@ parse_randoms(const xmlChar *line)
 	int	i = 0, j = 0, ret_len = 0, line_len = 0;
 
 
-	if (!line)
-		return(xmlStrdup(BAD_CAST ""));
+	if (!line) {
+		ret = xmlStrdup(BAD_CAST "");
+		return(ret);
+	}
 
 
 	line_len = xmlStrlen(line);
@@ -364,8 +366,10 @@ parse_newlines(const xmlChar *line, const unsigned char dir)		/* dir(direction):
 	int		i = 0, j = 0, nlnum = 0, ret_len = 0, line_len = 0;
 
 
-	if (!line)
-		return(xmlStrdup(BAD_CAST ""));
+	if (!line) {
+		ret = xmlStrdup(BAD_CAST "");
+		return(ret);
+	}
 
 	line_len = xmlStrlen(line);
 

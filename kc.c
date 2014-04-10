@@ -951,6 +951,7 @@ cmd_generator(const char *text, int state)
 	xmlNodePtr	db_node = NULL;
 	xmlChar		*cname = NULL;
 
+	char		*cmd = NULL;
 	command		*commands = commands_first;
 	long int	idx = 0;
 
@@ -964,8 +965,10 @@ cmd_generator(const char *text, int state)
 			if (idx < state)
 				idx++;
 			else
-				if (strncmp(text, commands->name, strlen(text)) == 0)
-					return(strdup(commands->name));
+				if (strncmp(text, commands->name, strlen(text)) == 0) {
+					cmd = strdup(commands->name);
+					return(cmd);
+				}
 
 
 			commands = commands->next;	/* iterate through the linked list */
