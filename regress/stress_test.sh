@@ -64,7 +64,7 @@ typeset -i offset=0
 # new
 i=0
 while [ $i -lt ${loop} ];do
-	printf "new $i\r" >/dev/stderr
+	printf "new $i\r" >&2
 
 	# random mode of command invocation for 'new'
 	if [ $(( $RANDOM % 2 )) -eq 0 ];then
@@ -102,7 +102,7 @@ fi
 # insert
 i=0
 while [ $i -lt $(( ${loop} + 2 )) ];do
-	printf "insert #$i\r" >/dev/stderr
+	printf "insert #$i\r" >&2
 
 	printf "insert 0 $(( ${loop} + 1 ))\n"
 
@@ -136,7 +136,7 @@ fi
 offset=2
 i=$(( 0 + ${offset} ))
 while [ $i -lt $(( ${loop} + ${offset} )) ];do
-	printf "edit $(( $i - ${offset} ))\r" >/dev/stderr
+	printf "edit $(( $i - ${offset} ))\r" >&2
 
 	if [ ${READLINE} ];then
 		printf "edit $i\nedited_\nedited_\n"
@@ -179,8 +179,8 @@ while [ $i -ge ${offset} ];do
 	while [ ${todel} -lt ${offset} ]  ||  [ ${todel} -gt $i ];do
 		todel=$RANDOM
 	done
-	printf "           \r" >/dev/stderr
-	printf "del $i\r" >/dev/stderr
+	printf "           \r" >&2
+	printf "del $i\r" >&2
 
 	printf "del ${todel}\nyes\n"
 
