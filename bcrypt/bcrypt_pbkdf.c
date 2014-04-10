@@ -26,6 +26,7 @@
 #ifdef __linux__
 #include <bsd/string.h>
 #endif
+void	explicit_bzero(void *, size_t);
 
 /*
  * pkcs #5 pbkdf2 implementation using the "bcrypt" hash
