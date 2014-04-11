@@ -88,6 +88,9 @@ Functional changes, improvements:
   described, but without opening the key; this works directly from the CLI.
   A line number can also be specified when dealing with multi-line values.
 
+- New command 'near'. Display the key with the given index and its surrounding
+  keys. It gives context around a key with a known index number.
+
 - 'passwd' command can now change KDF.
 
 - 'xport' command has been renamed, and it's now called 'export'.
@@ -110,3 +113,11 @@ Functional changes, improvements:
 - Project moved to github.
 
 - General documentation improvements and extensions.
+
+
+Bug fixes:
+- Plug in leaks.
+
+- Cygwin compatibility fixes.
+
+- Documentation fixes.
