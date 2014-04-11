@@ -40,7 +40,7 @@ cmd_help(const char *e_line, command *commands)
 
 	commands = commands_first;
 
-	line = strdup(e_line);
+	line = strdup(e_line); malloc_check(line);
 
 	strtok(line, " ");			/* remove the command from the line */
 	got_command = strtok(NULL, " ");	/* assign the command's parameter */

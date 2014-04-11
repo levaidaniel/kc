@@ -53,7 +53,7 @@ cmd_edit(const char *e_line, command *commands)
 	unsigned long int	idx = 0;
 
 
-	line = strdup(e_line);
+	line = strdup(e_line); malloc_check(line);
 
 
 	cmd = strtok(line, " ");
@@ -112,7 +112,7 @@ cmd_edit(const char *e_line, command *commands)
 		xmlFree(key); key = NULL;
 
 		if (e_line) {
-			key = xmlStrdup(BAD_CAST e_line);
+			key = xmlStrdup(BAD_CAST e_line); malloc_check(key);
 #ifndef _READLINE
 			key[xmlStrlen(key) - 1] = '\0';	/* remove the newline */
 #else
@@ -155,7 +155,7 @@ cmd_edit(const char *e_line, command *commands)
 		rl_pre_input_hook = NULL;
 #endif
 		if (e_line) {
-			value_rR = xmlStrdup(BAD_CAST e_line);
+			value_rR = xmlStrdup(BAD_CAST e_line); malloc_check(value_rR);
 #ifndef _READLINE
 			value_rR[xmlStrlen(value_rR) - 1] = '\0';	/* remove the newline */
 #else

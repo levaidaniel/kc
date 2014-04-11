@@ -40,7 +40,7 @@ cmd_c(const char *e_line, command *commands)
 	char		*line = NULL;
 
 
-	line = strdup(e_line);
+	line = strdup(e_line); malloc_check(line);
 
 	cmd = strtok(line, " ");		/* get the command name */
 	if (strncmp(cmd, "cc", 2) == 0)

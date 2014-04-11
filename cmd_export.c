@@ -71,15 +71,15 @@ cmd_export(const char *e_line, command *commands)
 	db_params_new.db_filename = NULL;
 	db_params_new.db_file = -1;
 	db_params_new.pass_filename = NULL;
-	db_params_new.kdf = strdup(db_params.kdf);
-	db_params_new.cipher = strdup(db_params.cipher);
-	db_params_new.cipher_mode = strdup(db_params.cipher_mode);
+	db_params_new.kdf = strdup(db_params.kdf); malloc_check(db_params_new.kdf);
+	db_params_new.cipher = strdup(db_params.cipher); malloc_check(db_params_new.cipher);
+	db_params_new.cipher_mode = strdup(db_params.cipher_mode); malloc_check(db_params_new.cipher_mode);
 	db_params_new.dirty = 0;
 	db_params_new.readonly = 0;
 
 
 	/* Parse the arguments */
-	line = strdup(e_line);
+	line = strdup(e_line); malloc_check(line);
 	larg(line, &largv, &largc);
 	free(line); line = NULL;
 
@@ -87,22 +87,22 @@ cmd_export(const char *e_line, command *commands)
 	while ((c = getopt(largc, largv, "k:c:P:e:m:")) != -1)
 		switch (c) {
 			case 'k':
-				db_params_new.db_filename = strdup(optarg);
+				db_params_new.db_filename = strdup(optarg); malloc_check(db_params_new.db_filename);
 			break;
 			case 'c':
-				cname = BAD_CAST strdup(optarg);
+				cname = BAD_CAST strdup(optarg); malloc_check(cname);
 			break;
 			case 'P':
 				free(db_params_new.kdf); db_params_new.kdf = NULL;
-				db_params_new.kdf = strdup(optarg);
+				db_params_new.kdf = strdup(optarg); malloc_check(db_params_new.kdf);
 			break;
 			case 'e':
 				free(db_params_new.cipher); db_params_new.cipher = NULL;
-				db_params_new.cipher = strdup(optarg);
+				db_params_new.cipher = strdup(optarg); malloc_check(db_params_new.cipher);
 			break;
 			case 'm':
 				free(db_params_new.cipher_mode); db_params_new.cipher_mode = NULL;
-				db_params_new.cipher_mode = strdup(optarg);
+				db_params_new.cipher_mode = strdup(optarg); malloc_check(db_params_new.cipher_mode);
 			break;
 		}
 

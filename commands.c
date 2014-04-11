@@ -245,7 +245,7 @@ parse_randoms(const xmlChar *line)
 
 
 	if (!line) {
-		ret = xmlStrdup(BAD_CAST "");
+		ret = xmlStrdup(BAD_CAST ""); malloc_check(ret);
 		return(ret);
 	}
 
@@ -367,7 +367,7 @@ parse_newlines(const xmlChar *line, const unsigned char dir)		/* dir(direction):
 
 
 	if (!line) {
-		ret = xmlStrdup(BAD_CAST "");
+		ret = xmlStrdup(BAD_CAST ""); malloc_check(ret);
 		return(ret);
 	}
 
@@ -463,10 +463,10 @@ larg(char *line, char ***largv, int *largc)
 
 
 	*largv = malloc(sizeof(char *)); malloc_check(*largv);
-	(*largv)[*largc] = strdup(strtok(line, " "));
+	(*largv)[*largc] = strdup(strtok(line, " ")); malloc_check((*largv)[*largc]);
 	while ((arg = strtok(NULL, " "))) {
 		*largv = realloc(*largv, (++(*largc) + 1) * sizeof(char *)); malloc_check(*largv);
-		(*largv)[*largc] = strdup(arg);
+		(*largv)[*largc] = strdup(arg); malloc_check((*largv)[*largc]);
 	}
 	*largv = realloc(*largv, (++(*largc) + 1) * sizeof(char *)); malloc_check(*largv);
 	(*largv)[*largc] = NULL;

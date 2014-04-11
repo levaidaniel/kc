@@ -54,7 +54,7 @@ cmd_list(const char *e_line, command *commands)
 	}
 
 
-	line = strdup(e_line);
+	line = strdup(e_line); malloc_check(line);
 
 
 	cmd = strtok(line, " ");

@@ -77,7 +77,7 @@ cmd_cedit(const char *e_line, command *commands)
 	xmlFree(name); name = NULL;
 
 	if (e_line) {
-		name = xmlStrdup(BAD_CAST e_line);
+		name = xmlStrdup(BAD_CAST e_line); malloc_check(name);
 #ifndef _READLINE
 		name[xmlStrlen(name) - 1] = '\0';	/* remove the newline */
 #else
@@ -125,7 +125,7 @@ cmd_cedit(const char *e_line, command *commands)
 	xmlFree(description); description = NULL;
 
 	if (e_line) {
-		description = xmlStrdup(BAD_CAST e_line);
+		description = xmlStrdup(BAD_CAST e_line); malloc_check(description);
 #ifndef _READLINE
 		description[xmlStrlen(description) - 1] = '\0';	/* remove the newline */
 #else

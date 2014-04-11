@@ -34,7 +34,7 @@ cmd_clear(const char *e_line, command *commands)
 	char	*cmd = NULL, *line = NULL, *inv = NULL;
 
 
-	line = strdup(e_line);
+	line = strdup(e_line); malloc_check(line);
 
 
 	cmd = strtok(line, " ");

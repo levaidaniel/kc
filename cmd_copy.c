@@ -43,7 +43,7 @@ cmd_copy(const char *e_line, command *commands)
 	unsigned long int	idx = 0;
 
 
-	line = strdup(e_line);
+	line = strdup(e_line); malloc_check(line);
 
 
 	cmd = strtok(line, " ");	/* get the command name */

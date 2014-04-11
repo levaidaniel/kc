@@ -127,15 +127,15 @@ main(int argc, char *argv[])
 			break;
 			case 'P':
 				free(db_params.kdf); db_params.kdf = NULL;
-				db_params.kdf = strdup(optarg);
+				db_params.kdf = strdup(optarg); malloc_check(db_params.kdf);
 			break;
 			case 'e':
 				free(db_params.cipher); db_params.cipher = NULL;
-				db_params.cipher = strdup(optarg);
+				db_params.cipher = strdup(optarg); malloc_check(db_params.cipher);
 			break;
 			case 'm':
 				free(db_params.cipher_mode); db_params.cipher_mode = NULL;
-				db_params.cipher_mode = strdup(optarg);
+				db_params.cipher_mode = strdup(optarg); malloc_check(db_params.cipher_mode);
 			break;
 			case 'b':
 				batchmode = 1;
@@ -575,7 +575,7 @@ main(int argc, char *argv[])
 #endif
 		if (e_line) {
 #ifndef _READLINE
-			line = strdup(e_line);
+			line = strdup(e_line); malloc_check(line);
 #else
 			line = e_line; e_line = NULL;
 #endif
@@ -611,10 +611,11 @@ cmd_match(char *e_line)
 	command			*commands = commands_first;
 
 
-	if (e_line)
-		line = strdup(e_line);
-	else
+	if (e_line) {
+		line = strdup(e_line); malloc_check(line);
+	} else {
 		return;
+	}
 
 
 	cmd = strtok(line, " ");	/* get the command name or index number */
@@ -799,7 +800,7 @@ el_tab_complete(EditLine *e)
 			 * 'line_buf' is the whole line entered so far to the edit buffer.
 			 * we want to complete only the last word from the edit buffer.
 			 */
-			line_buf_copy = strdup(line_buf);	/* strtok() modifies its given string */
+			line_buf_copy = strdup(line_buf); malloc_check(line_buf_copy);	/* strtok() modifies its given string */
 			word_next = strtok(line_buf_copy, " ");
 			while (word_next) {
 				word = word_next;
@@ -838,7 +839,7 @@ el_tab_complete(EditLine *e)
 				hits++;
 
 				match = realloc(match, hits * sizeof(char *)); malloc_check(match);
-				match[hits - 1] = strdup(commands->name);
+				match[hits - 1] = strdup(commands->name); malloc_check(match[hits - 1]);
 			}
 		} while((commands = commands->next));	/* iterate through the linked list */
 
@@ -857,7 +858,7 @@ el_tab_complete(EditLine *e)
 					hits++;
 
 					match = realloc(match, hits * sizeof(char *)); malloc_check(match);
-					match[hits - 1] = strdup((char *)cname);
+					match[hits - 1] = strdup((char *)cname); malloc_check(match[hits - 1]);
 				}
 
 				xmlFree(cname); cname = NULL;
@@ -966,7 +967,7 @@ cmd_generator(const char *text, int state)
 				idx++;
 			else
 				if (strncmp(text, commands->name, strlen(text)) == 0) {
-					cmd = strdup(commands->name);
+					cmd = strdup(commands->name); malloc_check(cmd);
 					return(cmd);
 				}
 

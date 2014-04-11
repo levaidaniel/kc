@@ -47,7 +47,7 @@ cmd_clipboard(const char *e_line, command *commands)
 	int		pipefd[2];
 
 
-	cmd_line = strdup(e_line);
+	cmd_line = strdup(e_line); malloc_check(cmd_line);
 
 	cmd = strtok(cmd_line, " ");
 	if (!cmd) {

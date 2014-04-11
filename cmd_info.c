@@ -42,7 +42,7 @@ cmd_info(const char *e_line, command *commands)
 	time_t			created_time = 0, modified_time = 0;
 
 
-	line = strdup(e_line);
+	line = strdup(e_line); malloc_check(line);
 
 
 	cmd = strtok(line, " ");

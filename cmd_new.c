@@ -67,7 +67,7 @@ cmd_new(const char *e_line, command *commands)
 	}
 #endif
 
-	line = strdup(e_line);
+	line = strdup(e_line); malloc_check(line);
 
 	/* Search for the first space in the command line, to see if
 	 * a key name was specified. If it was, the space will be right
@@ -83,7 +83,7 @@ cmd_new(const char *e_line, command *commands)
 	 */
 	for (; line[i] == ' '; i++) {}
 
-	key = xmlStrdup(BAD_CAST &line[i]);
+	key = xmlStrdup(BAD_CAST &line[i]); malloc_check(key);
 	free(line); line = NULL;
 
 	if (xmlStrlen(key) <= 0) {	/* if we didn't get a keyname as a parameter */
@@ -97,7 +97,7 @@ cmd_new(const char *e_line, command *commands)
 		e_line = readline(prompt_str());
 #endif
 		if (e_line) {
-			key = xmlStrdup(BAD_CAST e_line);
+			key = xmlStrdup(BAD_CAST e_line); malloc_check(key);
 #ifndef _READLINE
 			key[xmlStrlen(key) - 1] = '\0';	/* remove the newline */
 #else
@@ -134,7 +134,7 @@ cmd_new(const char *e_line, command *commands)
 	e_line = readline(prompt_str());
 #endif
 	if (e_line) {
-		value_rR = xmlStrdup(BAD_CAST e_line);
+		value_rR = xmlStrdup(BAD_CAST e_line); malloc_check(value_rR);
 #ifndef _READLINE
 		value_rR[xmlStrlen(value_rR) - 1] = '\0';	/* remove the newline */
 #else

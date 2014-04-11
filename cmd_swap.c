@@ -45,7 +45,7 @@ cmd_swap(const char *e_line, command *commands)
 	unsigned long int	idx_src = 0, idx_dst = 0;
 
 
-	line = strdup(e_line);
+	line = strdup(e_line); malloc_check(line);
 
 
 	cmd = strtok(line, " ");	/* command name */

@@ -51,7 +51,7 @@ cmd_del(const char *e_line, command *commands)
 #endif
 
 
-	line = strdup(e_line);
+	line = strdup(e_line); malloc_check(line);
 
 
 	cmd = strtok(line, " ");

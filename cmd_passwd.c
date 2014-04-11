@@ -49,7 +49,7 @@ cmd_passwd(const char *e_line, command *commands)
 
 
 	/* Parse the arguments */
-	line = strdup(e_line);
+	line = strdup(e_line); malloc_check(line);
 	larg(line, &largv, &largc);
 	free(line); line = NULL;
 
@@ -58,7 +58,7 @@ cmd_passwd(const char *e_line, command *commands)
 		switch (c) {
 			case 'P':
 				free(db_params.kdf); db_params.kdf = NULL;
-				db_params.kdf = strdup(optarg);
+				db_params.kdf = strdup(optarg); malloc_check(db_params.kdf);
 			break;
 		}
 
