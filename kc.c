@@ -147,7 +147,7 @@ main(int argc, char *argv[])
 			case 'h':
 				/* FALLTHROUGH */
 			default:
-				printf(	"%s [-k <database file>] [-r] [-p <password file>] [-m <cipher mode>] [-b] [-v] [-h]\n\n", argv[0]);
+				printf(	"%s [-k <database file>] [-r] [-p <password file>] [-P <kdf>] [-e <cipher>] [-m <cipher mode>] [-b] [-v] [-h]\n\n", argv[0]);
 				printf(	"-k <file>: Use file as database. The default is ~/.kc/default.kcd .\n"
 					"-r: Open the database in read-only mode.\n"
 					"-p <file>: Read password from file.\n"
