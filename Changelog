@@ -91,6 +91,9 @@ Functional changes, improvements:
 - New command 'near'. Display the key with the given index and its surrounding
   keys. It gives context around a key with a known index number.
 
+- New option '-B'. When used along with -b, force kc to prompt for a password,
+  even in batch mode.
+
 - 'passwd' command can now change KDF.
 
 - 'xport' command has been renamed, and it's now called 'export'.
