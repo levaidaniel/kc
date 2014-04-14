@@ -114,7 +114,7 @@ main(int argc, char *argv[])
 	strlcpy(db_params.cipher_mode, "cbc", 4);
 
 
-	while ((c = getopt(argc, argv, "k:rp:P:e:m:bvh")) != -1)
+	while ((c = getopt(argc, argv, "k:rp:P:e:m:bBvh")) != -1)
 		switch (c) {
 			case 'k':
 				db_params.db_filename = optarg;
@@ -140,6 +140,9 @@ main(int argc, char *argv[])
 			case 'b':
 				batchmode = 1;
 			break;
+			case 'B':
+				batchmode = 2;
+			break;
 			case 'v':
 				version();
 				exit(EXIT_SUCCESS);
@@ -147,7 +150,7 @@ main(int argc, char *argv[])
 			case 'h':
 				/* FALLTHROUGH */
 			default:
-				printf( "%s [-k <database file>] [-r] [-p <password file>] [-P <kdf>] [-e <cipher>] [-m <cipher mode>] [-b] [-v] [-h]\n\n", argv[0]);
+				printf( "%s [-k <database file>] [-r] [-p <password file>] [-P <kdf>] [-e <cipher>] [-m <cipher mode>] [-b] [-B] [-v] [-h]\n\n", argv[0]);
 				printf(	"-k <file>: Use file as database. The default is ~/.kc/default.kcd .\n"
 					"-r: Open the database in read-only mode.\n"
 					"-p <file>: Read password from file.\n"
@@ -155,6 +158,7 @@ main(int argc, char *argv[])
 					"-e <cipher>: Encryption cipher: aes256 (default).\n"
 					"-m <mode>: Cipher mode: cbc (default), cfb128, ofb.\n"
 					"-b: Batch mode: disable some features to enable commands from standard input.\n"
+					"-B: Force password prompt in batch mode.\n"
 					"-v: Display version.\n"
 					"-h: This help.\n");
 				exit(EXIT_SUCCESS);

@@ -488,7 +488,7 @@ kc_password_read(char **pass1, const unsigned char new)
 
 
 	rpp_flags = RPP_ECHO_OFF;
-	if (batchmode)
+	if (batchmode == 1)
 		rpp_flags |= RPP_STDIN;
 	else
 		rpp_flags |= RPP_REQUIRE_TTY;
