@@ -90,6 +90,10 @@ main(int argc, char *argv[])
 	char		*env_home = NULL;
 	unsigned char	newdb = 0;
 
+	char		*default_kdf = "sha512";
+	char		*default_cipher = "aes256";
+	char		*default_mode = "cbc";
+
 	xmlNodePtr	db_root = NULL;
 
 	int		c = 0;
@@ -104,14 +108,26 @@ main(int argc, char *argv[])
 	db_params.dirty = 0;
 	db_params.readonly = 0;
 
-	db_params.kdf = malloc(7); malloc_check(db_params.kdf);
-	strlcpy(db_params.kdf, "sha512", 7);
+	len = strlen(default_kdf) + 1;
+	db_params.kdf = malloc(len); malloc_check(db_params.kdf);
+	if (strlcpy(db_params.kdf, default_kdf, len) >= len) {
+		puts("Error while setting up default database parameters.");
+		quit(EXIT_FAILURE);
+	}
 
-	db_params.cipher = malloc(7); malloc_check(db_params.cipher);
-	strlcpy(db_params.cipher, "aes256", 7);
+	len = strlen(default_cipher) + 1;
+	db_params.cipher = malloc(len); malloc_check(db_params.cipher);
+	if (strlcpy(db_params.cipher, default_cipher, len) >= len) {
+		puts("Error while setting up default database parameters.");
+		quit(EXIT_FAILURE);
+	}
 
-	db_params.cipher_mode = malloc(4); malloc_check(db_params.cipher_mode);
-	strlcpy(db_params.cipher_mode, "cbc", 4);
+	len = strlen(default_mode) + 1;
+	db_params.cipher_mode = malloc(len); malloc_check(db_params.cipher_mode);
+	if (strlcpy(db_params.cipher_mode, default_mode, len) >= len) {
+		puts("Error while setting up default database parameters.");
+		quit(EXIT_FAILURE);
+	}
 
 
 	while ((c = getopt(argc, argv, "k:rp:P:e:m:bBvh")) != -1)
@@ -199,7 +215,7 @@ main(int argc, char *argv[])
 		snprintf(db_params.db_filename, len, "%s/%s/%s", env_home, default_db_dir, default_db_filename);
 	}
 
-	/* This should be identical with what is in cmd_import.c */
+	/* This should be identical of what is in cmd_import.c */
 	/* if db_filename exists */
 	if(stat(db_params.db_filename, &st) == 0) {
 		newdb = 0;
@@ -228,13 +244,12 @@ main(int argc, char *argv[])
 		}
 
 		/* read the IV */
-		buf = malloc(IV_DIGEST_LEN + 1); malloc_check(buf);
 		pos = 0;
 		do {
-			ret = read(db_params.db_file, buf + pos, IV_DIGEST_LEN - pos);
+			ret = read(db_params.db_file, db_params.iv + pos, IV_DIGEST_LEN - pos);
 			pos += ret;
 		} while (ret > 0  &&  pos < IV_DIGEST_LEN);
-		buf[pos] = '\0';
+		db_params.iv[pos] = '\0';
 
 		if (ret < 0) {
 			perror("read IV(database file)");
@@ -243,10 +258,7 @@ main(int argc, char *argv[])
 		if (pos != IV_DIGEST_LEN) {
 			puts("Could not read IV from database file!");
 			quit(EXIT_FAILURE);
-		} else
-			strlcpy((char *)db_params.iv, (const char *)buf, IV_DIGEST_LEN + 1);
-
-		free(buf); buf = NULL;
+		}
 
 		if (getenv("KC_DEBUG"))
 			printf("iv='%s'\n", db_params.iv);
@@ -257,13 +269,12 @@ main(int argc, char *argv[])
 		lseek(db_params.db_file, 1, SEEK_CUR);
 
 		/* read the salt */
-		buf = malloc(SALT_DIGEST_LEN + 1); malloc_check(buf);
 		pos = 0;
 		do {
-			ret = read(db_params.db_file, buf + pos, SALT_DIGEST_LEN - pos);
+			ret = read(db_params.db_file, db_params.salt + pos, SALT_DIGEST_LEN - pos);
 			pos += ret;
 		} while (ret > 0  &&  pos < SALT_DIGEST_LEN);
-		buf[pos] = '\0';
+		db_params.salt[pos] = '\0';
 
 		if (ret < 0) {
 			perror("read salt(database file)");
@@ -272,10 +283,7 @@ main(int argc, char *argv[])
 		if (pos != SALT_DIGEST_LEN) {
 			puts("Could not read salt from database file!");
 			quit(EXIT_FAILURE);
-		} else
-			strlcpy((char *)db_params.salt, (const char *)buf, SALT_DIGEST_LEN + 1);
-
-		free(buf); buf = NULL;
+		}
 
 		if (getenv("KC_DEBUG"))
 			printf("salt='%s'\n", db_params.salt);

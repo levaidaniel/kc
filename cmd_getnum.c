@@ -126,12 +126,12 @@ cmd_getnum(const unsigned long int idx, const unsigned long int spice)
 
 					return;
 				}
-				strlcat((char *)line_randomed, rand_str, line_randomed_len);
+				(void) strlcat((char *)line_randomed, rand_str, line_randomed_len);
 				free(rand_str); rand_str = NULL;
 				for (i = 0; i < line_len; i++) {
 					/* append a character from the line */
 					tmp = xmlUTF8Strsub(line, i, 1);
-					strlcat((char *)line_randomed, (const char *)tmp, line_randomed_len);
+					(void) strlcat((char *)line_randomed, (const char *)tmp, line_randomed_len);
 					xmlFree(tmp); tmp = NULL;
 
 					/* append a random string */
@@ -144,7 +144,7 @@ cmd_getnum(const unsigned long int idx, const unsigned long int spice)
 
 						return;
 					}
-					strlcat((char *)line_randomed, rand_str, line_randomed_len);
+					(void) strlcat((char *)line_randomed, rand_str, line_randomed_len);
 					free(rand_str); rand_str = NULL;
 				}
 				line_randomed[line_randomed_len - 1] = '\0';
