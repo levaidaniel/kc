@@ -594,6 +594,7 @@ kc_setup_crypt(BIO *bio_chain, const unsigned int enc, struct db_parameters *db_
 		EVP_DigestUpdate(mdctx, iv_tmp, IV_LEN);
 		EVP_DigestFinal_ex(mdctx, digested, &digested_len);
 		EVP_MD_CTX_destroy(mdctx);
+		free(iv_tmp); iv_tmp = NULL;
 
 		/* Print the binary digest in hex as characters (numbers, effectively)
 		 * into the ..->iv variable.
@@ -601,13 +602,26 @@ kc_setup_crypt(BIO *bio_chain, const unsigned int enc, struct db_parameters *db_
 		for (i = 0; i < digested_len; i++) {
 			snprintf(hex_tmp, 3, "%02x", digested[i]);
 
-			if (!i)
-				strlcpy((char *)db_params->iv, hex_tmp, IV_DIGEST_LEN + 1);
-			else
-				strlcat((char *)db_params->iv, hex_tmp, IV_DIGEST_LEN + 1);
+			if (!i) {
+				if (strlcpy(	(char *)db_params->iv,
+						hex_tmp,
+						IV_DIGEST_LEN + 1)
+						>= IV_DIGEST_LEN + 1)
+				{
+					free(salt_tmp); salt_tmp = NULL;
+					return(0);
+				}
+			} else {
+				if (strlcat(	(char *)db_params->iv,
+						hex_tmp,
+						IV_DIGEST_LEN + 1)
+						>= IV_DIGEST_LEN + 1)
+				{
+					free(salt_tmp); salt_tmp = NULL;
+					return(0);
+				}
+			}
 		}
-
-		free(iv_tmp); iv_tmp = NULL;
 	}
 	if (getenv("KC_DEBUG"))
 		printf("iv='%s'\n", db_params->iv);
@@ -627,6 +641,7 @@ kc_setup_crypt(BIO *bio_chain, const unsigned int enc, struct db_parameters *db_
 		EVP_DigestUpdate(mdctx, salt_tmp, SALT_LEN);
 		EVP_DigestFinal_ex(mdctx, digested, &digested_len);
 		EVP_MD_CTX_destroy(mdctx);
+		free(salt_tmp); salt_tmp = NULL;
 
 		/* Print the binary digest in hex as characters (numbers, effectively)
 		 * into the ..->salt variable.
@@ -634,13 +649,28 @@ kc_setup_crypt(BIO *bio_chain, const unsigned int enc, struct db_parameters *db_
 		for (i = 0; i < digested_len; i++) {
 			snprintf(hex_tmp, 3, "%02x", digested[i]);
 
-			if (!i)
-				strlcpy((char *)db_params->salt, hex_tmp, SALT_DIGEST_LEN + 1);
-			else
-				strlcat((char *)db_params->salt, hex_tmp, SALT_DIGEST_LEN + 1);
+			if (!i) {
+				if (strlcpy(	(char *)db_params->salt,
+						hex_tmp,
+						SALT_DIGEST_LEN + 1)
+						>= SALT_DIGEST_LEN + 1)
+				{
+					free(iv_tmp); iv_tmp = NULL;
+					free(salt_tmp); salt_tmp = NULL;
+					return(0);
+				}
+			} else {
+				if (strlcat(	(char *)db_params->salt,
+						hex_tmp,
+						SALT_DIGEST_LEN + 1)
+						>= SALT_DIGEST_LEN + 1)
+				{
+					free(iv_tmp); iv_tmp = NULL;
+					free(salt_tmp); salt_tmp = NULL;
+					return(0);
+				}
+			}
 		}
-
-		free(salt_tmp); salt_tmp = NULL;
 	}
 	if (getenv("KC_DEBUG"))
 		printf("salt='%s'\n", db_params->salt);

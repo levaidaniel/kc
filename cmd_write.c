@@ -63,33 +63,67 @@ cmd_write(const char *e_line, command *commands)
 	db_params_tmp.kdf = db_params.kdf;
 	db_params_tmp.cipher = db_params.cipher;
 	db_params_tmp.cipher_mode = db_params.cipher_mode;
-	strlcpy((char *)db_params_tmp.iv, (const char *)db_params.iv, IV_DIGEST_LEN + 1);
-	if (strcmp((const char *)db_params_tmp.iv, (const char *)db_params.iv) != 0) {
+	if (strlcpy(	(char *)db_params_tmp.iv,
+			(const char *)db_params.iv,
+			IV_DIGEST_LEN + 1)
+			>= IV_DIGEST_LEN + 1)
+	{
 		puts("Could not duplicate the original IV!");
 
 		free(db_params_tmp.db_filename); db_params_tmp.db_filename = NULL;
 		return;
 	}
-	strlcpy((char *)db_params_tmp.salt, (const char *)db_params.salt, SALT_DIGEST_LEN + 1);
-	if (strcmp((const char *)db_params_tmp.salt, (const char *)db_params.salt) != 0) {
+	if (strncmp((const char *)db_params_tmp.iv, (const char *)db_params.iv, IV_DIGEST_LEN) != 0) {
+		puts("The new and the original IV do not match!");
+
+		free(db_params_tmp.db_filename); db_params_tmp.db_filename = NULL;
+		return;
+	}
+
+	if (strlcpy(	(char *)db_params_tmp.salt,
+			(const char *)db_params.salt,
+			SALT_DIGEST_LEN + 1)
+			>= SALT_DIGEST_LEN + 1)
+	{
 		puts("Could not duplicate the original salt!");
 
 		free(db_params_tmp.db_filename); db_params_tmp.db_filename = NULL;
 		return;
 	}
-	/* the key gets duplicated right before the call to kc_setup_crypt() */
-
-
-	rand_str = get_random_str(6, 0);
-	if (!rand_str) {
+	if (strncmp((const char *)db_params_tmp.salt, (const char *)db_params.salt, SALT_DIGEST_LEN) != 0) {
+		puts("The new and the original salt do not match!");
 
 		free(db_params_tmp.db_filename); db_params_tmp.db_filename = NULL;
 		return;
 	}
 
-	strlcpy(db_params_tmp.db_filename, db_params.db_filename, MAXPATHLEN);
-	strlcat(db_params_tmp.db_filename, rand_str, MAXPATHLEN);
+	/* the key gets duplicated right before the call to kc_setup_crypt() */
+
+
+	if (strlcpy(db_params_tmp.db_filename, db_params.db_filename, MAXPATHLEN) >= MAXPATHLEN) {
+		puts("Could not construct a temporary filename!");
+
+		free(db_params_tmp.db_filename); db_params_tmp.db_filename = NULL;
+		return;
+	}
+
+	rand_str = get_random_str(6, 0);
+	if (!rand_str) {
+		puts("Could not create a random string for a temporary filename!");
+
+		free(db_params_tmp.db_filename); db_params_tmp.db_filename = NULL;
+		return;
+	}
+	if (strlcat(db_params_tmp.db_filename, rand_str, MAXPATHLEN) >= MAXPATHLEN) {
+		puts("Could not construct a temporary filename #2!");
+
+		free(db_params_tmp.db_filename); db_params_tmp.db_filename = NULL;
+		free(rand_str); rand_str = NULL;
+		return;
+	}
+
 	free(rand_str); rand_str = NULL;
+
 	if(stat(db_params_tmp.db_filename, &st) == 0) {	/* if temporary database filename exists */
 		puts("Could not create temporary database file (exists)!");
 

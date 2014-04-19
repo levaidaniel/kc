@@ -170,9 +170,15 @@ cmd_export(const char *e_line, command *commands)
 	if (!strchr(db_params_new.db_filename, '.')) {
 		db_params_new.db_filename = realloc(db_params_new.db_filename,
 							strlen(db_params_new.db_filename) + 4 + 1); malloc_check(db_params_new.db_filename);
-		strlcat(db_params_new.db_filename,
-			dump ? ".xml" : ".kcd",
-			strlen(db_params_new.db_filename) + 4 + 1);
+		if (strlcat(	db_params_new.db_filename,
+				dump ? ".xml" : ".kcd",
+				strlen(db_params_new.db_filename) + 4 + 1)
+				>= strlen(db_params_new.db_filename) + 4 + 1)
+		{
+			puts("Could not construct the name of the output file!");
+
+			goto exiting;
+		}
 	}
 
 	if(lstat(db_params_new.db_filename, &st) == 0) {	/* if export filename exists */

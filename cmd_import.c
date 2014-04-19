@@ -144,7 +144,7 @@ cmd_import(const char *e_line, command *commands)
 	} else {
 		/* encrypted database import */
 
-		/* This should be identical with what is in kc.c */
+		/* This should be identical of what is in kc.c */
 		if(stat(db_params_new.db_filename, &st) == 0) {
 
 			printf("Opening '%s'\n",db_params_new.db_filename);
@@ -175,34 +175,28 @@ cmd_import(const char *e_line, command *commands)
 			}
 
 			/* read the IV */
-			buf = malloc(IV_DIGEST_LEN + 1); malloc_check(buf);
 			pos = 0;
 			do {
-				ret = read(db_params_new.db_file, buf + pos, IV_DIGEST_LEN - pos);
+				ret = read(db_params_new.db_file, db_params_new.iv + pos, IV_DIGEST_LEN - pos);
 				pos += ret;
 			} while (ret > 0  &&  pos < IV_DIGEST_LEN);
-			buf[pos] = '\0';
+			db_params_new.iv[pos] = '\0';
 
 			if (ret < 0) {
-				perror("read IV(database file)");
+				perror("import: read IV(database file)");
 
 				close(db_params_new.db_file);
-				free(buf); buf = NULL;
 				goto exiting;
 			}
 			if (pos != IV_DIGEST_LEN) {
 				puts("Could not read IV from database file!");
 
 				close(db_params_new.db_file);
-				free(buf); buf = NULL;
 				goto exiting;
-			} else
-				strlcpy((char *)db_params_new.iv, (const char *)buf, IV_DIGEST_LEN + 1);
-
-			free(buf); buf = NULL;
+			}
 
 			if (getenv("KC_DEBUG"))
-				printf("iv='%s'\n", db_params_new.iv);
+				printf("import: iv='%s'\n", db_params_new.iv);
 
 			/* Fast-forward one byte after the current position,
 			 * to skip the newline.
@@ -210,16 +204,15 @@ cmd_import(const char *e_line, command *commands)
 			lseek(db_params_new.db_file, 1, SEEK_CUR);
 
 			/* read the salt */
-			buf = malloc(SALT_DIGEST_LEN + 1); malloc_check(buf);
 			pos = 0;
 			do {
-				ret = read(db_params_new.db_file, buf + pos, SALT_DIGEST_LEN - pos);
+				ret = read(db_params_new.db_file, db_params_new.salt + pos, SALT_DIGEST_LEN - pos);
 				pos += ret;
 			} while (ret > 0  &&  pos < SALT_DIGEST_LEN);
-			buf[pos] = '\0';
+			db_params_new.salt[pos] = '\0';
 
 			if (ret < 0) {
-				perror("read salt(database file)");
+				perror("import: read salt(database file)");
 
 				close(db_params_new.db_file);
 				free(buf); buf = NULL;
@@ -229,15 +222,11 @@ cmd_import(const char *e_line, command *commands)
 				puts("Could not read salt from database file!");
 
 				close(db_params_new.db_file);
-				free(buf); buf = NULL;
 				goto exiting;
-			} else
-				strlcpy((char *)db_params_new.salt, (const char *)buf, SALT_DIGEST_LEN + 1);
-
-			free(buf); buf = NULL;
+			}
 
 			if (getenv("KC_DEBUG"))
-				printf("salt='%s'\n", db_params_new.salt);
+				printf("import: salt='%s'\n", db_params_new.salt);
 
 
 			if (close(db_params_new.db_file) < 0) {
