@@ -32,6 +32,7 @@
 .Op Fl e Ar cipher
 .Op Fl m Ar mode
 .Op Fl b
+.Op Fl B
 .Op Fl v
 .Op Fl h
 .Sh DESCRIPTION
@@ -151,6 +152,8 @@ More information is in the
 section.
 .It Fl b
 Batch mode. Disable some features to enable commands from standard input.
+.It Fl B
+Force password prompt in batch mode, instead of expecting it from the standard input as the first line.
 .It Fl v
 Display version.
 .It Fl h
