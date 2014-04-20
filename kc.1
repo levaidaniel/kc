@@ -608,80 +608,88 @@ command.
 .It Em Adding new entries :
 .Bd -literal -offset |||
 .Em Simple :
-default% > new testuser
-default% NEW value> testpass
+<default% > new testuser
+<default% NEW value> testpass
 
 .Em Prompt for both key and value :
-default% > new
-default% NEW key> testuser2
-default% NEW value> test_\er_pass_with_random_characters:\eA
+<default% > new
+<default% NEW key> testuser2
+<default% NEW value> test_\er_pass_with_random_characters:\eA
 
 .Em Using the 'key' only as an indication :
-default% > new www.mysecuresite.com
-default% NEW value> user_name\enpass-word
+<default% > new www.mysecuresite.com
+<default% NEW value> user_name\enpass-word
 
 .Em Using the random and newline character sequences :
-default% > new testuser3
-default% NEW value> \er\eR\en\ea\eA\enthis is a multi-line value!
+<default% > new testuser3
+<default% NEW value> \er\eR\en\ea\eA\enthis is a multi-line value!
 
 .Em Creating new keychains :
-default% > cnew email_accounts
-default% > cnew
-default% NEW keychain name> WebSite Accounts
-default% NEW keychain description> description
+<default% > cnew email_accounts
+<default% > cnew
+<default% NEW keychain name> WebSite Accounts
+<default% NEW keychain description> description
+
+<default% > cnew 2
+<default% NEW keychain description> Two
+Created keychain: 3. 2
 
 .Em Results :
 
 .Em Listing the keys in the current keychain :
-default% > list
+<default% > list
 0. testuser
 1. testuser2
 2. www.mysecuresite.com
 3. testuser3
 
 .Em Displaying values in the current keychain :
-default% > 0
+<default% > 0
 [testuser] testpass
-default% > 1
+<default% > 1
 [testuser2] test_,x_pass_with_random_characters:6nzm
-default% > 2
+<default% > 2
 [www.mysecuresite.com] [1/2] user_name
 [www.mysecuresite.com] [2/2] pass-word
-default% > 3
+<default% > 3
 [testuser3] [1/3] v#)z!9
 [testuser3] [2/3] HwRz7i
 [testuser3] [3/3] this is a multi-line value!
 
 .Em Listing keychains :
-default% > clist
+<default% > clist
 0. default
 1. email_accounts
 2. WebSite Accounts
+3. 2
 
 .Em Switch to another keychains :
-default% > c email_accounts
-email_accounts% > c 2
-WebSite Accounts% >
+<default% > c email_accounts
+<email_accounts% > c 2
+<WebSite Accounts% > c 3
+<2% > c 2
+<WebSite Accounts% > cc 2
+<2% >
 .Ed
 .It Em Editing existing entries :
 .Bd -literal -offset |||
-default% > list
+<default% > list
 0. testuser
 1. testuser2
 2. www.mysecuresite.com
 3. testuser3
 
 .Em Edit an entry in the current keychain :
-default% > edit 1
-default% EDIT key> testuser2
-default% EDIT value> test_pass_with_random_characters:6nzm
-default% > 1
+<default% > edit 1
+<default% EDIT key> testuser2
+<default% EDIT value> test_pass_with_random_characters:6nzm
+<default% > 1
 [testuser2] test_pass_with_random_characters:6nzm
 
 .Em Rename a keychain :
-default% > cedit default
-default% EDIT keychain name> my_own keychain
-default% EDIT keychain description> description
+<default% > cedit
+<default% EDIT keychain name> my_own keychain
+<default% EDIT keychain description> description
 my_own keychain% >
 .Ed
 .El
