@@ -20,9 +20,7 @@ OBJS +=		cmd_c.o cmd_cdel.o cmd_clear.o cmd_clipboard.o cmd_clist.o cmd_cnew.o c
 		cmd_swap.o cmd_version.o cmd_write.o \
 		commands.o commands_init.o
 
-ifdef BUNDLED_BCRYPT
 BCRYPT_OBJS =	${BCRYPT_DIR}/bcrypt_pbkdf.o ${BCRYPT_DIR}/blf.o ${BCRYPT_DIR}/explicit_bzero.o ${BCRYPT_DIR}/sha2.o
-endif
 
 
 CFLAGS +=	-pedantic -Wall -g
@@ -38,9 +36,7 @@ endif
 ifdef HAVE_LIBSCRYPT
 CFLAGS +=	-D_HAVE_LIBSCRYPT
 endif
-ifdef BUNDLED_BCRYPT
 CFLAGS +=	-D_BUNDLED_BCRYPT
-endif
 
 LDADD +=	`pkg-config --libs libcrypto`
 LDADD +=	`pkg-config --libs libbsd`
@@ -60,7 +56,6 @@ endif
 CLEANFILES =	${PROG} *.o regress/test*
 
 
-ifdef BUNDLED_BCRYPT
 all: bcrypt ${PROG}
 
 .PHONY: bcrypt
@@ -68,9 +63,6 @@ bcrypt:
 	${MAKE} -C ${BCRYPT_DIR} -f Makefile.linux
 
 CLEANFILES +=	${BCRYPT_DIR}/*.o
-else
-all: ${PROG}
-endif
 
 clean:
 	rm -f ${CLEANFILES}
