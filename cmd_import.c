@@ -145,23 +145,23 @@ cmd_import(const char *e_line, command *commands)
 		/* encrypted database import */
 
 		/* This should be identical of what is in kc.c */
-		if(stat(db_params_new.db_filename, &st) == 0) {
+		if (stat(db_params_new.db_filename, &st) == 0) {
 
 			printf("Opening '%s'\n",db_params_new.db_filename);
 
-			if(!S_ISLNK(st.st_mode)  &&  !S_ISREG(st.st_mode)) {
+			if (!S_ISLNK(st.st_mode)  &&  !S_ISREG(st.st_mode)) {
 				printf("'%s' is not a regular file or a link!\n", db_params_new.db_filename);
 
 				goto exiting;
 			}
 
-			if(st.st_size == 0) {
+			if (st.st_size == 0) {
 				printf("'%s' is an empty file!\n", db_params_new.db_filename);
 
 				goto exiting;
 			}
 
-			if(st.st_size <= IV_DIGEST_LEN + SALT_DIGEST_LEN + 2) {
+			if (st.st_size <= IV_DIGEST_LEN + SALT_DIGEST_LEN + 2) {
 				printf("'%s' is suspiciously small file!\n", db_params_new.db_filename);
 
 				goto exiting;

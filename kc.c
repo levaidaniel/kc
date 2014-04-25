@@ -193,8 +193,8 @@ main(int argc, char *argv[])
 		/* default db directory (create it, if it doesn't exist) */
 		snprintf(db_params.db_filename, len, "%s/%s", env_home, default_db_dir);
 
-		if(stat(db_params.db_filename, &st) == 0) {
-			if(!S_ISDIR(st.st_mode)) {
+		if (stat(db_params.db_filename, &st) == 0) {
+			if (!S_ISDIR(st.st_mode)) {
 				printf("'%s' is not a directory!\n", db_params.db_filename);
 				quit(EXIT_FAILURE);
 			}
@@ -202,7 +202,7 @@ main(int argc, char *argv[])
 			if (getenv("KC_DEBUG"))
 				printf("creating '%s' directory\n", db_params.db_filename);
 
-			if(mkdir(db_params.db_filename, 0777) != 0) {
+			if (mkdir(db_params.db_filename, 0777) != 0) {
 				printf("Could not create '%s': %s\n", db_params.db_filename, strerror(errno));
 				quit(EXIT_FAILURE);
 			}
@@ -217,22 +217,22 @@ main(int argc, char *argv[])
 
 	/* This should be identical of what is in cmd_import.c */
 	/* if db_filename exists */
-	if(stat(db_params.db_filename, &st) == 0) {
+	if (stat(db_params.db_filename, &st) == 0) {
 		newdb = 0;
 
 		printf("Opening '%s'\n",db_params.db_filename);
 
-		if(!S_ISLNK(st.st_mode)  &&  !S_ISREG(st.st_mode)) {
+		if (!S_ISLNK(st.st_mode)  &&  !S_ISREG(st.st_mode)) {
 			printf("'%s' is not a regular file or a link!\n", db_params.db_filename);
 			quit(EXIT_FAILURE);
 		}
 
-		if(st.st_size == 0) {
+		if (st.st_size == 0) {
 			printf("'%s' is an empty file!\n", db_params.db_filename);
 			quit(EXIT_FAILURE);
 		}
 
-		if(st.st_size <= IV_DIGEST_LEN + SALT_DIGEST_LEN + 2) {
+		if (st.st_size <= IV_DIGEST_LEN + SALT_DIGEST_LEN + 2) {
 			printf("'%s' is suspiciously small file!\n", db_params.db_filename);
 			quit(EXIT_FAILURE);
 		}
@@ -332,8 +332,8 @@ main(int argc, char *argv[])
 		if (getenv("KC_DEBUG"))
 			puts("opening password file");
 
-		if(stat(db_params.pass_filename, &st) == 0) {
-			if(!S_ISLNK(st.st_mode)  &&  !S_ISREG(st.st_mode)) {
+		if (stat(db_params.pass_filename, &st) == 0) {
+			if (!S_ISLNK(st.st_mode)  &&  !S_ISREG(st.st_mode)) {
 				printf("'%s' is not a regular file or a link!\n", db_params.pass_filename);
 				quit(EXIT_FAILURE);
 			}
@@ -381,7 +381,7 @@ main(int argc, char *argv[])
 		if (close(pass_file) < 0)
 			perror("close(password file)");
 	} else {
-		if(newdb) {
+		if (newdb) {
 			/* ask for the new password */
 			do {
 				ret = kc_password_read(&db_params.pass, 1);
@@ -666,7 +666,7 @@ cmd_match(char *e_line)
 		/* We got a key index, display the value */
 		cmd_getnum(idx, spice);
 	} else {
-		while(commands) {
+		while (commands) {
 			/* Find an exact match */
 			if (strcmp(commands->name, cmd) == 0)
 				break;
@@ -853,7 +853,7 @@ el_tab_complete(EditLine *e)
 				match = realloc(match, hits * sizeof(char *)); malloc_check(match);
 				match[hits - 1] = strdup(commands->name); malloc_check(match[hits - 1]);
 			}
-		} while((commands = commands->next));	/* iterate through the linked list */
+		} while ((commands = commands->next));	/* iterate through the linked list */
 
 	/* only search for a keychain name if this is an already completed command
 	 * (ie. there is space(s) in the line), AND it's not the 'help' command that
