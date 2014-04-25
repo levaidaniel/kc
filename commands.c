@@ -922,7 +922,7 @@ kc_db_writer(xmlDocPtr db, BIO *bio_chain, struct db_parameters *db_params)
 					break;
 				}
 			}
-		} while(BIO_wpending(bio_chain) > 0);
+		} while (BIO_wpending(bio_chain) > 0);
 
 		if (getenv("KC_DEBUG"))
 			printf("db_file size -> %d\n", BIO_tell(bio_chain));

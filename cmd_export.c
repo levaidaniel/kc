@@ -181,7 +181,7 @@ cmd_export(const char *e_line, command *commands)
 		}
 	}
 
-	if(lstat(db_params_new.db_filename, &st) == 0) {	/* if export filename exists */
+	if (lstat(db_params_new.db_filename, &st) == 0) {	/* if export filename exists */
 		printf("Do you want to overwrite '%s'? <yes/no> ", db_params_new.db_filename);
 
 #ifndef _READLINE

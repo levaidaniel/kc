@@ -124,7 +124,7 @@ cmd_write(const char *e_line, command *commands)
 
 	free(rand_str); rand_str = NULL;
 
-	if(stat(db_params_tmp.db_filename, &st) == 0) {	/* if temporary database filename exists */
+	if (stat(db_params_tmp.db_filename, &st) == 0) {	/* if temporary database filename exists */
 		puts("Could not create temporary database file (exists)!");
 
 		free(db_params_tmp.db_filename); db_params_tmp.db_filename = NULL;
