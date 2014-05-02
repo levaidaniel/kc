@@ -353,13 +353,9 @@ Change the database password and optionally the KDF. All changes will be written
 .Pp
 More information about the
 .Ar kdf
-and the
-.Ar cipher_mode
-optional arguments are in the
+optional argument is in the
 .Fl P
-and
-.Fl m
-parameter descriptions.
+parameter description and the KDF section of this manual.
 .It Cm help Op command
 Print application help or describe a
 .Ar command .
@@ -580,14 +576,13 @@ on Linux and
 on everything else ) as characters. See also the
 .Em CAVEATS
 section.
-On changing the cipher mode in use, see the
-.Fl m
-option and the
-.Cm passwd
+To change the encryption cipher and/or its mode, you can use the
+.Cm export
 command.
 .Ss KDF
 The KDF converts the user supplied password with a generated salt to a strong key that can be used safely during encryption. Every SHA-* based PBKDF2 KDF uses 5000 rounds in
-.Nm . See the
+.Nm .
+On changing the KDF in use, see the
 .Fl P
 option and the
 .Cm passwd
