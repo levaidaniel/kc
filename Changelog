@@ -67,6 +67,9 @@ Functional changes, improvements:
   with the new default KDF, so kc now strongly depends on OpenSSL 1.0.0 or
   newer.
 
+- New database encryption cipher, blowfish is available. The default remains
+  AES-256-cbc.
+
 - Introduce new hotkeys while in value displaying, for copying 'values'
   to various clipboards:
 
