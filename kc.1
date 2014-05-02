@@ -139,14 +139,25 @@ Encryption cipher for database encryption. Valid parameters are:
 .Bl -tag -offset ||| -width |
 .It Ar aes256
 This is the default
+.It Ar blowfish
 .El
 .It Fl m Ar mode
-Cipher mode for database encryption. Not every mode makes sense with every encryption cipher. Valid parameters are:
+Cipher mode for database encryption. Different encryption ciphers can have different modes. The valid parameters are:
+.Bl -tag -offset || -width |
+.It Ar aes256
 .Bl -tag -offset ||| -width |
 .It Ar cbc
 This is the default
 .It Ar cfb128
 .It Ar ofb
+.El
+.It Ar blowfish
+.Bl -tag -offset ||| -width |
+.It Ar cbc
+.It Ar ebc
+.It Ar cfb64
+.It Ar ofb
+.El
 .El
 .Pp
 More information is in the
@@ -556,9 +567,11 @@ Perhaps the extra number (spice) after a key's index and its usefulness can use 
 to display that many random characters between the value's original characters when showing it to you. Granted, it will look like a mess (although, that is what we wanted), but you can copy-paste it to the password entry in the website form in question. Then you can start to "blindly" delete the given number of characters from it by moving you cursor to the beginning (eg. HOME key), pressing 'spice' numbers of DEL, then jump over one character to the right (with the right arrow key), then delete the random characters again, then repeating this until you reach the end of you original password (those who played Mortal Kombat will feel a bit nostalgic). You can catch on to this, because the random character padding is of fixed length, so the pattern remains the same for the whole password. You don't even have to pay attention to the original length of the password, because after you've completed the pattern (DELs-move-DELs-move...) and removed the spice (ie.: every padding random character), you end up with you original password, and you'll just be deleting nothing after the end of the string. This of course only makes sense if the form is a password input field, so you (and everybody else) just see stars or dots in place of the password.
 .El
 .Ss CIPHERS
-Databases are encrypted with AES-256 with one of the available cipher modes (see the
+Databases are encrypted with the AES-256 cipher in CBC mode, if another cipher and mode was not specified explicitly. (see the
+.Fl e
+and
 .Fl m
-option). Ciphers use a 128 byte key generated with a KDF (key derivation function) from the supplied password (see the
+options). Ciphers use a 128 byte key generated with a KDF (key derivation function) from the supplied password (see the
 .Em KDF
 section), and an IV (initialization vector) that is read from the host's specific random device (
 .Pa /dev/urandom

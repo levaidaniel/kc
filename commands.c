@@ -728,6 +728,19 @@ kc_setup_crypt(BIO *bio_chain, const unsigned int enc, struct db_parameters *db_
 			printf("Unknown cipher mode: %s!\n", db_params->cipher_mode);
 			return(0);
 		}
+	} else if (strcmp(db_params->cipher, "blowfish") == 0) {
+		if (strcmp(db_params->cipher_mode, "cfb64") == 0)
+			BIO_set_cipher(bio_chain, EVP_bf_cfb64(), db_params->key, db_params->iv, enc);
+		else if (strcmp(db_params->cipher_mode, "ofb") == 0)
+			BIO_set_cipher(bio_chain, EVP_bf_ofb(), db_params->key, db_params->iv, enc);
+		else if (strcmp(db_params->cipher_mode, "cbc") == 0)
+			BIO_set_cipher(bio_chain, EVP_bf_cbc(), db_params->key, db_params->iv, enc);
+		else if (strcmp(db_params->cipher_mode, "ecb") == 0)
+			BIO_set_cipher(bio_chain, EVP_bf_ecb(), db_params->key, db_params->iv, enc);
+		else {
+			printf("Unknown cipher mode: %s!\n", db_params->cipher_mode);
+			return(0);
+		}
 	} else {
 		printf("Unknown encryption cipher: %s!\n", db_params->cipher);
 		return(0);
