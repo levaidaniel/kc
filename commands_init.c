@@ -243,7 +243,7 @@ commands_init(command **commands)
 
 	(*commands)->name = "export";
 	(*commands)->usage = "export -k <filename> [-P kdf [-e cipher [-m cipher_mode [-c keychain]]]]";
-	(*commands)->help = "Export the database to a kc compatible encrypted database file named 'filename' (if no extension specified, \".kcd\" will be appended). When specifying 'keychain', export only that keychain. 'keychain' can be the keychain's index number or name. Index number takes priority when addressing a keychain. 'kdf' and 'cipher mode' can be used to specify a different KDF and/or cipher mode to use while exporting the database.\nSee command 'dump', 'import' and 'append'.";
+	(*commands)->help = "Export the database to a kc compatible encrypted database file named 'filename' (if no extension specified, \".kcd\" will be appended). When specifying 'keychain', export only that keychain. 'keychain' can be the keychain's index number or name. Index number takes priority when addressing a keychain. 'kdf', 'cipher' and 'cipher_mode' can be used to specify a different KDF, encryption cipher and cipher mode to use while exporting the database.\nSee command 'dump', 'import' and 'append'.";
 	(*commands)->fn = cmd_export;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;
