@@ -1,2 +1,3 @@
+- '-c' option to specify an initial keychain to open instead of the first one
 - 'ls' command: sort by key name option.
 - somehow able to import binary blobs, encoded as base64 in values. (for eg.: private keys etc...)
