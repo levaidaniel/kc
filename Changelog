@@ -70,6 +70,9 @@ Functional changes, improvements:
 - New database encryption cipher, blowfish is available. The default remains
   AES-256-cbc.
 
+- New -c and -C option can be used to switch to the specified keychain after
+  opening the database.
+
 - Introduce new hotkeys while in value displaying, for copying 'values'
   to various clipboards:
 
