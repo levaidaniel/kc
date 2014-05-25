@@ -10,9 +10,17 @@ fi
 
 export KC_RUN=${KC_RUN:-'./kc'}
 
-if ${KC_RUN} -v |grep -E -q -e '^Compiled with Readline(, PCRE)*(, SCRYPT)* support\.$';then
+
+# Figure out the compiled-in features
+VERSION=$( ${KC_RUN} -v |grep -E -e '^Compiled with' )
+
+if echo "${VERSION}" |grep -F -q -e 'Readline';then
 	export READLINE=readline
 fi
+if echo "${VERSION}" |grep -F -q -e 'SCRYPT';then
+	export SCRYPT=scrypt
+fi
+
 
 export KC_DB='regress/test.kcd'
 export KC_PASSFILE='regress/testpass'
@@ -59,3 +67,4 @@ sh regress/maxpassword.sh; COUNTER=$(( COUNTER + 1 ))	# 25
 sh regress/cmd_passwd.sh; COUNTER=$(( COUNTER + 1 ))	# 26
 sh regress/cmd_status.sh; COUNTER=$(( COUNTER + 1 ))	# 27
 sh regress/cmd_near.sh; COUNTER=$(( COUNTER + 1 ))	# 28
+sh regress/cmd_opt_c.sh; COUNTER=$(( COUNTER + 1 ))	# 29

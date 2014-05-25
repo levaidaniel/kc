@@ -26,6 +26,8 @@
 .Sh SYNOPSIS
 .Nm
 .Op Fl k Ar database file
+.Op Fl c Ar keychain name/idx
+.Op Fl C Ar keychain name
 .Op Fl r
 .Op Fl p Ar password file
 .Op Fl P Ar kdf
@@ -100,6 +102,18 @@ Use
 .Ar file
 as database. The default is
 .Pa ~/.kc/default.kcd .
+.It Fl c Ar keychain
+Change to the specified keychain after opening the database.
+.It Fl C Ar keychain
+Same as
+.Fl c ,
+but force
+.Ar keychain
+to be the keychain's name, instead of its index number. More on this is in the
+.Cm c
+and
+.Cm cc
+commands' description.
 .It Fl r
 Open the database in read-only mode.
 .Nm

@@ -53,6 +53,8 @@ command		*commands_first = NULL;
 
 xmlDocPtr	db = NULL;
 xmlNodePtr	keychain = NULL;
+char		*keychain_start = NULL;
+char		keychain_start_name = 0;
 
 unsigned char	batchmode = 0;
 
@@ -130,10 +132,17 @@ main(int argc, char *argv[])
 	}
 
 
-	while ((c = getopt(argc, argv, "k:rp:P:e:m:bBvh")) != -1)
+	while ((c = getopt(argc, argv, "k:c:C:rp:P:e:m:bBvh")) != -1)
 		switch (c) {
 			case 'k':
 				db_params.db_filename = optarg;
+			break;
+			case 'c':
+				keychain_start = optarg;
+			break;
+			case 'C':
+				keychain_start = optarg;
+				keychain_start_name = 1;
 			break;
 			case 'r':
 				db_params.readonly = 1;
@@ -486,7 +495,24 @@ main(int argc, char *argv[])
 			quit(EXIT_FAILURE);
 		}
 
+		/* We must init 'keychain' to the first keychain of the db, to
+		 * be able to search in it
+		 */
 		keychain = db_root->children->next;
+
+		if (keychain_start) {
+			/* Start with the specified keychain */
+			keychain = find_keychain(BAD_CAST keychain_start, keychain_start_name);
+			if (keychain) {
+				printf("Starting with keychain '%s'.\n", keychain_start);
+			} else {
+				printf("Keychain '%s' not found, starting with the first one!\n", keychain_start);
+				keychain = db_root->children->next;
+			}
+		} else {
+			/* Start with the first keychain */
+			keychain = db_root->children->next;
+		}
 	}
 	free(buf); buf = NULL;
 
