@@ -182,8 +182,8 @@ main(int argc, char *argv[])
 					"-P <kdf>: KDF to use.\n"
 					"-e <cipher>: Encryption cipher.\n"
 					"-m <mode>: Cipher mode.\n"
-					"-b: Batch mode: disable some features to enable commands from standard input.\n"
-					"-B: Force password prompt in batch mode.\n"
+					"-b: Enable reading commands and the password from standard input.\n"
+					"-B: Enable reading commands from standard input, but prompt for the password.\n"
 					"-v: Display version.\n"
 					"-h: This help.\n");
 				exit(EXIT_SUCCESS);
