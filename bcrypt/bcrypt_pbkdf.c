@@ -15,9 +15,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <stdint.h>
 #include <sys/param.h>
 
+#include <stdint.h>
 #include <stdlib.h>
 #include "blf.h"
 #include "sha2.h"
