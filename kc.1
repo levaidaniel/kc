@@ -17,7 +17,7 @@
 .\"ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 .\"(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 .\"SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-.Dd Jul 12, 2014
+.Dd August 27, 2014
 .Dt KC 1
 .Os
 .Sh NAME
@@ -49,9 +49,9 @@ A database file can contain multiple keychains, and keychains in turn can contai
 After starting
 .Nm
 the
-.Cm help
+.Ic help
 command shows the available commands, and usage information for them. If you're in a hurry, for starters, you create a new entry with the
-.Cm new
+.Ic new
 command, then entering only a number in the command line will display the entry with the given index. You quit from the display with 'q' or EOT (usually CTRL+d).
 .Pp
 The CLI supports tab-completion for commands and keychains.
@@ -59,12 +59,13 @@ The CLI supports tab-completion for commands and keychains.
 There is a utility in the source package (it is also available from the project website) that converts an exported pwsafe database to a
 .Nm
 compatible XML database, which can be imported using the
-.Cm importxml
+.Ic importxml
 command.
 .Pp
-When saving the database (
-.Cm write
-command)
+When saving the database
+.Po Ic write
+command
+.Pc
 .Nm
 will create a temporary file (under the same directory as the opened database file), and will first try to save the whole database to that temporary database file. When this succeeds, only then will
 .Nm
@@ -79,9 +80,9 @@ $ cp ~/.kc/default ~/.kc/default-bkp
 .Ed
 .Pp
 .Nm
-doesn't try excessively hard to recover from hard and/or non-recoverable errors (OS, memory, disk etc...), and in some cases this could mean that it will simply exit with an appropriate error message. No need to worry, but keep this in mind like you would with a common word processor or text editor and save (
-.Cm write
-) periodically, for example when you edit many keys at once. See also the
+doesn't try excessively hard to recover from hard and/or non-recoverable errors (OS, memory, disk etc...), and in some cases this could mean that it will simply exit with an appropriate error message. No need to worry, but keep this in mind like you would with a common word processor or text editor and save
+.Pq Ic write
+periodically, for example when you edit many keys at once. See also the
 .Em CAVEATS
 section regarding this.
 .Pp
@@ -90,11 +91,16 @@ Currently there is no character set conversion taking place in the program. In t
 .Nm ,
 you can "repair" such database by dumping its content to a
 .Nm
-XML file (see the
-.Cm dump
-command below), converting the plain text XML file to a working character set, then importing back that XML file (see the
-.Cm importxml
-command below).
+XML file
+.Po see the
+.Ic dump
+command below
+.Pc
+, converting the plain text XML file to a working character set, then importing back that XML file
+.Po see the
+.Ic importxml
+command below
+.Pc .
 .Ss PARAMETERS
 .Bl -tag -offset ||| -width |
 .It Fl k Ar file
@@ -110,9 +116,9 @@ Same as
 but force
 .Ar keychain
 to be the keychain's name, instead of its index number. More on this is in the
-.Cm c
+.Ic c
 and
-.Cm cc
+.Ic cc
 commands' description.
 .It Fl r
 Open the database in read-only mode.
@@ -189,7 +195,7 @@ Display help.
 .Ss COMMANDS
 These commands are available in the CLI:
 .Bl -tag -offset ||| -width |
-.It Cm new Op name
+.It Ic new Op name
 Create a new key in the current keychain. Both key and value will be prompted for, except when
 .Ar name
 is specified; then it will be used as the key's name.
@@ -203,7 +209,7 @@ Character sequences can be used in values:
 "\ea", "\eA" - these will be replaced with 2 and 4 (respectively) random alpha-numeric characters.
 .Pp
 Character sequences are to be used in values, regardless of their order or count, and can be escaped using double backslashes (eg.: "\e\ea").
-.It Cm list Op pager Op offset
+.It Ic list Op pager Op offset
 List
 .Ar pager
 number of keys per page from the current keychain, skipping
@@ -213,28 +219,28 @@ indices if specified. Every key gets prefixed by its index number. If
 is not specified, the default value of 20 is used. The special value 0 means to not use the pager. If
 .Ar offset
 is not specified, it is not used.
-.It Cm ls Op pager Op offset
+.It Ic ls Op pager Op offset
 Alias of
-.Cm list .
-.It Cm edit Ar index
+.Ic list .
+.It Ic edit Ar index
 Edit a key.
 .Ar index
 is the key's index number in the current keychain.
 .Pp
 Character sequence rules in values apply to this command also. See command
-.Cm new
+.Ic new
 for more information about this.
-.It Cm swap Ar index Ar index
+.It Ic swap Ar index Ar index
 Swap two keys, exchanging their index numbers. The two
 .Ar index
 parameters are the keys' index numbers in the current keychain.
-.It Cm insert Ar index Ar index
+.It Ic insert Ar index Ar index
 Move the key at the first
 .Ar index
 parameter to the index at the second
 .Ar index
 parameter in the current keychain. Surrounding indices will be shifted backwards or forwards.
-.It Cm search Ar string
+.It Ic search Ar string
 Search for
 .Ar string
 in key names in the current keychain.
@@ -242,16 +248,22 @@ in key names in the current keychain.
 Optional modifiers:
 .Pp
 .Ql \&!
-suffix (eg.: search!): show non-matching keys.
+suffix
+.Pq eg.: Ic search! :
+show non-matching keys.
 .Pp
 .Ql *
-suffix (eg.: search*): search in every keychain.
+suffix
+.Pq eg.: Ic search* :
+search in every keychain.
 .Pp
 .Ql i
-suffix (eg.: searchi): case of characters doesn't matter.
+suffix
+.Pq eg.: Ic searchi :
+case of characters doesn't matter.
 .Pp
 You can combine the modifiers.
-.It Cm / Ar pattern
+.It Ic / Ar pattern
 Search for
 .Ar pattern
 regular expression in key names in the current keychain.
@@ -259,22 +271,28 @@ regular expression in key names in the current keychain.
 Optional modifiers:
 .Pp
 .Ql \&!
-suffix (eg.: /!): show non-matching keys.
+suffix
+.Pq eg.: Ic /!  :
+show non-matching keys.
 .Pp
 .Ql *
-suffix (eg.: /*): search in every keychain.
+suffix
+.Pq eg.: Ic /* :
+search in every keychain.
 .Pp
 .Ql i
-suffix (eg.: /i): case of characters doesn't matter.
+suffix
+.Pq eg.: Ic /i :
+case of characters doesn't matter.
 .Pp
 You can combine the modifiers.
-.It Cm near Ar index Op context
+.It Ic near Ar index Op context
 Display the keyname of key at
 .Ar index
 position, and also print the surrounding keys' name in at most
 .Ar context
 vicinity. Only the keys' names and index numbers get displayed.
-.It Cm csearch Ar string
+.It Ic csearch Ar string
 Search for
 .Ar string
 in keychain names.
@@ -282,13 +300,17 @@ in keychain names.
 Optional modifiers:
 .Pp
 .Ql \&!
-suffix (eg.: csearch!): show non-matching keychains.
+suffix
+.Pq eg.: Ic csearch! :
+show non-matching keychains.
 .Pp
 .Ql i
-suffix (eg.: csearchi): case of characters doesn't matter.
+suffix
+.Pq eg.: Ic csearchi :
+case of characters doesn't matter.
 .Pp
 You can combine the modifiers.
-.It Cm c/ Ar pattern
+.It Ic c/ Ar pattern
 Search for
 .Ar pattern
 regular expression in keychain names.
@@ -296,73 +318,77 @@ regular expression in keychain names.
 Optional modifiers:
 .Pp
 .Ql \&!
-suffix (eg.: c/!): show non-matching keychains.
+suffix
+.Pq eg.: Ic c/!
+: show non-matching keychains.
 .Pp
 .Ql i
-suffix (eg.: c/i): case of characters doesn't matter.
+suffix
+.Pq eg.: Ic c/i
+: case of characters doesn't matter.
 .Pp
 You can combine the modifiers.
-.It Cm c Ar keychain
+.It Ic c Ar keychain
 Change the current keychain.
 .Ar keychain
-can be the keychain's index number or name. Index number takes priority when addressing a keychain. (see command
-.Cm cc )
-.It Cm cc Ar keychain_name
+can be the keychain's index number or name. Index number takes priority when addressing a keychain.
+.Pq see command Ic cc
+.It Ic cc Ar keychain_name
 Works like
-.Cm c ,
-but the keychain's name takes priority over its index number. (see command
-.Cm c )
-.It Cm cdel Ar keychain
+.Ic c ,
+but the keychain's name takes priority over its index number.
+.Pq see command Ic c
+.It Ic cdel Ar keychain
 Delete a keychain.
 .Ar keychain
-can be the keychain's index number or name. Index number takes priority when addressing a keychain. (see command
-.Cm ccdel )
-.It Cm ccdel Ar keychain_name
+can be the keychain's index number or name. Index number takes priority when addressing a keychain.
+.Pq see command Ic ccdel
+.It Ic ccdel Ar keychain_name
 Works like
-.Cm cdel ,
-but the keychain's name takes priority over its index number. (see command
-.Cm cdel )
-.It Cm clear Op count
+.Ic cdel ,
+but the keychain's name takes priority over its index number.
+.Pq see command Ic cdel
+.It Ic clear Op count
 Emulate a screen clearing. Scrolls a 100 lines by default, which can be multiplied by
 .Ar count
 times if specified.
-.It Cm clist
+.It Ic clist
 List keychains. Every keychain gets prefixed by its index number.
-.It Cm cls
+.It Ic cls
 Alias of
-.Cm clist .
-.It Cm cnew Op name
+.Ic clist .
+.It Ic cnew Op name
 Create a new keychain. If
 .Ar name
 is not given then prompt for one. Empty string cancels the addition.
-.It Cm cedit
+.It Ic cedit
 Edit the current keychain's name and description.
-.It Cm copy Ar index Ar keychain
+.It Ic copy Ar index Ar keychain
 Copy a key from the current keychain to another keychain.
 .Ar index
 is the key's index number to copy and
 .Ar keychain
 is the destination keychain's index number or name. Index number takes priority when addressing a keychain.
-.It Cm cp Ar index Ar keychain
+.It Ic cp Ar index Ar keychain
 Alias of
-.Cm copy .
-.It Cm move Ar index Ar keychain
+.Ic copy .
+.It Ic move Ar index Ar keychain
 Move a key from the current keychain to another keychain.
 .Ar index
 is the key's index number to move and
 .Ar keychain
 is the destination keychain's index number or name. Index number takes priority when addressing a keychain.
-.It Cm mv Ar index Ar keychain
+.It Ic mv Ar index Ar keychain
 Alias of
-.Cm move .
-.It Cm del Ar index
+.Ic move .
+.It Ic del Ar index
 Delete a key.
 .Ar index
 is the key's index number in the current keychain.
-.It Cm rm Ar index
+.It Ic rm Ar index
 Alias of
-.Cm del .
-.It Cm passwd Op Fl P Ar kdf
+.Ic del .
+.It Ic passwd Op Fl P Ar kdf
 Change the database password and optionally the KDF. All changes will be written immediately.
 .Pp
 More information about the
@@ -370,12 +396,12 @@ More information about the
 optional argument is in the
 .Fl P
 parameter description and the KDF section of this manual.
-.It Cm help Op command
+.It Ic help Op command
 Print application help or describe a
 .Ar command .
-.It Cm status
+.It Ic status
 Display information about the database.
-.It Cm export Fl k Ar filename Op Fl P Ar kdf Op Fl e Ar cipher Op Fl m Ar cipher_mode Op Fl c Ar keychain
+.It Ic export Fl k Ar filename Op Fl P Ar kdf Op Fl e Ar cipher Op Fl m Ar cipher_mode Op Fl c Ar keychain
 Export the database to a
 .Nm
 compatible encrypted database file named
@@ -387,20 +413,23 @@ Optional arguments
 .Ar cipher
 and
 .Ar cipher_mode
-can be used to specify a different KDF, encryption cipher and cipher mode to be used while exporting the database. This doesn't change the current database's parameters, but when importing this exported database, the parameters in use must be the same (or specified explicitly when using the
-.Cm import
-command).
+can be used to specify a different KDF, encryption cipher and cipher mode to be used while exporting the database. This doesn't change the current database's parameters, but when importing this exported database, the parameters in use must be the same
+.Po or specified explicitly when using the
+.Ic import
+command
+.Pc .
 .Pp
 When specifying
 .Ar keychain ,
 export only that keychain.
 .Ar keychain
-can be the keychain's index number or name. Index number takes priority when addressing a keychain. (see command
-.Cm dump ,
-.Cm import
-and
-.Cm append )
-.It Cm dump Fl k Ar filename Op Fl c Ar keychain
+can be the keychain's index number or name. Index number takes priority when addressing a keychain.
+.Po see commands
+.Ic dump ,
+.Ic import ,
+.Ic append
+.Pc
+.It Ic dump Fl k Ar filename Op Fl c Ar keychain
 Dump the database to a
 .Nm
 compatible XML file named
@@ -410,11 +439,10 @@ compatible XML file named
 When specifying a keychain, dump only that keychain to the XML file.
 .Ar keychain
 can be the keychain's index number or name. Index number takes priority when addressing a keychain.
-(see command
-.Cm export )
+.Pq see command Ic export
 .Em NOTE :
 the created XML file will be plain text.
-.It Cm import Fl k Ar filename Op Fl P Ar kdf Op Fl e Ar cipher Op Fl m Ar cipher_mode
+.It Ic import Fl k Ar filename Op Fl P Ar kdf Op Fl e Ar cipher Op Fl m Ar cipher_mode
 Import and overwrite the current database with the one from a
 .Nm
 compatible encrypted database file named
@@ -429,12 +457,13 @@ The
 .Ar cipher
 and
 .Ar cipher_mode
-optional arguments can be used to specify these parameters if they differ from the current database's. (see command
-.Cm importxml ,
-.Cm export
-and
-.Cm append )
-.It Cm importxml Fl k Ar filename
+optional arguments can be used to specify these parameters if they differ from the current database's.
+.Po see commands
+.Ic importxml ,
+.Ic export ,
+.Ic append
+.Pc
+.It Ic importxml Fl k Ar filename
 Import and overwrite the current database with the one from a
 .Nm
 compatible XML file named
@@ -442,12 +471,13 @@ compatible XML file named
 .Ar filename
 must contain a properly formatted
 .Nm
-XML document. (see command
-.Cm import ,
-.Cm export
-and
-.Cm append )
-.It Cm append Fl k Ar filename Op Fl P Ar kdf Op Fl m Ar cipher_mode
+XML document.
+.Po see commands
+.Ic import ,
+.Ic export ,
+.Ic append
+.Pc
+.It Ic append Fl k Ar filename Op Fl P Ar kdf Op Fl m Ar cipher_mode
 Append new and merge existing keychains to the database from a
 .Nm
 compatible encrypted database file named
@@ -466,12 +496,13 @@ See the
 .Em LIMITS
 section for information about how
 .Nm
-deals with limits reached while appending. (see command
-.Cm appendxml ,
-.Cm export
-and
-.Cm import )
-.It Cm appendxml Fl k Ar filename
+deals with limits reached while appending.
+.Po see commands
+.Ic appendxml ,
+.Ic export ,
+.Ic import
+.Pc
+.It Ic appendxml Fl k Ar filename
 Append new and merge existing keychains to the database from a
 .Nm
 compatible XML file named
@@ -483,21 +514,22 @@ XML document. See the
 .Em LIMITS
 section for information about how
 .Nm
-deals with limits reached while appending. (see command
-.Cm append ,
-.Cm export
-and
-.Cm import )
-.It Cm info Op index
+deals with limits reached while appending.
+.Po see command
+.Ic append ,
+.Ic export ,
+.Ic import
+.Pc
+.It Ic info Op index
 Print information about a key in the current keychain or the keychain itself. If
 .Ar index
 is specified, it is the key's index number in the current keychain. If omitted, information is about the current keychain.
-.It Cm quit
+.It Ic quit
 Quit the program. If the database has been modified, then ask if it should be saved.
-.It Cm exit
+.It Ic exit
 Alias of
-.Cm quit .
-.It Cm tmux Ar index Op line
+.Ic quit .
+.It Ic tmux Ar index Op line
 Copy the value of
 .Ar index
 to tmux's paste buffer.
@@ -507,7 +539,7 @@ is the key's index number in the current keychain.
 can be used to specify the line number to copy, if
 .Ar index
 is a multiline value (defaults to 1).
-.It Cm xclip Ar index Op line
+.It Ic xclip Ar index Op line
 Copy the value of
 .Ar index
 to the PRIMARY X11 selection (ie.: middle mouse button).
@@ -517,7 +549,7 @@ is the key's index number in the current keychain.
 can be used to specify the line number to copy, if
 .Ar index
 is a multiline value (defaults to 1).
-.It Cm Xclip Ar index Op line
+.It Ic Xclip Ar index Op line
 Copy the value of
 .Ar index
 to the CLIPBOARD X11 selection (aka.: CTRL+c - CTRL+v).
@@ -527,14 +559,14 @@ is the key's index number in the current keychain.
 can be used to specify the line number to copy, if
 .Ar index
 is a multiline value (defaults to 1).
-.It Cm version
+.It Ic version
 Display the program version.
-.It Cm write
+.It Ic write
 Save the database.
-.It Cm save
+.It Ic save
 Alias of
-.Cm write .
-.It Cm any number
+.Ic write .
+.It Ic any number
 To display a key's value, you enter the key's index (ie.: only a number) into the command line, then it will display the entry with the given index. You quit from the display with 'q' or EOT (usually CTRL+d). By specifying another number after the index (eg.: '12 2' -- here 12 is the index, and 2 is the extra number (spice) after it), that many random characters will be displayed between the value's characters. You can navigate up/down through a multi-line value's lines with keys j/k, n/p, f/b, +/-, [/], {/}, </>, <SPACE>, <ENTER>, <BACKSPACE>. Typing a number between 1-9 will jump directly to that line.
 .Pp
 It is possible to copy the displayed value to a clipboard (or such) with these hotkeys:
@@ -564,7 +596,7 @@ Fair warnings before using the clipboard features:
 .Bl -enum -offset ||| -width |
 .It
 If you don't trust the system where you're running
-.Cm kc
+.Ic kc
 then don't use these features, as you can not be sure that the binaries in your PATH are not tampered with and would record the passwords.
 .It
 Removal of the
@@ -577,21 +609,27 @@ Perhaps the extra number (spice) after a key's index and its usefulness can use 
 to display that many random characters between the value's original characters when showing it to you. Granted, it will look like a mess (although, that is what we wanted), but you can copy-paste it to the password entry in the website form in question. Then you can start to "blindly" delete the given number of characters from it by moving you cursor to the beginning (eg. HOME key), pressing 'spice' numbers of DEL, then jump over one character to the right (with the right arrow key), then delete the random characters again, then repeating this until you reach the end of you original password (those who played Mortal Kombat will feel a bit nostalgic). You can catch on to this, because the random character padding is of fixed length, so the pattern remains the same for the whole password. You don't even have to pay attention to the original length of the password, because after you've completed the pattern (DELs-move-DELs-move...) and removed the spice (ie.: every padding random character), you end up with you original password, and you'll just be deleting nothing after the end of the string. This of course only makes sense if the form is a password input field, so you (and everybody else) just see stars or dots in place of the password.
 .El
 .Ss CIPHERS
-Databases are encrypted with the AES-256 cipher in CBC mode, if another cipher and mode was not specified explicitly. (see the
+Databases are encrypted with the AES-256 cipher in CBC mode, if another cipher and mode was not specified explicitly.
+.Po see the
 .Fl e
 and
 .Fl m
-options). Ciphers use a 128 byte key generated with a KDF (key derivation function) from the supplied password (see the
+options
+.Pc . Ciphers use a 128 byte key generated with a KDF (key derivation function) from the supplied password
+.Po see the
 .Em KDF
-section), and an IV (initialization vector) that is read from the host's specific random device (
-.Pa /dev/urandom
+section
+.Pc
+, and an IV (initialization vector) that is read from the host's specific random device
+.Po Pa /dev/urandom
 on Linux and
 .Pa /dev/random
-on everything else ) as characters. See also the
+on everything else
+.Pc as characters. See also the
 .Em CAVEATS
 section.
 To change the encryption cipher and/or its mode, you can use the
-.Cm export
+.Ic export
 command.
 .Ss KDF
 The KDF converts the user supplied password with a generated salt to a strong key that can be used safely during encryption. Every SHA-* based PBKDF2 KDF uses 5000 rounds in
@@ -599,7 +637,7 @@ The KDF converts the user supplied password with a generated salt to a strong ke
 On changing the KDF in use, see the
 .Fl P
 option and the
-.Cm passwd
+.Ic passwd
 command. Of course, changing the KDF with which the database was created/opened means that the new KDF must be used from then on. This is because changing the KDF changes the key the database was encrypted with.
 .Sh LIMITS
 .Nm
@@ -627,7 +665,7 @@ After the above commands, you should end up with a
 compatible XML database. You can import it to
 .Nm
 using the
-.Cm importxml
+.Ic importxml
 command.
 .It Em Adding new entries :
 .Bd -literal -offset |||
