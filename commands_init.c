@@ -153,7 +153,7 @@ commands_init(command **commands)
 
 		(*commands)->name = "new";
 		(*commands)->usage = "new [name]";
-		(*commands)->help = "Create a new key with a value in the current keychain. Both key and value will be prompted for, except when 'name' is specified; then it will be used as the key's name.\n\nCharacter sequences can be used in values:\n\"\\n\" - create a new line, and make the result a multi-line value.\n\"\\r\", \"\\R\" - these will be replaced with 2 and 4 (respectively) random printable characters.\n\"\\a\", \"\\A\" - these will be replaced with 2 and 4 (respectively) random alpha-numeric characters.";
+		(*commands)->help = "Create a new key with a value in the current keychain. Both key and value will be prompted for, except when 'name' is specified; then it will be used as the key's name.\n\nCharacter sequences can be used in values:\n\"\\n\" - create a new line, and make the result a multiline value.\n\"\\r\", \"\\R\" - these will be replaced with 2 and 4 (respectively) random printable characters.\n\"\\a\", \"\\A\" - these will be replaced with 2 and 4 (respectively) random alpha-numeric characters.";
 		(*commands)->fn = cmd_new;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
