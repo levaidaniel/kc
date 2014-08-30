@@ -104,7 +104,7 @@ cmd_getnum(const unsigned long int idx, const unsigned long int spice)
 
 			printf("[%s] ", key);	/* print the key */
 
-			/* if multi-line, prefix the line with a line number */
+			/* if multiline, prefix the line with a line number */
 			if (lines > 1)
 				printf("[%lu/%lu] ", line_req, lines);
 
