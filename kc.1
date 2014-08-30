@@ -637,7 +637,7 @@ On changing the KDF in use, see the
 option and the
 .Ic passwd
 command. Of course, changing the KDF with which the database was created/opened means that the new KDF must be used from then on. This is because changing the KDF changes the key the database was encrypted with.
-.Sh LIMITS
+.Ss LIMITS
 .Nm
 has limits when it deals with keychains and keys in keychains. The maximum number of elements for both is the upper limit an unsigned long integer can store on the running platfrom, minus one. These limits are enforced every time a new keychain or key is being created (or moved, copied, etc...). Appending is done in a non-atomic fashion. This means that
 .Nm
