@@ -639,7 +639,7 @@ option and the
 command. Of course, changing the KDF with which the database was created/opened means that the new KDF must be used from then on. This is because changing the KDF changes the key the database was encrypted with.
 .Ss LIMITS
 .Nm
-has limits when it deals with keychains and keys in keychains. The maximum number of elements for both is the upper limit an unsigned long integer can store on the running platfrom, minus one. These limits are enforced every time a new keychain or key is being created (or moved, copied, etc...). Appending is done in a non-atomic fashion. This means that
+has limits when it deals with keychains and keys in keychains. The maximum number of elements for both is the upper limit an unsigned long integer can store on the running platform, minus one. These limits are enforced every time a new keychain or key is being created (or moved, copied, etc...). Appending is done in a non-atomic fashion. This means that
 .Nm
 will not create a keychain if it would not fit in the limit, and it will not append keys to an existing keychain if they would not fit in the limit. However, for example, if a database that is being appended contains a keychain whose keys could not fit in the existing keychain, and also contains a keychain whose keys could fit in the existing keychain, then the one that could fit will be appended, and the one that could not will not be appended. This means that appending is atomic on the keychain level (or keys level, if you like), and not atomic on the database level.
 .Sh EXAMPLES
