@@ -537,27 +537,40 @@ is the key's index number in the current keychain.
 .Ar line
 can be used to specify the line number to copy, if
 .Ar index
-is a multiline value (defaults to 1).
+is a multiline value (defaults to 1). This will try to execute the
+.Xr tmux 1
+binary with the
+.Em set-buffer
+command passing the
+.Em value
+as its parameter.
+.Pp
+Check the
+.Em CAVEATS
+section about the clipboard commands.
+.It Ic Xclip Ar index Op line
 .It Ic xclip Ar index Op line
 Copy the value of
 .Ar index
-to the PRIMARY X11 selection (ie.: middle mouse button).
+to the CLIPBOARD (aka.: CTRL+c - CTRL+v) or PRIMARY X11 selection (ie.: middle mouse button), depending on the first
+.Sq x
+character's case, respectively.
 .Ar index
 is the key's index number in the current keychain.
 .Ar line
 can be used to specify the line number to copy, if
 .Ar index
 is a multiline value (defaults to 1).
-.It Ic Xclip Ar index Op line
-Copy the value of
-.Ar index
-to the CLIPBOARD X11 selection (aka.: CTRL+c - CTRL+v).
-.Ar index
-is the key's index number in the current keychain.
-.Ar line
-can be used to specify the line number to copy, if
-.Ar index
-is a multiline value (defaults to 1).
+.Pp
+These will try to execute the
+.Xr xclip 1
+binary, piping the
+.Em value
+to its standard input.
+.Pp
+Check the
+.Em CAVEATS
+section about the clipboard commands.
 .It Ic version
 Display the program version.
 .It Ic write
@@ -571,37 +584,21 @@ To display a key's value, you enter the key's index (ie.: only a number) into th
 It is possible to copy the displayed value to a clipboard (or such) with these hotkeys:
 .Bl -tag -offset ||| -width |
 .It t
-Insert the value to tmux's paste buffer. This will try to execute the
-.Xr tmux 1
-binary with the
-.Em set-buffer
-command passing the
-.Em value
-as its parameter.
+Copy the value to the tmux paste buffer like the
+.Ic tmux
+command.
 .It x
-Copy the value to the PRIMARY X selection (ie.: middle mouse button).
+Copy the value to the PRIMARY X selection. like the
+.Ic xclip
+command.
 .It X
-Copy the value to the CLIPBOARD X selection (aka.: CTRL+c - CTRL+v).
+Copy the value to the CLIPBOARD X selection, like the
+.Ic Xclip
+command.
 .El
-The latter two will try to execute the
-.Xr xclip 1
-binary, piping the
-.Em value
-to its standard input.
-.Pp
-The above binaries must be in PATH in order to use the hotkeys.
-.Pp
-Fair warnings before using the clipboard features:
-.Bl -enum -offset ||| -width |
-.It
-If you don't trust the system where you're running
-.Ic kc
-then don't use these features, as you can not be sure that the binaries in your PATH are not tampered with and would record the passwords.
-.It
-Removal of the
-.Em values
-from the clipboards are not being dealt with. This should be the user's responsibility.
-.El
+Check the
+.Em CAVEATS
+section about the clipboard commands.
 .Pp
 Perhaps the extra number (spice) after a key's index and its usefulness can use some further explanation. Let's say you want to display a password to use it on a website's form, but you don't want the people walking by or around you to recognize words, numbers or parts of it. You can use this nifty "trick" to tell
 .Nm
@@ -766,6 +763,18 @@ There is no character conversion taking place for the input fields.
 .Pp
 .Nm
 will exit without saving the database (with a corresponding error message) when an out-of-memory condition arises.
+.Pp
+Fair warnings before using the clipboard features:
+.Bl -enum -offset ||| -width |
+.It
+If you don't trust the system where you're running
+.Ic kc
+then don't use these features, as you can not be sure that the binaries in your PATH are not tampered with and would record the passwords.
+.It
+Removal of the
+.Em values
+from the clipboards are not being dealt with. This should be the user's responsibility.
+.El
 .Sh AUTHOR
 .Nm
 was written by
