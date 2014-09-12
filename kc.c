@@ -175,15 +175,15 @@ main(int argc, char *argv[])
 			case 'h':
 				/* FALLTHROUGH */
 			default:
-				printf( "%s [-k <database file>] [-r] [-p <password file>] [-P <kdf>] [-e <cipher>] [-m <cipher mode>] [-b] [-B] [-v] [-h]\n\n", argv[0]);
+				printf( "%s [-k <file>] [-r] [-c/-C <keychain>] [-p <file>] [-P <kdf>] [-e <cipher>] [-m <mode>] [-B/-b] [-v] [-h]\n\n", argv[0]);
 				printf(	"-k <file>: Use file as database. The default is ~/.kc/default.kcd .\n"
 					"-r: Open the database in read-only mode.\n"
-					"-c/-C <keychain>: Change to the specified keychain after opening the database.\n"
+					"-c/-C <keychain>: Start in <keychain>.\n"
 					"-p <file>: Read password from file.\n"
 					"-P <kdf>: KDF to use.\n"
 					"-e <cipher>: Encryption cipher.\n"
 					"-m <mode>: Cipher mode.\n"
-					"-B/-b: Batch mode. Enable reading commands and optionally the password from standard input.\n"
+					"-B/-b: Batch mode.\n"
 					"-v: Display version.\n"
 					"-h: This help.\n");
 				exit(EXIT_SUCCESS);
