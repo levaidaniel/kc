@@ -379,7 +379,7 @@ main(int argc, char *argv[])
 		}
 
 		if (getenv("KC_DEBUG"))
-			db = xmlReadMemory(buf, (int)pos, NULL, "UTF-8", XML_PARSE_RECOVER | XML_PARSE_NONET | XML_PARSE_PEDANTIC);
+			db = xmlReadMemory(buf, (int)pos, NULL, "UTF-8", XML_PARSE_NONET | XML_PARSE_PEDANTIC | XML_PARSE_RECOVER);
 		else
 			db = xmlReadMemory(buf, (int)pos, NULL, "UTF-8", XML_PARSE_NONET | XML_PARSE_NOERROR | XML_PARSE_NOWARNING);
 		if (!db) {
