@@ -1,3 +1,9 @@
+2.3.3:
+Functional changes, improvements:
+- Allow database opening and XML importing of broken UTF-8 encoded XML's
+  databases -- only in KC_DEBUG mode.
+
+
 2.3.2:
 Bug fixes:
 - Fix logic flaw in saving the new database file. There was no file lock on
