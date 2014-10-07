@@ -128,7 +128,7 @@ cmd_import(const char *e_line, command *commands)
 		/* plain text XML database import */
 
 		if (getenv("KC_DEBUG"))
-			db_new = xmlReadFile(db_params_new.db_filename, "UTF-8", XML_PARSE_NONET | XML_PARSE_PEDANTIC);
+			db_new = xmlReadFile(db_params_new.db_filename, "UTF-8", XML_PARSE_NONET | XML_PARSE_PEDANTIC | XML_PARSE_RECOVER);
 		else
 			db_new = xmlReadFile(db_params_new.db_filename, "UTF-8", XML_PARSE_NONET | XML_PARSE_NOERROR | XML_PARSE_NOWARNING);
 
@@ -284,9 +284,9 @@ cmd_import(const char *e_line, command *commands)
 		BIO_free_all(bio_chain);
 
 		if (getenv("KC_DEBUG"))
-			db_new = xmlReadMemory(buf, (int)ret, NULL, "UTF-8", XML_PARSE_NONET | XML_PARSE_RECOVER);
+			db_new = xmlReadMemory(buf, (int)ret, NULL, "UTF-8", XML_PARSE_NONET | XML_PARSE_PEDANTIC | XML_PARSE_RECOVER);
 		else
-			db_new = xmlReadMemory(buf, (int)ret, NULL, "UTF-8", XML_PARSE_NONET | XML_PARSE_NOERROR | XML_PARSE_NOWARNING | XML_PARSE_RECOVER);
+			db_new = xmlReadMemory(buf, (int)ret, NULL, "UTF-8", XML_PARSE_NONET | XML_PARSE_NOERROR | XML_PARSE_NOWARNING);
 
 		free(buf); buf = NULL;
 
