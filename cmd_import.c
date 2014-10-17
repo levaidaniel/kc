@@ -82,7 +82,7 @@ cmd_import(const char *e_line, command *commands)
 	larg(line, &largv, &largc);
 	free(line); line = NULL;
 
-	optind = 1;
+	optind = 0;
 	while ((c = getopt(largc, largv, "k:P:e:m:")) != -1)
 		switch (c) {
 			case 'k':

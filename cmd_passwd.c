@@ -53,7 +53,7 @@ cmd_passwd(const char *e_line, command *commands)
 	larg(line, &largv, &largc);
 	free(line); line = NULL;
 
-	optind = 1;
+	optind = 0;
 	while ((c = getopt(largc, largv, "P:")) != -1)
 		switch (c) {
 			case 'P':
