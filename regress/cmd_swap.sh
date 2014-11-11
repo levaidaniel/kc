@@ -24,7 +24,7 @@ printf "new ABCDEF\nGHIJKL\nwrite\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}
 
 printf "swap 0 3\nwrite\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}
 SHA1=$(printf "list\n" |KC_DEBUG=yes ${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = '1e43bcd8d5b67176d0582a1cbbb2fe11c02e3672' ];then
+if [ "$SHA1" = '85f6dcd99ae2c05ffef94cb4552a85619e5b7073' ];then
 	echo "$0 test ok (swap)!"
 else
 	echo "$0 test failed (swap)!"
@@ -33,7 +33,7 @@ fi
 
 printf "swap 0 3\nwrite\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}
 SHA1=$(printf "list\n" |KC_DEBUG=yes ${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = '374b7bbc7e4f120740863e6e52b31a50c28948ab' ];then
+if [ "$SHA1" = '649e3af4746b4284a4372791a0426d3af4135834' ];then
 	echo "$0 test ok (swap back)!"
 else
 	echo "$0 test failed (swap back)!"

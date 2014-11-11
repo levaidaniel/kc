@@ -20,7 +20,7 @@ esac
 
 
 SHA1=$(printf "info\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." |sed -e 's/^\(Modified: \).*$/\1/' |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = 'db6f86083e3da30ca234edbe29cfc01f3167488f' ];then
+if [ "$SHA1" = '726595530fc31cbde570adb2e204afe55013f0ed' ];then
 	echo "$0 test ok (keychain description/created/modified)!"
 else
 	echo "$0 test failed (keychain description/created/modified)!"
