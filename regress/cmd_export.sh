@@ -81,7 +81,7 @@ if [ ! -r "regress/test_dump.xml" ];then
 fi
 
 SHA1=$(cat regress/test_dump.xml |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = 'f7fb5577878b3d1ceaf8aa14ea9c273a36b03d15' ];then
+if [ "$SHA1" = "$SHA1_COMMON_1" ];then
 	echo "$0 test ok (dump)!"
 else
 	echo "$0 test failed (dump)!"

@@ -20,7 +20,7 @@ else
 	exit 1
 fi
 
-if [ "$xml_size" = 'XML structure size: 502 bytes' ];then
+if [ "$xml_size" = 'XML structure size: 538 bytes' ];then
 	echo "$0 test ok (xml size)!"
 else
 	echo "$0 test failed (xml size)!"
