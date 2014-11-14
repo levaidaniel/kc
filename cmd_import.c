@@ -58,7 +58,7 @@ cmd_import(const char *e_line, command *commands)
 	char		**largv = NULL;
 	char		*line = NULL;
 	char		*buf = NULL;
-	char		append = 0, xml = 0;
+	char		append = 0, xml = 0, exiting = 0;
 	ssize_t		ret = -1;
 	int		pos = 0;
 
@@ -100,6 +100,9 @@ cmd_import(const char *e_line, command *commands)
 				free(db_params_new.cipher_mode); db_params_new.cipher_mode = NULL;
 				db_params_new.cipher_mode = strdup(optarg); malloc_check(db_params_new.cipher_mode);
 			break;
+			default:
+				exiting++;
+			break;
 		}
 
 	if (strncmp(largv[0], "append", 6) == 0)	/* command is 'append' or 'appendxml' */
@@ -114,7 +117,7 @@ cmd_import(const char *e_line, command *commands)
 	}
 	free(largv); largv = NULL;
 
-	if (!db_params_new.db_filename) {
+	if (!db_params_new.db_filename  ||  exiting) {
 		puts(commands->usage);
 
 		goto exiting;

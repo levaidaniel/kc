@@ -58,7 +58,7 @@ cmd_export(const char *e_line, command *commands)
 	int		c = 0, largc = 0;
 	char		**largv = NULL;
 	char		*line = NULL;
-	char		dump = 0, ret = -1;
+	char		dump = 0, ret = -1, exiting = 0;
 	struct stat	st;
 
 #ifndef _READLINE
@@ -104,6 +104,9 @@ cmd_export(const char *e_line, command *commands)
 				free(db_params_new.cipher_mode); db_params_new.cipher_mode = NULL;
 				db_params_new.cipher_mode = strdup(optarg); malloc_check(db_params_new.cipher_mode);
 			break;
+			default:
+				exiting++;
+			break;
 		}
 
 	if (strcmp(largv[0], "dump") == 0)
@@ -115,7 +118,7 @@ cmd_export(const char *e_line, command *commands)
 	}
 	free(largv); largv = NULL;
 
-	if (!db_params_new.db_filename) {
+	if (!db_params_new.db_filename  ||  exiting) {
 		puts(commands->usage);
 
 		goto exiting;
