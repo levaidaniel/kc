@@ -36,7 +36,7 @@ cmd_passwd(const char *e_line, command *commands)
 {
 	int	c = 0, largc = 0;
 	char	**largv = NULL;
-	char	ret = -1;
+	char	ret = -1, exiting = 0;
 	char	*line = NULL;
 
 
@@ -60,6 +60,9 @@ cmd_passwd(const char *e_line, command *commands)
 				free(db_params.kdf); db_params.kdf = NULL;
 				db_params.kdf = strdup(optarg); malloc_check(db_params.kdf);
 			break;
+			default:
+				exiting++;
+			break;
 		}
 
 	for (c = 0; c <= largc; c++) {
@@ -67,6 +70,8 @@ cmd_passwd(const char *e_line, command *commands)
 	}
 	free(largv); largv = NULL;
 
+	if (exiting)
+		return;
 
 	ret = kc_setup_crypt(bio_chain, 1, &db_params, KC_SETUP_CRYPT_IV | KC_SETUP_CRYPT_SALT | KC_SETUP_CRYPT_KEY);
 
