@@ -112,6 +112,8 @@ Functional changes, improvements:
 - The 'new' command's first parameter (if specified), the key, now works with
   spaces.
 
+- 'clist' command now displays also the keychains' description.
+
 - IV and salt sizes were increased.
 
 - Maximum number of keys and keychains are now determined at compile time (the
