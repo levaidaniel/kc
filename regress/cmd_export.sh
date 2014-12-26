@@ -36,6 +36,23 @@ else
 	exit 1
 fi
 
+
+rm -f regress/test_export.kcd
+printf "export -k regress/test_export -P bcrypt -e blowfish -m cbc\n${PASSWORD}\n${PASSWORD}\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}
+
+if [ ! -r "regress/test_export.kcd" ];then
+	echo "$0 test failed (unreadable export file, bcrypt + blowfish)!"
+	exit 1
+fi
+
+if printf "${PASSWORD}" |${KC_RUN} -b -k regress/test_export.kcd -P bcrypt -e blowfish -m cbc;then
+	echo "$0 test ok (export, bcrypt + blowfish)!"
+else
+	echo "$0 test failed (export, bcrypt + blowfish)!"
+	exit 1
+fi
+
+
 if [ ${SCRYPT} ];then
 	rm -f regress/test_export.kcd
 	printf "export -k regress/test_export -P scrypt\n${PASSWORD}\n${PASSWORD}\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}
@@ -52,6 +69,7 @@ if [ ${SCRYPT} ];then
 		exit 1
 	fi
 fi
+
 
 # This test must be the last one that writes test_export.kcd,
 # because the cmd_import.sh test will use this as its input.
