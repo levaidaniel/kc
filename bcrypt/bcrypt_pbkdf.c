@@ -1,4 +1,4 @@
-/* $OpenBSD: bcrypt_pbkdf.c,v 1.10 2014/12/30 01:41:43 djm Exp $ */
+/* $OpenBSD: bcrypt_pbkdf.c,v 1.12 2015/01/08 00:30:07 deraadt Exp $ */
 /*
  * Copyright (c) 2013 Ted Unangst <tedu@openbsd.org>
  *
@@ -15,7 +15,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <sys/param.h>
+#include <sys/types.h>
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -25,6 +25,9 @@
 #ifdef __linux__
 #include <bsd/string.h>
 #endif
+
+#define	MINIMUM(a,b) (((a) < (b)) ? (a) : (b))
+
 void	explicit_bzero(void *, size_t);
 
 /*
@@ -152,7 +155,7 @@ bcrypt_pbkdf(const unsigned char *pass, size_t passlen, const uint8_t *salt, siz
 		/*
 		 * pbkdf2 deviation: output the key material non-linearly.
 		 */
-		amt = MIN(amt, keylen);
+		amt = MINIMUM(amt, keylen);
 		for (i = 0; i < amt; i++) {
 			size_t dest = i * stride + (count - 1);
 			if (dest >= origkeylen)
