@@ -25,7 +25,7 @@ Compile:
   $ make -f Makefile.linux install
 
 Options:
-HAVE_PCRE=y		This will turn on regexp support in searches, and needs libcpre.
+HAVE_PCRE=y		This will turn on regexp support in searches, and needs libpcre.
 HAVE_LIBSCRYPT=y	This will turn on scrypt KDF support, and needs libscrypt.
 BUNDLED_BCRYPT=y	To use the packaged bcrypt implementation (that comes
 			from OpenBSD). This is hardcoded in Makefile.linux, and on BSDs
