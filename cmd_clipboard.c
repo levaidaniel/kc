@@ -171,7 +171,7 @@ cmd_clipboard(const char *e_line, command *commands)
 
 						break;
 					default: /* Parent */
-						printf("Copying '%s' to tmux paste buffer.\n", key);
+						printf("Copying #%lu from '%s' to tmux paste buffer.\n", line_req, key);
 						break;
 				}
 
@@ -227,7 +227,7 @@ cmd_clipboard(const char *e_line, command *commands)
 						write(pipefd[1], value_line, value_line_len);
 						close(pipefd[1]);
 
-						printf("Copying '%s' to X11 clipboard.\n", key);
+						printf("Copying #%lu from '%s' to X11 clipboard.\n", line_req, key);
 
 						break;
 				}
