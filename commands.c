@@ -682,7 +682,12 @@ kc_setup_crypt(BIO *bio_chain, const unsigned int enc, struct db_parameters *db_
 
 		/* Generate a proper key from the user's password */
 		if (strcmp(db_params->kdf, "sha1") == 0) {
-			if (!PKCS5_PBKDF2_HMAC_SHA1(db_params->pass, (int)strlen(db_params->pass), db_params->salt, SALT_DIGEST_LEN + 1, 5000, KEY_LEN, db_params->key)) {
+			if (!PKCS5_PBKDF2_HMAC_SHA1(db_params->pass, (int)strlen(db_params->pass),
+				db_params->salt, SALT_DIGEST_LEN + 1,
+				5000,
+				KEY_LEN, db_params->key))
+			{
+
 				puts("Failed to generate a key from the password!");
 				if (getenv("KC_DEBUG"))
 					puts("PKCS5_PBKDF2_HMAC_SHA1() error");
@@ -690,7 +695,11 @@ kc_setup_crypt(BIO *bio_chain, const unsigned int enc, struct db_parameters *db_
 				return(0);
 			}
 		} else if (strcmp(db_params->kdf, "sha512") == 0) {
-			if (!PKCS5_PBKDF2_HMAC(db_params->pass, (int)strlen(db_params->pass), db_params->salt, SALT_DIGEST_LEN + 1, 5000, EVP_sha512(), KEY_LEN, db_params->key)) {
+			if (!PKCS5_PBKDF2_HMAC(db_params->pass, (int)strlen(db_params->pass),
+				db_params->salt, SALT_DIGEST_LEN + 1,
+				5000, EVP_sha512(),
+				KEY_LEN, db_params->key))
+			{
 				puts("Failed to generate a key from the password!");
 				if (getenv("KC_DEBUG"))
 					puts("PKCS5_PBKDF2_HMAC() error");
@@ -698,7 +707,10 @@ kc_setup_crypt(BIO *bio_chain, const unsigned int enc, struct db_parameters *db_
 				return(0);
 			}
 		} else if (strcmp(db_params->kdf, "bcrypt") == 0) {
-			if (bcrypt_pbkdf(db_params->pass, strlen(db_params->pass), db_params->salt, SALT_DIGEST_LEN + 1, db_params->key, KEY_LEN, 16) != 0) {
+			if (bcrypt_pbkdf(db_params->pass, strlen(db_params->pass),
+				db_params->salt, SALT_DIGEST_LEN + 1,
+				db_params->key, KEY_LEN, 16) != 0)
+			{
 				puts("Failed to generate a key from the password!");
 				if (getenv("KC_DEBUG"))
 					puts("bcrypt_pbkdf() error");
@@ -707,7 +719,11 @@ kc_setup_crypt(BIO *bio_chain, const unsigned int enc, struct db_parameters *db_
 			}
 #ifdef _HAVE_LIBSCRYPT
 		} else if (strcmp(db_params->kdf, "scrypt") == 0) {
-			if (libscrypt_scrypt((const unsigned char *)db_params->pass, strlen(db_params->pass), db_params->salt, SALT_DIGEST_LEN + 1, SCRYPT_N, SCRYPT_r, SCRYPT_p, db_params->key, KEY_LEN) != 0) {
+			if (libscrypt_scrypt((const unsigned char *)db_params->pass, strlen(db_params->pass),
+				db_params->salt, SALT_DIGEST_LEN + 1,
+				SCRYPT_N, SCRYPT_r, SCRYPT_p,
+				db_params->key, KEY_LEN) != 0)
+			{
 				puts("Failed to generate a key from the password!");
 				if (getenv("KC_DEBUG"))
 					puts("libscrypt_scrypt() error");
