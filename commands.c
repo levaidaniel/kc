@@ -740,12 +740,6 @@ kc_setup_crypt(BIO *bio_chain, const unsigned int enc, struct db_parameters *db_
 	if (getenv("KC_DEBUG"))
 		printf("crypt setup: using %s based KDF\n", db_params->kdf);
 
-	if (!db_params->key) {
-		puts("Key generation failure!");
-
-		return(0);
-	}
-
 
 	/* extract bio_cipher from bio_chain */
 	bio_chain = BIO_find_type(bio_chain, BIO_TYPE_CIPHER);
