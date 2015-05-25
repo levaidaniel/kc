@@ -75,5 +75,4 @@ test: all
 	sh regress/run_tests.sh
 
 ${PROG}: ${OBJS} ${BCRYPT_OBJS}
-	${CC} -o ${PROG} ${LDADD} \
-		${OBJS} ${BCRYPT_OBJS}
+	${CC} ${OBJS} ${BCRYPT_OBJS} -o ${PROG} ${LDADD}
