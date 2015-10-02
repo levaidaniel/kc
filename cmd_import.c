@@ -245,7 +245,7 @@ cmd_import(const char *e_line, command *commands)
 
 		bio_chain = kc_setup_bio_chain(db_params_new.db_filename, 0);
 		if (!bio_chain) {
-			printf("Could not setup bio_chain!");
+			puts("Could not setup bio_chain!");
 
 			goto exiting;
 		}
@@ -265,7 +265,7 @@ cmd_import(const char *e_line, command *commands)
 
 		/* kc_setup_crypt() check from a few lines above */
 		if (!ret) {
-			printf("Could not setup decrypting!");
+			puts("Could not setup decrypting!");
 
 			BIO_free_all(bio_chain);
 			goto exiting;
