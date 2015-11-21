@@ -154,6 +154,8 @@ cmd_clipboard(const char *e_line, command *commands)
 							if (close(db_params.db_file) == -1) {
 								perror("child: close(database file)");
 								exit(EXIT_FAILURE);
+							} else {
+								db_params.db_file = -1;
 							}
 						}
 
@@ -165,7 +167,7 @@ cmd_clipboard(const char *e_line, command *commands)
 						fork_argv[4] = NULL;
 
 						if (execvp(fork_argv[0], fork_argv) == -1)
-							fprintf(stderr, "tmux: %s", strerror(errno));
+							fprintf(stderr, "tmux: %s\n", strerror(errno));
 
 						quit(EXIT_FAILURE);
 
@@ -198,6 +200,8 @@ cmd_clipboard(const char *e_line, command *commands)
 							if (close(db_params.db_file) == -1) {
 								perror("child: close(database file)");
 								exit(EXIT_FAILURE);
+							} else {
+								db_params.db_file = -1;
 							}
 						}
 
@@ -215,7 +219,7 @@ cmd_clipboard(const char *e_line, command *commands)
 						 * and the exec'd process will have the same environment. */
 						dup2(pipefd[0], 0);
 						if (execvp(fork_argv[0], fork_argv) == -1)
-							fprintf(stderr, "xclip: %s", strerror(errno));
+							fprintf(stderr, "xclip: %s\n", strerror(errno));
 
 						quit(EXIT_FAILURE);
 
