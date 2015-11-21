@@ -238,6 +238,8 @@ cmd_getnum(const unsigned long int idx, const unsigned long int spice)
 									if (close(db_params.db_file) == -1) {
 										perror("child: close(database file)");
 										exit(EXIT_FAILURE);
+									} else {
+										db_params.db_file = -1;
 									}
 								}
 
@@ -249,7 +251,7 @@ cmd_getnum(const unsigned long int idx, const unsigned long int spice)
 								fork_argv[4] = NULL;
 
 								if (execvp(fork_argv[0], fork_argv) == -1)
-									fprintf(stderr, "tmux: %s", strerror(errno));
+									fprintf(stderr, "tmux: %s\n", strerror(errno));
 
 								quit(EXIT_FAILURE);
 
@@ -283,6 +285,8 @@ cmd_getnum(const unsigned long int idx, const unsigned long int spice)
 									if (close(db_params.db_file) == -1) {
 										perror("child: close(database file)");
 										exit(EXIT_FAILURE);
+									} else {
+										db_params.db_file = -1;
 									}
 								}
 
@@ -300,7 +304,7 @@ cmd_getnum(const unsigned long int idx, const unsigned long int spice)
 								 * and the exec'd process will have the same environment. */
 								dup2(pipefd[0], 0);
 								if (execvp(fork_argv[0], fork_argv) == -1)
-									fprintf(stderr, "xclip: %s", strerror(errno));
+									fprintf(stderr, "xclip: %s\n", strerror(errno));
 
 								quit(EXIT_FAILURE);
 
