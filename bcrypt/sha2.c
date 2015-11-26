@@ -34,6 +34,9 @@
  * $From: sha2.c,v 1.1 2001/11/08 00:01:51 adg Exp adg $
  */
 
+#ifndef _OS_LINUX
+#include <sys/endian.h>
+#endif
 #include <sys/param.h>
 #include <sys/time.h>
 #include <strings.h>
