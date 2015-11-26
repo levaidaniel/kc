@@ -1,3 +1,7 @@
+2.4.1:
+- Fix parameter parsing in specific commands (export, passwd, import).
+- Fix compilation on FreeBSD
+
 2.4.0:
 The new encrypted database format is incompatible with older (< 2.4.0)
 versions!
