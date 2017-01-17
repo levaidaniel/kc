@@ -60,10 +60,11 @@ cmd_cnew(const char *e_line, command *commands)
 
 	line = strdup(e_line); malloc_check(line);
 
-	strtok(line, " ");				/* remove the command from the line */
-	name = xmlStrdup(BAD_CAST strtok(NULL, " ")); malloc_check(name);	/* assign the command's first parameter (name) */
-	free(line); line = NULL;
-	if (!name) {					/* if we didn't get a name as a parameter */
+	strtok(line, " ");		/* remove the command from the line */
+	name = BAD_CAST strtok(NULL, " ");	/* assign the command's first parameter (name) */
+	if (name) {
+		name = xmlStrdup(name);
+	} else {	/* if we didn't get a name as a parameter */
 		strlcpy(prompt_context, "NEW keychain name", sizeof(prompt_context));
 
 #ifndef _READLINE
@@ -97,6 +98,8 @@ cmd_cnew(const char *e_line, command *commands)
 			return;
 		}
 	}
+
+	free(line); line = NULL;
 
 	strlcpy(prompt_context, "NEW keychain description", sizeof(prompt_context));
 

@@ -29,7 +29,7 @@ cmd=$cmd"write\n"
 printf "${cmd}" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}
 
 SHA1=$(printf "list\n" |KC_DEBUG=yes ${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = 'c2e5f570bb6bd57f86c02e1420e9de82ab712ae9' ];then
+if [ "$SHA1" = 'd58459cc5a47ad06f8b2fa5ea6d12e6dc6c34680' ];then
 	echo $0 test ok!
 else
 	echo $0 test failed!
