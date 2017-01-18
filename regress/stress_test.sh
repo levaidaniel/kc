@@ -89,7 +89,7 @@ echo # new line
 
 if [ ${CHECK_DURING_MODIFY} -gt 0 ];then
 	SHA1=$(printf "list\n" |KC_DEBUG=yes ${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
-	if [ "$SHA1" == 'ff93f58b1306ae81a5a59acc032d554b7a303683' ];then
+	if [ "$SHA1" == 'b839f4f482d77b04e82827e607035423158f56c1' ];then
 		echo "$0 test ok (#${loop} new entry)!"
 	else
 		echo "$0 test failed (#${loop} new entry)!"
@@ -122,7 +122,7 @@ echo # new line
 
 if [ ${CHECK_DURING_MODIFY} -gt 0 ];then
 	SHA1=$(printf "list\n" |KC_DEBUG=yes ${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
-	if [ "$SHA1" == 'ff93f58b1306ae81a5a59acc032d554b7a303683' ];then
+	if [ "$SHA1" == 'b839f4f482d77b04e82827e607035423158f56c1' ];then
 		echo "$0 test ok (#${loop} inserts)!"
 	else
 		echo "$0 test failed (#${loop} inserts)!"
@@ -160,7 +160,7 @@ echo # new line
 
 if [ ${CHECK_DURING_MODIFY} -gt 0 ];then
 	SHA1=$(printf "list\n" |KC_DEBUG=yes ${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
-	if [ "$SHA1" == '3d599f58ab63ea98d63df6a5c346aaa85848b93c' ];then
+	if [ "$SHA1" == '264dfbfbc893baa61b57b51bdb4c38880e4466d0' ];then
 		echo "$0 test ok (#${loop} entry edit)!"
 	else
 		echo "$0 test failed (#${loop} entry edit)!"
@@ -199,7 +199,7 @@ done |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} >/dev/null
 echo # new line
 
 SHA1=$(printf "list\n" |KC_DEBUG=yes ${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = '846e795e8eb1b3c4ab07753f915c619ce1ff4bec' ];then
+if [ "$SHA1" = '1c9090963d9f6168a9bbbb24d73dd2e7e9e991ba' ];then
 	echo $0 test ok!
 else
 	echo $0 test failed!
