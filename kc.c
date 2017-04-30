@@ -669,8 +669,9 @@ cmd_match(char *e_line)
 	 * we display the appropriate entry, and if there
 	 * is another number after it, use it as spice for jamming.
 	 */
-		/* Because there is no way to tell if the number was negative with strtoul(),
-		 * check for the minus sign. This is sooo great... */
+		/* Because there is no way to tell if the number was negative
+		 * with strtoul(), check for the minus sign. This is sooo
+		 * great... */
 	if (inv[0] == '\0'  &&  errno == 0  &&  cmd[0] != '-') {
 		/* We also check for a spice */
 		cmd = strtok(NULL, " ");
@@ -819,24 +820,28 @@ el_tab_complete(EditLine *e)
 	/*
 	 * We search after match(es) for only the last word in the line buffer,
 	 * and for this we are prepared for space separated words.
-	 * If the last character is a space, then we treat it as if the previous
-	 * word would have been finished, and there were no new one to complete.
-	 * We complete 'word' to a command name or a keychain name, depending on
-	 * its position in the line buffer.
+	 * If the last character is a space, then we treat it as if the
+	 * previous word would have been finished, and there was no new one to
+	 * complete.
+	 * We complete 'word' to a command name or a keychain name, depending
+	 * on its position in the line buffer.
 	 *
 	 * It's a side-effect, that if (word == NULL) and (word_len == 0) when
-	 * searching for matches, then it will match for eveything with strncmp().
-	 * So we will get a full list of command or keychain names which we wanted
-	 * if the user is just pressing the completion key (eg. TAB) without something
-	 * to be completed (eg. empty line, or right after a word and a space).
+	 * searching for matches, then it will match for eveything with
+	 * strncmp().
+	 * So we will get a full list of commands or keychain names which we
+	 * wanted if the user was just pressing the completion key (eg. TAB)
+	 * without something to be completed (eg. empty line, or right after a
+	 * word and a space).
 	 */
 
 	if (line_buf_len > 0)
 		if (line_buf[line_buf_len - 1] != ' ') {
 			/*
 			 * 'word' is the last word from 'line_buf'.
-			 * 'line_buf' is the whole line entered so far to the edit buffer.
-			 * we want to complete only the last word from the edit buffer.
+			 * 'line_buf' is the whole line entered so far into the
+			 * edit buffer. We want to complete only the last word
+			 * from the edit buffer.
 			 */
 			line_buf_copy = strdup(line_buf); malloc_check(line_buf_copy);	/* strtok() modifies its given string */
 			word_next = strtok(line_buf_copy, " ");
@@ -850,8 +855,9 @@ el_tab_complete(EditLine *e)
 		}
 
 	/*
-	 * Altough it is okay if (word == NULL) as long as (word_len == 0),
-	 * make this a bit nicer and place an empty string in word if it would be NULL.
+	 * Although it is okay if (word == NULL) as long as (word_len == 0),
+	 * make this a bit nicer and place an empty string in word if it would
+	 * be NULL.
 	 */
 	if (!word) {
 		word_len = 0;
@@ -861,14 +867,16 @@ el_tab_complete(EditLine *e)
 
 	/*
 	 * Basically, the first word will only be completed to a command.
-	 * The second (or any additional) word will be completed to a command only
-	 * if the first word was 'help' (because help [command] shows the help for command),
-	 * or (if the first word is something other than 'help') it will be completed to a
-	 * keychain name (to serve as a parameter for the previously completed command).
+	 * The second (or any additional) word will be completed to a command
+	 * only if the first word was 'help' (because help [command] shows the
+	 * help for command), or (if the first word is something other than
+	 * 'help') it will be completed to a keychain name (to serve as a
+	 * parameter for the previously completed command).
 	 */
 
-	/* only search for a command name if this is not an already completed command
-	 * (ie. there is no space in the line), OR if the already completed command is 'help'
+	/* only search for a command name if this is not an already completed
+	 * command (ie. there is no space in the line), OR if the already
+	 * completed command is 'help'
 	 */
 	if (!strchr(line_buf, ' ')  ||  (strncmp(line_buf, "help ", 5) == 0))
 		/* search for a command name */
@@ -881,9 +889,9 @@ el_tab_complete(EditLine *e)
 			}
 		} while ((commands = commands->next));	/* iterate through the linked list */
 
-	/* only search for a keychain name if this is an already completed command
-	 * (ie. there is space(s) in the line), AND it's not the 'help' command that
-	 * has been completed previously
+	/* only search for a keychain name if this is an already completed
+	 * command (ie. there is space(s) in the line), AND it's not the 'help'
+	 * command that has been completed previously
 	 */
 	if (strchr(line_buf, ' ')  &&  (strncmp(line_buf, "help ", 5) != 0)) {
 		/* search for a keychain name */
@@ -913,8 +921,8 @@ el_tab_complete(EditLine *e)
 		break;
 		case 1:
 			/* print the word's remaining characters
-			 * (remaining: the ones without the part (at the beginning)
-			 * that we've entered already)
+			 * (remaining: the ones without the part (at the
+			 * beginning) that we've entered already)
 			 */
 			el_push(e, match[0] + word_len);
 
@@ -949,9 +957,12 @@ el_tab_complete(EditLine *e)
 				}
 
 			j = 0;
-			/* complete_max will be the string difference between the user supplied command fragment
-			 * and the shortest command name fragment that is common in all of the matched commands.
-			 * eg.: user: "imp", matched commands: "import" and "importxml" => complete_max = "ort".
+			/* complete_max will be the string difference between
+			 * the user supplied command fragment and the shortest
+			 * command name fragment that is common in all of the
+			 * matched commands.
+			 * eg.: user: "imp", matched commands: "import" and
+			 * "importxml" => complete_max = "ort".
 			 */
 			complete_max = malloc(word_len + match_max + 1); malloc_check(complete_max);
 			for (i = word_len; i < match_max; i++)
@@ -959,10 +970,10 @@ el_tab_complete(EditLine *e)
 
 			complete_max[j] = '\0';
 
-			/* We put the string difference in a char*, because el_push()
-			 * only accepts that type.
-			 * It would have been simpler to just push the characters into
-			 * the line buffer one after another.
+			/* We put the string difference in a char*, because
+			 * el_push() only accepts that type.
+			 * It would have been simpler to just push the
+			 * characters into the line buffer one after another.
 			 */
 			el_push(e, complete_max);
 
@@ -995,8 +1006,9 @@ cmd_generator(const char *text, int state)
 	long int	idx = 0;
 
 
-	/* only search for a command name if this is not an already completed command
-	 * (ie. there is no space in the line), OR if the already completed command is 'help'
+	/* only search for a command name if this is not an already completed
+	 * command (ie. there is no space in the line), OR if the already
+	 * completed command is 'help'
 	 */
 	if (!strchr(rl_line_buffer, ' ')  ||  (strncmp(rl_line_buffer, "help ", 5) == 0))
 		/* search for a command name */
@@ -1013,9 +1025,9 @@ cmd_generator(const char *text, int state)
 			commands = commands->next;	/* iterate through the linked list */
 		}
 
-	/* only search for a keychain name if this is an already completed command
-	 * (ie. there is space(s) in the line), AND it's not the 'help' command that
-	 * has been completed previously
+	/* only search for a keychain name if this is an already completed
+	 * command (ie. there is space(s) in the line), AND it's not the 'help'
+	 * command that has been completed previously
 	 */
 	if (strchr(rl_line_buffer, ' ')  &&  (strncmp(rl_line_buffer, "help ", 5) != 0)) {
 		/* search for a keychain name */
