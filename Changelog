@@ -43,7 +43,7 @@ Creating '/home/user/.kc/default.kcd'
 Using '/home/user/.kc/default.kcd' database.
 New password (empty to cancel):
 New password again (empty to cancel):
-<default% > importxml kcdump.xml
+<default% > importxml -k kcdump.xml
 Import OK
 <example_chain% > write
 Save OK
