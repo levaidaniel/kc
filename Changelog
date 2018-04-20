@@ -1,3 +1,8 @@
+2.4.2:
+- Fix a fake out-of-memory condition in 'cnew'
+- Fix stress test
+- Documentation fixes
+
 2.4.1:
 - Fix parameter parsing in specific commands (export, passwd, import).
 - Fix compilation on FreeBSD
