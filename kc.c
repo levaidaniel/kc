@@ -84,7 +84,6 @@ main(int argc, char *argv[])
 	ssize_t		ret = -1;
 	int		pos = 0;
 	int		pass_file = -1;
-	int		kc_setup_crypt_flags = 0;
 
 	struct stat	st;
 	const char	*default_db_dir = ".kc";
@@ -296,9 +295,6 @@ main(int argc, char *argv[])
 
 		if (getenv("KC_DEBUG"))
 			printf("salt='%s'\n", db_params.salt);
-
-
-		kc_setup_crypt_flags = KC_SETUP_CRYPT_KEY;
 	} else {
 		newdb = 1;
 
@@ -310,8 +306,11 @@ main(int argc, char *argv[])
 			quit(EXIT_FAILURE);
 		}
 
-
-		kc_setup_crypt_flags = KC_SETUP_CRYPT_IV | KC_SETUP_CRYPT_SALT | KC_SETUP_CRYPT_KEY;
+		/* Generate iv/salt */
+		if (kc_crypt_iv_salt(&db_params) != 1) {
+			puts("Could not generate IV and/or salt!");
+			quit(EXIT_FAILURE);
+		}
 	}
 
 	printf("Using '%s' database.\n", db_params.db_filename);
@@ -402,12 +401,12 @@ main(int argc, char *argv[])
 			kc_password_read(&db_params.pass, 0);
 	}
 
-
-	/* Optionally generate iv/salt.
-	 * Setup cipher mode and turn on decrypting */
-	if (!kc_setup_crypt(bio_chain, 0, &db_params, kc_setup_crypt_flags)) {
-		puts("Could not setup decrypting!");
-		quit(EXIT_FAILURE);
+	/* Setup cipher mode and turn on decrypting */
+	if (	kc_crypt_key(&db_params) != 1  ||
+		kc_crypt_setup(bio_chain, 0, &db_params) != 1
+	) {
+			puts("Could setup decrypting!");
+			quit(EXIT_FAILURE);
 	}
 
 	if (db_params.pass)

@@ -97,7 +97,7 @@ cmd_write(const char *e_line, command *commands)
 		return;
 	}
 
-	/* the key gets duplicated right before the call to kc_setup_crypt() */
+	/* the key gets duplicated right before the call to kc_crypt_setup() */
 
 
 	if (strlcpy(db_params_tmp.db_filename, db_params.db_filename, MAXPATHLEN) >= MAXPATHLEN) {
@@ -164,7 +164,7 @@ cmd_write(const char *e_line, command *commands)
 		return;
 	}
 	/* Setup cipher mode, turn on encrypting, etc... */
-	if (!kc_setup_crypt(bio_chain_tmp, 1, &db_params_tmp, 0)) {
+	if (!kc_crypt_setup(bio_chain_tmp, 1, &db_params_tmp)) {
 		printf("Could not setup encrypting!");
 
 		memset(db_params_tmp.key, '\0', KEY_LEN);

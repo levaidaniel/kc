@@ -73,7 +73,7 @@ cmd_passwd(const char *e_line, command *commands)
 	if (exiting)
 		return;
 
-	ret = kc_setup_crypt(bio_chain, 1, &db_params, KC_SETUP_CRYPT_IV | KC_SETUP_CRYPT_SALT | KC_SETUP_CRYPT_KEY);
+	ret = kc_crypt_iv_salt(&db_params)  &&  kc_crypt_key(&db_params)  &&  kc_crypt_setup(bio_chain, 1, &db_params);
 
 	if (db_params.pass)
 		memset(db_params.pass, '\0', PASSWORD_MAXLEN);

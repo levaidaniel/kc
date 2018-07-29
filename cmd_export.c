@@ -267,7 +267,10 @@ cmd_export(const char *e_line, command *commands)
 		}
 
 		/* Generate iv/salt, setup cipher mode and turn on encrypting */
-		if (!kc_setup_crypt(bio_chain, 1, &db_params_new, KC_SETUP_CRYPT_IV | KC_SETUP_CRYPT_SALT | KC_SETUP_CRYPT_KEY)) {
+		if (	kc_crypt_iv_salt(&db_params_new) != 1  ||
+			kc_crypt_key(&db_params_new) != 1  ||
+			kc_crypt_setup(bio_chain, 1, &db_params_new) != 1
+		) {
 			puts("Could not setup encrypting!");
 
 			BIO_free_all(bio_chain);

@@ -549,7 +549,7 @@ kc_password_read(char **pass1, const unsigned char new)
 
 
 char
-kc_setup_crypt(BIO *bio_chain, const unsigned int enc, struct db_parameters *db_params, const unsigned int flags)
+kc_crypt_iv_salt(struct db_parameters *db_params)
 {
 	char	*iv_tmp = NULL, *salt_tmp = NULL;
 	int	i = 0;
@@ -560,183 +560,190 @@ kc_setup_crypt(BIO *bio_chain, const unsigned int enc, struct db_parameters *db_
 	char		hex_tmp[3];
 
 
-	if ((flags & KC_SETUP_CRYPT_IV)) {
-		iv_tmp = get_random_str(IV_LEN, 2);
-		if (!iv_tmp) {
-			puts("IV generation failure!");
+	iv_tmp = get_random_str(IV_LEN, 2);
+	if (!iv_tmp) {
+		puts("IV generation failure!");
 
-			return(0);
-		}
+		return(0);
 	}
 
-	if ((flags & KC_SETUP_CRYPT_SALT)) {
-		salt_tmp = get_random_str(SALT_LEN, 2);
-		if (!salt_tmp) {
-			puts("Salt generation failure!");
+	salt_tmp = get_random_str(SALT_LEN, 2);
+	if (!salt_tmp) {
+		puts("Salt generation failure!");
 
-			free(iv_tmp); iv_tmp = NULL;
-			return(0);
-		}
-	}
-
-
-	if ((flags & KC_SETUP_CRYPT_IV)) {
-		/* Setup the digest context */
-		mdctx = EVP_MD_CTX_create();
-		if (!mdctx) {
-			puts("Could not create digest context for IV!");
-
-			free(iv_tmp); iv_tmp = NULL;
-			free(salt_tmp); salt_tmp = NULL;
-			return(0);
-		}
-		EVP_DigestInit_ex(mdctx, EVP_sha512(), NULL);
-		EVP_DigestUpdate(mdctx, iv_tmp, IV_LEN);
-		EVP_DigestFinal_ex(mdctx, digested, &digested_len);
-		EVP_MD_CTX_destroy(mdctx);
 		free(iv_tmp); iv_tmp = NULL;
+		return(0);
+	}
 
-		/* Print the binary digest in hex as characters (numbers, effectively)
-		 * into the ..->iv variable.
-		 */
-		for (i = 0; i < digested_len; i++) {
-			snprintf(hex_tmp, 3, "%02x", digested[i]);
 
-			if (!i) {
-				if (strlcpy(	(char *)db_params->iv,
-						hex_tmp,
-						IV_DIGEST_LEN + 1)
-						>= IV_DIGEST_LEN + 1)
-				{
-					free(salt_tmp); salt_tmp = NULL;
-					return(0);
-				}
-			} else {
-				if (strlcat(	(char *)db_params->iv,
-						hex_tmp,
-						IV_DIGEST_LEN + 1)
-						>= IV_DIGEST_LEN + 1)
-				{
-					free(salt_tmp); salt_tmp = NULL;
-					return(0);
-				}
+	/* Setup the digest context */
+	mdctx = EVP_MD_CTX_create();
+	if (!mdctx) {
+		puts("Could not create digest context for IV!");
+
+		free(iv_tmp); iv_tmp = NULL;
+		free(salt_tmp); salt_tmp = NULL;
+		return(0);
+	}
+	EVP_DigestInit_ex(mdctx, EVP_sha512(), NULL);
+	EVP_DigestUpdate(mdctx, iv_tmp, IV_LEN);
+	EVP_DigestFinal_ex(mdctx, digested, &digested_len);
+	EVP_MD_CTX_destroy(mdctx);
+	free(iv_tmp); iv_tmp = NULL;
+
+	/* Print the binary digest in hex as characters (numbers, effectively)
+	 * into the ..->iv variable.
+	 */
+	for (i = 0; i < digested_len; i++) {
+		snprintf(hex_tmp, 3, "%02x", digested[i]);
+
+		if (!i) {
+			if (strlcpy(	(char *)db_params->iv,
+					hex_tmp,
+					IV_DIGEST_LEN + 1)
+					>= IV_DIGEST_LEN + 1)
+			{
+				free(salt_tmp); salt_tmp = NULL;
+				return(0);
+			}
+		} else {
+			if (strlcat(	(char *)db_params->iv,
+					hex_tmp,
+					IV_DIGEST_LEN + 1)
+					>= IV_DIGEST_LEN + 1)
+			{
+				free(salt_tmp); salt_tmp = NULL;
+				return(0);
 			}
 		}
 	}
+
 	if (getenv("KC_DEBUG"))
 		printf("iv='%s'\n", db_params->iv);
 
 
-	if ((flags & KC_SETUP_CRYPT_SALT)) {
-		/* Setup the digest context */
-		mdctx = EVP_MD_CTX_create();
-		if (!mdctx) {
-			puts("Could not create digest context for IV!");
+	/* Setup the digest context */
+	mdctx = EVP_MD_CTX_create();
+	if (!mdctx) {
+		puts("Could not create digest context for IV!");
 
-			free(iv_tmp); iv_tmp = NULL;
-			free(salt_tmp); salt_tmp = NULL;
-			return(0);
-		}
-		EVP_DigestInit_ex(mdctx, EVP_sha512(), NULL);
-		EVP_DigestUpdate(mdctx, salt_tmp, SALT_LEN);
-		EVP_DigestFinal_ex(mdctx, digested, &digested_len);
-		EVP_MD_CTX_destroy(mdctx);
+		free(iv_tmp); iv_tmp = NULL;
 		free(salt_tmp); salt_tmp = NULL;
+		return(0);
+	}
+	EVP_DigestInit_ex(mdctx, EVP_sha512(), NULL);
+	EVP_DigestUpdate(mdctx, salt_tmp, SALT_LEN);
+	EVP_DigestFinal_ex(mdctx, digested, &digested_len);
+	EVP_MD_CTX_destroy(mdctx);
+	free(salt_tmp); salt_tmp = NULL;
 
-		/* Print the binary digest in hex as characters (numbers, effectively)
-		 * into the ..->salt variable.
-		 */
-		for (i = 0; i < digested_len; i++) {
-			snprintf(hex_tmp, 3, "%02x", digested[i]);
+	/* Print the binary digest in hex as characters (numbers, effectively)
+	 * into the ..->salt variable.
+	 */
+	for (i = 0; i < digested_len; i++) {
+		snprintf(hex_tmp, 3, "%02x", digested[i]);
 
-			if (!i) {
-				if (strlcpy(	(char *)db_params->salt,
-						hex_tmp,
-						SALT_DIGEST_LEN + 1)
-						>= SALT_DIGEST_LEN + 1)
-				{
-					free(iv_tmp); iv_tmp = NULL;
-					free(salt_tmp); salt_tmp = NULL;
-					return(0);
-				}
-			} else {
-				if (strlcat(	(char *)db_params->salt,
-						hex_tmp,
-						SALT_DIGEST_LEN + 1)
-						>= SALT_DIGEST_LEN + 1)
-				{
-					free(iv_tmp); iv_tmp = NULL;
-					free(salt_tmp); salt_tmp = NULL;
-					return(0);
-				}
+		if (!i) {
+			if (strlcpy(	(char *)db_params->salt,
+					hex_tmp,
+					SALT_DIGEST_LEN + 1)
+					>= SALT_DIGEST_LEN + 1)
+			{
+				free(iv_tmp); iv_tmp = NULL;
+				free(salt_tmp); salt_tmp = NULL;
+				return(0);
+			}
+		} else {
+			if (strlcat(	(char *)db_params->salt,
+					hex_tmp,
+					SALT_DIGEST_LEN + 1)
+					>= SALT_DIGEST_LEN + 1)
+			{
+				free(iv_tmp); iv_tmp = NULL;
+				free(salt_tmp); salt_tmp = NULL;
+				return(0);
 			}
 		}
 	}
+
 	if (getenv("KC_DEBUG"))
 		printf("salt='%s'\n", db_params->salt);
 
 
-	if ((flags & KC_SETUP_CRYPT_KEY)) {
-		if (getenv("KC_DEBUG"))
-			printf("generating new key from pass and salt.\n");
+	return(1);
+} /* kc_crypt_iv_salt() */
 
-		/* Generate a proper key from the user's password */
-		if (strcmp(db_params->kdf, "sha1") == 0) {
-			if (!PKCS5_PBKDF2_HMAC_SHA1(db_params->pass, (int)strlen(db_params->pass),
-				db_params->salt, SALT_DIGEST_LEN + 1,
-				5000,
-				KEY_LEN, db_params->key))
-			{
 
-				puts("Failed to generate a key from the password!");
-				if (getenv("KC_DEBUG"))
-					puts("PKCS5_PBKDF2_HMAC_SHA1() error");
+char
+kc_crypt_key(struct db_parameters *db_params)
+{
+	if (getenv("KC_DEBUG"))
+		printf("generating new key from pass and salt.\n");
 
-				return(0);
-			}
-		} else if (strcmp(db_params->kdf, "sha512") == 0) {
-			if (!PKCS5_PBKDF2_HMAC(db_params->pass, (int)strlen(db_params->pass),
-				db_params->salt, SALT_DIGEST_LEN + 1,
-				5000, EVP_sha512(),
-				KEY_LEN, db_params->key))
-			{
-				puts("Failed to generate a key from the password!");
-				if (getenv("KC_DEBUG"))
-					puts("PKCS5_PBKDF2_HMAC() error");
+	/* Generate a proper key from the user's password */
+	if (strcmp(db_params->kdf, "sha1") == 0) {
+		if (!PKCS5_PBKDF2_HMAC_SHA1(db_params->pass, (int)strlen(db_params->pass),
+			db_params->salt, SALT_DIGEST_LEN + 1,
+			5000,
+			KEY_LEN, db_params->key))
+		{
 
-				return(0);
-			}
-		} else if (strcmp(db_params->kdf, "bcrypt") == 0) {
-			if (bcrypt_pbkdf(db_params->pass, strlen(db_params->pass),
-				db_params->salt, SALT_DIGEST_LEN + 1,
-				db_params->key, KEY_LEN, 16) != 0)
-			{
-				puts("Failed to generate a key from the password!");
-				if (getenv("KC_DEBUG"))
-					puts("bcrypt_pbkdf() error");
+			puts("Failed to generate a key from the password!");
+			if (getenv("KC_DEBUG"))
+				puts("PKCS5_PBKDF2_HMAC_SHA1() error");
 
-				return(0);
-			}
-#ifdef _HAVE_LIBSCRYPT
-		} else if (strcmp(db_params->kdf, "scrypt") == 0) {
-			if (libscrypt_scrypt((const unsigned char *)db_params->pass, strlen(db_params->pass),
-				db_params->salt, SALT_DIGEST_LEN + 1,
-				SCRYPT_N, SCRYPT_r, SCRYPT_p,
-				db_params->key, KEY_LEN) != 0)
-			{
-				puts("Failed to generate a key from the password!");
-				if (getenv("KC_DEBUG"))
-					puts("libscrypt_scrypt() error");
-
-				return(0);
-			}
-#endif
-		} else {
-			printf("Unknown kdf: %s!\n", db_params->kdf);
 			return(0);
 		}
+	} else if (strcmp(db_params->kdf, "sha512") == 0) {
+		if (!PKCS5_PBKDF2_HMAC(db_params->pass, (int)strlen(db_params->pass),
+			db_params->salt, SALT_DIGEST_LEN + 1,
+			5000, EVP_sha512(),
+			KEY_LEN, db_params->key))
+		{
+			puts("Failed to generate a key from the password!");
+			if (getenv("KC_DEBUG"))
+				puts("PKCS5_PBKDF2_HMAC() error");
+
+			return(0);
+		}
+	} else if (strcmp(db_params->kdf, "bcrypt") == 0) {
+		if (bcrypt_pbkdf(db_params->pass, strlen(db_params->pass),
+			db_params->salt, SALT_DIGEST_LEN + 1,
+			db_params->key, KEY_LEN, 16) != 0)
+		{
+			puts("Failed to generate a key from the password!");
+			if (getenv("KC_DEBUG"))
+				puts("bcrypt_pbkdf() error");
+
+			return(0);
+		}
+#ifdef _HAVE_LIBSCRYPT
+	} else if (strcmp(db_params->kdf, "scrypt") == 0) {
+		if (libscrypt_scrypt((const unsigned char *)db_params->pass, strlen(db_params->pass),
+			db_params->salt, SALT_DIGEST_LEN + 1,
+			SCRYPT_N, SCRYPT_r, SCRYPT_p,
+			db_params->key, KEY_LEN) != 0)
+		{
+			puts("Failed to generate a key from the password!");
+			if (getenv("KC_DEBUG"))
+				puts("libscrypt_scrypt() error");
+
+			return(0);
+		}
+#endif
+	} else {
+		printf("Unknown kdf: %s!\n", db_params->kdf);
+		return(0);
 	}
 
+
+	return(1);
+} /* kc_crypt_key() */
+
+
+char
+kc_crypt_setup(BIO *bio_chain, const unsigned int enc, struct db_parameters *db_params)
+{
 	if (getenv("KC_DEBUG"))
 		printf("crypt setup: using %s based KDF\n", db_params->kdf);
 
@@ -785,7 +792,7 @@ kc_setup_crypt(BIO *bio_chain, const unsigned int enc, struct db_parameters *db_
 
 
 	return(1);
-} /* kc_setup_crypt() */
+} /* kc_crypt_setup() */
 
 
 BIO *

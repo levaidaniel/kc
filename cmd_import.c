@@ -254,7 +254,7 @@ cmd_import(const char *e_line, command *commands)
 		kc_password_read(&db_params_new.pass, 0);
 
 		/* Setup cipher mode and turn on decrypting */
-		ret = kc_setup_crypt(bio_chain, 0, &db_params_new, KC_SETUP_CRYPT_KEY);
+		ret = kc_crypt_key(&db_params_new)  &&  kc_crypt_setup(bio_chain, 0, &db_params_new);
 
 		/* from here on now, we don't need to store the key or the password text anymore */
 		memset(db_params_new.key, '\0', KEY_LEN);
@@ -263,7 +263,7 @@ cmd_import(const char *e_line, command *commands)
 			memset(db_params_new.pass, '\0', PASSWORD_MAXLEN);
 		free(db_params_new.pass); db_params_new.pass = NULL;
 
-		/* kc_setup_crypt() check from a few lines above */
+		/* kc_crypt_key() and kc_crypt_setup() check from a few lines above */
 		if (!ret) {
 			puts("Could not setup decrypting!");
 
