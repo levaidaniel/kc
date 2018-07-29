@@ -1,90 +1,12 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/un.h>
-#include <bsd/string.h>
 
-/* Messages for the authentication agent connection. */
-#define SSH_AGENTC_REQUEST_RSA_IDENTITIES	1
-#define SSH_AGENT_RSA_IDENTITIES_ANSWER		2
-#define SSH_AGENTC_RSA_CHALLENGE		3
-#define SSH_AGENT_RSA_RESPONSE			4
-#define SSH_AGENT_FAILURE			5
-#define SSH_AGENT_SUCCESS			6
-#define SSH_AGENTC_ADD_RSA_IDENTITY		7
-#define SSH_AGENTC_REMOVE_RSA_IDENTITY		8
-#define SSH_AGENTC_REMOVE_ALL_RSA_IDENTITIES	9
-
-/* private OpenSSH extensions for SSH2 */
-#define SSH2_AGENTC_REQUEST_IDENTITIES		11
-#define SSH2_AGENT_IDENTITIES_ANSWER		12
-#define SSH2_AGENTC_SIGN_REQUEST		13
-#define SSH2_AGENT_SIGN_RESPONSE		14
-#define SSH2_AGENTC_ADD_IDENTITY		17
-#define SSH2_AGENTC_REMOVE_IDENTITY		18
-#define SSH2_AGENTC_REMOVE_ALL_IDENTITIES	19
-
-/* smartcard */
-#define SSH_AGENTC_ADD_SMARTCARD_KEY		20
-#define SSH_AGENTC_REMOVE_SMARTCARD_KEY		21
-
-/* lock/unlock the agent */
-#define SSH_AGENTC_LOCK				22
-#define SSH_AGENTC_UNLOCK			23
-
-/* add key with constraints */
-#define SSH_AGENTC_ADD_RSA_ID_CONSTRAINED	24
-#define SSH2_AGENTC_ADD_ID_CONSTRAINED		25
-#define SSH_AGENTC_ADD_SMARTCARD_KEY_CONSTRAINED 26
-
-#define	SSH_AGENT_CONSTRAIN_LIFETIME		1
-#define	SSH_AGENT_CONSTRAIN_CONFIRM		2
-
-/* extended failure messages */
-#define SSH2_AGENT_FAILURE			30
-
-/* additional error code for ssh.com's ssh-agent2 */
-#define SSH_COM_AGENT2_FAILURE			102
-
-#define	SSH_AGENT_OLD_SIGNATURE			0x01
-#define	SSH_AGENT_RSA_SHA2_256			0x02
-#define	SSH_AGENT_RSA_SHA2_512			0x04
-
-#define MAX_AGENT_IDENTITIES	2048		/* Max keys in agent reply */
-#define MAX_AGENT_REPLY_LEN	(256 * 1024) 	/* Max bytes in agent reply */
-
-/* macro to check for "agent failure" message */
-#define agent_failed(x) \
-    ((x == SSH_AGENT_FAILURE) || \
-    (x == SSH_COM_AGENT2_FAILURE) || \
-    (x == SSH2_AGENT_FAILURE))
-
-#define KC_MAX_PUBKEY_LEN		535
-#define KC_MAX_PUBKEY_COMMENT_LEN	256
-#define KC_MAX_SIGNATURE_LEN		527
+#include "common.h"
+#include "ssha.h"
 
 
-struct kc_ssha_response {
-	char	*data;
-	size_t	length;
-};
-
-
-struct kc_ssha_signature {
-	char	*signature;
-	size_t	length;
-};
-
-
-struct kc_ssha_identity {
-	char	*type;
-	void	*pubkey;
-	size_t	pubkey_len;
-	char	*comment;
-	void	*next;
-};
+extern db_parameters	db_params;
 
 
 void
@@ -114,22 +36,8 @@ get_u32(const void *vp)
 }
 
 
-void
-print_buf(char *buf, ssize_t len)
-{
-	int		i = 0;
-
-
-	printf("buf = ");
-	for (i=0; i < len; i++) {
-		printf("%02X", buf[i]);
-	}
-	printf("\n%d bytes\n", i);
-}
-
-
 int
-kc_ssha_connect()
+kc_ssha_connect(void)
 {
 	int	sock = -1;
 	struct	sockaddr_un addr;
@@ -403,7 +311,6 @@ struct kc_ssha_identity*
 kc_ssha_parse_identities(struct kc_ssha_response *response)
 {
 	struct kc_ssha_identity		*idlist = NULL, *idlist_first = NULL;
-	int	i = 0;
 	size_t	pos = 1;	/* begin with skipping response type */
 	size_t	num_ids = 0, slen = 0;
 
@@ -415,9 +322,15 @@ kc_ssha_parse_identities(struct kc_ssha_response *response)
 	}
 	pos += 4;
 
-	idlist = calloc(1, sizeof(struct kc_ssha_identity));
-	idlist_first = idlist;
-	for (i=0; i < num_ids; i++) {
+	do {
+		if (idlist != NULL)	/* not first call */
+			idlist = idlist->next;
+		else
+			idlist = calloc(1, sizeof(struct kc_ssha_identity));
+
+		if (idlist_first == NULL)	/* first call */
+			idlist_first = idlist;
+
 		/* pubkey length */
 		idlist->pubkey_len = get_u32(response->data+pos);
 		if (idlist->pubkey_len > KC_MAX_PUBKEY_LEN) {
@@ -452,9 +365,9 @@ kc_ssha_parse_identities(struct kc_ssha_response *response)
 		pos += slen;
 
 		idlist->next = calloc(1, sizeof(struct kc_ssha_identity));
-		idlist = idlist->next;
-	}
+	} while (--num_ids);
 	free(idlist->next); idlist->next = NULL;
+
 
 	return(idlist_first);
 } /* kc_ssha_parse_identities() */
@@ -487,30 +400,39 @@ kc_ssha_parse_signature(struct kc_ssha_response *response)
 } /* kc_ssha_parse_signature() */
 
 
-int
-main(int argc, char *argv[])
+char *
+kc_ssha_get_password(char *type, char *comment)
 {
 	int		sock = -1, i = 0;
-
-	char		agent_msg = 0;
-	unsigned char	*msg = NULL;
-	size_t		len = 0, num = 0, slen = 0;
-	char		*buf = NULL, *tmp;
-	ssize_t		r = -1, s = -1;
+	size_t		pos = 0;
 	char		response_type = 0;
+	char		*data_to_sign = NULL, *password = NULL;
+	char		hex[3];
 	struct kc_ssha_response		*response = NULL;
 	struct kc_ssha_identity		*idlist = NULL;
 	struct kc_ssha_signature 	*signature = NULL;
 
-	char		*looking_for_type = argv[1];
-	char		*looking_for_comment = argv[2];
-	char		*data_to_sign = argv[3];
 
+	data_to_sign = malloc(IV_DIGEST_LEN + SALT_DIGEST_LEN + 1); malloc_check(data_to_sign);
+	dprintf(STDERR_FILENO, "Using iv for signing: '%s'\n", db_params.iv);
+	dprintf(STDERR_FILENO, "Using salt for signing: '%s'\n", db_params.salt);
+	if (strlcpy(data_to_sign, (const char*)db_params.iv, IV_DIGEST_LEN + 1) >= IV_DIGEST_LEN + 1) {
+		puts("Error while setting up OpenSSH agent signing.");
+		free(data_to_sign); data_to_sign = NULL;
+		return(NULL);
+	}
+	dprintf(STDERR_FILENO, "data_to_sign: '%s'\n", data_to_sign);
+	if (strlcat(data_to_sign, (const char*)db_params.salt, SALT_DIGEST_LEN + IV_DIGEST_LEN + 1) >= SALT_DIGEST_LEN + IV_DIGEST_LEN + 1) {
+		puts("Error while setting up OpenSSH agent signing.");
+		free(data_to_sign); data_to_sign = NULL;
+		return(NULL);
+	}
+	dprintf(STDERR_FILENO, "data_to_sign: '%s'\n", data_to_sign);
 
 	sock = kc_ssha_connect();
 	if (sock < 0) {
 		dprintf(STDERR_FILENO, "couldn't establish UNIX socket connection\n");
-		return(1);
+		return(NULL);
 	}
 
 	/* get identities */
@@ -520,7 +442,7 @@ main(int argc, char *argv[])
 	response = kc_ssha_get_full_response(sock);
 	if (response == NULL) {
 		/* TODO Error message */
-		return(1);
+		return(NULL);
 	}
 
 	response_type = (char)*response->data;
@@ -534,29 +456,35 @@ main(int argc, char *argv[])
 	idlist = kc_ssha_parse_identities(response);
 	if (idlist == NULL) {
 		/* TODO Error message */
-		return(1);
+		return(NULL);
 	}
 
 	do {
-		if (	strncmp(looking_for_type, idlist->type, strlen(idlist->type)) == 0  &&
-			strncmp(looking_for_comment, idlist->comment, strlen(idlist->comment)) == 0) {
+		if (	strncmp(type, idlist->type, strlen(idlist->type)) == 0  &&
+			strncmp(comment, idlist->comment, strlen(idlist->comment)) == 0) {
 			break;
 		}
 
 		idlist = idlist->next;
-	} while (idlist->next != NULL);
+	} while (idlist != NULL);
 
-	printf("found a match for (%s) %s\n", looking_for_type, looking_for_comment);
+	if (idlist == NULL) {
+		printf("could not find a match for (%s) %s\n", type, comment);
+		return(NULL);
+	} else {
+		printf("found a match for (%s) %s\n", type, comment);
+	}
+
 
 	/* ask for a signature */
 	if (kc_ssha_sign_request(sock, idlist, data_to_sign, 0) < 0) {
 		dprintf(STDERR_FILENO, "failed to send signature request\n");
-		return(1);
+		return(NULL);
 	}
 	response = kc_ssha_get_full_response(sock);
 	if (response == NULL) {
 		/* TODO Error message */
-		return(1);
+		return(NULL);
 	}
 
 	response_type = (char)*response->data;
@@ -570,9 +498,22 @@ main(int argc, char *argv[])
 	signature = kc_ssha_parse_signature(response);
 	if (signature == NULL) {
 		/* TODO Error message */
-		return(1);
+		return(NULL);
 	}
-	print_buf(signature->signature, signature->length);
 
-	return(0);
-} /* main() */
+	if (signature->length > PASSWORD_MAXLEN) {
+		dprintf(STDERR_FILENO, "PASSWORD_MAXLEN is smaller than the signature length\n");
+		return(NULL);
+	}
+
+	password = calloc(1, PASSWORD_MAXLEN); malloc_check(password);
+	pos = 0;
+	for (i = 0; i < signature->length; i++) {
+		snprintf(hex, 3, "%02x", signature->signature[i]);
+		memcpy(password+pos, &hex, 2);
+		pos += 2;
+	}
+	dprintf(STDERR_FILENO, "password from agent signature is '%s'\n", password);
+
+	return(password);
+} /* kc_ssha_get_password() */

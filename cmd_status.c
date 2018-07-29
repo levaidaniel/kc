@@ -55,6 +55,8 @@ cmd_status(const char *e_line, command *commands)
 	xmlSaveClose(xml_save);
 	xmlBufferFree(xml_buf);
 
+	printf("OpenSSH agent: %s\n", strlen(db_params.ssha) ? db_params.ssha : "No");
+
 	printf("Password handling: %s\n", db_params.kdf);
 
 	printf("Encryption: %s, %s\n", db_params.cipher, db_params.cipher_mode);

@@ -13,7 +13,7 @@ SRCS +=		cmd_c.c cmd_cdel.c cmd_clear.c cmd_clipboard.c cmd_clist.c cmd_cnew.c c
 		cmd_help.c cmd_import.c cmd_info.c cmd_list.c cmd_new.c cmd_near.c \
 		cmd_passwd.c cmd_quit.c cmd_search.c cmd_searchre.c cmd_status.c \
 		cmd_swap.c cmd_version.c cmd_write.c \
-		commands.c commands_init.c
+		commands.c commands_init.c ssha.c
 
 CFLAGS +=	-pedantic -Wall -g
 CFLAGS +=	`pkg-config --cflags libxml-2.0`

@@ -25,6 +25,7 @@
 
 #include "common.h"
 #include "commands.h"
+#include "ssha.h"
 
 #include <signal.h>
 #include <sys/types.h>
@@ -90,6 +91,7 @@ main(int argc, char *argv[])
 	const char	*default_db_filename = "default.kcd";
 	char		*env_home = NULL;
 	unsigned char	newdb = 0;
+	char		*ssha_type = NULL, *ssha_comment = NULL;
 
 	char		*default_kdf = "sha512";
 	char		*default_cipher = "aes256";
@@ -102,6 +104,7 @@ main(int argc, char *argv[])
 
 
 	/* db_param defaults */
+	db_params.ssha[0] = '\0';
 	db_params.pass = NULL;
 	db_params.db_filename = NULL;
 	db_params.db_file = -1;
@@ -131,8 +134,24 @@ main(int argc, char *argv[])
 	}
 
 
-	while ((c = getopt(argc, argv, "k:c:C:rp:P:e:m:bBvh")) != -1)
+	while ((c = getopt(argc, argv, "A:k:c:C:rp:P:e:m:bBvh")) != -1)
 		switch (c) {
+			case 'A':
+				ssha_type = strndup(strsep(&optarg, ","), 11);
+				ssha_comment = strndup(optarg, 497);
+				if (ssha_type == NULL  ||  ssha_comment == NULL) {
+					printf("OpenSSH public key type and/or comment is empty!");
+					quit(EXIT_FAILURE);
+				}
+				if (!strlen(ssha_type)  ||  !strlen(ssha_comment)) {
+					printf("OpenSSH public key type and/or comment is empty!");
+					quit(EXIT_FAILURE);
+				}
+
+				snprintf(db_params.ssha, sizeof(db_params.ssha), "(%s) %s", ssha_type, ssha_comment);
+				if (getenv("KC_DEBUG"))
+					printf("using OpenSSH agent with identity: %s\n", db_params.ssha);
+			break;
 			case 'k':
 				db_params.db_filename = optarg;
 			break;
@@ -390,15 +409,31 @@ main(int argc, char *argv[])
 			perror("close(password file)");
 	} else {
 		if (newdb) {
-			/* ask for the new password */
-			do {
-				ret = kc_password_read(&db_params.pass, 1);
-			} while (ret == -1);
+			if (strlen(db_params.ssha)) {
+				/* use OpenSSH agent to generate the password */
+				db_params.pass = kc_ssha_get_password(ssha_type, ssha_comment);
+				if (db_params.pass == NULL)
+					quit(EXIT_FAILURE);
+			} else {
+				/* ask for the new password */
+				do {
+					ret = kc_password_read(&db_params.pass, 1);
+				} while (ret == -1);
 
-			if (ret == 0)
-				quit(EXIT_FAILURE);
-		} else	/* ask for the password */
-			kc_password_read(&db_params.pass, 0);
+				if (ret == 0)
+					quit(EXIT_FAILURE);
+			}
+		} else {
+			if (strlen(db_params.ssha)) {
+				/* use OpenSSH agent to generate the password */
+				db_params.pass = kc_ssha_get_password(ssha_type, ssha_comment);
+				if (db_params.pass == NULL)
+					quit(EXIT_FAILURE);
+			} else {
+				/* ask for the password */
+				kc_password_read(&db_params.pass, 0);
+			}
+		}
 	}
 
 	/* Setup cipher mode and turn on decrypting */

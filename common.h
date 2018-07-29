@@ -60,6 +60,7 @@ enum {
 typedef struct db_parameters {
 	char		*db_filename;
 	int		db_file;
+	char		ssha[512];
 	char		*pass_filename;
 	char 		*pass;
 	char		*kdf;
