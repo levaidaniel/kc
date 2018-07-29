@@ -197,6 +197,7 @@ main(int argc, char *argv[])
 				printf(	"-k <file>: Use file as database. The default is ~/.kc/default.kcd .\n"
 					"-r: Open the database in read-only mode.\n"
 					"-c/-C <keychain>: Start in <keychain>.\n"
+					"-A <key type,key comment>: Use OpenSSH agent to provide password.\n"
 					"-p <file>: Read password from file.\n"
 					"-P <kdf>: KDF to use.\n"
 					"-e <cipher>: Encryption cipher.\n"
