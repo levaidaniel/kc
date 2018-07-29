@@ -40,6 +40,21 @@ export SHA1_INVALID_INDEX='812e96292afbdf1b0cebb40a7db6a7ffa2e52dfe'
 export SHA1_KEYCHAIN_NOT_FOUND='f00ecea88ac8e16851779e4230ffd0871c453d40'
 export SHA1_COMMON_1='a15dd0ffd1aef152f7d10654361c01ea1c04dfe5'
 
+case "$(uname -s)" in
+	Linux|CYGWIN*)
+		SHA1_BIN=$(which sha1sum)
+	;;
+	*BSD)
+		SHA1_BIN="$(which sha1) -r"
+	;;
+	*)
+		echo "unknown operating system."
+		exit 1
+	;;
+esac
+export SHA1_BIN
+
+
 sh regress/create_db.sh; COUNTER=$(( COUNTER + 1 ))	# 1
 sh regress/cmd_quit.sh; COUNTER=$(( COUNTER + 1 ))	# 2
 sh regress/cmd_help.sh; COUNTER=$(( COUNTER + 1 ))	# 3
@@ -69,3 +84,4 @@ sh regress/cmd_passwd.sh; COUNTER=$(( COUNTER + 1 ))	# 26
 sh regress/cmd_status.sh; COUNTER=$(( COUNTER + 1 ))	# 27
 sh regress/cmd_near.sh; COUNTER=$(( COUNTER + 1 ))	# 28
 sh regress/cmd_opt_c.sh; COUNTER=$(( COUNTER + 1 ))	# 29
+sh regress/ssha.sh; COUNTER=$(( COUNTER + 1 ))		# 30

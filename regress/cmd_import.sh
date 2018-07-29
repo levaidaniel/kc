@@ -5,19 +5,6 @@ set -e
 
 echo "test => $0"
 
-case "$(uname -s)" in
-	Linux|CYGWIN*)
-		SHA1_BIN=$(which sha1sum)
-	;;
-	*BSD)
-		SHA1_BIN="$(which sha1) -r"
-	;;
-	*)
-		echo "unknown system."
-		exit 1
-	;;
-esac
-
 if [ ! -r regress/test_export.kcd ];then
 	echo "$0 test failed (unreadable export file)!"
 	exit 1

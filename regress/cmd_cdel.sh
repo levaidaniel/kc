@@ -5,19 +5,6 @@ set -e
 
 echo "test => $0"
 
-case "$(uname -s)" in
-	Linux|CYGWIN*)
-		SHA1_BIN=$(which sha1sum)
-	;;
-	*BSD)
-		SHA1_BIN="$(which sha1) -r"
-	;;
-	*)
-		echo "unknown system."
-		exit 1
-	;;
-esac
-
 printf "cdel newchain2\nyes\nwrite\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}
 printf "cdel renamed_newchain\nyes\nwrite\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}
 

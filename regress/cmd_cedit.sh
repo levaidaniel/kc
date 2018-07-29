@@ -5,19 +5,6 @@ set -e
 
 echo "test => $0"
 
-case "$(uname -s)" in
-	Linux|CYGWIN*)
-		SHA1_BIN=$(which sha1sum)
-	;;
-	*BSD)
-		SHA1_BIN="$(which sha1) -r"
-	;;
-	*)
-		echo "unknown system."
-		exit 1
-	;;
-esac
-
 cmd="c newchain\ncedit\n"
 if [ ${READLINE} ];then
 	cmd=$cmd"renamed_\nrenamed_\n"

@@ -5,19 +5,6 @@ set -e
 
 echo "test => $0"
 
-case "$(uname -s)" in
-	Linux|CYGWIN*)
-		SHA1_BIN=$(which sha1sum)
-	;;
-	*BSD)
-		SHA1_BIN="$(which sha1) -r"
-	;;
-	*)
-		echo "unknown system."
-		exit 1
-	;;
-esac
-
 printf "c testchain\nlist\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}
 SHA1=$(printf "c testchain\nlist\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<(default|testchain)% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." |$SHA1_BIN |cut -d' ' -f1)
 if [ "${SHA1}" = '1886fcb9e486061976c72ab5e76de444bc1133c3' ];then
