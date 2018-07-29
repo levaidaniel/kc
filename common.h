@@ -51,12 +51,6 @@
 #define	ITEMS_MAX	ULONG_MAX
 
 
-enum {
-	KC_SETUP_CRYPT_IV = 1,
-	KC_SETUP_CRYPT_SALT = 1 << 1,
-	KC_SETUP_CRYPT_KEY = 1 << 2
-};
-
 typedef struct db_parameters {
 	char		*db_filename;
 	int		db_file;
