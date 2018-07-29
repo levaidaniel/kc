@@ -138,13 +138,13 @@ main(int argc, char *argv[])
 		switch (c) {
 			case 'A':
 				ssha_type = strndup(strsep(&optarg, ","), 11);
-				ssha_comment = strndup(optarg, 497);
-				if (ssha_type == NULL  ||  ssha_comment == NULL) {
-					dprintf(STDERR_FILENO, "OpenSSH public key type and/or comment is empty!\n");
+				if (ssha_type == NULL  ||  !strlen(ssha_type)) {
+					dprintf(STDERR_FILENO, "OpenSSH public key type is empty!\n");
 					quit(EXIT_FAILURE);
 				}
-				if (!strlen(ssha_type)  ||  !strlen(ssha_comment)) {
-					dprintf(STDERR_FILENO, "OpenSSH public key type and/or comment is empty!\n");
+				ssha_comment = strndup(optarg, 497);
+				if (ssha_comment == NULL  ||  !strlen(ssha_comment)) {
+					dprintf(STDERR_FILENO, "OpenSSH public key comment is empty!\n");
 					quit(EXIT_FAILURE);
 				}
 
