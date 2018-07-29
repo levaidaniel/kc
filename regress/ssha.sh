@@ -39,6 +39,7 @@ if [ $? -ne 0 ];then
 fi
 
 KC_DB='regress/test_ssha.kcd'
+rm -f "${KC_DB}"
 if echo "write" |${KC_RUN} -A "ssh-${SSH_ID_TYPE},${SSH_ID_COMMENT}" -b -k ${KC_DB};then
 	echo "$0 test ok (create new db with agent)!"
 else
@@ -53,3 +54,5 @@ else
 	echo "$0 test failed (status output)!"
 	exit 1
 fi
+
+${SSH_ADD} -d ${SSH_ID}
