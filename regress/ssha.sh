@@ -22,7 +22,7 @@ if [ $? -ne 0 ];then
 	exit 1
 fi
 
-SSH_ID='regress/id_ssh'
+SSH_ID='regress/test_id_ssh'
 SSH_ID_TYPE='ed25519'
 SSH_ID_COMMENT="this is what we're looking for"
 rm -f "${SSH_ID}" "${SSH_ID}".pub
