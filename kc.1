@@ -150,6 +150,20 @@ This private key is looked up based on the
 and
 .Ar key comment
 separated by a comma (with no whitespaces around it).
+.Pp
+See also the
+.Em CAVEATS
+section for an explanation of how this can be insecure.
+.Pp
+The key types that has been tested so far were rsa, ecdsa and ed25519, but as an option argument here you must specify the type in the format it's actually stored, so here's the list:
+.Bl -tag -offset ||| -width |
+.It Ar rsa
+ssh-rsa
+.It Ar ecdsa
+ecdsa-sha2-nistp256
+.It Ar ed25519
+ssh-ed25519
+.El
 .It Fl p Ar file
 Read password from
 .Ar file .
@@ -871,3 +885,15 @@ Removal of the
 from the clipboards are not being dealt with.
 This should be the user's responsibility.
 .El
+.Pp
+Using OpenSSH's
+.Xr ssh-agent 1
+to provide the password for the database is convenient but in my opinion is less secure.
+.Nm
+uses a local UNIX socket to communicate with the agent, and that being a file on a local filesystem can be used to hijack your database password if you have another user with access to that UNIX socket and your database file (eg.: root).
+In other words, any user who has access to your
+.Xr ssh-agent 1
+UNIX socket and your database file will be able to open it.
+The password (signature) coming from
+.Xr ssh-agent 1
+also varies between different types of SSH keys -- different keys produce different signature lengths.
