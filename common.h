@@ -54,7 +54,7 @@
 typedef struct db_parameters {
 	char		*db_filename;
 	int		db_file;
-	char		ssha[512];
+	char		ssha[535];	/* 19 bytes for the longest 'ecdsa-sha2-nistp256' key type, and 512 bytes for the comment, +3 for decoration and +1 for NUL) */
 	char		*pass_filename;
 	char 		*pass;
 	char		*kdf;

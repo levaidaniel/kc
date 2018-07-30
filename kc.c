@@ -137,12 +137,12 @@ main(int argc, char *argv[])
 	while ((c = getopt(argc, argv, "A:k:c:C:rp:P:e:m:bBvh")) != -1)
 		switch (c) {
 			case 'A':
-				ssha_type = strndup(strsep(&optarg, ","), 11);
+				ssha_type = strndup(strsep(&optarg, ","), 19);
 				if (ssha_type == NULL  ||  !strlen(ssha_type)) {
 					dprintf(STDERR_FILENO, "OpenSSH public key type is empty!\n");
 					quit(EXIT_FAILURE);
 				}
-				ssha_comment = strndup(optarg, 497);
+				ssha_comment = strndup(optarg, 512);
 				if (ssha_comment == NULL  ||  !strlen(ssha_comment)) {
 					dprintf(STDERR_FILENO, "OpenSSH public key comment is empty!\n");
 					quit(EXIT_FAILURE);
