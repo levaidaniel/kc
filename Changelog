@@ -1,1 +1,5 @@
 2.5.0:
+- Unify error messages, in that they now appear on STDERR.
+- Increase maximum allowed password length to 1024
+- Implement OpenSSH agent support to acquire a database password from a
+  signature based on the chosen SSH private key.
