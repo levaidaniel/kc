@@ -456,6 +456,9 @@ kc_ssha_get_password(char *type, char *comment, struct db_parameters *db_params)
 		return(0);
 	}
 
+	if (getenv("KC_DEBUG"))
+		printf("data to sign is '%s'\n", data_to_sign);
+
 	if (kc_ssha_sign_request(sock, idlist, data_to_sign, 0) < 0) {
 		dprintf(STDERR_FILENO, "Failed to send signature request\n");
 		free(data_to_sign); data_to_sign = NULL;
