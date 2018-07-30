@@ -3,3 +3,5 @@
 - Increase maximum allowed password length to 1024
 - Implement OpenSSH agent support to acquire a database password from a
   signature based on the chosen SSH private key.
+- kc won't strip the last new-line character when reading the password from a
+  file.
