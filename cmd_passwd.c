@@ -40,6 +40,11 @@ cmd_passwd(const char *e_line, command *commands)
 	char	*line = NULL;
 
 
+	if (strlen(db_params.ssha)) {
+		puts("Cannot change password when using OpenSSH agent.");
+		return;
+	}
+
 	/* ask for the new password */
 	while (ret == -1)
 		ret = kc_password_read(&db_params, 1);
