@@ -15,7 +15,7 @@ else
 	exit 1
 fi
 
-echo "${LONGPASSWORD}" > ${KC_PASSFILE}
+echo -n "${LONGPASSWORD}" > ${KC_PASSFILE}
 
 MAXPASSLEN=$(grep -E -e"#define[[:space:]]PASSWORD_MAXLEN" common.h |cut -d"	" -f3)
 
@@ -35,6 +35,6 @@ else
 	exit 1
 fi
 
-echo "${OLDPASSWORD}" > ${KC_PASSFILE}
+echo -n "${OLDPASSWORD}" > ${KC_PASSFILE}
 
 exit 0

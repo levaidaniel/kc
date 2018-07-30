@@ -106,6 +106,7 @@ main(int argc, char *argv[])
 	/* db_param defaults */
 	db_params.ssha[0] = '\0';
 	db_params.pass = NULL;
+	db_params.pass_len = 0;
 	db_params.db_filename = NULL;
 	db_params.db_file = -1;
 	db_params.pass_filename = NULL;
@@ -377,7 +378,7 @@ main(int argc, char *argv[])
 			quit(EXIT_FAILURE);
 		}
 
-		db_params.pass = malloc(PASSWORD_MAXLEN + 2); malloc_check(db_params.pass);
+		db_params.pass = malloc(PASSWORD_MAXLEN + 1); malloc_check(db_params.pass);
 		pos = 0;
 		/* We read PASSWORD_MAXLEN plus one byte, to see if the password in the
 		 * password file is longer than PASSWORD_MAXLEN.
@@ -396,15 +397,12 @@ main(int argc, char *argv[])
 			quit(EXIT_FAILURE);
 		}
 
-		if (db_params.pass[pos - 1] == '\n')	/* if the last read character is a newline, strip it */
-			db_params.pass[--pos] = '\0';
-
 		if (pos > PASSWORD_MAXLEN) {
 			printf("WARNING: the password in '%s' is longer than the maximum allowed length (%d) of a password, and it was truncated to %d characters!\n\n", db_params.pass_filename, PASSWORD_MAXLEN, PASSWORD_MAXLEN);
 			pos = PASSWORD_MAXLEN;
 		}
 
-		db_params.pass[pos] = '\0';
+		db_params.pass_len = pos;
 
 		if (close(pass_file) < 0)
 			perror("close(password file)");
@@ -412,13 +410,12 @@ main(int argc, char *argv[])
 		if (newdb) {
 			if (strlen(db_params.ssha)) {
 				/* use OpenSSH agent to generate the password */
-				db_params.pass = kc_ssha_get_password(ssha_type, ssha_comment);
-				if (db_params.pass == NULL)
+				if (!kc_ssha_get_password(ssha_type, ssha_comment, &db_params))
 					quit(EXIT_FAILURE);
 			} else {
 				/* ask for the new password */
 				do {
-					ret = kc_password_read(&db_params.pass, 1);
+					ret = kc_password_read(&db_params, 1);
 				} while (ret == -1);
 
 				if (ret == 0)
@@ -427,12 +424,11 @@ main(int argc, char *argv[])
 		} else {
 			if (strlen(db_params.ssha)) {
 				/* use OpenSSH agent to generate the password */
-				db_params.pass = kc_ssha_get_password(ssha_type, ssha_comment);
-				if (db_params.pass == NULL)
+				if (!kc_ssha_get_password(ssha_type, ssha_comment, &db_params))
 					quit(EXIT_FAILURE);
 			} else {
 				/* ask for the password */
-				kc_password_read(&db_params.pass, 0);
+				kc_password_read(&db_params, 0);
 			}
 		}
 	}
@@ -446,7 +442,7 @@ main(int argc, char *argv[])
 	}
 
 	if (db_params.pass)
-		memset(db_params.pass, '\0', PASSWORD_MAXLEN);
+		memset(db_params.pass, '\0', db_params.pass_len);
 	free(db_params.pass); db_params.pass = NULL;
 
 
@@ -1118,7 +1114,7 @@ quit(int retval)
 	memset(db_params.key, '\0', KEY_LEN);
 
 	if (db_params.pass)
-		memset(db_params.pass, '\0', PASSWORD_MAXLEN);
+		memset(db_params.pass, '\0', db_params.pass_len);
 	free(db_params.pass); db_params.pass = NULL;
 
 	if (getenv("KC_DEBUG"))

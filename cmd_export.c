@@ -68,6 +68,7 @@ cmd_export(const char *e_line, command *commands)
 
 	/* initial db_params for the exported database */
 	db_params_new.pass = NULL;
+	db_params_new.pass_len = 0;
 	db_params_new.db_filename = NULL;
 	db_params_new.db_file = -1;
 	db_params_new.pass_filename = NULL;
@@ -254,11 +255,11 @@ cmd_export(const char *e_line, command *commands)
 
 		/* ask for the new password */
 		while (ret == -1)
-			ret = kc_password_read(&db_params_new.pass, 1);
+			ret = kc_password_read(&db_params_new, 1);
 
 		if (ret == 0) {	/* canceled */
 			if (db_params_new.pass)
-				memset(db_params_new.pass, '\0', PASSWORD_MAXLEN);
+				memset(db_params_new.pass, '\0', db_params_new.pass_len);
 			free(db_params_new.pass); db_params_new.pass = NULL;
 
 			BIO_free_all(bio_chain);
@@ -279,7 +280,7 @@ cmd_export(const char *e_line, command *commands)
 			memset(db_params_new.key, '\0', KEY_LEN);
 
 			if (db_params_new.pass)
-				memset(db_params_new.pass, '\0', PASSWORD_MAXLEN);
+				memset(db_params_new.pass, '\0', db_params_new.pass_len);
 			free(db_params_new.pass); db_params_new.pass = NULL;
 
 			goto exiting;
@@ -288,7 +289,7 @@ cmd_export(const char *e_line, command *commands)
 		memset(db_params_new.key, '\0', KEY_LEN);
 
 		if (db_params_new.pass)
-			memset(db_params_new.pass, '\0', PASSWORD_MAXLEN);
+			memset(db_params_new.pass, '\0', db_params_new.pass_len);
 		free(db_params_new.pass); db_params_new.pass = NULL;
 
 

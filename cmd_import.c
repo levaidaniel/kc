@@ -67,6 +67,7 @@ cmd_import(const char *e_line, command *commands)
 
 	/* initial db_params parameters of the imported database */
 	db_params_new.pass = NULL;
+	db_params_new.pass_len = 0;
 	db_params_new.db_filename = NULL;
 	db_params_new.db_file = -1;
 	db_params_new.pass_filename = NULL;
@@ -251,7 +252,7 @@ cmd_import(const char *e_line, command *commands)
 		}
 
 		/* ask for the password */
-		kc_password_read(&db_params_new.pass, 0);
+		kc_password_read(&db_params_new, 0);
 
 		/* Setup cipher mode and turn on decrypting */
 		ret = kc_crypt_key(&db_params_new)  &&  kc_crypt_setup(bio_chain, 0, &db_params_new);
@@ -260,7 +261,7 @@ cmd_import(const char *e_line, command *commands)
 		memset(db_params_new.key, '\0', KEY_LEN);
 
 		if (db_params_new.pass)
-			memset(db_params_new.pass, '\0', PASSWORD_MAXLEN);
+			memset(db_params_new.pass, '\0', db_params_new.pass_len);
 		free(db_params_new.pass); db_params_new.pass = NULL;
 
 		/* kc_crypt_key() and kc_crypt_setup() check from a few lines above */

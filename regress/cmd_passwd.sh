@@ -15,7 +15,7 @@ else
 	exit 1
 fi
 
-echo "${NEWPASSWORD}" > ${KC_PASSFILE}
+echo -n "${NEWPASSWORD}" > ${KC_PASSFILE}
 
 if printf "passwd\n${PASSWORD}\n${PASSWORD}\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE};then
 	echo "$0 test ok (orig passwd)!"
@@ -24,7 +24,7 @@ else
 	exit 1
 fi
 
-echo "${PASSWORD}" > ${KC_PASSFILE}
+echo -n "${PASSWORD}" > ${KC_PASSFILE}
 
 if printf "passwd -P bcrypt\n${PASSWORD}\n${PASSWORD}\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE};then
 	echo "$0 test ok (passwd bcrypt #1)!"

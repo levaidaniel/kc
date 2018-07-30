@@ -474,7 +474,7 @@ larg(char *line, char ***largv, int *largc)
 
 
 char
-kc_password_read(char **pass1, const unsigned char new)
+kc_password_read(struct db_parameters *db_params, const unsigned char new)
 {
 	/*
 	 * returns:
@@ -483,7 +483,7 @@ kc_password_read(char **pass1, const unsigned char new)
 	 *  1 ok
 	 */
 
-	char	*pass2 = NULL;
+	char	*pass1 = NULL, *pass2 = NULL;
 	int	rpp_flags = 0;
 
 
@@ -494,18 +494,18 @@ kc_password_read(char **pass1, const unsigned char new)
 		rpp_flags |= RPP_REQUIRE_TTY;
 
 
-	*pass1 = malloc(PASSWORD_MAXLEN + 1); malloc_check(*pass1);
+	pass1 = malloc(PASSWORD_MAXLEN + 1); malloc_check(pass1);
 
 	if (new)
-		readpassphrase("New password (empty to cancel): ", *pass1, PASSWORD_MAXLEN + 1, rpp_flags);
+		readpassphrase("New password (empty to cancel): ", pass1, PASSWORD_MAXLEN + 1, rpp_flags);
 	else
-		readpassphrase("Password: ", *pass1, PASSWORD_MAXLEN + 1, rpp_flags);
+		readpassphrase("Password: ", pass1, PASSWORD_MAXLEN + 1, rpp_flags);
 
 	if (new) {
-		if (!strlen(*pass1)) {
-			if (*pass1)
-				memset(*pass1, '\0', PASSWORD_MAXLEN);
-			free(*pass1); *pass1 = NULL;
+		if (!strlen(pass1)) {
+			if (pass1)
+				memset(pass1, '\0', PASSWORD_MAXLEN + 1);
+			free(pass1); pass1 = NULL;
 
 			puts("Canceled.");
 			return(0);
@@ -514,25 +514,25 @@ kc_password_read(char **pass1, const unsigned char new)
 		pass2 = malloc(PASSWORD_MAXLEN + 1); malloc_check(pass2);
 		readpassphrase("New password again (empty to cancel): ", pass2, PASSWORD_MAXLEN + 1, rpp_flags);
 		if (!strlen(pass2)) {
-			if (*pass1)
-				memset(*pass1, '\0', PASSWORD_MAXLEN);
-			free(*pass1); *pass1 = NULL;
+			if (pass1)
+				memset(pass1, '\0', PASSWORD_MAXLEN + 1);
+			free(pass1); pass1 = NULL;
 
 			if (pass2)
-				memset(pass2, '\0', PASSWORD_MAXLEN);
+				memset(pass2, '\0', PASSWORD_MAXLEN + 1);
 			free(pass2); pass2 = NULL;
 
 			puts("Canceled.");
 			return(0);
 		}
 
-		if (strcmp(*pass1, pass2) != 0) {
-			if (*pass1)
-				memset(*pass1, '\0', PASSWORD_MAXLEN);
-			free(*pass1); *pass1 = NULL;
+		if (strcmp(pass1, pass2) != 0) {
+			if (pass1)
+				memset(pass1, '\0', PASSWORD_MAXLEN + 1);
+			free(pass1); pass1 = NULL;
 
 			if (pass2)
-				memset(pass2, '\0', PASSWORD_MAXLEN);
+				memset(pass2, '\0', PASSWORD_MAXLEN + 1);
 			free(pass2); pass2 = NULL;
 
 			puts("Passwords mismatch.");
@@ -540,9 +540,18 @@ kc_password_read(char **pass1, const unsigned char new)
 		}
 
 		if (pass2)
-			memset(pass2, '\0', PASSWORD_MAXLEN);
+			memset(pass2, '\0', PASSWORD_MAXLEN + 1);
 		free(pass2); pass2 = NULL;
 	}
+
+	db_params->pass_len = strlen(pass1);
+	db_params->pass = malloc(db_params->pass_len); malloc_check(db_params->pass);
+	memcpy(db_params->pass, pass1, db_params->pass_len);
+
+	if (pass1)
+		memset(pass1, '\0', PASSWORD_MAXLEN + 1);
+	free(pass1); pass1 = NULL;
+
 
 	return(1);
 } /* kc_password_read() */
@@ -682,7 +691,7 @@ kc_crypt_key(struct db_parameters *db_params)
 
 	/* Generate a proper key from the user's password */
 	if (strcmp(db_params->kdf, "sha1") == 0) {
-		if (!PKCS5_PBKDF2_HMAC_SHA1(db_params->pass, (int)strlen(db_params->pass),
+		if (!PKCS5_PBKDF2_HMAC_SHA1(db_params->pass, db_params->pass_len,
 			db_params->salt, SALT_DIGEST_LEN + 1,
 			5000,
 			KEY_LEN, db_params->key))
@@ -695,7 +704,7 @@ kc_crypt_key(struct db_parameters *db_params)
 			return(0);
 		}
 	} else if (strcmp(db_params->kdf, "sha512") == 0) {
-		if (!PKCS5_PBKDF2_HMAC(db_params->pass, (int)strlen(db_params->pass),
+		if (!PKCS5_PBKDF2_HMAC(db_params->pass, db_params->pass_len,
 			db_params->salt, SALT_DIGEST_LEN + 1,
 			5000, EVP_sha512(),
 			KEY_LEN, db_params->key))
@@ -707,7 +716,7 @@ kc_crypt_key(struct db_parameters *db_params)
 			return(0);
 		}
 	} else if (strcmp(db_params->kdf, "bcrypt") == 0) {
-		if (bcrypt_pbkdf(db_params->pass, strlen(db_params->pass),
+		if (bcrypt_pbkdf(db_params->pass, db_params->pass_len,
 			db_params->salt, SALT_DIGEST_LEN + 1,
 			db_params->key, KEY_LEN, 16) != 0)
 		{
@@ -719,7 +728,7 @@ kc_crypt_key(struct db_parameters *db_params)
 		}
 #ifdef _HAVE_LIBSCRYPT
 	} else if (strcmp(db_params->kdf, "scrypt") == 0) {
-		if (libscrypt_scrypt((const unsigned char *)db_params->pass, strlen(db_params->pass),
+		if (libscrypt_scrypt((const unsigned char *)db_params->pass, db_params->pass_len,
 			db_params->salt, SALT_DIGEST_LEN + 1,
 			SCRYPT_N, SCRYPT_r, SCRYPT_p,
 			db_params->key, KEY_LEN) != 0)

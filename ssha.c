@@ -6,9 +6,6 @@
 #include "ssha.h"
 
 
-extern db_parameters	db_params;
-
-
 void
 put_u32(void *vp, u_int32_t v)
 {
@@ -347,6 +344,9 @@ kc_ssha_parse_identities(struct kc_ssha_response *response)
 		pos += slen;
 
 		idlist->next = calloc(1, sizeof(struct kc_ssha_identity)); malloc_check(idlist->next);
+
+		if (getenv("KC_DEBUG"))
+			printf("parsed SSH ID: (%s) %s, %zd long\n", idlist->type, idlist->comment, idlist->pubkey_len);
 	} while (--num_ids);
 	free(idlist->next); idlist->next = NULL;
 
@@ -383,14 +383,12 @@ kc_ssha_parse_signature(struct kc_ssha_response *response)
 } /* kc_ssha_parse_signature() */
 
 
-char *
-kc_ssha_get_password(char *type, char *comment)
+int
+kc_ssha_get_password(char *type, char *comment, struct db_parameters *db_params)
 {
-	int		sock = -1, i = 0;
-	size_t		pos = 0;
+	int		sock = -1;
 	char		response_type = 0;
-	char		*data_to_sign = NULL, *password = NULL;
-	char		hex[3];
+	char		*data_to_sign = NULL;
 	struct kc_ssha_response		*response = NULL;
 	struct kc_ssha_identity		*idlist = NULL;
 	struct kc_ssha_signature 	*signature = NULL;
@@ -399,18 +397,18 @@ kc_ssha_get_password(char *type, char *comment)
 	sock = kc_ssha_connect();
 	if (sock < 0) {
 		dprintf(STDERR_FILENO, "Couldn't establish UNIX socket connection\n");
-		return(NULL);
+		return(0);
 	}
 
 	/* get identities */
 	if (kc_ssha_get_identity_list(sock) < 0) {
 		dprintf(STDERR_FILENO, "Failed to send identity list request\n");
-		return(NULL);
+		return(0);
 	}
 	response = kc_ssha_get_full_response(sock);
 	if (response == NULL) {
 		dprintf(STDERR_FILENO, "Could not get response for identity list request\n");
-		return(NULL);
+		return(0);
 	}
 
 	response_type = (char)*response->data;
@@ -418,16 +416,16 @@ kc_ssha_get_password(char *type, char *comment)
 		printf("response type is %d\n", response_type);
 	if (agent_failed(response_type)) {
 		dprintf(STDERR_FILENO, "OpenSSH agent request failed\n");
-		return(NULL);
+		return(0);
 	} else if (response_type != SSH2_AGENT_IDENTITIES_ANSWER) {
 		dprintf(STDERR_FILENO, "Invalid OpenSSH agent response type\n");
-		return(NULL);
+		return(0);
 	}
 
 	idlist = kc_ssha_parse_identities(response);
 	if (idlist == NULL) {
 		dprintf(STDERR_FILENO, "Could not parse identity list\n");
-		return(NULL);
+		return(0);
 	}
 
 	do {
@@ -441,34 +439,34 @@ kc_ssha_get_password(char *type, char *comment)
 
 	if (idlist == NULL) {
 		dprintf(STDERR_FILENO, "Could not find a match for identity: (%s) %s\n", type, comment);
-		return(NULL);
+		return(0);
 	}
 
 
 	/* ask for a signature */
 	data_to_sign = malloc(IV_DIGEST_LEN + SALT_DIGEST_LEN + 1); malloc_check(data_to_sign);
-	if (strlcpy(data_to_sign, (const char*)db_params.iv, IV_DIGEST_LEN + 1) >= IV_DIGEST_LEN + 1) {
+	if (strlcpy(data_to_sign, (const char*)db_params->iv, IV_DIGEST_LEN + 1) >= IV_DIGEST_LEN + 1) {
 		dprintf(STDERR_FILENO, "Error while setting up OpenSSH agent signing.\n");
 		free(data_to_sign); data_to_sign = NULL;
-		return(NULL);
+		return(0);
 	}
-	if (strlcat(data_to_sign, (const char*)db_params.salt, SALT_DIGEST_LEN + IV_DIGEST_LEN + 1) >= SALT_DIGEST_LEN + IV_DIGEST_LEN + 1) {
+	if (strlcat(data_to_sign, (const char*)db_params->salt, SALT_DIGEST_LEN + IV_DIGEST_LEN + 1) >= SALT_DIGEST_LEN + IV_DIGEST_LEN + 1) {
 		dprintf(STDERR_FILENO, "Error while setting up OpenSSH agent signing.\n");
 		free(data_to_sign); data_to_sign = NULL;
-		return(NULL);
+		return(0);
 	}
 
 	if (kc_ssha_sign_request(sock, idlist, data_to_sign, 0) < 0) {
 		dprintf(STDERR_FILENO, "Failed to send signature request\n");
 		free(data_to_sign); data_to_sign = NULL;
-		return(NULL);
+		return(0);
 	}
 	free(data_to_sign); data_to_sign = NULL;
 
 	response = kc_ssha_get_full_response(sock);
 	if (response == NULL) {
 		dprintf(STDERR_FILENO, "Could not get response for signature request\n");
-		return(NULL);
+		return(0);
 	}
 
 	response_type = (char)*response->data;
@@ -476,34 +474,31 @@ kc_ssha_get_password(char *type, char *comment)
 		printf("response type is %d\n", response_type);
 	if (agent_failed(response_type)) {
 		dprintf(STDERR_FILENO, "OpenSSH agent request failed\n");
-		return(NULL);
+		return(0);
 	} else if (response_type != SSH2_AGENT_SIGN_RESPONSE) {
 		dprintf(STDERR_FILENO, "Invalid OpenSSH agent response type\n");
-		return(NULL);
+		return(0);
 	}
 
 	signature = kc_ssha_parse_signature(response);
 	if (signature == NULL) {
 		dprintf(STDERR_FILENO, "Could not parse signature response\n");
-		return(NULL);
+		return(0);
 	}
 
 	if (signature->length > PASSWORD_MAXLEN) {
-		dprintf(STDERR_FILENO, "Signature length is larger than the allowed password length\n");
-		return(NULL);
+		dprintf(STDERR_FILENO, "Signature length(%zd) is larger than the allowed password length(%d)\n", signature->length * 2, PASSWORD_MAXLEN);
+		return(0);
 	}
 
-	password = calloc(1, PASSWORD_MAXLEN); malloc_check(password);
-	pos = 0;
-	for (i = 0; i < signature->length; i++) {
-		snprintf(hex, 3, "%02x", signature->signature[i]);
-		memcpy(password+pos, &hex, 2);
-		pos += 2;
-	}
+	db_params->pass_len = signature->length;
+	db_params->pass = malloc(db_params->pass_len); malloc_check(db_params->pass);
+	memcpy(db_params->pass, signature->signature, db_params->pass_len);
+
 	memset(signature->signature, 0, signature->length);
 	free(signature->signature); signature->signature = NULL;
 	free(signature); signature = NULL;
 
 
-	return(password);
+	return(1);
 } /* kc_ssha_get_password() */

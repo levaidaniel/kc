@@ -42,7 +42,7 @@ cmd_passwd(const char *e_line, command *commands)
 
 	/* ask for the new password */
 	while (ret == -1)
-		ret = kc_password_read(&db_params.pass, 1);
+		ret = kc_password_read(&db_params, 1);
 
 	if (ret == 0)	/* canceled */
 		return;
@@ -76,7 +76,7 @@ cmd_passwd(const char *e_line, command *commands)
 	ret = kc_crypt_iv_salt(&db_params)  &&  kc_crypt_key(&db_params)  &&  kc_crypt_setup(bio_chain, 1, &db_params);
 
 	if (db_params.pass)
-		memset(db_params.pass, '\0', PASSWORD_MAXLEN);
+		memset(db_params.pass, '\0', db_params.pass_len);
 	free(db_params.pass); db_params.pass = NULL;
 
 	if (ret) {

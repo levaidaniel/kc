@@ -22,7 +22,7 @@ else
 	exit 1
 fi
 
-echo ${PASSWORD} > ${KC_PASSFILE}
+echo -n ${PASSWORD} > ${KC_PASSFILE}
 if echo "" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE};then
 	echo "$0 test ok (open random db)!"
 else
