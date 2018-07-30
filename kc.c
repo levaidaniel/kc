@@ -150,8 +150,7 @@ main(int argc, char *argv[])
 				}
 
 				snprintf(db_params.ssha, sizeof(db_params.ssha), "(%s) %s", ssha_type, ssha_comment);
-				if (getenv("KC_DEBUG"))
-					printf("using OpenSSH agent with identity: %s\n", db_params.ssha);
+				printf("Using '%s' identity for decryption\n", db_params.ssha);
 			break;
 			case 'k':
 				db_params.db_filename = optarg;
