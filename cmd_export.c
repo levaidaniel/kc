@@ -312,8 +312,10 @@ cmd_export(const char *e_line, command *commands)
 exiting:
 	memset(db_params_new.key, '\0', KEY_LEN);
 
-	if (bio_chain)
-		BIO_free_all(bio_chain); bio_chain = NULL;
+	if (bio_chain) {
+		BIO_free_all(bio_chain);
+		bio_chain = NULL;
+	}
 
 	if (db_params_new.db_file >= 0)
 		close(db_params_new.db_file);

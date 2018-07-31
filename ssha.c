@@ -301,10 +301,11 @@ kc_ssha_parse_identities(struct kc_ssha_response *response)
 	pos += 4;
 
 	do {
-		if (idlist != NULL)	/* not first call */
+		if (idlist != NULL) {	/* not first call */
 			idlist = idlist->next;
-		else
+		} else {
 			idlist = calloc(1, sizeof(struct kc_ssha_identity)); malloc_check(idlist);
+		}
 
 		if (idlist_first == NULL)	/* first call */
 			idlist_first = idlist;

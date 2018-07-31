@@ -454,8 +454,10 @@ cmd_import(const char *e_line, command *commands)
 	db_params.dirty = 1;
 
 exiting:
-	if (bio_chain)
-		BIO_free_all(bio_chain); bio_chain = NULL;
+	if (bio_chain) {
+		BIO_free_all(bio_chain);
+		bio_chain = NULL;
+	}
 
 	if (db_params_new.db_file >= 0)
 		close(db_params_new.db_file);
