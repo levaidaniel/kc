@@ -138,6 +138,9 @@ main(int argc, char *argv[])
 	while ((c = getopt(argc, argv, "A:k:c:C:rp:P:e:m:bBvh")) != -1)
 		switch (c) {
 			case 'A':
+				if (ssha_type) {
+					free(ssha_type); ssha_type = NULL;
+				}
 				ssha_type = strndup(strsep(&optarg, ","), 19);
 				if (ssha_type == NULL  ||  !strlen(ssha_type)) {
 					dprintf(STDERR_FILENO, "SSH key type is empty!\n");
@@ -150,6 +153,9 @@ main(int argc, char *argv[])
 					quit(EXIT_FAILURE);
 				}
 
+				if (ssha_comment) {
+					free(ssha_comment); ssha_comment = NULL;
+				}
 				ssha_comment = strndup(optarg, 512);
 				if (ssha_comment == NULL  ||  !strlen(ssha_comment)) {
 					dprintf(STDERR_FILENO, "SSH key comment is empty!\n");
