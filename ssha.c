@@ -304,6 +304,8 @@ kc_ssha_parse_identities(struct kc_ssha_response *response)
 		if (idlist == NULL) {	/* first call */
 			idlist = calloc(1, sizeof(struct kc_ssha_identity)); malloc_check(idlist);
 			idlist_first = idlist;
+		} else {
+			idlist = idlist->next;
 		}
 		idlist->pubkey_len = 0;
 		idlist->pubkey = NULL;
@@ -350,10 +352,9 @@ kc_ssha_parse_identities(struct kc_ssha_response *response)
 		if (getenv("KC_DEBUG"))
 			printf("parsed SSH ID: (%s) %s, %zd long\n", idlist->type, idlist->comment, idlist->pubkey_len);
 
-		idlist = idlist->next;
-		idlist = calloc(1, sizeof(struct kc_ssha_identity)); malloc_check(idlist);
+		idlist->next = calloc(1, sizeof(struct kc_ssha_identity)); malloc_check(idlist);
 	} while (--num_ids);
-	free(idlist); idlist = NULL;
+	free(idlist->next); idlist->next = NULL;
 
 
 	return(idlist_first);
@@ -437,6 +438,10 @@ kc_ssha_get_password(char *type, char *comment, struct db_parameters *db_params)
 	do {
 		if (	strncmp(type, idlist->type, strlen(idlist->type)) == 0  &&
 			strncmp(comment, idlist->comment, strlen(idlist->comment)) == 0) {
+
+			if (getenv("KC_DEBUG"))
+				printf("found a match for identity: (%s) %s\n", type, comment);
+
 			break;
 		}
 
