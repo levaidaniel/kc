@@ -2,6 +2,8 @@
 
 set -e
 
+ulimit -c
+
 
 if [ $(basename $(pwd))  = 'regress' ];then
 	echo "please run this script directly from the source directory."
