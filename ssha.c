@@ -288,6 +288,7 @@ kc_ssha_parse_identities(struct kc_ssha_response *response)
 	struct kc_ssha_identity		*idlist = NULL, *idlist_first = NULL;
 	size_t	pos = 1;	/* begin with skipping response type */
 	size_t	num_ids = 0, slen = 0;
+	int	i = 0;
 
 
 	num_ids = get_u32(response->data+pos);
@@ -300,13 +301,19 @@ kc_ssha_parse_identities(struct kc_ssha_response *response)
 	}
 	pos += 4;
 
-	do {
-		if (idlist == NULL) {	/* first call */
-			idlist = calloc(1, sizeof(struct kc_ssha_identity)); malloc_check(idlist);
+	for (i = 0; i < num_ids; i++) {
+		if (!i) {	/* first call */
+			idlist = malloc(sizeof(struct kc_ssha_identity)); malloc_check(idlist);
 			idlist_first = idlist;
 		} else {
-			idlist = idlist->next;
+			if (idlist) {
+				idlist->next = malloc(sizeof(struct kc_ssha_identity)); malloc_check(idlist->next);
+				idlist = idlist->next;
+			} else {	/* last ID was erroneous, and we had free()'d 'idlist' */
+				idlist = malloc(sizeof(struct kc_ssha_identity)); malloc_check(idlist);
+			}
 		}
+
 		idlist->pubkey_len = 0;
 		idlist->pubkey = NULL;
 		idlist->type = NULL;
@@ -317,12 +324,17 @@ kc_ssha_parse_identities(struct kc_ssha_response *response)
 		idlist->pubkey_len = get_u32(response->data+pos);
 		if (idlist->pubkey_len > KC_MAX_PUBKEY_LEN) {
 			dprintf(STDERR_FILENO, "Public key length is larger than allowed(%d), skipping\n", KC_MAX_PUBKEY_LEN);
+
+			free(idlist); idlist = NULL;
+			if (!i)	/* first call */
+				idlist_first = NULL;
+
 			continue;
 		}
 		pos += 4;
 
 		/* public key */
-		idlist->pubkey = calloc(1, idlist->pubkey_len); malloc_check(idlist->pubkey);
+		idlist->pubkey = malloc(idlist->pubkey_len); malloc_check(idlist->pubkey);
 		memcpy(idlist->pubkey, response->data+pos, idlist->pubkey_len);
 		pos += idlist->pubkey_len;
 
@@ -331,7 +343,7 @@ kc_ssha_parse_identities(struct kc_ssha_response *response)
 		 * which are part of the pubkey blob
 		 */
 		slen = get_u32(idlist->pubkey);
-		idlist->type = calloc(1, slen + 1); malloc_check(idlist->type);
+		idlist->type = malloc(slen + 1); malloc_check(idlist->type);
 		memcpy(idlist->type, idlist->pubkey+4, slen); idlist->type[slen] = '\0';
 		/*				^^^^^ + 4 here is the length indication of the key type string */
 
@@ -342,19 +354,20 @@ kc_ssha_parse_identities(struct kc_ssha_response *response)
 
 			free(idlist->pubkey); idlist->pubkey = NULL;
 			free(idlist->type); idlist->type = NULL;
+			free(idlist); idlist = NULL;
+			if (!i)	/* first call */
+				idlist_first = NULL;
+
 			continue;
 		}
 		pos += 4;
-		idlist->comment = calloc(1, slen); malloc_check(idlist->comment);
-		memcpy(idlist->comment, response->data+pos, slen);
+		idlist->comment = malloc(slen + 1); malloc_check(idlist->comment);
+		memcpy(idlist->comment, response->data+pos, slen); idlist->comment[slen] = '\0';
 		pos += slen;
 
 		if (getenv("KC_DEBUG"))
-			printf("parsed SSH ID: (%s) %s, %zd long\n", idlist->type, idlist->comment, idlist->pubkey_len);
-
-		idlist->next = calloc(1, sizeof(struct kc_ssha_identity)); malloc_check(idlist);
-	} while (--num_ids);
-	free(idlist->next); idlist->next = NULL;
+			printf("%d. parsed SSH ID: (%s) %s, %zd long\n", i, idlist->type, idlist->comment, idlist->pubkey_len);
+	}
 
 
 	return(idlist_first);
