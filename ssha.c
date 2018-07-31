@@ -208,7 +208,6 @@ kc_ssha_get_full_response(int sock)
 	struct kc_ssha_response	*response = NULL;
 
 
-	buf_len = 10; buf_rem = buf_len;	/* XXX DEBUG */
 	buf = malloc(buf_len); malloc_check(buf);
 
 	/* first read the response's length */
