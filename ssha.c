@@ -46,9 +46,9 @@ kc_ssha_connect(void)
 
 	sock_name = getenv("SSH_AUTH_SOCK");
 	if (getenv("KC_DEBUG"))
-		printf("OpenSSH agent UNIX socket: '%s'\n", sock_name);
+		printf("SSH agent UNIX socket: '%s'\n", sock_name);
 	if (sock_name == NULL  ||  strlen(sock_name) <= 0) {
-		dprintf(STDERR_FILENO, "OpenSSH agent socket name is NULL or zero length\n");
+		dprintf(STDERR_FILENO, "SSH agent socket name is NULL or zero length\n");
 		return(-1);
 	}
 
@@ -59,12 +59,12 @@ kc_ssha_connect(void)
 
 	sock = socket(AF_UNIX, SOCK_STREAM, 0);
 	if (sock <= 0) {
-		dprintf(STDERR_FILENO, "Could not create UNIX socket for OpenSSH agent communication\n");
+		dprintf(STDERR_FILENO, "Could not create UNIX socket for SSH agent communication\n");
 		return(-1);
 	}
 
 	if (connect(sock, (struct sockaddr*)&addr, sizeof(struct sockaddr_un)) != 0) {
-		dprintf(STDERR_FILENO, "Could not connect to OpenSSH agent UNIX socket: '%s'\n", sock_name);
+		dprintf(STDERR_FILENO, "Could not connect to SSH agent UNIX socket: '%s'\n", sock_name);
 		return(-1);
 	}
 
@@ -293,10 +293,10 @@ kc_ssha_parse_identities(struct kc_ssha_response *response)
 
 	num_ids = get_u32(response->data+pos);
 	if (getenv("KC_DEBUG"))
-		dprintf(STDERR_FILENO, "OpenSSH agent has %zd identities\n", num_ids);
+		dprintf(STDERR_FILENO, "SSH agent has %zd identities\n", num_ids);
 
 	if (num_ids <= 0) {
-		dprintf(STDERR_FILENO, "OpenSSH agent has no identities\n");
+		dprintf(STDERR_FILENO, "SSH agent has no identities\n");
 		return(NULL);
 	}
 	pos += 4;
@@ -415,10 +415,10 @@ kc_ssha_get_password(char *type, char *comment, struct db_parameters *db_params)
 	if (getenv("KC_DEBUG"))
 		printf("response type is %d\n", response_type);
 	if (agent_failed(response_type)) {
-		dprintf(STDERR_FILENO, "OpenSSH agent request failed\n");
+		dprintf(STDERR_FILENO, "SSH agent request failed\n");
 		return(0);
 	} else if (response_type != SSH2_AGENT_IDENTITIES_ANSWER) {
-		dprintf(STDERR_FILENO, "Invalid OpenSSH agent response type\n");
+		dprintf(STDERR_FILENO, "Invalid SSH agent response type\n");
 		return(0);
 	}
 
@@ -446,12 +446,12 @@ kc_ssha_get_password(char *type, char *comment, struct db_parameters *db_params)
 	/* ask for a signature */
 	data_to_sign = malloc(IV_DIGEST_LEN + SALT_DIGEST_LEN + 1); malloc_check(data_to_sign);
 	if (strlcpy(data_to_sign, (const char*)db_params->iv, IV_DIGEST_LEN + 1) >= IV_DIGEST_LEN + 1) {
-		dprintf(STDERR_FILENO, "Error while setting up OpenSSH agent signing.\n");
+		dprintf(STDERR_FILENO, "Error while setting up SSH agent signing.\n");
 		free(data_to_sign); data_to_sign = NULL;
 		return(0);
 	}
 	if (strlcat(data_to_sign, (const char*)db_params->salt, SALT_DIGEST_LEN + IV_DIGEST_LEN + 1) >= SALT_DIGEST_LEN + IV_DIGEST_LEN + 1) {
-		dprintf(STDERR_FILENO, "Error while setting up OpenSSH agent signing.\n");
+		dprintf(STDERR_FILENO, "Error while setting up SSH agent signing.\n");
 		free(data_to_sign); data_to_sign = NULL;
 		return(0);
 	}
@@ -476,10 +476,10 @@ kc_ssha_get_password(char *type, char *comment, struct db_parameters *db_params)
 	if (getenv("KC_DEBUG"))
 		printf("response type is %d\n", response_type);
 	if (agent_failed(response_type)) {
-		dprintf(STDERR_FILENO, "OpenSSH agent request failed\n");
+		dprintf(STDERR_FILENO, "SSH agent request failed\n");
 		return(0);
 	} else if (response_type != SSH2_AGENT_SIGN_RESPONSE) {
-		dprintf(STDERR_FILENO, "Invalid OpenSSH agent response type\n");
+		dprintf(STDERR_FILENO, "Invalid SSH agent response type\n");
 		return(0);
 	}
 

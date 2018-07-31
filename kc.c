@@ -140,12 +140,12 @@ main(int argc, char *argv[])
 			case 'A':
 				ssha_type = strndup(strsep(&optarg, ","), 19);
 				if (ssha_type == NULL  ||  !strlen(ssha_type)) {
-					dprintf(STDERR_FILENO, "OpenSSH public key type is empty!\n");
+					dprintf(STDERR_FILENO, "SSH public key type is empty!\n");
 					quit(EXIT_FAILURE);
 				}
 				ssha_comment = strndup(optarg, 512);
 				if (ssha_comment == NULL  ||  !strlen(ssha_comment)) {
-					dprintf(STDERR_FILENO, "OpenSSH public key comment is empty!\n");
+					dprintf(STDERR_FILENO, "SSH public key comment is empty!\n");
 					quit(EXIT_FAILURE);
 				}
 
@@ -197,7 +197,7 @@ main(int argc, char *argv[])
 				printf(	"-k <file>: Use file as database. The default is ~/.kc/default.kcd .\n"
 					"-r: Open the database in read-only mode.\n"
 					"-c/-C <keychain>: Start in <keychain>.\n"
-					"-A <key type,key comment>: Use OpenSSH agent to provide password.\n"
+					"-A <key type,key comment>: Use an SSH agent to provide password.\n"
 					"-p <file>: Read password from file.\n"
 					"-P <kdf>: KDF to use.\n"
 					"-e <cipher>: Encryption cipher.\n"
@@ -407,7 +407,7 @@ main(int argc, char *argv[])
 			perror("close(password file)");
 	} else {
 		if (strlen(db_params.ssha)) {
-			/* use OpenSSH agent to generate the password */
+			/* use SSH agent to generate the password */
 			if (!kc_ssha_get_password(ssha_type, ssha_comment, &db_params))
 				quit(EXIT_FAILURE);
 		} else {

@@ -137,7 +137,7 @@ Open the database in read-only mode.
 .Nm
 will not try to lock the database file, and commands which could modify the database will not be available.
 .It Fl A Ar key type,key comment
-Use a signature from OpenSSH agent as the database password.
+Use a signature from SSH agent as the database password.
 For this,
 .Nm
 asks
@@ -886,9 +886,9 @@ from the clipboards are not being dealt with.
 This should be the user's responsibility.
 .El
 .Pp
-Using OpenSSH's
+Using an SSH agent (eg.: OpenSSH
 .Xr ssh-agent 1
-to provide the password for the database is convenient but in my opinion is less secure.
+) to provide the password for the database is convenient but in my opinion is less secure.
 .Nm
 uses a local UNIX socket to communicate with the agent, and that being a file on a local filesystem can be used to hijack your database password if you have another user with access to that UNIX socket and your database file (eg.: root).
 In other words, any user who has access to your

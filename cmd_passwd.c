@@ -41,7 +41,7 @@ cmd_passwd(const char *e_line, command *commands)
 
 
 	if (strlen(db_params.ssha)) {
-		puts("Cannot change password when using OpenSSH agent.");
+		puts("Cannot change password when using SSH agent.");
 		return;
 	}
 
