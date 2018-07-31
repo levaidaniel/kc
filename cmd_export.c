@@ -25,6 +25,7 @@
 
 #include "common.h"
 #include "commands.h"
+#include "ssha.h"
 
 #ifdef BSD
 #include <fcntl.h>
@@ -60,6 +61,7 @@ cmd_export(const char *e_line, command *commands)
 	char		*line = NULL;
 	char		dump = 0, ret = -1, exiting = 0;
 	struct stat	st;
+	char		*ssha_type = NULL, *ssha_comment = NULL;
 
 #ifndef _READLINE
 	int		e_count = 0;
@@ -67,6 +69,7 @@ cmd_export(const char *e_line, command *commands)
 
 
 	/* initial db_params for the exported database */
+	db_params_new.ssha[0] = '\0';
 	db_params_new.pass = NULL;
 	db_params_new.pass_len = 0;
 	db_params_new.db_filename = NULL;
@@ -85,8 +88,23 @@ cmd_export(const char *e_line, command *commands)
 	free(line); line = NULL;
 
 	optind = 1;
-	while ((c = getopt(largc, largv, "k:c:P:e:m:")) != -1)
+	while ((c = getopt(largc, largv, "A:k:c:P:e:m:")) != -1)
 		switch (c) {
+			case 'A':
+				ssha_type = strndup(strsep(&optarg, ","), 19);
+				if (ssha_type == NULL  ||  !strlen(ssha_type)) {
+					dprintf(STDERR_FILENO, "OpenSSH public key type is empty!\n");
+					quit(EXIT_FAILURE);
+				}
+				ssha_comment = strndup(optarg, 512);
+				if (ssha_comment == NULL  ||  !strlen(ssha_comment)) {
+					dprintf(STDERR_FILENO, "OpenSSH public key comment is empty!\n");
+					quit(EXIT_FAILURE);
+				}
+
+				snprintf(db_params_new.ssha, sizeof(db_params_new.ssha), "(%s) %s", ssha_type, ssha_comment);
+				printf("Using '%s' identity for decryption\n", db_params_new.ssha);
+			break;
 			case 'k':
 				db_params_new.db_filename = strdup(optarg); malloc_check(db_params_new.db_filename);
 			break;
@@ -240,57 +258,40 @@ cmd_export(const char *e_line, command *commands)
 		db_params_new.db_file = open(db_params_new.db_filename, O_RDWR | O_CREAT, 0600);
 		if (db_params_new.db_file < 0) {
 			perror("open(database file)");
-
 			goto exiting;
 		}
 
 		bio_chain = kc_setup_bio_chain(db_params_new.db_filename, 1);
 		if (!bio_chain) {
 			puts("Could not setup bio_chain!");
-
-			close(db_params_new.db_file);
 			goto exiting;
 		}
 
 
-		/* ask for the new password */
-		while (ret == -1)
-			ret = kc_password_read(&db_params_new, 1);
-
-		if (ret == 0) {	/* canceled */
-			if (db_params_new.pass)
-				memset(db_params_new.pass, '\0', db_params_new.pass_len);
-			free(db_params_new.pass); db_params_new.pass = NULL;
-
-			BIO_free_all(bio_chain);
-			close(db_params_new.db_file);
+		/* Generate iv/salt */
+		if (kc_crypt_iv_salt(&db_params_new) != 1) {
+			puts("Could not generate IV and/or salt!\n");
 			goto exiting;
 		}
 
-		/* Generate iv/salt, setup cipher mode and turn on encrypting */
-		if (	kc_crypt_iv_salt(&db_params_new) != 1  ||
-			kc_crypt_key(&db_params_new) != 1  ||
+		/* get a password */
+		if (strlen(db_params.ssha)) {
+			/* use SSH agent to generate the password */
+			if (!kc_ssha_get_password(ssha_type, ssha_comment, &db_params_new))
+				goto exiting;
+		} else {
+			/* ask for the new password */
+			if (kc_password_read(&db_params_new, 1) != 1)
+				goto exiting;
+		}
+
+		/* Setup cipher mode and turn on encrypting */
+		if (	kc_crypt_key(&db_params_new) != 1  ||
 			kc_crypt_setup(bio_chain, 1, &db_params_new) != 1
 		) {
 			puts("Could not setup encrypting!");
-
-			BIO_free_all(bio_chain);
-			close(db_params_new.db_file);
-
-			memset(db_params_new.key, '\0', KEY_LEN);
-
-			if (db_params_new.pass)
-				memset(db_params_new.pass, '\0', db_params_new.pass_len);
-			free(db_params_new.pass); db_params_new.pass = NULL;
-
 			goto exiting;
 		}
-
-		memset(db_params_new.key, '\0', KEY_LEN);
-
-		if (db_params_new.pass)
-			memset(db_params_new.pass, '\0', db_params_new.pass_len);
-		free(db_params_new.pass); db_params_new.pass = NULL;
 
 
 		if (kc_db_writer(db_tmp, bio_chain, &db_params_new))
@@ -298,15 +299,27 @@ cmd_export(const char *e_line, command *commands)
 		else
 			printf("Failed exporting to '%s'!\n", db_params_new.db_filename);
 
-		BIO_free_all(bio_chain);
-		close(db_params_new.db_file);
 	}
 
+
 exiting:
+	memset(db_params_new.key, '\0', KEY_LEN);
+
+	if (bio_chain)
+		BIO_free_all(bio_chain); bio_chain = NULL;
+
+	if (db_params_new.db_file >= 0)
+		close(db_params_new.db_file);
+
 	if (cname  &&  db_tmp)
 		xmlFreeDoc(db_tmp);	/* if we saved a specific keychain, clean up the temporary xmlDoc and its tree. */
 
 	free(cname); cname = NULL;
+
+	if (db_params_new.pass) {
+		memset(db_params_new.pass, '\0', db_params_new.pass_len);
+		free(db_params_new.pass); db_params_new.pass = NULL;
+	}
 	free(db_params_new.kdf); db_params_new.kdf = NULL;
 	free(db_params_new.cipher); db_params_new.cipher = NULL;
 	free(db_params_new.cipher_mode); db_params_new.cipher_mode = NULL;

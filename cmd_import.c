@@ -25,6 +25,7 @@
 
 #include "common.h"
 #include "commands.h"
+#include "ssha.h"
 
 #ifdef BSD
 #include <fcntl.h>
@@ -46,6 +47,7 @@ cmd_import(const char *e_line, command *commands)
 	BIO		*bio_chain = NULL;
 
 	struct stat	st;
+	char		*ssha_type = NULL, *ssha_comment = NULL;
 
 	db_parameters	db_params_new;
 
@@ -66,6 +68,7 @@ cmd_import(const char *e_line, command *commands)
 
 
 	/* initial db_params parameters of the imported database */
+	db_params_new.ssha[0] = '\0';
 	db_params_new.pass = NULL;
 	db_params_new.pass_len = 0;
 	db_params_new.db_filename = NULL;
@@ -84,8 +87,23 @@ cmd_import(const char *e_line, command *commands)
 	free(line); line = NULL;
 
 	optind = 1;
-	while ((c = getopt(largc, largv, "k:P:e:m:")) != -1)
+	while ((c = getopt(largc, largv, "A:k:P:e:m:")) != -1)
 		switch (c) {
+			case 'A':
+				ssha_type = strndup(strsep(&optarg, ","), 19);
+				if (ssha_type == NULL  ||  !strlen(ssha_type)) {
+					dprintf(STDERR_FILENO, "OpenSSH public key type is empty!\n");
+					quit(EXIT_FAILURE);
+				}
+				ssha_comment = strndup(optarg, 512);
+				if (ssha_comment == NULL  ||  !strlen(ssha_comment)) {
+					dprintf(STDERR_FILENO, "OpenSSH public key comment is empty!\n");
+					quit(EXIT_FAILURE);
+				}
+
+				snprintf(db_params_new.ssha, sizeof(db_params_new.ssha), "(%s) %s", ssha_type, ssha_comment);
+				printf("Using '%s' identity for decryption\n", db_params_new.ssha);
+			break;
 			case 'k':
 				db_params_new.db_filename = strdup(optarg); malloc_check(db_params_new.db_filename);
 			break;
@@ -189,13 +207,11 @@ cmd_import(const char *e_line, command *commands)
 			if (ret < 0) {
 				perror("import: read IV(database file)");
 
-				close(db_params_new.db_file);
 				goto exiting;
 			}
 			if (pos != IV_DIGEST_LEN) {
 				puts("Could not read IV from database file!");
 
-				close(db_params_new.db_file);
 				goto exiting;
 			}
 
@@ -218,26 +234,16 @@ cmd_import(const char *e_line, command *commands)
 			if (ret < 0) {
 				perror("import: read salt(database file)");
 
-				close(db_params_new.db_file);
-				free(buf); buf = NULL;
 				goto exiting;
 			}
 			if (pos != SALT_DIGEST_LEN) {
 				puts("Could not read salt from database file!");
 
-				close(db_params_new.db_file);
 				goto exiting;
 			}
 
 			if (getenv("KC_DEBUG"))
 				printf("import: salt='%s'\n", db_params_new.salt);
-
-
-			if (close(db_params_new.db_file) < 0) {
-				perror("close after reading IV/salt(database file)");
-
-				goto exiting;
-			}
 		} else {
 			perror("Could not open database file");
 
@@ -251,8 +257,16 @@ cmd_import(const char *e_line, command *commands)
 			goto exiting;
 		}
 
-		/* ask for the password */
-		kc_password_read(&db_params_new, 0);
+		/* get the password */
+		if (strlen(db_params_new.ssha)) {
+			/* use OpenSSH agent to generate the password */
+			if (!kc_ssha_get_password(ssha_type, ssha_comment, &db_params_new))
+				goto exiting;
+		} else {
+			/* ask for the password */
+			if (kc_password_read(&db_params_new, 0) != 1)
+				goto exiting;
+		}
 
 		/* Setup cipher mode and turn on decrypting */
 		ret = kc_crypt_key(&db_params_new)  &&  kc_crypt_setup(bio_chain, 0, &db_params_new);
@@ -268,7 +282,6 @@ cmd_import(const char *e_line, command *commands)
 		if (!ret) {
 			puts("Could not setup decrypting!");
 
-			BIO_free_all(bio_chain);
 			goto exiting;
 		}
 
@@ -280,12 +293,11 @@ cmd_import(const char *e_line, command *commands)
 		if (BIO_get_cipher_status(bio_chain) == 0  &&  ret > 0) {
 			puts("Failed to decrypt import file!");
 
-			BIO_free_all(bio_chain);
 			free(buf); buf = NULL;
 			goto exiting;
 		}
 
-		BIO_free_all(bio_chain);
+		BIO_free_all(bio_chain); bio_chain = NULL;
 
 		if (getenv("KC_DEBUG"))
 			db_new = xmlReadMemory(buf, (int)ret, NULL, "UTF-8", XML_PARSE_NONET | XML_PARSE_PEDANTIC | XML_PARSE_RECOVER);
@@ -316,7 +328,7 @@ cmd_import(const char *e_line, command *commands)
 	db_root = xmlDocGetRootElement(db);		/* the existing db root */
 	db_root_new = xmlDocGetRootElement(db_new);	/* the new db root */
 	if (db_root_new->children->next == NULL) {
-		puts("Can not import an empty database!");
+		puts("Cannot import an empty database!");
 
 		xmlFreeDoc(db_new);
 		goto exiting;
@@ -403,7 +415,7 @@ cmd_import(const char *e_line, command *commands)
 		while (keychain_new  &&  count_keychains < ITEMS_MAX) {
 			/* Count the keys in the keychain */
 			if (count_elements(keychain_new->children) >= ITEMS_MAX - 1) {
-				printf("Can not import: maximum number of keys reached, %lu.\n", ITEMS_MAX - 1);
+				printf("Cannot import: maximum number of keys reached, %lu.\n", ITEMS_MAX - 1);
 
 				xmlFreeDoc(db_new);
 				goto exiting;
@@ -417,7 +429,7 @@ cmd_import(const char *e_line, command *commands)
 
 		/* Finished scanning the keys in the new keychains, now lets evaluate the number of keychains */
 		if (count_keychains >= ITEMS_MAX - 1) {
-			printf("Can not import: maximum number of keychains reached, %lu.\n", ITEMS_MAX - 1);
+			printf("Cannot import: maximum number of keychains reached, %lu.\n", ITEMS_MAX - 1);
 
 			xmlFreeDoc(db_new);
 			goto exiting;
@@ -435,6 +447,16 @@ cmd_import(const char *e_line, command *commands)
 	db_params.dirty = 1;
 
 exiting:
+	if (bio_chain)
+		BIO_free_all(bio_chain); bio_chain = NULL;
+
+	if (db_params_new.db_file >= 0)
+		close(db_params_new.db_file);
+
+	if (db_params_new.pass) {
+		memset(db_params_new.pass, '\0', db_params_new.pass_len);
+		free(db_params_new.pass); db_params_new.pass = NULL;
+	}
 	free(db_params_new.kdf); db_params_new.kdf = NULL;
 	free(db_params_new.cipher); db_params_new.cipher = NULL;
 	free(db_params_new.cipher_mode); db_params_new.cipher_mode = NULL;

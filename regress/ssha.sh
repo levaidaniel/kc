@@ -23,9 +23,10 @@ if [ $? -ne 0 ];then
 fi
 
 KC_DB='regress/test_ssha.kcd'
-for SSH_ID_TYPE in ecdsa ed25519 rsa;do
+# when this is failing, it's a good idea to: ${SSH_ADD} -D
+for SSH_ID_TYPE in ed25519 rsa ecdsa;do
 	SSH_ID_FILE="regress/test_id_${SSH_ID_TYPE}_ssh"
-	SSH_ID_COMMENT="this is what we're looking for"
+	SSH_ID_COMMENT="this_is_what_we're_looking_for"
 
 	if [ "${SSH_ID_TYPE}" == 'ecdsa' ];then
 		KC_ID_TYPE='ecdsa-sha2-nistp256'
@@ -37,13 +38,13 @@ for SSH_ID_TYPE in ecdsa ed25519 rsa;do
 
 	${SSH_KEYGEN} -o -t "${SSH_ID_TYPE}" -C "${SSH_ID_COMMENT}" -N '' -f "${SSH_ID_FILE}"
 	if [ $? -ne 0 ];then
-		echo "$0 test failed (generate new ssh key)!"
+		echo "$0 test failed (generate new ssh key, key type ${SSH_ID_TYPE})!"
 		exit 1
 	fi
 
 	${SSH_ADD} "${SSH_ID_FILE}"
 	if [ $? -ne 0 ];then
-		echo "$0 test failed (add new ssh key to agent)!"
+		echo "$0 test failed (add new ssh key to agent, key type ${SSH_ID_TYPE})!"
 		exit 1
 	fi
 
@@ -52,6 +53,33 @@ for SSH_ID_TYPE in ecdsa ed25519 rsa;do
 		echo "$0 test ok (create new db with agent, key type ${SSH_ID_TYPE})!"
 	else
 		echo "$0 test failed (create new db with agent, key type ${SSH_ID_TYPE})!"
+		exit 1
+	fi
+
+	rm -f regress/test_export.kcd
+	if echo "export -A ${KC_ID_TYPE},${SSH_ID_COMMENT} -k regress/test_export" |${KC_RUN} -A "${KC_ID_TYPE},${SSH_ID_COMMENT}" -b -k ${KC_DB};then
+		echo "$0 test ok (export#1, key type ${SSH_ID_TYPE})!"
+	else
+		echo "$0 test failed (export#1, key type ${SSH_ID_TYPE})!"
+		exit 1
+	fi
+
+	if [ ! -r "regress/test_export.kcd" ];then
+		echo "$0 test failed (unreadable export file, key type ${SSH_ID_TYPE})!"
+		exit 1
+	fi
+
+	if echo exit |${KC_RUN} -A "${KC_ID_TYPE},${SSH_ID_COMMENT}" -b -k regress/test_export.kcd;then
+		echo "$0 test ok (export#2, key type ${SSH_ID_TYPE})!"
+	else
+		echo "$0 test failed (export#2, key type ${SSH_ID_TYPE})!"
+		exit 1
+	fi
+
+	if printf "import -A ${KC_ID_TYPE},${SSH_ID_COMMENT} -k regress/test_export.kcd\nwrite\n" |${KC_RUN} -A "${KC_ID_TYPE},${SSH_ID_COMMENT}" -b -k regress/test_export.kcd;then
+		echo "$0 test ok (export, key type ${SSH_ID_TYPE})!"
+	else
+		echo "$0 test failed (export, key type ${SSH_ID_TYPE})!"
 		exit 1
 	fi
 

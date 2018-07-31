@@ -46,10 +46,7 @@ cmd_passwd(const char *e_line, command *commands)
 	}
 
 	/* ask for the new password */
-	while (ret == -1)
-		ret = kc_password_read(&db_params, 1);
-
-	if (ret == 0)	/* canceled */
+	if (kc_password_read(&db_params, 1) != 1)
 		return;
 
 
