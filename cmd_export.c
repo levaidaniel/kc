@@ -59,7 +59,7 @@ cmd_export(const char *e_line, command *commands)
 	int		c = 0, largc = 0;
 	char		**largv = NULL;
 	char		*line = NULL;
-	char		dump = 0, ret = -1, exiting = 0;
+	char		dump = 0, exiting = 0;
 	struct stat	st;
 	char		*ssha_type = NULL, *ssha_comment = NULL;
 
