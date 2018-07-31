@@ -544,6 +544,11 @@ kc_password_read(struct db_parameters *db_params, const unsigned char new)
 		free(pass2); pass2 = NULL;
 	}
 
+	if (pass1 == NULL  ||  !strlen(pass1)) {
+		puts("Password is of zero length!");
+		return(-1);
+	}
+
 	db_params->pass_len = strlen(pass1);
 	db_params->pass = malloc(db_params->pass_len); malloc_check(db_params->pass);
 	memcpy(db_params->pass, pass1, db_params->pass_len);

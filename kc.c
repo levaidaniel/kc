@@ -406,29 +406,14 @@ main(int argc, char *argv[])
 		if (close(pass_file) < 0)
 			perror("close(password file)");
 	} else {
-		if (newdb) {
-			if (strlen(db_params.ssha)) {
-				/* use OpenSSH agent to generate the password */
-				if (!kc_ssha_get_password(ssha_type, ssha_comment, &db_params))
-					quit(EXIT_FAILURE);
-			} else {
-				/* ask for the new password */
-				do {
-					ret = kc_password_read(&db_params, 1);
-				} while (ret == -1);
-
-				if (ret == 0)
-					quit(EXIT_FAILURE);
-			}
+		if (strlen(db_params.ssha)) {
+			/* use OpenSSH agent to generate the password */
+			if (!kc_ssha_get_password(ssha_type, ssha_comment, &db_params))
+				quit(EXIT_FAILURE);
 		} else {
-			if (strlen(db_params.ssha)) {
-				/* use OpenSSH agent to generate the password */
-				if (!kc_ssha_get_password(ssha_type, ssha_comment, &db_params))
-					quit(EXIT_FAILURE);
-			} else {
-				/* ask for the password */
-				kc_password_read(&db_params, 0);
-			}
+			/* ask for the new password */
+			if (kc_password_read(&db_params, newdb) != 1)
+				quit(EXIT_FAILURE);
 		}
 	}
 
