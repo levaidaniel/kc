@@ -151,19 +151,18 @@ and
 .Ar key comment
 separated by a comma (with no whitespaces around it).
 .Pp
+The key types supported and tested so far are RSA and ED25519, by using the type names
+.Ar ssh-rsa
+and
+.Ar ssh-ed25519
+, respectively.
+Due to the nature of *DSA keys,
+.Nm
+cannot use it in this specific way for this specific purpose.
+.Pp
 See also the
 .Em CAVEATS
 section for an explanation of how this can be insecure.
-.Pp
-The key types that has been tested so far were rsa, ecdsa and ed25519, but as an option argument here you must specify the type in the format it's actually stored, so here's the list:
-.Bl -tag -offset ||| -width |
-.It Ar rsa
-ssh-rsa
-.It Ar ecdsa
-ecdsa-sha2-nistp256
-.It Ar ed25519
-ssh-ed25519
-.El
 .It Fl p Ar file
 Read password from
 .Ar file .
@@ -886,14 +885,27 @@ from the clipboards are not being dealt with.
 This should be the user's responsibility.
 .El
 .Pp
+SSH agent support:
+.Bl -enum -offset ||| -width |
+.It
 Using an SSH agent (eg.: OpenSSH
 .Xr ssh-agent 1
-) to provide the password for the database is convenient but in my opinion is less secure.
+) to provide the password for the database is convenient but in my opinion less secure.
 .Nm
 uses a local UNIX socket to communicate with the agent, and that being a file on a local filesystem can be used to hijack your database password if you have another user with access to that UNIX socket and your database file (eg.: root).
 In other words, any user who has access to your
 .Xr ssh-agent 1
 UNIX socket and your database file will be able to open it.
+.It
 The password (signature) coming from
 .Xr ssh-agent 1
-also varies between different types of SSH keys -- different keys produce different signature lengths.
+also varies between different types of SSH keys -- different keys/key bit lengths produce different signature lengths.
+.It
+.Nm
+cannot handle spaces in the key comment when using the
+.Ic export
+or
+.Ic import
+commands.
+However, opening a database works with spaces in the key comment.
+.El

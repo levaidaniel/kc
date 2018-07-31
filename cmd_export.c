@@ -93,12 +93,19 @@ cmd_export(const char *e_line, command *commands)
 			case 'A':
 				ssha_type = strndup(strsep(&optarg, ","), 19);
 				if (ssha_type == NULL  ||  !strlen(ssha_type)) {
-					dprintf(STDERR_FILENO, "OpenSSH public key type is empty!\n");
+					dprintf(STDERR_FILENO, "SSH key type is empty!\n");
 					quit(EXIT_FAILURE);
 				}
+				if (	strncmp(ssha_type, "ssh-rsa", 7) != 0  &&
+					strncmp(ssha_type, "ssh-ed25519", 11) != 0
+				) {
+					dprintf(STDERR_FILENO, "SSH key type is unsupported: '%s'\n", ssha_type);
+					quit(EXIT_FAILURE);
+				}
+
 				ssha_comment = strndup(optarg, 512);
 				if (ssha_comment == NULL  ||  !strlen(ssha_comment)) {
-					dprintf(STDERR_FILENO, "OpenSSH public key comment is empty!\n");
+					dprintf(STDERR_FILENO, "SSH key comment is empty!\n");
 					quit(EXIT_FAILURE);
 				}
 

@@ -24,19 +24,16 @@ fi
 
 KC_DB='regress/test_ssha.kcd'
 # when this is failing, it's a good idea to: ${SSH_ADD} -D
-for SSH_ID_TYPE in ed25519 rsa ecdsa;do
+for SSH_ID_TYPE in ed25519:256 rsa:1024 rsa:2048 rsa:4096;do
+	SSH_ID_BITS="-b ${SSH_ID_TYPE##*:}"
+	SSH_ID_TYPE=${SSH_ID_TYPE%%:*}
+	KC_ID_TYPE="ssh-${SSH_ID_TYPE}"
 	SSH_ID_FILE="regress/test_id_${SSH_ID_TYPE}_ssh"
 	SSH_ID_COMMENT="this_is_what_we're_looking_for"
 
-	if [ "${SSH_ID_TYPE}" == 'ecdsa' ];then
-		KC_ID_TYPE='ecdsa-sha2-nistp256'
-	else
-		KC_ID_TYPE="ssh-${SSH_ID_TYPE}"
-	fi
-
 	rm -f "${SSH_ID_FILE}" "${SSH_ID_FILE}".pub
 
-	${SSH_KEYGEN} -o -t "${SSH_ID_TYPE}" -C "${SSH_ID_COMMENT}" -N '' -f "${SSH_ID_FILE}"
+	${SSH_KEYGEN} -o -t "${SSH_ID_TYPE}" ${SSH_ID_BITS} -C "${SSH_ID_COMMENT}" -N '' -f "${SSH_ID_FILE}"
 	if [ $? -ne 0 ];then
 		echo "$0 test failed (generate new ssh key, key type ${SSH_ID_TYPE})!"
 		exit 1
