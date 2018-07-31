@@ -454,6 +454,9 @@ cmd_import(const char *e_line, command *commands)
 	db_params.dirty = 1;
 
 exiting:
+	free(ssha_type); ssha_type = NULL;
+	free(ssha_comment); ssha_comment = NULL;
+
 	if (bio_chain) {
 		BIO_free_all(bio_chain);
 		bio_chain = NULL;

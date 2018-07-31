@@ -417,6 +417,9 @@ main(int argc, char *argv[])
 			/* use SSH agent to generate the password */
 			if (!kc_ssha_get_password(ssha_type, ssha_comment, &db_params))
 				quit(EXIT_FAILURE);
+
+			free(ssha_type); ssha_type = NULL;
+			free(ssha_comment); ssha_comment = NULL;
 		} else {
 			/* ask for the new password */
 			if (kc_password_read(&db_params, newdb) != 1)

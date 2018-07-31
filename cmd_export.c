@@ -310,6 +310,9 @@ cmd_export(const char *e_line, command *commands)
 
 
 exiting:
+	free(ssha_type); ssha_type = NULL;
+	free(ssha_comment); ssha_comment = NULL;
+
 	memset(db_params_new.key, '\0', KEY_LEN);
 
 	if (bio_chain) {
