@@ -73,7 +73,7 @@ kc_ssha_connect(void)
 
 
 char
-kc_ssha_get_identity_list(int sock)
+kc_ssha_identity_list_request(int sock)
 {
 	char	*buf = NULL;
 	char	request = SSH2_AGENTC_REQUEST_IDENTITIES;
@@ -106,7 +106,7 @@ kc_ssha_get_identity_list(int sock)
 
 	free(buf); buf = NULL;
 	return(1);
-} /* kc_ssha_get_identity_list() */
+} /* kc_ssha_identity_list_request() */
 
 
 char
@@ -201,9 +201,9 @@ kc_ssha_get_full_response(int sock)
 {
 	char	*buf = NULL, *nbuf = NULL;
 	size_t	buf_len_base = MAX_AGENT_REPLY_LEN/256, buf_len_mult = 1;
-	size_t	buf_len = buf_len_mult * buf_len_base, buf_len_prev = buf_len;
+	size_t	buf_len = buf_len_mult * buf_len_base, buf_len_prev = 0;
 	size_t	buf_rem = buf_len, r = 0, rt = 0;
-	size_t	len = 0, rem = len;
+	size_t	len = 0, rem = 0;
 
 	struct kc_ssha_response	*response = NULL;
 
@@ -301,20 +301,21 @@ kc_ssha_parse_identities(struct kc_ssha_response *response)
 	pos += 4;
 
 	do {
-		if (idlist != NULL) {	/* not first call */
-			idlist = idlist->next;
-		} else {
+		if (idlist == NULL) {	/* first call */
 			idlist = calloc(1, sizeof(struct kc_ssha_identity)); malloc_check(idlist);
-		}
-
-		if (idlist_first == NULL)	/* first call */
 			idlist_first = idlist;
+		}
+		idlist->pubkey_len = 0;
+		idlist->pubkey = NULL;
+		idlist->type = NULL;
+		idlist->comment = NULL;
+		idlist->next = NULL;
 
 		/* pubkey length */
 		idlist->pubkey_len = get_u32(response->data+pos);
 		if (idlist->pubkey_len > KC_MAX_PUBKEY_LEN) {
-			dprintf(STDERR_FILENO, "Public key length is larger than allowed\n");
-			return(NULL);
+			dprintf(STDERR_FILENO, "Public key length is larger than allowed(%d), skipping\n", KC_MAX_PUBKEY_LEN);
+			continue;
 		}
 		pos += 4;
 
@@ -335,20 +336,24 @@ kc_ssha_parse_identities(struct kc_ssha_response *response)
 		/* key comment */
 		slen = get_u32(response->data+pos);
 		if (slen > KC_MAX_PUBKEY_COMMENT_LEN) {
-			dprintf(STDERR_FILENO, "Public key comment length is larger than allowed\n");
-			return(NULL);
+			dprintf(STDERR_FILENO, "Public key (%s) comment length is larger than allowed(%d), skipping\n", idlist->type, KC_MAX_PUBKEY_COMMENT_LEN);
+
+			free(idlist->pubkey); idlist->pubkey = NULL;
+			free(idlist->type); idlist->type = NULL;
+			continue;
 		}
 		pos += 4;
 		idlist->comment = calloc(1, slen); malloc_check(idlist->comment);
 		memcpy(idlist->comment, response->data+pos, slen);
 		pos += slen;
 
-		idlist->next = calloc(1, sizeof(struct kc_ssha_identity)); malloc_check(idlist->next);
-
 		if (getenv("KC_DEBUG"))
 			printf("parsed SSH ID: (%s) %s, %zd long\n", idlist->type, idlist->comment, idlist->pubkey_len);
+
+		idlist = idlist->next;
+		idlist = calloc(1, sizeof(struct kc_ssha_identity)); malloc_check(idlist);
 	} while (--num_ids);
-	free(idlist->next); idlist->next = NULL;
+	free(idlist); idlist = NULL;
 
 
 	return(idlist_first);
@@ -387,28 +392,29 @@ int
 kc_ssha_get_password(char *type, char *comment, struct db_parameters *db_params)
 {
 	int		sock = -1;
+	char		ret = 0;
 	char		response_type = 0;
 	char		*data_to_sign = NULL;
 	struct kc_ssha_response		*response = NULL;
-	struct kc_ssha_identity		*idlist = NULL;
+	struct kc_ssha_identity		*idlist = NULL, *idlist_prev = NULL;
 	struct kc_ssha_signature 	*signature = NULL;
 
 
 	sock = kc_ssha_connect();
 	if (sock < 0) {
 		dprintf(STDERR_FILENO, "Couldn't establish UNIX socket connection\n");
-		return(0);
+		goto exiting;
 	}
 
 	/* get identities */
-	if (kc_ssha_get_identity_list(sock) < 0) {
+	if (kc_ssha_identity_list_request(sock) < 0) {
 		dprintf(STDERR_FILENO, "Failed to send identity list request\n");
-		return(0);
+		goto exiting;
 	}
 	response = kc_ssha_get_full_response(sock);
 	if (response == NULL) {
 		dprintf(STDERR_FILENO, "Could not get response for identity list request\n");
-		return(0);
+		goto exiting;
 	}
 
 	response_type = (char)*response->data;
@@ -416,16 +422,16 @@ kc_ssha_get_password(char *type, char *comment, struct db_parameters *db_params)
 		printf("response type is %d\n", response_type);
 	if (agent_failed(response_type)) {
 		dprintf(STDERR_FILENO, "SSH agent request failed\n");
-		return(0);
+		goto exiting;
 	} else if (response_type != SSH2_AGENT_IDENTITIES_ANSWER) {
 		dprintf(STDERR_FILENO, "Invalid SSH agent response type\n");
-		return(0);
+		goto exiting;
 	}
 
 	idlist = kc_ssha_parse_identities(response);
 	if (idlist == NULL) {
 		dprintf(STDERR_FILENO, "Could not parse identity list\n");
-		return(0);
+		goto exiting;
 	}
 
 	do {
@@ -434,12 +440,19 @@ kc_ssha_get_password(char *type, char *comment, struct db_parameters *db_params)
 			break;
 		}
 
+		free(idlist->pubkey); idlist->pubkey = NULL;
+		free(idlist->type); idlist->type = NULL;
+		free(idlist->comment); idlist->comment = NULL;
+
+		idlist_prev = idlist;
 		idlist = idlist->next;
+
+		free(idlist_prev); idlist_prev = NULL;
 	} while (idlist != NULL);
 
 	if (idlist == NULL) {
 		dprintf(STDERR_FILENO, "Could not find a match for identity: (%s) %s\n", type, comment);
-		return(0);
+		goto exiting;
 	}
 
 
@@ -447,13 +460,11 @@ kc_ssha_get_password(char *type, char *comment, struct db_parameters *db_params)
 	data_to_sign = malloc(IV_DIGEST_LEN + SALT_DIGEST_LEN + 1); malloc_check(data_to_sign);
 	if (strlcpy(data_to_sign, (const char*)db_params->iv, IV_DIGEST_LEN + 1) >= IV_DIGEST_LEN + 1) {
 		dprintf(STDERR_FILENO, "Error while setting up SSH agent signing.\n");
-		free(data_to_sign); data_to_sign = NULL;
-		return(0);
+		goto exiting;
 	}
 	if (strlcat(data_to_sign, (const char*)db_params->salt, SALT_DIGEST_LEN + IV_DIGEST_LEN + 1) >= SALT_DIGEST_LEN + IV_DIGEST_LEN + 1) {
 		dprintf(STDERR_FILENO, "Error while setting up SSH agent signing.\n");
-		free(data_to_sign); data_to_sign = NULL;
-		return(0);
+		goto exiting;
 	}
 
 	if (getenv("KC_DEBUG"))
@@ -461,15 +472,13 @@ kc_ssha_get_password(char *type, char *comment, struct db_parameters *db_params)
 
 	if (kc_ssha_sign_request(sock, idlist, data_to_sign, 0) < 0) {
 		dprintf(STDERR_FILENO, "Failed to send signature request\n");
-		free(data_to_sign); data_to_sign = NULL;
-		return(0);
+		goto exiting;
 	}
-	free(data_to_sign); data_to_sign = NULL;
 
 	response = kc_ssha_get_full_response(sock);
 	if (response == NULL) {
 		dprintf(STDERR_FILENO, "Could not get response for signature request\n");
-		return(0);
+		goto exiting;
 	}
 
 	response_type = (char)*response->data;
@@ -477,31 +486,57 @@ kc_ssha_get_password(char *type, char *comment, struct db_parameters *db_params)
 		printf("response type is %d\n", response_type);
 	if (agent_failed(response_type)) {
 		dprintf(STDERR_FILENO, "SSH agent request failed\n");
-		return(0);
+		goto exiting;
 	} else if (response_type != SSH2_AGENT_SIGN_RESPONSE) {
 		dprintf(STDERR_FILENO, "Invalid SSH agent response type\n");
-		return(0);
+		goto exiting;
 	}
 
 	signature = kc_ssha_parse_signature(response);
 	if (signature == NULL) {
 		dprintf(STDERR_FILENO, "Could not parse signature response\n");
-		return(0);
+		goto exiting;
 	}
 
 	if (signature->length > PASSWORD_MAXLEN) {
 		dprintf(STDERR_FILENO, "Signature length(%zd) is larger than the allowed password length(%d)\n", signature->length * 2, PASSWORD_MAXLEN);
-		return(0);
+		goto exiting;
 	}
 
 	db_params->pass_len = signature->length;
 	db_params->pass = malloc(db_params->pass_len); malloc_check(db_params->pass);
 	memcpy(db_params->pass, signature->signature, db_params->pass_len);
+	ret = 1;
 
-	memset(signature->signature, 0, signature->length);
-	free(signature->signature); signature->signature = NULL;
-	free(signature); signature = NULL;
+exiting:
+	free(data_to_sign); data_to_sign = NULL;
+
+	if (signature != NULL) {
+		memset(signature->signature, 0, signature->length);
+		free(signature->signature); signature->signature = NULL;
+		free(signature); signature = NULL;
+	}
+
+	if (response != NULL) {
+		memset(response->data, 0, response->length);
+		free(response->data); response->data = NULL;
+		free(response); response = NULL;
+	}
+
+	while (idlist != NULL) {
+		free(idlist->pubkey); idlist->pubkey = NULL;
+		free(idlist->type); idlist->type = NULL;
+		free(idlist->comment); idlist->comment = NULL;
+
+		idlist_prev = idlist;
+		idlist = idlist->next;
+
+		free(idlist_prev); idlist_prev = NULL;
+	}
+
+	if (sock < 0)
+		close(sock);
 
 
-	return(1);
+	return(ret);
 } /* kc_ssha_get_password() */

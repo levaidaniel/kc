@@ -66,12 +66,10 @@ struct kc_ssha_response {
 	size_t	length;
 };
 
-
 struct kc_ssha_signature {
 	char	*signature;
 	size_t	length;
 };
-
 
 struct kc_ssha_identity {
 	char	*type;
