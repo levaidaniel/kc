@@ -37,6 +37,7 @@ ifdef HAVE_LIBSCRYPT
 CFLAGS +=	-D_HAVE_LIBSCRYPT
 endif
 CFLAGS +=	-D_BUNDLED_BCRYPT -D_OS_LINUX
+export CFLAGS
 
 LDADD +=	`pkg-config --libs libcrypto`
 LDADD +=	`pkg-config --libs libbsd`
