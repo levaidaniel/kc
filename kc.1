@@ -908,4 +908,12 @@ or
 .Ic import
 commands.
 However, opening a database works with spaces in the key comment.
+.It
+Using user supplied passwords and SSH keys is either-or.
+Once
+.Nm
+has initialized a database with either one of them it can't convert it to the other.
+Using the
+.Cm export
+command can be used to overcome this.
 .El
