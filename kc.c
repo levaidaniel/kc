@@ -103,6 +103,19 @@ main(int argc, char *argv[])
 	size_t		len = 0;
 
 
+#ifdef __OpenBSD__
+	char            *pledges = "cpath fattr flock rpath stdio tty unix wpath";
+
+	if (getenv("KC_DEBUG"))
+	       printf("Pledging for '%s'\n", pledges);
+
+	if (pledge(pledges, NULL) != 0) {
+	       perror("Unable to pledge()!");
+	       quit(EXIT_FAILURE);
+	}
+#endif
+
+
 	/* db_param defaults */
 	db_params.ssha[0] = '\0';
 	db_params.pass = NULL;
