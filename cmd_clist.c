@@ -46,7 +46,7 @@ cmd_clist(const char *e_line, command *commands)
 	db_node = keychain->parent->children;
 
 	if (getenv("KC_DEBUG"))
-		printf("#BEGIN\n");
+		printf("%s(): #BEGIN\n", __func__);
 
 	while (db_node  &&  idx < ITEMS_MAX) {
 		if (db_node->type == XML_ELEMENT_NODE) {	/* we only care about ELEMENT nodes */
@@ -63,5 +63,5 @@ cmd_clist(const char *e_line, command *commands)
 	}
 
 	if (getenv("KC_DEBUG"))
-		printf("#END\n");
+		printf("%s(): #END\n", __func__);
 } /* cmd_clist() */

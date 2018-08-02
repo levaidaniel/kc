@@ -107,7 +107,7 @@ main(int argc, char *argv[])
 	char            *pledges = "cpath fattr flock rpath stdio tty unix wpath";
 
 	if (getenv("KC_DEBUG"))
-	       printf("Pledging for '%s'\n", pledges);
+	       printf("%s(): Pledging for '%s'\n", pledges, __func__);
 
 	if (pledge(pledges, NULL) != 0) {
 	       perror("Unable to pledge()!");
@@ -254,7 +254,7 @@ main(int argc, char *argv[])
 			}
 		} else {
 			if (getenv("KC_DEBUG"))
-				printf("creating '%s' directory\n", db_params.db_filename);
+				printf("%s(): creating '%s' directory\n", __func__, db_params.db_filename);
 
 			if (mkdir(db_params.db_filename, 0777) != 0) {
 				dprintf(STDERR_FILENO, "Could not create '%s': %s\n", db_params.db_filename, strerror(errno));
@@ -315,7 +315,7 @@ main(int argc, char *argv[])
 		}
 
 		if (getenv("KC_DEBUG"))
-			printf("iv='%s'\n", db_params.iv);
+			printf("%s(): iv='%s'\n", __func__, db_params.iv);
 
 		/* Fast-forward one byte after the current position,
 		 * to skip the newline.
@@ -340,7 +340,7 @@ main(int argc, char *argv[])
 		}
 
 		if (getenv("KC_DEBUG"))
-			printf("salt='%s'\n", db_params.salt);
+			printf("%s(): salt='%s'\n", __func__, db_params.salt);
 	} else {
 		newdb = 1;
 
@@ -365,7 +365,7 @@ main(int argc, char *argv[])
 	if (!db_params.readonly)
 		if (flock(db_params.db_file, LOCK_NB | LOCK_EX) < 0) {
 			if (getenv("KC_DEBUG"))
-				puts("flock(database file)");
+				printf("%s(): flock(database file)\n", __func__);
 
 			dprintf(STDERR_FILENO, "Could not lock the database file!\nMaybe another instance is using that database?\n");
 			quit(EXIT_FAILURE);
@@ -384,7 +384,7 @@ main(int argc, char *argv[])
 	/* Get the password one way or another */
 	if (db_params.pass_filename) {	/* we were given a password file name */
 		if (getenv("KC_DEBUG"))
-			puts("opening password file");
+			printf("%s(): opening password file\n", __func__);
 
 		if (stat(db_params.pass_filename, &st) == 0) {
 			if (!S_ISLNK(st.st_mode)  &&  !S_ISREG(st.st_mode)) {
@@ -461,7 +461,7 @@ main(int argc, char *argv[])
 
 	if (newdb) {	/* new database file */
 		if (getenv("KC_DEBUG"))
-			puts("empty database file");
+			printf("%s(): empty database file\n", __func__);
 
 		/* create a new document */
 		db = xmlNewDoc(BAD_CAST "1.0");
@@ -804,7 +804,7 @@ print_bio_chain(BIO *bio_chain)
 	BIO	*bio_tmp = NULL;
 
 
-	printf("bio_chain: ");
+	printf("%s(): bio_chain: ", __func__);
 	bio_tmp = bio_chain;
 	while (bio_tmp) {
 		switch (BIO_method_type(bio_tmp)) {
@@ -1131,18 +1131,18 @@ quit(int retval)
 	free(db_params.pass); db_params.pass = NULL;
 
 	if (getenv("KC_DEBUG"))
-		puts("exiting...");
+		printf("%s(): exiting...\n", __func__);
 
 	if (bio_chain) {
 		BIO_free_all(bio_chain);
 		if (getenv("KC_DEBUG"))
-			puts("closed bio_chain");
+			printf("%s(): closed bio_chain\n", __func__);
 	}
 
 	if (db_params.db_file > 0) {
 		if (close(db_params.db_file) == 0) {
 			if (getenv("KC_DEBUG"))
-				puts("closed database file");
+				printf("%s(): closed database file\n", __func__);
 		} else
 			perror("close(database file)");
 	}
@@ -1151,13 +1151,13 @@ quit(int retval)
 	if (eh) {
 		history_end(eh);
 		if (getenv("KC_DEBUG"))
-			puts("closed editline history");
+			printf("%s(): closed editline history\n", __func__);
 	}
 
 	if (e) {
 		el_end(e);
 		if (getenv("KC_DEBUG"))
-			puts("closed editline");
+			printf("%s(): closed editline\n", __func__);
 	}
 #endif
 

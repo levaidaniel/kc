@@ -50,7 +50,7 @@ cmd_list(const char *e_line, command *commands)
 
 	if (getenv("KC_DEBUG")) {
 		xmlSaveFormatFileEnc("-", db, "UTF-8", XML_SAVE_FORMAT);
-		printf("#BEGIN\n");
+		printf("%s(): #BEGIN\n", __func__);
 	}
 
 
@@ -196,5 +196,5 @@ cmd_list(const char *e_line, command *commands)
 		puts("Empty keychain.");
 
 	if (getenv("KC_DEBUG"))
-		printf("#END\n");
+		printf("%s(): #END\n", __func__);
 } /* cmd_list() */

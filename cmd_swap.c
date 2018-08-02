@@ -154,7 +154,7 @@ cmd_swap(const char *e_line, command *commands)
 			if (key_dst->type != XML_ELEMENT_NODE) {
 				puts("Error while trying to insert key! Please check your key list and reload your database without saving, if necessary!");
 				if (getenv("KC_DEBUG"))
-					puts("key_dst is non-element node!");
+					printf("%s(): key_dst is non-element node!\n", __func__);
 
 				return;
 			}
@@ -162,7 +162,7 @@ cmd_swap(const char *e_line, command *commands)
 			if (!swap_keys(&key_src, &key_dst)) {
 				puts("Error while trying to insert key! Please check your key list and reload your database without saving, if necessary!");
 				if (getenv("KC_DEBUG"))
-					puts("swap_key() error while shifting nodes!");
+					printf("%s(): swap_key() error while shifting nodes!\n", __func__);
 
 				return;
 			}
@@ -205,7 +205,7 @@ swap_keys(xmlNodePtr *key_src, xmlNodePtr *key_dst)
 		puts("Error duplicating source entry!");
 
 		if (getenv("KC_DEBUG"))
-			puts("xmlCopyNode() error!");
+			printf("%s(): xmlCopyNode() error!\n", __func__);
 
 		return(0);
 	}
@@ -216,7 +216,7 @@ swap_keys(xmlNodePtr *key_src, xmlNodePtr *key_dst)
 		puts("Error duplicating destination entry!");
 
 		if (getenv("KC_DEBUG"))
-			puts("xmlCopyNode() error!");
+			printf("%s(): xmlCopyNode() error!\n", __func__);
 
 		return(0);
 	}

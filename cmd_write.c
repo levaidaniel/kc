@@ -194,7 +194,7 @@ cmd_write(const char *e_line, command *commands)
 
 	stat(db_params_tmp.db_filename, &st);
 	if (getenv("KC_DEBUG"))
-		printf("temporary database file has been written: %d bytes\n", (int)st.st_size);
+		printf("%s(): temporary database file has been written: %d bytes\n", __func__, (int)st.st_size);
 
 	if (st.st_size <= IV_DIGEST_LEN + SALT_DIGEST_LEN + 2) {
 		puts("Temporary database file became unusually small!");
@@ -209,14 +209,14 @@ cmd_write(const char *e_line, command *commands)
 
 	if (close(db_params.db_file) == 0) {
 		if (getenv("KC_DEBUG"))
-			puts("closed old database file");
+			printf("%s(): closed old database file\n", __func__);
 	} else
 		perror("close(old database file)");
 
 
 	if (close(db_params_tmp.db_file) == 0) {
 		if (getenv("KC_DEBUG"))
-			puts("closed tmp database file");
+			printf("%s(): closed tmp database file\n", __func__);
 	} else
 		perror("close(tmp database file)");
 
@@ -232,7 +232,7 @@ cmd_write(const char *e_line, command *commands)
 		return;
 	} else
 		if (getenv("KC_DEBUG"))
-			puts("renamed temporary database file to the original database filename");
+			printf("%s(): renamed temporary database file to the original database filename\n", __func__);
 
 	BIO_free_all(bio_chain_tmp);
 	unlink(db_params_tmp.db_filename);
@@ -248,11 +248,11 @@ cmd_write(const char *e_line, command *commands)
 		return;
 	} else
 		if (getenv("KC_DEBUG"))
-			puts("reopened new database file");
+			printf("%s(): reopened new database file\n", __func__);
 
 	if (flock(db_params.db_file, LOCK_NB | LOCK_EX) < 0) {
 		if (getenv("KC_DEBUG"))
-			puts("flock(new database file)");
+			printf("%s(): flock(new database file)\n", __func__);
 
 		puts("Could not lock the new database file! I suggest you to restart the application!");
 		perror("flock(new database file)");
@@ -260,7 +260,7 @@ cmd_write(const char *e_line, command *commands)
 		return;
 	} else
 		if (getenv("KC_DEBUG"))
-			puts("locked new database file");
+			printf("%s(): locked new database file\n", __func__);
 
 
 	db_params.dirty = 0;

@@ -121,7 +121,7 @@ cmd_new(const char *e_line, command *commands)
 		}
 	}
 	if (getenv("KC_DEBUG"))
-		printf("new key is '%s'\n", key);
+		printf("%s(): new key is '%s'\n", __func__, key);
 
 
 	strlcpy(prompt_context, "NEW value", sizeof(prompt_context));
@@ -155,7 +155,7 @@ cmd_new(const char *e_line, command *commands)
 	value = parse_randoms(value_rR);
 
 	if (getenv("KC_DEBUG"))
-		printf("new value is '%s'\n", value);
+		printf("%s(): new value is '%s'\n", __func__, value);
 
 	strlcpy(prompt_context, "", sizeof(prompt_context));
 

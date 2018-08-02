@@ -113,7 +113,7 @@ cmd_copy(const char *e_line, command *commands)
 			puts("Error copying entry!");
 
 			if (getenv("KC_DEBUG"))
-				puts("xmlCopyNode() error!");
+				printf("%s(): xmlCopyNode() error!\n", __func__);
 
 			free(line); line = NULL;
 			return;

@@ -229,7 +229,7 @@ cmd_import(const char *e_line, command *commands)
 			}
 
 			if (getenv("KC_DEBUG"))
-				printf("import: iv='%s'\n", db_params_new.iv);
+				printf("%s(): import: iv='%s'\n", __func__, db_params_new.iv);
 
 			/* Fast-forward one byte after the current position,
 			 * to skip the newline.
@@ -256,7 +256,7 @@ cmd_import(const char *e_line, command *commands)
 			}
 
 			if (getenv("KC_DEBUG"))
-				printf("import: salt='%s'\n", db_params_new.salt);
+				printf("%s(): import: salt='%s'\n", __func__, db_params_new.salt);
 		} else {
 			perror("Could not open database file");
 
@@ -301,7 +301,7 @@ cmd_import(const char *e_line, command *commands)
 
 		ret = kc_db_reader(&buf, bio_chain);
 		if (getenv("KC_DEBUG"))
-			printf("read %d bytes\n", (int)ret);
+			printf("%s(): read %d bytes\n", __func__, (int)ret);
 
 		if (BIO_get_cipher_status(bio_chain) == 0  &&  ret > 0) {
 			puts("Failed to decrypt import file!");

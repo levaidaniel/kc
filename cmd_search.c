@@ -103,7 +103,7 @@ cmd_search(const char *e_line, command *commands)
 			db_node = search_keychain->children;
 
 		if (getenv("KC_DEBUG"))
-			printf("searching for: '%s' in '%s' chain\n", pattern, xmlGetProp(search_keychain, BAD_CAST "name"));
+			printf("%s(): searching for '%s' in '%s' chain\n", __func__, pattern, xmlGetProp(search_keychain, BAD_CAST "name"));
 
 		idx = 0;
 		while (db_node) {
@@ -115,7 +115,7 @@ cmd_search(const char *e_line, command *commands)
 			key = xmlGetProp(db_node, BAD_CAST "name");
 
 			if (getenv("KC_DEBUG"))
-				printf("name=%s", key);
+				printf("%s(): name=%s", __func__, key);
 
 			if (icase)
 				search = xmlStrcasestr(key, pattern);

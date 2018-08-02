@@ -633,7 +633,7 @@ kc_crypt_iv_salt(struct db_parameters *db_params)
 	}
 
 	if (getenv("KC_DEBUG"))
-		printf("iv='%s'\n", db_params->iv);
+		printf("%s(): iv='%s'\n", __func__, db_params->iv);
 
 
 	/* Setup the digest context */
@@ -681,7 +681,7 @@ kc_crypt_iv_salt(struct db_parameters *db_params)
 	}
 
 	if (getenv("KC_DEBUG"))
-		printf("salt='%s'\n", db_params->salt);
+		printf("%s(): salt='%s'\n", __func__, db_params->salt);
 
 
 	return(1);
@@ -692,7 +692,7 @@ char
 kc_crypt_key(struct db_parameters *db_params)
 {
 	if (getenv("KC_DEBUG"))
-		printf("generating new key from pass and salt.\n");
+		printf("%s(): generating new key from pass and salt.\n", __func__);
 
 	/* Generate a proper key from the user's password */
 	if (strcmp(db_params->kdf, "sha1") == 0) {
@@ -704,7 +704,7 @@ kc_crypt_key(struct db_parameters *db_params)
 
 			puts("Failed to generate a key from the password!");
 			if (getenv("KC_DEBUG"))
-				puts("PKCS5_PBKDF2_HMAC_SHA1() error");
+				printf("%s(): PKCS5_PBKDF2_HMAC_SHA1() error\n", __func__);
 
 			return(0);
 		}
@@ -716,7 +716,7 @@ kc_crypt_key(struct db_parameters *db_params)
 		{
 			puts("Failed to generate a key from the password!");
 			if (getenv("KC_DEBUG"))
-				puts("PKCS5_PBKDF2_HMAC() error");
+				printf("%s(): PKCS5_PBKDF2_HMAC() error\n", __func__);
 
 			return(0);
 		}
@@ -727,7 +727,7 @@ kc_crypt_key(struct db_parameters *db_params)
 		{
 			puts("Failed to generate a key from the password!");
 			if (getenv("KC_DEBUG"))
-				puts("bcrypt_pbkdf() error");
+				printf("%s(): bcrypt_pbkdf() error\n", __func__);
 
 			return(0);
 		}
@@ -740,7 +740,7 @@ kc_crypt_key(struct db_parameters *db_params)
 		{
 			puts("Failed to generate a key from the password!");
 			if (getenv("KC_DEBUG"))
-				puts("libscrypt_scrypt() error");
+				printf("%s(): libscrypt_scrypt() error\n", __func__);
 
 			return(0);
 		}
@@ -759,7 +759,7 @@ char
 kc_crypt_setup(BIO *bio_chain, const unsigned int enc, struct db_parameters *db_params)
 {
 	if (getenv("KC_DEBUG"))
-		printf("crypt setup: using %s based KDF\n", db_params->kdf);
+		printf("%s(): crypt setup: using %s based KDF\n", __func__, db_params->kdf);
 
 
 	/* extract bio_cipher from bio_chain */
@@ -802,7 +802,7 @@ kc_crypt_setup(BIO *bio_chain, const unsigned int enc, struct db_parameters *db_
 	}
 
 	if (getenv("KC_DEBUG"))
-		printf("crypt setup: using %s cipher mode\n", db_params->cipher_mode);
+		printf("%s(): crypt setup: using %s cipher mode\n", __func__, db_params->cipher_mode);
 
 
 	return(1);
@@ -863,13 +863,13 @@ kc_db_writer(xmlDocPtr db, BIO *bio_chain, struct db_parameters *db_params)
 		xmlSaveDoc(xml_save, db);
 		xmlSaveFlush(xml_save);
 		if (getenv("KC_DEBUG"))
-			printf("xml_buf content:\n'%s'(%d)\n", xmlBufferContent(xml_buf), (int)xmlBufferLength(xml_buf));
+			printf("%s(): xml_buf content:\n'%s'(%d)\n", __func__, xmlBufferContent(xml_buf), (int)xmlBufferLength(xml_buf));
 		xmlSaveClose(xml_save);
 
 
 		/* write the IV */
 		if (getenv("KC_DEBUG"))
-			puts("writing IV");
+			printf("%s(): writing IV\n", __func__);
 
 		remaining = IV_DIGEST_LEN;
 		while (remaining > 0) {
@@ -883,8 +883,8 @@ kc_db_writer(xmlDocPtr db, BIO *bio_chain, struct db_parameters *db_params)
 			remaining -= ret;
 
 			if (getenv("KC_DEBUG")) {
-				printf("wrote: %d\n", ret);
-				printf("remaining: %d\n", remaining);
+				printf("%s(): wrote: %d\n", __func__, ret);
+				printf("%s(): remaining: %d\n", __func__, remaining);
 			}
 		}
 		/* Write a newline at the end */
@@ -897,7 +897,7 @@ kc_db_writer(xmlDocPtr db, BIO *bio_chain, struct db_parameters *db_params)
 
 		/* write the salt */
 		if (getenv("KC_DEBUG"))
-			puts("writing salt");
+			printf("%s(): writing salt\n", __func__);
 
 		remaining = SALT_DIGEST_LEN;
 		while (remaining > 0) {
@@ -911,8 +911,8 @@ kc_db_writer(xmlDocPtr db, BIO *bio_chain, struct db_parameters *db_params)
 			remaining -= ret;
 
 			if (getenv("KC_DEBUG")) {
-				printf("wrote: %d\n", ret);
-				printf("remaining: %d\n", remaining);
+				printf("%s(): wrote: %d\n", __func__, ret);
+				printf("%s(): remaining: %d\n", __func__, remaining);
 			}
 		}
 		/* Write a newline at the end */
@@ -941,7 +941,7 @@ kc_db_writer(xmlDocPtr db, BIO *bio_chain, struct db_parameters *db_params)
 
 		/* Write the database */
 		if (getenv("KC_DEBUG"))
-			puts("writing database");
+			printf("%s(): writing database\n", __func__);
 
 		remaining = xmlBufferLength(xml_buf);
 		while (remaining > 0) {
@@ -950,13 +950,13 @@ kc_db_writer(xmlDocPtr db, BIO *bio_chain, struct db_parameters *db_params)
 			if (ret <= 0) {
 				if (BIO_should_retry(bio_chain)) {
 					if (getenv("KC_DEBUG"))
-						puts("write delay");
+						printf("%s(): write delay\n", __func__);
 
 					sleep(1);
 					continue;
 				} else {
 					if (getenv("KC_DEBUG"))
-						puts("BIO_write() error (don't retry)");
+						printf("%s(): BIO_write() error (don't retry)\n", __func__);
 
 					break;
 				}
@@ -965,8 +965,8 @@ kc_db_writer(xmlDocPtr db, BIO *bio_chain, struct db_parameters *db_params)
 			remaining -= ret;
 
 			if (getenv("KC_DEBUG")) {
-				printf("wrote: %d\n", ret);
-				printf("remaining: %d\n", remaining);
+				printf("%s(): wrote: %d\n", __func__, ret);
+				printf("%s(): remaining: %d\n", __func__, remaining);
 			}
 		}
 
@@ -975,17 +975,17 @@ kc_db_writer(xmlDocPtr db, BIO *bio_chain, struct db_parameters *db_params)
 		do {
 			if (BIO_flush(bio_chain) == 1) {
 				if (getenv("KC_DEBUG"))
-					puts("flushed bio_chain");
+					printf("%s(): flushed bio_chain\n", __func__);
 			} else {
 				if (BIO_should_retry(bio_chain)) {
 					if (getenv("KC_DEBUG"))
-						puts("flush delay");
+						printf("%s(): flush delay\n", __func__);
 
 					sleep(1);
 					continue;
 				} else {
 					if (getenv("KC_DEBUG"))
-						puts("BIO_should_retry() is false");
+						printf("%s(): BIO_should_retry() is false\n", __func__);
 
 					break;
 				}
@@ -993,14 +993,14 @@ kc_db_writer(xmlDocPtr db, BIO *bio_chain, struct db_parameters *db_params)
 		} while (BIO_wpending(bio_chain) > 0);
 
 		if (getenv("KC_DEBUG"))
-			printf("db_file size -> %d\n", BIO_tell(bio_chain));
+			printf("%s(): db_file size -> %d\n", __func__, BIO_tell(bio_chain));
 
 		xmlBufferFree(xml_buf);
 
 		return(1);
 	} else {
 		if (getenv("KC_DEBUG"))
-			puts("xmlSaveToBuffer() error");
+			printf("%s(): xmlSaveToBuffer() error\n", __func__);
 
 		return(0);
 	}
@@ -1072,19 +1072,19 @@ kc_db_reader(char **buf, BIO *bio_chain)
 
 	/* Seek after the IV and salt */
 	if (getenv("KC_DEBUG"))
-		puts("skipping over IV and salt while reading db");
+		printf("%s(): skipping over IV and salt while reading db\n", __func__);
 
 	BIO_seek(bio_chain, IV_DIGEST_LEN + SALT_DIGEST_LEN + 2);
 
 	if (getenv("KC_DEBUG"))
-		printf("skipped over %d bytes\n", BIO_tell(bio_chain));
+		printf("%s(): skipped over %d bytes\n", __func__, BIO_tell(bio_chain));
 
 
 	/* Read the database */
 	*buf = calloc(1, buf_size); malloc_check(*buf);
 
 	if (getenv("KC_DEBUG"))
-		puts("reading database");
+		printf("%s(): reading database\n", __func__);
 
 	pos = 0;
 	do {
@@ -1096,12 +1096,12 @@ kc_db_reader(char **buf, BIO *bio_chain)
 
 		ret = BIO_read(bio_chain, *buf + pos, buf_size - pos);
 		if (getenv("KC_DEBUG"))
-			printf("BIO_read(): %d\n", (unsigned int)ret);
+			printf("%s(): BIO_read(): %d\n", __func__, (unsigned int)ret);
 		switch (ret) {
 			case 0:
 				if (BIO_should_retry(bio_chain)) {
 					if (getenv("KC_DEBUG"))
-						puts("read delay");
+						printf("%s(): read delay\n", __func__);
 
 					sleep(1);
 					continue;
@@ -1110,33 +1110,33 @@ kc_db_reader(char **buf, BIO *bio_chain)
 			case -1:
 				if (BIO_should_retry(bio_chain)) {
 					if (getenv("KC_DEBUG"))
-						puts("read delay");
+						printf("%s(): read delay\n", __func__);
 
 					sleep(1);
 					continue;
 				} else {
 					if (getenv("KC_DEBUG"))
-						perror("BIO_read() error (don't retry)");
+						printf("%s(): BIO_read() error (don't retry): %s\n", __func__, strerror(errno));
 
 					puts("There was an error while trying to read the database!");
 				}
 			break;
 			case -2:
 				if (getenv("KC_DEBUG"))
-					perror("unsupported operation");
+					printf("%s(): unsupported operation: %s\n", __func__, strerror(errno));
 
 				puts("There was an error while trying to read the database!");
 			break;
 			default:
 				pos += ret;
 				if (getenv("KC_DEBUG"))
-					printf("pos: %d\n", pos);
+					printf("%s(): pos: %d\n", __func__, pos);
 			break;
 		}
 	} while (ret > 0);
 
 	if (getenv("KC_DEBUG"))
-		printf("read %d bytes\n", pos);
+		printf("%s(): read %d bytes\n", __func__, pos);
 
 
 	return(pos);
