@@ -191,6 +191,10 @@ cmd_searchre(const char *e_line, command *commands)
 		printf("'%s' was not found.\n", pattern);
 	}
 #else
+	/* these are unused in this function */
+	e_line = NULL;
+	commands = NULL;
+
 	puts("PCRE - regular expression - support was not compiled in!");
 #endif
 } /* cmd_searchre() */
