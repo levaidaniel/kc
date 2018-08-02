@@ -15,7 +15,7 @@ SRCS +=		cmd_c.c cmd_cdel.c cmd_clear.c cmd_clipboard.c cmd_clist.c cmd_cnew.c c
 		cmd_swap.c cmd_version.c cmd_write.c \
 		commands.c commands_init.c ssha.c
 
-CFLAGS +=	-pedantic -Wall -g
+CFLAGS +=	-pedantic -Wall
 CFLAGS +=	`pkg-config --cflags libxml-2.0`
 .ifdef READLINE
 CFLAGS +=	-D_READLINE
