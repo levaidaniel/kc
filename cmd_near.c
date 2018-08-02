@@ -47,12 +47,6 @@ cmd_near(const char *e_line, command *commands)
 	char			*line = NULL, *cmd = NULL, *inv = NULL;
 
 
-	if (getenv("KC_DEBUG")) {
-		xmlSaveFormatFileEnc("-", db, "UTF-8", XML_SAVE_FORMAT);
-		printf("#BEGIN\n");
-	}
-
-
 	line = strdup(e_line); malloc_check(line);
 
 
