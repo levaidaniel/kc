@@ -23,7 +23,7 @@ OBJS +=		cmd_c.o cmd_cdel.o cmd_clear.o cmd_clipboard.o cmd_clist.o cmd_cnew.o c
 BCRYPT_OBJS =	${BCRYPT_DIR}/bcrypt_pbkdf.o ${BCRYPT_DIR}/blf.o ${BCRYPT_DIR}/explicit_bzero.o ${BCRYPT_DIR}/sha2.o
 
 
-CFLAGS +=	-pedantic -Wall -g
+CFLAGS +=	-pedantic -Wall
 CFLAGS +=	`pkg-config --cflags libcrypto`
 CFLAGS +=	`pkg-config --cflags libbsd`
 CFLAGS +=	`pkg-config --cflags libxml-2.0`
