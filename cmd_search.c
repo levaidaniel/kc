@@ -40,8 +40,7 @@ cmd_search(const char *e_line, command *commands)
 	const xmlChar	*search = NULL;
 
 	char		chain = 0, searchall = 0, searchinv = 0, icase = 0;
-	int		hits = 0, offset = 0;
-	unsigned long int	idx = 0;
+	unsigned long int	idx = 0, hits = 0, offset = 0;
 
 
 	/* Command name */
@@ -158,7 +157,7 @@ cmd_search(const char *e_line, command *commands)
 
 	if (hits > 0) {
 		if (hits > 5  &&  !batchmode)
-			printf("\n %d keys were found.\n", hits);
+			printf("\n %lu keys were found.\n", hits);
 	} else {
 		printf("'%s' was not found.\n", pattern);
 	}

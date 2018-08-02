@@ -49,6 +49,10 @@ cmd_write(const char *e_line, command *commands)
 	char		*rand_str = NULL;
 
 
+	/* these are unused in this function */
+	e_line = NULL;
+	commands = NULL;
+
 	/* initial db_params for the exported database */
 	db_params_tmp.pass = NULL;
 	db_params_tmp.db_filename = malloc(MAXPATHLEN);

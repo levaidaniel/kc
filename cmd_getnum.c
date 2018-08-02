@@ -57,8 +57,7 @@ cmd_getnum(const unsigned long int idx, const unsigned long int spice)
 	xmlNodePtr	db_node = NULL;
 	xmlChar		*key = NULL, *value = NULL, *value_nl = NULL, *line = NULL, *line_randomed = NULL, *tmp = NULL;
 
-	long int		value_len = 0, line_len = 0, line_randomed_len = 0;
-	unsigned long int	lines = 0, line_req = 1, i = 0, erase_len = 0;
+	unsigned long int	lines = 0, line_req = 1, value_len = 0, line_len = 0, line_randomed_len = 0, erase_len = 0, i = 0;
 	char		rc = 0;
 	char		*rand_str = NULL;
 	char		**fork_argv = NULL;
@@ -216,7 +215,7 @@ cmd_getnum(const unsigned long int idx, const unsigned long int spice)
 					case '7':
 					case '8':
 					case '9':
-						if ((rc - 48) <= lines)
+						if ((unsigned char)(rc - 48) <= lines)
 							line_req = rc - 48;
 						break;
 					case 't':

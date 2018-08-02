@@ -146,7 +146,7 @@ _rl_push_buffer(void)
 char *
 get_random_str(const unsigned int length, const unsigned char mode)
 {
-	int		i = 0;
+	unsigned int	i = 0;
 	int		rnd_file = -1;
 #if defined(__linux__)  ||  defined(__CYGWIN__)
 	char		*rnd_dev = "/dev/urandom";
@@ -326,7 +326,7 @@ get_line(const xmlChar *value_nl, const unsigned long int idx)
 {
 	xmlChar	*line = NULL;
 
-	long int	nl = 1, pos = 0, tmp = 0, length = 0;
+	unsigned long int	nl = 1, pos = 0, tmp = 0, length = 0;
 
 
 	length = xmlStrlen(value_nl);
@@ -566,7 +566,7 @@ char
 kc_crypt_iv_salt(struct db_parameters *db_params)
 {
 	char	*iv_tmp = NULL, *salt_tmp = NULL;
-	int	i = 0;
+	unsigned int	i = 0;
 
 	EVP_MD_CTX	*mdctx = NULL;
 	unsigned char	digested[EVP_MAX_MD_SIZE];

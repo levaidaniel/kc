@@ -39,6 +39,10 @@ cmd_clist(const char *e_line, command *commands)
 	unsigned long int	idx = 0;
 
 
+	/* these are unused in this function */
+	e_line = NULL;
+	commands = NULL;
+
 	db_node = keychain->parent->children;
 
 	if (getenv("KC_DEBUG"))

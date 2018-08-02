@@ -50,6 +50,9 @@ cmd_cedit(const char *e_line, command *commands)
 #endif
 
 
+	/* this is unused in this function */
+	commands = NULL;
+
 	strlcpy(prompt_context, "EDIT keychain name", sizeof(prompt_context));
 
 	/* if we edit an existing entry, push the current value to the edit buffer */

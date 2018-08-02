@@ -40,6 +40,10 @@ cmd_status(const char *e_line, command *commands)
 	xmlBufferPtr		xml_buf = NULL;
 
 
+	/* these are unused in this function */
+	e_line = NULL;
+	commands = NULL;
+
 	printf("Database file: %s", db_params.db_filename);
 	db_filename_realpath = realpath((const char*)db_params.db_filename, NULL);
 	if (db_filename_realpath)

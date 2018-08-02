@@ -30,5 +30,9 @@
 void
 cmd_version(const char *e_line, command *commands)
 {
+	/* these are unused in this function */
+	e_line = NULL;
+	commands = NULL;
+
 	version();
 } /* cmd_version() */

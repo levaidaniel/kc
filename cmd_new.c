@@ -53,6 +53,9 @@ cmd_new(const char *e_line, command *commands)
 #endif
 
 
+	/* this is unused in this function */
+	commands = NULL;
+
 	if ((idx = count_elements(keychain->children)) >= ITEMS_MAX - 1) {
 		printf("Can not create the key: maximum number of keys reached, %lu.\n", ITEMS_MAX - 1);
 

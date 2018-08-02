@@ -287,8 +287,7 @@ kc_ssha_parse_identities(struct kc_ssha_response *response)
 {
 	struct kc_ssha_identity		*idlist = NULL, *idlist_first = NULL;
 	size_t	pos = 1;	/* begin with skipping response type */
-	size_t	num_ids = 0, slen = 0;
-	int	i = 0;
+	size_t	num_ids = 0, slen = 0, i = 0;
 
 
 	num_ids = get_u32(response->data+pos);
@@ -366,7 +365,7 @@ kc_ssha_parse_identities(struct kc_ssha_response *response)
 		pos += slen;
 
 		if (getenv("KC_DEBUG"))
-			printf("%d. parsed SSH ID: (%s) %s, %zd long\n", i, idlist->type, idlist->comment, idlist->pubkey_len);
+			printf("%zd. parsed SSH ID: (%s) %s, %zd long\n", i, idlist->type, idlist->comment, idlist->pubkey_len);
 	}
 
 

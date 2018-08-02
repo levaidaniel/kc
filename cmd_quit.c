@@ -44,6 +44,9 @@ cmd_quit(const char *e_line, command *commands)
 #endif
 
 
+	/* this is unused in this function */
+	commands = NULL;
+
 	if (db_params.dirty  &&  !batchmode) {
 		printf("Do you want to save the changes? <yes/no> ");
 
