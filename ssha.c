@@ -164,7 +164,7 @@ kc_ssha_sign_request(int sock, struct kc_ssha_identity *id, char *data, unsigned
 	/* flags */
 	/* This is not 'len' per se, I'm just using this variable. This is the
 	 * flags parameter which is an uint32 */
-	put_u32(len, 0);
+	put_u32(len, flags);
 	memcpy(buf+pos, len, 4);
 	pos += 4;
 
