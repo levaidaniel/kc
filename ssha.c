@@ -274,8 +274,17 @@ kc_ssha_get_full_response(int sock)
 
 	/* create the response struct */
 	response = malloc(sizeof(struct kc_ssha_response)); malloc_check(response);
-	response->data = buf;
+
+	response->type = (char)*buf;
+	if (getenv("KC_DEBUG"))
+		printf("%s(): response type is %d\n", __func__, response->type);
+	/* allocate memory for the response data without the response type */
+	response->data = malloc(rt - 1); malloc_check(response->data);
+	memcpy(response->data, buf + 1, rt - 1);
 	response->length = rt;
+
+
+	free(buf); buf = NULL;
 
 
 	return(response);
@@ -286,7 +295,7 @@ struct kc_ssha_identity*
 kc_ssha_parse_identities(struct kc_ssha_response *response)
 {
 	struct kc_ssha_identity		*idlist = NULL, *idlist_first = NULL;
-	size_t	pos = 1;	/* begin with skipping response type */
+	size_t	pos = 0;
 	size_t	num_ids = 0, slen = 0, i = 0;
 
 
@@ -376,7 +385,7 @@ kc_ssha_parse_identities(struct kc_ssha_response *response)
 struct kc_ssha_signature *
 kc_ssha_parse_signature(struct kc_ssha_response *response)
 {
-	size_t	pos = 1;	/* begin with skipping response type */
+	size_t	pos = 0;
 	size_t	len = 0;
 	char	*s = NULL;
 	struct kc_ssha_signature	*signature = NULL;
@@ -406,7 +415,6 @@ kc_ssha_get_password(char *type, char *comment, struct db_parameters *db_params)
 {
 	int		sock = -1;
 	char		ret = 0;
-	char		response_type = 0;
 	char		*data_to_sign = NULL;
 	struct kc_ssha_response		*response = NULL;
 	struct kc_ssha_identity		*idlist = NULL, *idlist_prev = NULL;
@@ -430,13 +438,10 @@ kc_ssha_get_password(char *type, char *comment, struct db_parameters *db_params)
 		goto exiting;
 	}
 
-	response_type = (char)*response->data;
-	if (getenv("KC_DEBUG"))
-		printf("response type is %d\n", response_type);
-	if (agent_failed(response_type)) {
+	if (agent_failed(response->type)) {
 		dprintf(STDERR_FILENO, "SSH agent request failed\n");
 		goto exiting;
-	} else if (response_type != SSH2_AGENT_IDENTITIES_ANSWER) {
+	} else if (response->type != SSH2_AGENT_IDENTITIES_ANSWER) {
 		dprintf(STDERR_FILENO, "Invalid SSH agent response type\n");
 		goto exiting;
 	}
@@ -498,13 +503,10 @@ kc_ssha_get_password(char *type, char *comment, struct db_parameters *db_params)
 		goto exiting;
 	}
 
-	response_type = (char)*response->data;
-	if (getenv("KC_DEBUG"))
-		printf("response type is %d\n", response_type);
-	if (agent_failed(response_type)) {
+	if (agent_failed(response->type)) {
 		dprintf(STDERR_FILENO, "SSH agent request failed\n");
 		goto exiting;
-	} else if (response_type != SSH2_AGENT_SIGN_RESPONSE) {
+	} else if (response->type != SSH2_AGENT_SIGN_RESPONSE) {
 		dprintf(STDERR_FILENO, "Invalid SSH agent response type\n");
 		goto exiting;
 	}

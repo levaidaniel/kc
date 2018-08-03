@@ -63,6 +63,7 @@
 
 struct kc_ssha_response {
 	char	*data;
+	char	type;
 	size_t	length;
 };
 
