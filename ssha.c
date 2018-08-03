@@ -46,7 +46,7 @@ kc_ssha_connect(void)
 
 	sock_name = getenv("SSH_AUTH_SOCK");
 	if (getenv("KC_DEBUG"))
-		printf("SSH agent UNIX socket: '%s'\n", sock_name);
+		printf("%s(): SSH agent UNIX socket: '%s'\n", __func__, sock_name);
 	if (sock_name == NULL  ||  strlen(sock_name) <= 0) {
 		dprintf(STDERR_FILENO, "SSH agent socket name is NULL or zero length\n");
 		return(-1);
@@ -188,7 +188,7 @@ kc_ssha_sign_request(int sock, struct kc_ssha_identity *id, char *data, unsigned
 	} while (pos < buf_len);
 
 	if (getenv("KC_DEBUG"))
-		dprintf(STDERR_FILENO, "wrote total = %zd\n", wt);
+		dprintf(STDERR_FILENO, "%s(): wrote total = %zd\n", __func__, wt);
 
 
 	free(buf); buf = NULL;
@@ -220,7 +220,7 @@ kc_ssha_get_full_response(int sock)
 
 	len = get_u32(buf);
 	if (getenv("KC_DEBUG"))
-		dprintf(STDERR_FILENO, "response length = %zd\n", len);
+		dprintf(STDERR_FILENO, "%s(): response length = %zd\n", __func__, len);
 
 	if (len > MAX_AGENT_REPLY_LEN) {
 		dprintf(STDERR_FILENO, "Indicated response length(%zd) is more than MAX_AGENT_REPLY_LEN(%d)\n", len, MAX_AGENT_REPLY_LEN);
@@ -237,7 +237,7 @@ kc_ssha_get_full_response(int sock)
 			buf_len_prev = buf_len;
 			buf_len = ++buf_len_mult * buf_len_base;
 			if (getenv("KC_DEBUG"))
-				dprintf(STDERR_FILENO, "realloc response buf to %zd\n", buf_len);
+				dprintf(STDERR_FILENO, "%s(): realloc response buf to %zd\n", __func__, buf_len);
 			nbuf = realloc(buf, buf_len); malloc_check(nbuf);
 
 			buf = nbuf;
@@ -263,7 +263,7 @@ kc_ssha_get_full_response(int sock)
 	}
 
 	if (getenv("KC_DEBUG"))
-		dprintf(STDERR_FILENO, "read total = %zd\n", rt);
+		dprintf(STDERR_FILENO, "%s(): read total = %zd\n", __func__, rt);
 
 	if (rt != len) {
 		dprintf(STDERR_FILENO, "Total read bytes is different from length indication in response\n");
@@ -301,7 +301,7 @@ kc_ssha_parse_identities(struct kc_ssha_response *response)
 
 	num_ids = get_u32(response->data+pos);
 	if (getenv("KC_DEBUG"))
-		dprintf(STDERR_FILENO, "SSH agent has %zd identities\n", num_ids);
+		dprintf(STDERR_FILENO, "%s(): SSH agent has %zd identities\n", __func__, num_ids);
 
 	if (num_ids <= 0) {
 		dprintf(STDERR_FILENO, "SSH agent has no identities\n");
@@ -374,7 +374,7 @@ kc_ssha_parse_identities(struct kc_ssha_response *response)
 		pos += slen;
 
 		if (getenv("KC_DEBUG"))
-			printf("%zd. parsed SSH ID: (%s) %s, %zd long\n", i, idlist->type, idlist->comment, idlist->pubkey_len);
+			printf("%s(): %zd. parsed SSH ID: (%s) %s, %zd long\n", __func__, i, idlist->type, idlist->comment, idlist->pubkey_len);
 	}
 
 
@@ -393,7 +393,7 @@ kc_ssha_parse_signature(struct kc_ssha_response *response)
 	len = get_u32(response->data+pos);
 	pos += 4;
 	if (getenv("KC_DEBUG"))
-		printf("signature length is %zd\n", len);
+		printf("%s(): signature length is %zd\n", __func__, len);
 
 	if (len > KC_MAX_SIGNATURE_LEN) {
 		dprintf(STDERR_FILENO, "Signature length is larger than allowed\n");
@@ -457,7 +457,7 @@ kc_ssha_get_password(char *type, char *comment, struct db_parameters *db_params)
 			strncmp(comment, idlist->comment, strlen(idlist->comment)) == 0) {
 
 			if (getenv("KC_DEBUG"))
-				printf("found a match for identity: (%s) %s\n", type, comment);
+				printf("%s(): found a match for identity: (%s) %s\n", __func__, type, comment);
 
 			break;
 		}
@@ -490,7 +490,7 @@ kc_ssha_get_password(char *type, char *comment, struct db_parameters *db_params)
 	}
 
 	if (getenv("KC_DEBUG"))
-		printf("data to sign is '%s'\n", data_to_sign);
+		printf("%s(): data to sign is '%s'\n", __func__, data_to_sign);
 
 	if (kc_ssha_sign_request(sock, idlist, data_to_sign, 0) < 0) {
 		dprintf(STDERR_FILENO, "Failed to send signature request\n");
