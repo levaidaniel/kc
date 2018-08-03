@@ -143,7 +143,9 @@ cmd_clipboard(const char *e_line, command *commands)
 						perror("\nCouldn't fork(2) for tmux(1)");
 						break;
 					case 0:	/* Child */
+#ifndef __OpenBSD__
 						close(0);
+#endif
 						close(1);
 
 						if (bio_chain)
@@ -166,7 +168,7 @@ cmd_clipboard(const char *e_line, command *commands)
 						fork_argv[4] = NULL;
 
 						if (execvp(fork_argv[0], fork_argv) == -1)
-							fprintf(stderr, "tmux: %s\n", strerror(errno));
+							dprintf(STDERR_FILENO, "tmux: %s\n", strerror(errno));
 
 						quit(EXIT_FAILURE);
 
@@ -218,7 +220,7 @@ cmd_clipboard(const char *e_line, command *commands)
 						 * and the exec'd process will have the same environment. */
 						dup2(pipefd[0], 0);
 						if (execvp(fork_argv[0], fork_argv) == -1)
-							fprintf(stderr, "xclip: %s\n", strerror(errno));
+							dprintf(STDERR_FILENO, "xclip: %s\n", strerror(errno));
 
 						quit(EXIT_FAILURE);
 
