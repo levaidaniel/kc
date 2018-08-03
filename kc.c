@@ -104,10 +104,11 @@ main(int argc, char *argv[])
 
 
 #ifdef __OpenBSD__
-	char            *pledges = "cpath fattr flock rpath stdio tty unix wpath";
+	char		*pledges = "cpath exec fattr flock proc rpath stdio tty unix wpath";
+
 
 	if (getenv("KC_DEBUG"))
-	       printf("%s(): Pledging for '%s'\n", pledges, __func__);
+	       printf("%s(): Pledging for '%s'\n", __func__, pledges);
 
 	if (pledge(pledges, NULL) != 0) {
 	       perror("Unable to pledge()!");
