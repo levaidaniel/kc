@@ -288,7 +288,7 @@ cmd_export(const char *e_line, command *commands)
 		}
 
 		/* get a password */
-		if (strlen(db_params.ssha)) {
+		if (strlen(db_params_new.ssha)) {
 			/* use SSH agent to generate the password */
 			if (!kc_ssha_get_password(ssha_type, ssha_comment, &db_params_new))
 				goto exiting;
