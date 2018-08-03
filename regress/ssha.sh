@@ -22,7 +22,8 @@ if [ $? -ne 0 ];then
 	exit 1
 fi
 
-KC_DB='regress/test_ssha.kcd'
+PASSWORD='asdbqwdoijqw2189'
+KC_DB_SSHA='regress/test_ssha.kcd'
 ${SSH_ADD} -D
 for _type in ed25519:256 rsa:1024 rsa:2048 rsa:4096;do
 	SSH_ID_BITS="-b ${_type##*:}"
@@ -45,8 +46,8 @@ for _type in ed25519:256 rsa:1024 rsa:2048 rsa:4096;do
 		exit 1
 	fi
 
-	rm -f "${KC_DB}"
-	if echo "write" |${KC_RUN} -A "${KC_ID_TYPE},${SSH_ID_COMMENT}" -b -k ${KC_DB};then
+	rm -f "${KC_DB_SSHA}"
+	if echo "write" |${KC_RUN} -A "${KC_ID_TYPE},${SSH_ID_COMMENT}" -b -k ${KC_DB_SSHA};then
 		echo "$0 test ok (create new db with agent, key type ${_type})!"
 	else
 		echo "$0 test failed (create new db with agent, key type ${_type})!"
@@ -54,29 +55,69 @@ for _type in ed25519:256 rsa:1024 rsa:2048 rsa:4096;do
 	fi
 
 	rm -f regress/test_export.kcd
-	if echo "export -A ${KC_ID_TYPE},${SSH_ID_COMMENT} -k regress/test_export" |${KC_RUN} -A "${KC_ID_TYPE},${SSH_ID_COMMENT}" -b -k ${KC_DB};then
-		echo "$0 test ok (export#1, key type ${_type})!"
+	if printf "export -k regress/test_export\n${PASSWORD}\n${PASSWORD}\n" |${KC_RUN} -A "${KC_ID_TYPE},${SSH_ID_COMMENT}" -b -k ${KC_DB_SSHA};then
+		echo "$0 test ok (export#1 from agent to non-agent, key type ${_type})!"
+
+		if printf "${PASSWORD}\nlist\nexit\n" |${KC_RUN} -b -k regress/test_export.kcd;then
+			echo "$0 test ok (opening after export#1 from agent to non-agent, key type ${_type})!"
+		else
+			echo "$0 test failed (opening after export#1 from agent to non-agent, key type ${_type})!"
+			exit 1
+		fi
 	else
-		echo "$0 test failed (export#1, key type ${_type})!"
+		echo "$0 test failed (export#1 from agent to non-agent, key type ${_type})!"
 		exit 1
 	fi
 
 	if [ ! -r "regress/test_export.kcd" ];then
-		echo "$0 test failed (unreadable export file, key type ${_type})!"
+		echo "$0 test failed (export#1 from agent to non-agent, unreadable export file, key type ${_type})!"
 		exit 1
 	fi
 
-	if echo exit |${KC_RUN} -A "${KC_ID_TYPE},${SSH_ID_COMMENT}" -b -k regress/test_export.kcd;then
-		echo "$0 test ok (export#2, key type ${_type})!"
+	rm -f regress/test_export.kcd
+	if echo "export -A ${KC_ID_TYPE},${SSH_ID_COMMENT} -k regress/test_export" |${KC_RUN} -A "${KC_ID_TYPE},${SSH_ID_COMMENT}" -b -k ${KC_DB_SSHA};then
+		echo "$0 test ok (export#1 from agent to agent, key type ${_type})!"
+
+		if printf "list\nexit\n" |${KC_RUN} -A ${KC_ID_TYPE},${SSH_ID_COMMENT} -b -k regress/test_export.kcd;then
+			echo "$0 test ok (opening after export#1 from agent to agent, key type ${_type})!"
+		else
+			echo "$0 test failed (opening after export#1 from agent to agent, key type ${_type})!"
+			exit 1
+		fi
 	else
-		echo "$0 test failed (export#2, key type ${_type})!"
+		echo "$0 test failed (export#1 from agent to agent, key type ${_type})!"
+		exit 1
+	fi
+
+	if [ ! -r "regress/test_export.kcd" ];then
+		echo "$0 test failed (export#1 from agent to agent, unreadable export file, key type ${_type})!"
+		exit 1
+	fi
+
+	rm -f regress/test_export.kcd
+	if echo "export -A ${KC_ID_TYPE},${SSH_ID_COMMENT} -k regress/test_export" |${KC_RUN} -p ${KC_PASSFILE} -b -k ${KC_DB};then
+		echo "$0 test ok (export#1 from non-agent to agent, key type ${_type})!"
+
+		if printf "list\nexit\n" |${KC_RUN} -A ${KC_ID_TYPE},${SSH_ID_COMMENT} -b -k regress/test_export.kcd;then
+			echo "$0 test ok (opening after export#1 from non-agent to agent, key type ${_type})!"
+		else
+			echo "$0 test failed (opening after export#1 from non-agent to agent, key type ${_type})!"
+			exit 1
+		fi
+	else
+		echo "$0 test failed (export#1 from non-agent to agent, key type ${_type})!"
+		exit 1
+	fi
+
+	if [ ! -r "regress/test_export.kcd" ];then
+		echo "$0 test failed (export#1 from non-agent to agent, unreadable export file, key type ${_type})!"
 		exit 1
 	fi
 
 	if printf "import -A ${KC_ID_TYPE},${SSH_ID_COMMENT} -k regress/test_export.kcd\nwrite\n" |${KC_RUN} -A "${KC_ID_TYPE},${SSH_ID_COMMENT}" -b -k regress/test_export.kcd;then
-		echo "$0 test ok (export, key type ${_type})!"
+		echo "$0 test ok (importing export, key type ${_type})!"
 	else
-		echo "$0 test failed (export, key type ${_type})!"
+		echo "$0 test failed (importing export, key type ${_type})!"
 		exit 1
 	fi
 done
