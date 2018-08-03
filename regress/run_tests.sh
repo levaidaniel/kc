@@ -87,3 +87,4 @@ sh regress/cmd_status.sh; COUNTER=$(( COUNTER + 1 ))	# 27
 sh regress/cmd_near.sh; COUNTER=$(( COUNTER + 1 ))	# 28
 sh regress/cmd_opt_c.sh; COUNTER=$(( COUNTER + 1 ))	# 29
 sh regress/ssha.sh; COUNTER=$(( COUNTER + 1 ))		# 30
+sh regress/cmd_clipboard.sh; COUNTER=$(( COUNTER + 1 ))		# 31
