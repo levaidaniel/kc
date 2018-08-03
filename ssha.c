@@ -453,6 +453,9 @@ kc_ssha_get_password(char *type, char *comment, struct db_parameters *db_params)
 	}
 
 	do {
+		if (getenv("KC_DEBUG"))
+			printf("%s(): ('%s' ?= '%s') '%s' ?= '%s'\n", __func__, type, idlist->type, comment, idlist->comment);
+
 		if (	strncmp(type, idlist->type, strlen(idlist->type)) == 0  &&
 			strncmp(comment, idlist->comment, strlen(idlist->comment)) == 0) {
 
