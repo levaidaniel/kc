@@ -281,7 +281,7 @@ kc_ssha_get_full_response(int sock)
 	/* allocate memory for the response data without the response type */
 	response->data = malloc(rt - 1); malloc_check(response->data);
 	memcpy(response->data, buf + 1, rt - 1);
-	response->length = rt;
+	response->length = rt - 1;
 
 
 	free(buf); buf = NULL;
