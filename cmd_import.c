@@ -68,7 +68,8 @@ cmd_import(const char *e_line, command *commands)
 
 
 	/* initial db_params parameters of the imported database */
-	db_params_new.ssha[0] = '\0';
+	db_params_new.ssha_type[0] = '\0';
+	db_params_new.ssha_comment[0] = '\0';
 	db_params_new.pass = NULL;
 	db_params_new.pass_len = 0;
 	db_params_new.db_filename = NULL;
@@ -90,10 +91,11 @@ cmd_import(const char *e_line, command *commands)
 	while ((c = getopt(largc, largv, "A:k:P:e:m:")) != -1)
 		switch (c) {
 			case 'A':
+				/* in case this parameter is passed multiple times */
 				if (ssha_type) {
 					free(ssha_type); ssha_type = NULL;
 				}
-				ssha_type = strndup(strsep(&optarg, ","), 19);
+				ssha_type = strndup(strsep(&optarg, ","), 11);
 				if (ssha_type == NULL  ||  !strlen(ssha_type)) {
 					dprintf(STDERR_FILENO, "SSH key type is empty!\n");
 					goto exiting;
@@ -105,6 +107,7 @@ cmd_import(const char *e_line, command *commands)
 					goto exiting;
 				}
 
+				/* in case this parameter is passed multiple times */
 				if (ssha_comment) {
 					free(ssha_comment); ssha_comment = NULL;
 				}
@@ -114,8 +117,19 @@ cmd_import(const char *e_line, command *commands)
 					goto exiting;
 				}
 
-				snprintf(db_params_new.ssha, sizeof(db_params_new.ssha), "(%s) %s", ssha_type, ssha_comment);
-				printf("Using '%s' identity for decryption\n", db_params_new.ssha);
+				if (strlcpy(db_params_new.ssha_type, ssha_type, sizeof(db_params_new.ssha_type)) >= sizeof(db_params_new.ssha_type)) {
+					dprintf(STDERR_FILENO, "Error while getting SSH key type.\n");
+					goto exiting;
+				}
+				free(ssha_type); ssha_type = NULL;
+
+				if (strlcpy(db_params_new.ssha_comment, ssha_comment, sizeof(db_params_new.ssha_comment)) >= sizeof(db_params_new.ssha_comment)) {
+					dprintf(STDERR_FILENO, "Error while getting SSH key type.\n");
+					goto exiting;
+				}
+				free(ssha_comment); ssha_comment = NULL;
+
+				printf("Using (%s) %s identity for decryption\n", db_params_new.ssha_type, db_params_new.ssha_comment);
 			break;
 			case 'k':
 				db_params_new.db_filename = strdup(optarg); malloc_check(db_params_new.db_filename);
@@ -271,9 +285,9 @@ cmd_import(const char *e_line, command *commands)
 		}
 
 		/* get the password */
-		if (strlen(db_params_new.ssha)) {
+		if (strlen(db_params_new.ssha_type)) {
 			/* use OpenSSH agent to generate the password */
-			if (!kc_ssha_get_password(ssha_type, ssha_comment, &db_params_new))
+			if (!kc_ssha_get_password(&db_params_new))
 				goto exiting;
 		} else {
 			/* ask for the password */

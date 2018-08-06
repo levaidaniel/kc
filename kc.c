@@ -118,7 +118,8 @@ main(int argc, char *argv[])
 
 
 	/* db_param defaults */
-	db_params.ssha[0] = '\0';
+	db_params.ssha_type[0] = '\0';
+	db_params.ssha_comment[0] = '\0';
 	db_params.pass = NULL;
 	db_params.pass_len = 0;
 	db_params.db_filename = NULL;
@@ -152,10 +153,11 @@ main(int argc, char *argv[])
 	while ((c = getopt(argc, argv, "A:k:c:C:rp:P:e:m:bBvh")) != -1)
 		switch (c) {
 			case 'A':
+				/* in case this parameter is passed multiple times */
 				if (ssha_type) {
 					free(ssha_type); ssha_type = NULL;
 				}
-				ssha_type = strndup(strsep(&optarg, ","), 19);
+				ssha_type = strndup(strsep(&optarg, ","), 11);
 				if (ssha_type == NULL  ||  !strlen(ssha_type)) {
 					dprintf(STDERR_FILENO, "SSH key type is empty!\n");
 					quit(EXIT_FAILURE);
@@ -167,6 +169,7 @@ main(int argc, char *argv[])
 					quit(EXIT_FAILURE);
 				}
 
+				/* in case this parameter is passed multiple times */
 				if (ssha_comment) {
 					free(ssha_comment); ssha_comment = NULL;
 				}
@@ -176,8 +179,19 @@ main(int argc, char *argv[])
 					quit(EXIT_FAILURE);
 				}
 
-				snprintf(db_params.ssha, sizeof(db_params.ssha), "(%s) %s", ssha_type, ssha_comment);
-				printf("Using '%s' identity for decryption\n", db_params.ssha);
+				if (strlcpy(db_params.ssha_type, ssha_type, sizeof(db_params.ssha_type)) >= sizeof(db_params.ssha_type)) {
+					dprintf(STDERR_FILENO, "Error while getting SSH key type.\n");
+					quit(EXIT_FAILURE);
+				}
+				free(ssha_type); ssha_type = NULL;
+
+				if (strlcpy(db_params.ssha_comment, ssha_comment, sizeof(db_params.ssha_comment)) >= sizeof(db_params.ssha_comment)) {
+					dprintf(STDERR_FILENO, "Error while getting SSH key comment.\n");
+					quit(EXIT_FAILURE);
+				}
+				free(ssha_comment); ssha_comment = NULL;
+
+				printf("Using (%s) %s identity for decryption\n", db_params.ssha_type, db_params.ssha_comment);
 			break;
 			case 'k':
 				db_params.db_filename = optarg;
@@ -433,13 +447,10 @@ main(int argc, char *argv[])
 		if (close(pass_file) < 0)
 			perror("close(password file)");
 	} else {
-		if (strlen(db_params.ssha)) {
+		if (strlen(db_params.ssha_type)) {
 			/* use SSH agent to generate the password */
-			if (!kc_ssha_get_password(ssha_type, ssha_comment, &db_params))
+			if (!kc_ssha_get_password(&db_params))
 				quit(EXIT_FAILURE);
-
-			free(ssha_type); ssha_type = NULL;
-			free(ssha_comment); ssha_comment = NULL;
 		} else {
 			/* ask for the new password */
 			if (kc_password_read(&db_params, newdb) != 1)

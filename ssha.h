@@ -81,6 +81,6 @@ struct kc_ssha_identity {
 };
 
 
-int kc_ssha_get_password(char *, char *, struct db_parameters *);
+int kc_ssha_get_password(struct db_parameters *);
 
 #endif

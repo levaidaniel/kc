@@ -411,7 +411,7 @@ kc_ssha_parse_signature(struct kc_ssha_response *response)
 
 
 int
-kc_ssha_get_password(char *type, char *comment, struct db_parameters *db_params)
+kc_ssha_get_password(struct db_parameters *db_params)
 {
 	int		sock = -1;
 	char		ret = 0;
@@ -454,13 +454,13 @@ kc_ssha_get_password(char *type, char *comment, struct db_parameters *db_params)
 
 	do {
 		if (getenv("KC_DEBUG"))
-			printf("%s(): ('%s' ?= '%s') '%s' ?= '%s'\n", __func__, type, idlist->type, comment, idlist->comment);
+			printf("%s(): ('%s' ?= '%s') '%s' ?= '%s'\n", __func__, db_params->ssha_type, idlist->type, db_params->ssha_comment, idlist->comment);
 
-		if (	strncmp(type, idlist->type, strlen(idlist->type)) == 0  &&
-			strncmp(comment, idlist->comment, strlen(idlist->comment)) == 0) {
+		if (	strncmp(db_params->ssha_type, idlist->type, strlen(idlist->type)) == 0  &&
+			strncmp(db_params->ssha_comment, idlist->comment, strlen(idlist->comment)) == 0) {
 
 			if (getenv("KC_DEBUG"))
-				printf("%s(): found a match for identity: (%s) %s\n", __func__, type, comment);
+				printf("%s(): found a match for identity: (%s) %s\n", __func__, db_params->ssha_type, db_params->ssha_comment);
 
 			break;
 		}
@@ -476,7 +476,7 @@ kc_ssha_get_password(char *type, char *comment, struct db_parameters *db_params)
 	} while (idlist != NULL);
 
 	if (idlist == NULL) {
-		dprintf(STDERR_FILENO, "Could not find a match for identity: (%s) %s\n", type, comment);
+		dprintf(STDERR_FILENO, "Could not find a match for identity: (%s) %s\n", db_params->ssha_type, db_params->ssha_comment);
 		goto exiting;
 	}
 

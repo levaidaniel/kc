@@ -43,7 +43,7 @@ cmd_passwd(const char *e_line, command *commands)
 	/* this is unused in this function */
 	commands = NULL;
 
-	if (strlen(db_params.ssha)) {
+	if (strlen(db_params.ssha_type)) {
 		puts("Cannot change password when using SSH agent.");
 		return;
 	}

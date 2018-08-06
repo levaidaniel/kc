@@ -59,7 +59,11 @@ cmd_status(const char *e_line, command *commands)
 	xmlSaveClose(xml_save);
 	xmlBufferFree(xml_buf);
 
-	printf("SSH agent: %s\n", strlen(db_params.ssha) ? db_params.ssha : "No");
+	printf("SSH agent: ");
+	if (strlen(db_params.ssha_type))
+		printf("(%s) %s\n", db_params.ssha_type, db_params.ssha_comment);
+	else
+		puts("No");
 
 	printf("Password handling: %s\n", db_params.kdf);
 
