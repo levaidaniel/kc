@@ -58,7 +58,7 @@ cmd_write(const char *e_line, command *commands)
 	db_params_tmp.db_filename = malloc(MAXPATHLEN);
 	if (!db_params_tmp.db_filename) {
 		perror("Could not allocate memory for the file name");
-		return;
+		goto exiting;
 	}
 	db_params_tmp.db_file = -1;
 	db_params_tmp.pass_filename = NULL;
@@ -74,14 +74,12 @@ cmd_write(const char *e_line, command *commands)
 	{
 		puts("Could not duplicate the original IV!");
 
-		free(db_params_tmp.db_filename); db_params_tmp.db_filename = NULL;
-		return;
+		goto exiting;
 	}
 	if (strncmp((const char *)db_params_tmp.iv, (const char *)db_params.iv, IV_DIGEST_LEN) != 0) {
 		puts("The new and the original IV do not match!");
 
-		free(db_params_tmp.db_filename); db_params_tmp.db_filename = NULL;
-		return;
+		goto exiting;
 	}
 
 	if (strlcpy(	(char *)db_params_tmp.salt,
@@ -91,14 +89,12 @@ cmd_write(const char *e_line, command *commands)
 	{
 		puts("Could not duplicate the original salt!");
 
-		free(db_params_tmp.db_filename); db_params_tmp.db_filename = NULL;
-		return;
+		goto exiting;
 	}
 	if (strncmp((const char *)db_params_tmp.salt, (const char *)db_params.salt, SALT_DIGEST_LEN) != 0) {
 		puts("The new and the original salt do not match!");
 
-		free(db_params_tmp.db_filename); db_params_tmp.db_filename = NULL;
-		return;
+		goto exiting;
 	}
 
 	/* the key gets duplicated right before the call to kc_crypt_setup() */
@@ -107,41 +103,32 @@ cmd_write(const char *e_line, command *commands)
 	if (strlcpy(db_params_tmp.db_filename, db_params.db_filename, MAXPATHLEN) >= MAXPATHLEN) {
 		puts("Could not construct a temporary filename!");
 
-		free(db_params_tmp.db_filename); db_params_tmp.db_filename = NULL;
-		return;
+		goto exiting;
 	}
 
 	rand_str = get_random_str(6, 0);
 	if (!rand_str) {
 		puts("Could not create a random string for a temporary filename!");
 
-		free(db_params_tmp.db_filename); db_params_tmp.db_filename = NULL;
-		return;
+		goto exiting;
 	}
 	if (strlcat(db_params_tmp.db_filename, rand_str, MAXPATHLEN) >= MAXPATHLEN) {
 		puts("Could not construct a temporary filename #2!");
 
-		free(db_params_tmp.db_filename); db_params_tmp.db_filename = NULL;
-		free(rand_str); rand_str = NULL;
-		return;
+		goto exiting;
 	}
 
-	free(rand_str); rand_str = NULL;
-
 	if (stat(db_params_tmp.db_filename, &st) == 0) {	/* if temporary database filename exists */
-		puts("Could not create temporary database file (exists)!");
+		perror("Could not create temporary database file (exists)!");
 
-		free(db_params_tmp.db_filename); db_params_tmp.db_filename = NULL;
-		return;
+		goto exiting;
 	}
 
 	db_params_tmp.db_file = open(db_params_tmp.db_filename, O_RDWR | O_CREAT, 0600);
 	if (db_params_tmp.db_file < 0) {
-		puts("Could not open temporary database file!");
-		perror("open(tmp db_filename)");
+		perror("Could not open temporary database file");
 
-		free(db_params_tmp.db_filename); db_params_tmp.db_filename = NULL;
-		return;
+		goto exiting;
 	}
 
 	/* setup temporary bio_chain */
@@ -149,10 +136,7 @@ cmd_write(const char *e_line, command *commands)
 	if (!bio_chain_tmp) {
 		printf("Could not setup bio_chain_tmp!");
 
-		close(db_params_tmp.db_file);
-		unlink(db_params_tmp.db_filename);
-		free(db_params_tmp.db_filename); db_params_tmp.db_filename = NULL;
-		return;
+		goto exiting;
 	}
 
 
@@ -160,23 +144,13 @@ cmd_write(const char *e_line, command *commands)
 	if (memcmp(db_params_tmp.key, db_params.key, KEY_LEN) != 0) {
 		puts("Could not duplicate the original key!");
 
-		memset(db_params_tmp.key, '\0', KEY_LEN);
-		BIO_free_all(bio_chain_tmp);
-		close(db_params_tmp.db_file);
-		unlink(db_params_tmp.db_filename);
-		free(db_params_tmp.db_filename); db_params_tmp.db_filename = NULL;
-		return;
+		goto exiting;
 	}
 	/* Setup cipher mode, turn on encrypting, etc... */
 	if (!kc_crypt_setup(bio_chain_tmp, 1, &db_params_tmp)) {
 		printf("Could not setup encrypting!");
 
-		memset(db_params_tmp.key, '\0', KEY_LEN);
-		BIO_free_all(bio_chain_tmp);
-		close(db_params_tmp.db_file);
-		unlink(db_params_tmp.db_filename);
-		free(db_params_tmp.db_filename); db_params_tmp.db_filename = NULL;
-		return;
+		goto exiting;
 	}
 	memset(db_params_tmp.key, '\0', KEY_LEN);
 
@@ -184,11 +158,7 @@ cmd_write(const char *e_line, command *commands)
 	if (!kc_db_writer(db, bio_chain_tmp, &db_params_tmp)) {
 		puts("There was an error while trying to save the database!");
 
-		BIO_free_all(bio_chain_tmp);
-		close(db_params_tmp.db_file);
-		unlink(db_params_tmp.db_filename);
-		free(db_params_tmp.db_filename); db_params_tmp.db_filename = NULL;
-		return;
+		goto exiting;
 	}
 
 
@@ -199,11 +169,7 @@ cmd_write(const char *e_line, command *commands)
 	if (st.st_size <= IV_DIGEST_LEN + SALT_DIGEST_LEN + 2) {
 		puts("Temporary database file became unusually small!");
 
-		BIO_free_all(bio_chain_tmp);
-		close(db_params_tmp.db_file);
-		unlink(db_params_tmp.db_filename);
-		free(db_params_tmp.db_filename); db_params_tmp.db_filename = NULL;
-		return;
+		goto exiting;
 	}
 
 
@@ -225,18 +191,10 @@ cmd_write(const char *e_line, command *commands)
 		puts("Could not rename temporary database file!");
 		perror("rename(tmp db_filename, db_filename)");
 
-		BIO_free_all(bio_chain_tmp);
-		close(db_params_tmp.db_file);
-		unlink(db_params_tmp.db_filename);
-		free(db_params_tmp.db_filename); db_params_tmp.db_filename = NULL;
-		return;
+		goto exiting;
 	} else
 		if (getenv("KC_DEBUG"))
 			printf("%s(): renamed temporary database file to the original database filename\n", __func__);
-
-	BIO_free_all(bio_chain_tmp);
-	unlink(db_params_tmp.db_filename);
-	free(db_params_tmp.db_filename); db_params_tmp.db_filename = NULL;
 
 
 	/* Reopen the new database file as the 'db_file' fd. */
@@ -245,7 +203,7 @@ cmd_write(const char *e_line, command *commands)
 		puts("Could not reopen the new database file! This means that a file lock can not be placed on it. I suggest you to restart the application!");
 		perror("open(new database file)");
 
-		return;
+		goto exiting;
 	} else
 		if (getenv("KC_DEBUG"))
 			printf("%s(): reopened new database file\n", __func__);
@@ -257,7 +215,7 @@ cmd_write(const char *e_line, command *commands)
 		puts("Could not lock the new database file! I suggest you to restart the application!");
 		perror("flock(new database file)");
 
-		return;
+		goto exiting;
 	} else
 		if (getenv("KC_DEBUG"))
 			printf("%s(): locked new database file\n", __func__);
@@ -266,4 +224,18 @@ cmd_write(const char *e_line, command *commands)
 	db_params.dirty = 0;
 
 	puts("Save OK");
+
+exiting:
+	free(db_params_tmp.db_filename); db_params_tmp.db_filename = NULL;
+	free(rand_str); rand_str = NULL;
+
+	if (db_params_tmp.db_file >= 0) {
+		close(db_params_tmp.db_file);
+		unlink(db_params_tmp.db_filename);
+	}
+
+	if (bio_chain_tmp)
+		BIO_free_all(bio_chain_tmp);
+
+	memset(db_params_tmp.key, '\0', KEY_LEN);
 } /* cmd_write() */
