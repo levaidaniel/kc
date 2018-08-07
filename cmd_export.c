@@ -59,7 +59,7 @@ cmd_export(const char *e_line, command *commands)
 	int		c = 0, largc = 0;
 	char		**largv = NULL;
 	char		*line = NULL;
-	char		dump = 0, exiting = 0;
+	char		dump = 0;
 	struct stat	st;
 	char		*ssha_type = NULL, *ssha_comment = NULL;
 
@@ -183,7 +183,8 @@ cmd_export(const char *e_line, command *commands)
 				}
 			break;
 			default:
-				exiting++;
+				puts(commands->usage);
+				goto exiting;
 			break;
 		}
 
@@ -196,11 +197,8 @@ cmd_export(const char *e_line, command *commands)
 	}
 	free(largv); largv = NULL;
 
-	if (!db_params_new.db_filename  ||  exiting) {
-		puts(commands->usage);
-
+	if (!db_params_new.db_filename)
 		goto exiting;
-	}
 
 
 	if (cname) {

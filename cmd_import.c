@@ -60,7 +60,7 @@ cmd_import(const char *e_line, command *commands)
 	char		**largv = NULL;
 	char		*line = NULL;
 	char		*buf = NULL;
-	char		append = 0, xml = 0, exiting = 0;
+	char		append = 0, xml = 0;
 	ssize_t		ret = -1;
 	int		pos = 0;
 
@@ -174,7 +174,8 @@ cmd_import(const char *e_line, command *commands)
 				}
 			break;
 			default:
-				exiting++;
+				puts(commands->usage);
+				goto exiting;
 			break;
 		}
 
@@ -190,11 +191,8 @@ cmd_import(const char *e_line, command *commands)
 	}
 	free(largv); largv = NULL;
 
-	if (!db_params_new.db_filename  ||  exiting) {
-		puts(commands->usage);
-
+	if (!db_params_new.db_filename)
 		goto exiting;
-	}
 
 
 	puts("Reading database...");
