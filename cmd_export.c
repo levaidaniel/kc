@@ -363,8 +363,6 @@ exiting:
 	free(ssha_type); ssha_type = NULL;
 	free(ssha_comment); ssha_comment = NULL;
 
-	memset(db_params_new.key, '\0', KEY_LEN);
-
 	if (bio_chain) {
 		BIO_free_all(bio_chain);
 		bio_chain = NULL;
@@ -378,6 +376,7 @@ exiting:
 
 	free(cname); cname = NULL;
 
+	memset(db_params_new.key, '\0', KEY_LEN);
 	if (db_params_new.pass) {
 		memset(db_params_new.pass, '\0', db_params_new.pass_len);
 		free(db_params_new.pass); db_params_new.pass = NULL;

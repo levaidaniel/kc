@@ -151,9 +151,6 @@ cmd_passwd(const char *e_line, command *commands)
 		puts("Could not setup encrypting!");
 		goto exiting;
 	}
-	if (db_params_tmp.pass)
-		memset(db_params_tmp.pass, '\0', db_params_tmp.pass_len);
-	free(db_params_tmp.pass); db_params_tmp.pass = NULL;
 
 
 	/* store the new IV/salt/key in our working copy of 'db_params' */
@@ -182,6 +179,14 @@ exiting:
 	}
 	free(largv); largv = NULL;
 
+	free(ssha_type); ssha_type = NULL;
+	free(ssha_comment); ssha_comment = NULL;
+
+	memset(db_params_tmp.key, '\0', KEY_LEN);
+	if (db_params_tmp.pass) {
+		memset(db_params_tmp.pass, '\0', db_params_tmp.pass_len);
+		free(db_params_tmp.pass); db_params_tmp.pass = NULL;
+	}
 	free(db_params_tmp.kdf); db_params_tmp.kdf = NULL;
 	free(db_params_tmp.cipher); db_params_tmp.cipher = NULL;
 	free(db_params_tmp.cipher_mode); db_params_tmp.cipher_mode = NULL;
