@@ -2,7 +2,7 @@
 
 set -e
 
-ulimit -c
+ulimit -c unlimited
 
 
 if [ $(basename $(pwd))  = 'regress' ];then
