@@ -104,7 +104,7 @@ cmd_export(const char *e_line, command *commands)
 	larg(line, &largv, &largc);
 	free(line); line = NULL;
 
-	optind = 1;
+	optind = 0;
 	while ((c = getopt(largc, largv, "A:k:c:P:e:m:")) != -1)
 		switch (c) {
 			case 'A':
@@ -191,11 +191,6 @@ cmd_export(const char *e_line, command *commands)
 	if (strcmp(largv[0], "dump") == 0)
 		dump = 1;
 
-
-	for (c = 0; c <= largc; c++) {
-		free(largv[c]); largv[c] = NULL;
-	}
-	free(largv); largv = NULL;
 
 	if (!db_params_new.db_filename)
 		goto exiting;
@@ -360,6 +355,11 @@ cmd_export(const char *e_line, command *commands)
 
 
 exiting:
+	for (c = 0; c <= largc; c++) {
+		free(largv[c]); largv[c] = NULL;
+	}
+	free(largv); largv = NULL;
+
 	free(ssha_type); ssha_type = NULL;
 	free(ssha_comment); ssha_comment = NULL;
 
