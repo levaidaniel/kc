@@ -33,7 +33,8 @@ else
 	exit 1
 fi
 
-if printf "passwd -P sha512\n${PASSWORD}\n${PASSWORD}\n" |${KC_RUN} -b -k ${KC_DB} -P bcrypt -p ${KC_PASSFILE};then
+# Also fake an invalid parameter
+if printf "passwd --help\npasswd -P sha512\n${PASSWORD}\n${PASSWORD}\n" |${KC_RUN} -b -k ${KC_DB} -P bcrypt -p ${KC_PASSFILE};then
 	echo "$0 test ok (passwd bcrypt #2)!"
 else
 	echo "$0 test failed (passwd bcrypt #2)!"

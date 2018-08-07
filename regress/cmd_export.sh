@@ -25,7 +25,8 @@ fi
 
 
 rm -f regress/test_export.kcd
-printf "export -k regress/test_export -P bcrypt -e blowfish -m cbc\n${PASSWORD}\n${PASSWORD}\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}
+# Also fake an invalid parameter
+printf "export --help\nexport -k regress/test_export -P bcrypt -e blowfish -m cbc\n${PASSWORD}\n${PASSWORD}\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}
 
 if [ ! -r "regress/test_export.kcd" ];then
 	echo "$0 test failed (unreadable export file, bcrypt + blowfish)!"
