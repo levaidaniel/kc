@@ -99,7 +99,7 @@ cmd_searchre(const char *e_line, command *commands)
 
 	re = pcre_compile(pattern, PCRE_UTF8 | (icase ? PCRE_CASELESS : 0), &error, &erroffset, NULL);
 	if (!re) {
-		dprintf(STDERR_FILENO, "Error in pattern at %d: (%s)\n", erroffset, error);
+		dprintf(STDERR_FILENO, "ERROR: Error in pattern at %d: (%s)\n", erroffset, error);
 		return;
 	}
 

@@ -116,29 +116,29 @@ cmd_import(const char *e_line, command *commands)
 
 				ssha_type = strndup(strsep(&optarg, ","), 11);
 				if (ssha_type == NULL  ||  !strlen(ssha_type)) {
-					dprintf(STDERR_FILENO, "SSH key type is empty!\n");
+					dprintf(STDERR_FILENO, "ERROR: SSH key type is empty!\n");
 					goto exiting;
 				}
 				if (	strncmp(ssha_type, "ssh-rsa", 7) != 0  &&
 					strncmp(ssha_type, "ssh-ed25519", 11) != 0
 				) {
-					dprintf(STDERR_FILENO, "SSH key type is unsupported: '%s'\n", ssha_type);
+					dprintf(STDERR_FILENO, "ERROR: SSH key type is unsupported: '%s'\n", ssha_type);
 					goto exiting;
 				}
 
 				ssha_comment = strndup(optarg, 512);
 				if (ssha_comment == NULL  ||  !strlen(ssha_comment)) {
-					dprintf(STDERR_FILENO, "SSH key comment is empty!\n");
+					dprintf(STDERR_FILENO, "ERROR: SSH key comment is empty!\n");
 					goto exiting;
 				}
 
 				if (strlcpy(db_params_new.ssha_type, ssha_type, sizeof(db_params_new.ssha_type)) >= sizeof(db_params_new.ssha_type)) {
-					dprintf(STDERR_FILENO, "Error while getting SSH key type.\n");
+					dprintf(STDERR_FILENO, "ERROR: Error while getting SSH key type.\n");
 					goto exiting;
 				}
 
 				if (strlcpy(db_params_new.ssha_comment, ssha_comment, sizeof(db_params_new.ssha_comment)) >= sizeof(db_params_new.ssha_comment)) {
-					dprintf(STDERR_FILENO, "Error while getting SSH key type.\n");
+					dprintf(STDERR_FILENO, "ERROR: Error while getting SSH key type.\n");
 					goto exiting;
 				}
 
@@ -209,7 +209,7 @@ cmd_import(const char *e_line, command *commands)
 			if (errno == 0)
 				puts("");
 			else
-				dprintf(STDERR_FILENO, ": %s\n", strerror(errno));
+				dprintf(STDERR_FILENO, "ERROR: : %s\n", strerror(errno));
 
 			goto exiting;
 		}
@@ -260,7 +260,7 @@ cmd_import(const char *e_line, command *commands)
 				goto exiting;
 			}
 			if (pos != IV_DIGEST_LEN) {
-				dprintf(STDERR_FILENO, "Could not read IV from database file!\n");
+				dprintf(STDERR_FILENO, "ERROR: Could not read IV from database file!\n");
 
 				goto exiting;
 			}
@@ -287,7 +287,7 @@ cmd_import(const char *e_line, command *commands)
 				goto exiting;
 			}
 			if (pos != SALT_DIGEST_LEN) {
-				dprintf(STDERR_FILENO, "Could not read salt from database file!\n");
+				dprintf(STDERR_FILENO, "ERROR: Could not read salt from database file!\n");
 
 				goto exiting;
 			}
@@ -302,7 +302,7 @@ cmd_import(const char *e_line, command *commands)
 
 		bio_chain = kc_setup_bio_chain(db_params_new.db_filename, 0);
 		if (!bio_chain) {
-			dprintf(STDERR_FILENO, "Could not setup bio_chain!\n");
+			dprintf(STDERR_FILENO, "ERROR: Could not setup bio_chain!\n");
 
 			goto exiting;
 		}
@@ -330,7 +330,7 @@ cmd_import(const char *e_line, command *commands)
 
 		/* kc_crypt_key() and kc_crypt_setup() check from a few lines above */
 		if (!ret) {
-			dprintf(STDERR_FILENO, "Could not setup decrypting!\n");
+			dprintf(STDERR_FILENO, "ERROR: Could not setup decrypting!\n");
 
 			goto exiting;
 		}
@@ -357,7 +357,7 @@ cmd_import(const char *e_line, command *commands)
 		free(buf); buf = NULL;
 
 		if (!db_new) {
-			dprintf(STDERR_FILENO, "Could not parse XML document!\n");
+			dprintf(STDERR_FILENO, "ERROR: Could not parse XML document!\n");
 
 			goto exiting;
 		}
@@ -378,7 +378,7 @@ cmd_import(const char *e_line, command *commands)
 	db_root = xmlDocGetRootElement(db);		/* the existing db root */
 	db_root_new = xmlDocGetRootElement(db_new);	/* the new db root */
 	if (db_root_new->children->next == NULL) {
-		dprintf(STDERR_FILENO, "Cannot import an empty database!\n");
+		dprintf(STDERR_FILENO, "ERROR: Cannot import an empty database!\n");
 
 		xmlFreeDoc(db_new);
 		goto exiting;
@@ -445,7 +445,7 @@ cmd_import(const char *e_line, command *commands)
 
 						count_keychains++;
 					} else {
-						dprintf(STDERR_FILENO, "Can not create new keychain: maximum number of keychains reached, %lu.\n", ITEMS_MAX - 1);
+						dprintf(STDERR_FILENO, "ERROR: Can not create new keychain: maximum number of keychains reached, %lu.\n", ITEMS_MAX - 1);
 					}
 				}
 			}
@@ -465,7 +465,7 @@ cmd_import(const char *e_line, command *commands)
 		while (keychain_new  &&  count_keychains < ITEMS_MAX) {
 			/* Count the keys in the keychain */
 			if (count_elements(keychain_new->children) >= ITEMS_MAX - 1) {
-				dprintf(STDERR_FILENO, "Cannot import: maximum number of keys reached, %lu.\n", ITEMS_MAX - 1);
+				dprintf(STDERR_FILENO, "ERROR: Cannot import: maximum number of keys reached, %lu.\n", ITEMS_MAX - 1);
 
 				xmlFreeDoc(db_new);
 				goto exiting;
@@ -479,7 +479,7 @@ cmd_import(const char *e_line, command *commands)
 
 		/* Finished scanning the keys in the new keychains, now lets evaluate the number of keychains */
 		if (count_keychains >= ITEMS_MAX - 1) {
-			dprintf(STDERR_FILENO, "Cannot import: maximum number of keychains reached, %lu.\n", ITEMS_MAX - 1);
+			dprintf(STDERR_FILENO, "ERROR: Cannot import: maximum number of keychains reached, %lu.\n", ITEMS_MAX - 1);
 
 			xmlFreeDoc(db_new);
 			goto exiting;

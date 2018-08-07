@@ -72,7 +72,7 @@ cmd_write(const char *e_line, command *commands)
 			IV_DIGEST_LEN + 1)
 			>= IV_DIGEST_LEN + 1)
 	{
-		dprintf(STDERR_FILENO, "Could not duplicate the original IV!\n");
+		dprintf(STDERR_FILENO, "ERROR: Could not duplicate the original IV!\n");
 
 		goto exiting;
 	}
@@ -87,7 +87,7 @@ cmd_write(const char *e_line, command *commands)
 			SALT_DIGEST_LEN + 1)
 			>= SALT_DIGEST_LEN + 1)
 	{
-		dprintf(STDERR_FILENO, "Could not duplicate the original salt!\n");
+		dprintf(STDERR_FILENO, "ERROR: Could not duplicate the original salt!\n");
 
 		goto exiting;
 	}
@@ -101,19 +101,19 @@ cmd_write(const char *e_line, command *commands)
 
 
 	if (strlcpy(db_params_tmp.db_filename, db_params.db_filename, MAXPATHLEN) >= MAXPATHLEN) {
-		dprintf(STDERR_FILENO, "Could not construct a temporary filename!\n");
+		dprintf(STDERR_FILENO, "ERROR: Could not construct a temporary filename!\n");
 
 		goto exiting;
 	}
 
 	rand_str = get_random_str(6, 0);
 	if (!rand_str) {
-		dprintf(STDERR_FILENO, "Could not create a random string for a temporary filename!\n");
+		dprintf(STDERR_FILENO, "ERROR: Could not create a random string for a temporary filename!\n");
 
 		goto exiting;
 	}
 	if (strlcat(db_params_tmp.db_filename, rand_str, MAXPATHLEN) >= MAXPATHLEN) {
-		dprintf(STDERR_FILENO, "Could not construct a temporary filename #2!\n");
+		dprintf(STDERR_FILENO, "ERROR: Could not construct a temporary filename #2!\n");
 
 		goto exiting;
 	}
@@ -134,7 +134,7 @@ cmd_write(const char *e_line, command *commands)
 	/* setup temporary bio_chain */
 	bio_chain_tmp = kc_setup_bio_chain(db_params_tmp.db_filename, 1);
 	if (!bio_chain_tmp) {
-		dprintf(STDERR_FILENO, "Could not setup bio_chain_tmp!\n");
+		dprintf(STDERR_FILENO, "ERROR: Could not setup bio_chain_tmp!\n");
 
 		goto exiting;
 	}
@@ -142,13 +142,13 @@ cmd_write(const char *e_line, command *commands)
 
 	memcpy(db_params_tmp.key, db_params.key, KEY_LEN);
 	if (memcmp(db_params_tmp.key, db_params.key, KEY_LEN) != 0) {
-		dprintf(STDERR_FILENO, "Could not duplicate the original key!\n");
+		dprintf(STDERR_FILENO, "ERROR: Could not duplicate the original key!\n");
 
 		goto exiting;
 	}
 	/* Setup cipher mode, turn on encrypting, etc... */
 	if (!kc_crypt_setup(bio_chain_tmp, 1, &db_params_tmp)) {
-		dprintf(STDERR_FILENO, "Could not setup encrypting!\n");
+		dprintf(STDERR_FILENO, "ERROR: Could not setup encrypting!\n");
 
 		goto exiting;
 	}
@@ -156,7 +156,7 @@ cmd_write(const char *e_line, command *commands)
 
 
 	if (!kc_db_writer(db, bio_chain_tmp, &db_params_tmp)) {
-		dprintf(STDERR_FILENO, "There was an error while trying to save the database!\n");
+		dprintf(STDERR_FILENO, "ERROR: There was an error while trying to save the database!\n");
 
 		goto exiting;
 	}
@@ -188,7 +188,7 @@ cmd_write(const char *e_line, command *commands)
 
 
 	if (rename(db_params_tmp.db_filename, db_params.db_filename) < 0) {
-		dprintf(STDERR_FILENO, "Could not rename temporary database file!\n");
+		dprintf(STDERR_FILENO, "ERROR: Could not rename temporary database file!\n");
 		perror("rename(tmp db_filename, db_filename)");
 
 		goto exiting;
@@ -200,7 +200,7 @@ cmd_write(const char *e_line, command *commands)
 	/* Reopen the new database file as the 'db_file' fd. */
 	db_params.db_file = open(db_params.db_filename, O_RDONLY);
 	if (db_params.db_file < 0) {
-		dprintf(STDERR_FILENO, "Could not reopen the new database file! This means that a file lock can not be placed on it. I suggest you to restart the application!\n");
+		dprintf(STDERR_FILENO, "ERROR: Could not reopen the new database file! This means that a file lock can not be placed on it. I suggest you to restart the application!\n");
 		perror("open(new database file)");
 
 		goto exiting;
@@ -212,7 +212,7 @@ cmd_write(const char *e_line, command *commands)
 		if (getenv("KC_DEBUG"))
 			printf("%s(): flock(new database file)\n", __func__);
 
-		dprintf(STDERR_FILENO, "Could not lock the new database file! I suggest you to restart the application!\n");
+		dprintf(STDERR_FILENO, "ERROR: Could not lock the new database file! I suggest you to restart the application!\n");
 		perror("flock(new database file)");
 
 		goto exiting;

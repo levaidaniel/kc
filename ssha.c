@@ -48,23 +48,23 @@ kc_ssha_connect(void)
 	if (getenv("KC_DEBUG"))
 		printf("%s(): SSH agent UNIX socket: '%s'\n", __func__, sock_name);
 	if (sock_name == NULL  ||  strlen(sock_name) <= 0) {
-		dprintf(STDERR_FILENO, "SSH agent socket name is NULL or zero length\n");
+		dprintf(STDERR_FILENO, "ERROR: SSH agent socket name is NULL or zero length\n");
 		return(-1);
 	}
 
 	if (strlcpy(addr.sun_path, sock_name, sizeof(addr.sun_path)) >= sizeof(addr.sun_path)) {
-		dprintf(STDERR_FILENO, "Truncated strlcpy() when copying sock_name to sun_path\n");
+		dprintf(STDERR_FILENO, "ERROR: Truncated strlcpy() when copying sock_name to sun_path\n");
 		return(-1);
 	}
 
 	sock = socket(AF_UNIX, SOCK_STREAM, 0);
 	if (sock <= 0) {
-		dprintf(STDERR_FILENO, "Could not create UNIX socket for SSH agent communication\n");
+		dprintf(STDERR_FILENO, "ERROR: Could not create UNIX socket for SSH agent communication\n");
 		return(-1);
 	}
 
 	if (connect(sock, (struct sockaddr*)&addr, sizeof(struct sockaddr_un)) != 0) {
-		dprintf(STDERR_FILENO, "Could not connect to SSH agent UNIX socket: '%s'\n", sock_name);
+		dprintf(STDERR_FILENO, "ERROR: Could not connect to SSH agent UNIX socket: '%s'\n", sock_name);
 		return(-1);
 	}
 
@@ -119,7 +119,7 @@ kc_ssha_sign_request(int sock, struct kc_ssha_identity *id, char *data, unsigned
 
 
 	if (data == NULL) {
-		dprintf(STDERR_FILENO, "Data to sign is empty\n");
+		dprintf(STDERR_FILENO, "ERROR: Data to sign is empty\n");
 		return(-1);
 	}
 
@@ -169,7 +169,7 @@ kc_ssha_sign_request(int sock, struct kc_ssha_identity *id, char *data, unsigned
 	pos += 4;
 
 	if (buf_len != pos) {
-		dprintf(STDERR_FILENO, "Total copied bytes is different from the buffer size\n");
+		dprintf(STDERR_FILENO, "ERROR: Total copied bytes is different from the buffer size\n");
 		free(buf); buf = NULL;
 		return(-1);
 	}
@@ -223,7 +223,7 @@ kc_ssha_get_full_response(int sock)
 		printf("%s(): response length = %zd\n", __func__, len);
 
 	if (len > MAX_AGENT_REPLY_LEN) {
-		dprintf(STDERR_FILENO, "Indicated response length(%zd) is more than MAX_AGENT_REPLY_LEN(%d)\n", len, MAX_AGENT_REPLY_LEN);
+		dprintf(STDERR_FILENO, "ERROR: Indicated response length(%zd) is more than MAX_AGENT_REPLY_LEN(%d)\n", len, MAX_AGENT_REPLY_LEN);
 		free(buf); buf = NULL;
 		return(NULL);
 	} else {
@@ -266,7 +266,7 @@ kc_ssha_get_full_response(int sock)
 		printf("%s(): read total = %zd\n", __func__, rt);
 
 	if (rt != len) {
-		dprintf(STDERR_FILENO, "Total read bytes is different from length indication in response\n");
+		dprintf(STDERR_FILENO, "ERROR: Total read bytes is different from length indication in response\n");
 		free(buf); buf = NULL;
 		return(NULL);
 	}
@@ -304,7 +304,7 @@ kc_ssha_parse_identities(struct kc_ssha_response *response)
 		printf("%s(): SSH agent has %zd identities\n", __func__, num_ids);
 
 	if (num_ids <= 0) {
-		dprintf(STDERR_FILENO, "SSH agent has no identities\n");
+		dprintf(STDERR_FILENO, "ERROR: SSH agent has no identities\n");
 		return(NULL);
 	}
 	pos += 4;
@@ -331,7 +331,7 @@ kc_ssha_parse_identities(struct kc_ssha_response *response)
 		/* pubkey length */
 		idlist->pubkey_len = get_u32(response->data+pos);
 		if (idlist->pubkey_len > KC_MAX_PUBKEY_LEN) {
-			dprintf(STDERR_FILENO, "Public key length is larger than allowed(%d), skipping\n", KC_MAX_PUBKEY_LEN);
+			dprintf(STDERR_FILENO, "ERROR: Public key length is larger than allowed(%d), skipping\n", KC_MAX_PUBKEY_LEN);
 
 			free(idlist); idlist = NULL;
 			if (!i)	/* first call */
@@ -358,7 +358,7 @@ kc_ssha_parse_identities(struct kc_ssha_response *response)
 		/* key comment */
 		slen = get_u32(response->data+pos);
 		if (slen > KC_MAX_PUBKEY_COMMENT_LEN) {
-			dprintf(STDERR_FILENO, "Public key (%s) comment length is larger than allowed(%d), skipping\n", idlist->type, KC_MAX_PUBKEY_COMMENT_LEN);
+			dprintf(STDERR_FILENO, "ERROR: Public key (%s) comment length is larger than allowed(%d), skipping\n", idlist->type, KC_MAX_PUBKEY_COMMENT_LEN);
 
 			free(idlist->pubkey); idlist->pubkey = NULL;
 			free(idlist->type); idlist->type = NULL;
@@ -396,7 +396,7 @@ kc_ssha_parse_signature(struct kc_ssha_response *response)
 		printf("%s(): signature length is %zd\n", __func__, len);
 
 	if (len > KC_MAX_SIGNATURE_LEN) {
-		dprintf(STDERR_FILENO, "Signature length is larger than allowed\n");
+		dprintf(STDERR_FILENO, "ERROR: Signature length is larger than allowed\n");
 		return(NULL);
 	}
 	s = calloc(1, len); malloc_check(s);
@@ -423,32 +423,32 @@ kc_ssha_get_password(struct db_parameters *db_params)
 
 	sock = kc_ssha_connect();
 	if (sock < 0) {
-		dprintf(STDERR_FILENO, "Couldn't establish UNIX socket connection\n");
+		dprintf(STDERR_FILENO, "ERROR: Couldn't establish UNIX socket connection\n");
 		goto exiting;
 	}
 
 	/* get identities */
 	if (kc_ssha_identity_list_request(sock) < 0) {
-		dprintf(STDERR_FILENO, "Failed to send identity list request\n");
+		dprintf(STDERR_FILENO, "ERROR: Failed to send identity list request\n");
 		goto exiting;
 	}
 	response = kc_ssha_get_full_response(sock);
 	if (response == NULL) {
-		dprintf(STDERR_FILENO, "Could not get response for identity list request\n");
+		dprintf(STDERR_FILENO, "ERROR: Could not get response for identity list request\n");
 		goto exiting;
 	}
 
 	if (agent_failed(response->type)) {
-		dprintf(STDERR_FILENO, "SSH agent request failed\n");
+		dprintf(STDERR_FILENO, "ERROR: SSH agent request failed\n");
 		goto exiting;
 	} else if (response->type != SSH2_AGENT_IDENTITIES_ANSWER) {
-		dprintf(STDERR_FILENO, "Invalid SSH agent response type\n");
+		dprintf(STDERR_FILENO, "ERROR: Invalid SSH agent response type\n");
 		goto exiting;
 	}
 
 	idlist = kc_ssha_parse_identities(response);
 	if (idlist == NULL) {
-		dprintf(STDERR_FILENO, "Could not parse identity list\n");
+		dprintf(STDERR_FILENO, "ERROR: Could not parse identity list\n");
 		goto exiting;
 	}
 
@@ -476,7 +476,7 @@ kc_ssha_get_password(struct db_parameters *db_params)
 	} while (idlist != NULL);
 
 	if (idlist == NULL) {
-		dprintf(STDERR_FILENO, "Could not find a match for identity: (%s) %s\n", db_params->ssha_type, db_params->ssha_comment);
+		dprintf(STDERR_FILENO, "ERROR: Could not find a match for identity: (%s) %s\n", db_params->ssha_type, db_params->ssha_comment);
 		goto exiting;
 	}
 
@@ -484,11 +484,11 @@ kc_ssha_get_password(struct db_parameters *db_params)
 	/* ask for a signature */
 	data_to_sign = malloc(IV_DIGEST_LEN + SALT_DIGEST_LEN + 1); malloc_check(data_to_sign);
 	if (strlcpy(data_to_sign, (const char*)db_params->iv, IV_DIGEST_LEN + 1) >= IV_DIGEST_LEN + 1) {
-		dprintf(STDERR_FILENO, "Error while setting up SSH agent signing.\n");
+		dprintf(STDERR_FILENO, "ERROR: Error while setting up SSH agent signing.\n");
 		goto exiting;
 	}
 	if (strlcat(data_to_sign, (const char*)db_params->salt, SALT_DIGEST_LEN + IV_DIGEST_LEN + 1) >= SALT_DIGEST_LEN + IV_DIGEST_LEN + 1) {
-		dprintf(STDERR_FILENO, "Error while setting up SSH agent signing.\n");
+		dprintf(STDERR_FILENO, "ERROR: Error while setting up SSH agent signing.\n");
 		goto exiting;
 	}
 
@@ -496,32 +496,32 @@ kc_ssha_get_password(struct db_parameters *db_params)
 		printf("%s(): data to sign is '%s'\n", __func__, data_to_sign);
 
 	if (kc_ssha_sign_request(sock, idlist, data_to_sign, 0) < 0) {
-		dprintf(STDERR_FILENO, "Failed to send signature request\n");
+		dprintf(STDERR_FILENO, "ERROR: Failed to send signature request\n");
 		goto exiting;
 	}
 
 	response = kc_ssha_get_full_response(sock);
 	if (response == NULL) {
-		dprintf(STDERR_FILENO, "Could not get response for signature request\n");
+		dprintf(STDERR_FILENO, "ERROR: Could not get response for signature request\n");
 		goto exiting;
 	}
 
 	if (agent_failed(response->type)) {
-		dprintf(STDERR_FILENO, "SSH agent request failed\n");
+		dprintf(STDERR_FILENO, "ERROR: SSH agent request failed\n");
 		goto exiting;
 	} else if (response->type != SSH2_AGENT_SIGN_RESPONSE) {
-		dprintf(STDERR_FILENO, "Invalid SSH agent response type\n");
+		dprintf(STDERR_FILENO, "ERROR: Invalid SSH agent response type\n");
 		goto exiting;
 	}
 
 	signature = kc_ssha_parse_signature(response);
 	if (signature == NULL) {
-		dprintf(STDERR_FILENO, "Could not parse signature response\n");
+		dprintf(STDERR_FILENO, "ERROR: Could not parse signature response\n");
 		goto exiting;
 	}
 
 	if (signature->length > PASSWORD_MAXLEN) {
-		dprintf(STDERR_FILENO, "Signature length(%zd) is larger than the allowed password length(%d)\n", signature->length * 2, PASSWORD_MAXLEN);
+		dprintf(STDERR_FILENO, "ERROR: Signature length(%zd) is larger than the allowed password length(%d)\n", signature->length * 2, PASSWORD_MAXLEN);
 		goto exiting;
 	}
 

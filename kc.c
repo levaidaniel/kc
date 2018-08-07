@@ -131,21 +131,21 @@ main(int argc, char *argv[])
 	len = strlen(default_kdf) + 1;
 	db_params.kdf = malloc(len); malloc_check(db_params.kdf);
 	if (strlcpy(db_params.kdf, default_kdf, len) >= len) {
-		dprintf(STDERR_FILENO, "Error while setting up default database parameters.\n");
+		dprintf(STDERR_FILENO, "ERROR: Error while setting up default database parameters.\n");
 		quit(EXIT_FAILURE);
 	}
 
 	len = strlen(default_cipher) + 1;
 	db_params.cipher = malloc(len); malloc_check(db_params.cipher);
 	if (strlcpy(db_params.cipher, default_cipher, len) >= len) {
-		dprintf(STDERR_FILENO, "Error while setting up default database parameters.\n");
+		dprintf(STDERR_FILENO, "ERROR: Error while setting up default database parameters.\n");
 		quit(EXIT_FAILURE);
 	}
 
 	len = strlen(default_mode) + 1;
 	db_params.cipher_mode = malloc(len); malloc_check(db_params.cipher_mode);
 	if (strlcpy(db_params.cipher_mode, default_mode, len) >= len) {
-		dprintf(STDERR_FILENO, "Error while setting up default database parameters.\n");
+		dprintf(STDERR_FILENO, "ERROR: Error while setting up default database parameters.\n");
 		quit(EXIT_FAILURE);
 	}
 
@@ -159,30 +159,30 @@ main(int argc, char *argv[])
 
 				ssha_type = strndup(strsep(&optarg, ","), 11);
 				if (ssha_type == NULL  ||  !strlen(ssha_type)) {
-					dprintf(STDERR_FILENO, "SSH key type is empty!\n");
+					dprintf(STDERR_FILENO, "ERROR: SSH key type is empty!\n");
 					quit(EXIT_FAILURE);
 				}
 				if (	strncmp(ssha_type, "ssh-rsa", 7) != 0  &&
 					strncmp(ssha_type, "ssh-ed25519", 11) != 0
 				) {
-					dprintf(STDERR_FILENO, "SSH key type is unsupported: '%s'\n", ssha_type);
+					dprintf(STDERR_FILENO, "ERROR: SSH key type is unsupported: '%s'\n", ssha_type);
 					quit(EXIT_FAILURE);
 				}
 
 				ssha_comment = strndup(optarg, 512);
 				if (ssha_comment == NULL  ||  !strlen(ssha_comment)) {
-					dprintf(STDERR_FILENO, "SSH key comment is empty!\n");
+					dprintf(STDERR_FILENO, "ERROR: SSH key comment is empty!\n");
 					quit(EXIT_FAILURE);
 				}
 
 				if (strlcpy(db_params.ssha_type, ssha_type, sizeof(db_params.ssha_type)) >= sizeof(db_params.ssha_type)) {
-					dprintf(STDERR_FILENO, "Error while getting SSH key type.\n");
+					dprintf(STDERR_FILENO, "ERROR: Error while getting SSH key type.\n");
 					quit(EXIT_FAILURE);
 				}
 				free(ssha_type); ssha_type = NULL;
 
 				if (strlcpy(db_params.ssha_comment, ssha_comment, sizeof(db_params.ssha_comment)) >= sizeof(db_params.ssha_comment)) {
-					dprintf(STDERR_FILENO, "Error while getting SSH key comment.\n");
+					dprintf(STDERR_FILENO, "ERROR: Error while getting SSH key comment.\n");
 					quit(EXIT_FAILURE);
 				}
 				free(ssha_comment); ssha_comment = NULL;
@@ -260,7 +260,7 @@ main(int argc, char *argv[])
 
 		if (stat(db_params.db_filename, &st) == 0) {
 			if (!S_ISDIR(st.st_mode)) {
-				dprintf(STDERR_FILENO, "'%s' is not a directory!\n", db_params.db_filename);
+				dprintf(STDERR_FILENO, "ERROR: '%s' is not a directory!\n", db_params.db_filename);
 				quit(EXIT_FAILURE);
 			}
 		} else {
@@ -268,7 +268,7 @@ main(int argc, char *argv[])
 				printf("%s(): creating '%s' directory\n", __func__, db_params.db_filename);
 
 			if (mkdir(db_params.db_filename, 0777) != 0) {
-				dprintf(STDERR_FILENO, "Could not create '%s': %s\n", db_params.db_filename, strerror(errno));
+				dprintf(STDERR_FILENO, "ERROR: Could not create '%s': %s\n", db_params.db_filename, strerror(errno));
 				quit(EXIT_FAILURE);
 			}
 		}
@@ -288,17 +288,17 @@ main(int argc, char *argv[])
 		printf("Opening '%s'\n",db_params.db_filename);
 
 		if (!S_ISLNK(st.st_mode)  &&  !S_ISREG(st.st_mode)) {
-			dprintf(STDERR_FILENO, "'%s' is not a regular file or a link!\n", db_params.db_filename);
+			dprintf(STDERR_FILENO, "ERROR: '%s' is not a regular file or a link!\n", db_params.db_filename);
 			quit(EXIT_FAILURE);
 		}
 
 		if (st.st_size == 0) {
-			dprintf(STDERR_FILENO, "'%s' is an empty file!\n", db_params.db_filename);
+			dprintf(STDERR_FILENO, "ERROR: '%s' is an empty file!\n", db_params.db_filename);
 			quit(EXIT_FAILURE);
 		}
 
 		if (st.st_size <= IV_DIGEST_LEN + SALT_DIGEST_LEN + 2) {
-			dprintf(STDERR_FILENO, "'%s' is suspiciously small file!\n", db_params.db_filename);
+			dprintf(STDERR_FILENO, "ERROR: '%s' is suspiciously small file!\n", db_params.db_filename);
 			quit(EXIT_FAILURE);
 		}
 
@@ -321,7 +321,7 @@ main(int argc, char *argv[])
 			quit(EXIT_FAILURE);
 		}
 		if (pos != IV_DIGEST_LEN) {
-			dprintf(STDERR_FILENO, "Could not read IV from database file!\n");
+			dprintf(STDERR_FILENO, "ERROR: Could not read IV from database file!\n");
 			quit(EXIT_FAILURE);
 		}
 
@@ -346,7 +346,7 @@ main(int argc, char *argv[])
 			quit(EXIT_FAILURE);
 		}
 		if (pos != SALT_DIGEST_LEN) {
-			dprintf(STDERR_FILENO, "Could not read salt from database file!\n");
+			dprintf(STDERR_FILENO, "ERROR: Could not read salt from database file!\n");
 			quit(EXIT_FAILURE);
 		}
 
@@ -365,7 +365,7 @@ main(int argc, char *argv[])
 
 		/* Generate iv/salt */
 		if (kc_crypt_iv_salt(&db_params) != 1) {
-			dprintf(STDERR_FILENO, "Could not generate IV and/or salt!\n");
+			dprintf(STDERR_FILENO, "ERROR: Could not generate IV and/or salt!\n");
 			quit(EXIT_FAILURE);
 		}
 	}
@@ -378,14 +378,14 @@ main(int argc, char *argv[])
 			if (getenv("KC_DEBUG"))
 				printf("%s(): flock(database file)\n", __func__);
 
-			dprintf(STDERR_FILENO, "Could not lock the database file!\nMaybe another instance is using that database?\n");
+			dprintf(STDERR_FILENO, "ERROR: Could not lock the database file!\nMaybe another instance is using that database?\n");
 			quit(EXIT_FAILURE);
 		}
 
 
 	bio_chain = kc_setup_bio_chain(db_params.db_filename, 0);
 	if (!bio_chain) {
-		dprintf(STDERR_FILENO, "Could not setup bio_chain!\n");
+		dprintf(STDERR_FILENO, "ERROR: Could not setup bio_chain!\n");
 		quit(EXIT_FAILURE);
 	}
 	if (getenv("KC_DEBUG"))
@@ -399,7 +399,7 @@ main(int argc, char *argv[])
 
 		if (stat(db_params.pass_filename, &st) == 0) {
 			if (!S_ISLNK(st.st_mode)  &&  !S_ISREG(st.st_mode)) {
-				dprintf(STDERR_FILENO, "'%s' is not a regular file or a link!\n", db_params.pass_filename);
+				dprintf(STDERR_FILENO, "ERROR: '%s' is not a regular file or a link!\n", db_params.pass_filename);
 				quit(EXIT_FAILURE);
 			}
 		} else {
@@ -429,7 +429,7 @@ main(int argc, char *argv[])
 			quit(EXIT_FAILURE);
 		}
 		if (pos == 0) {
-			dprintf(STDERR_FILENO, "Password file must not be empty!\n");
+			dprintf(STDERR_FILENO, "ERROR: Password file must not be empty!\n");
 			quit(EXIT_FAILURE);
 		}
 
@@ -458,7 +458,7 @@ main(int argc, char *argv[])
 	if (	kc_crypt_key(&db_params) != 1  ||
 		kc_crypt_setup(bio_chain, 0, &db_params) != 1
 	) {
-			dprintf(STDERR_FILENO, "Could not setup decrypting!\n");
+			dprintf(STDERR_FILENO, "ERROR: Could not setup decrypting!\n");
 			quit(EXIT_FAILURE);
 	}
 
@@ -474,13 +474,13 @@ main(int argc, char *argv[])
 		/* create a new document */
 		db = xmlNewDoc(BAD_CAST "1.0");
 		if (!db) {
-			dprintf(STDERR_FILENO, "Could not create XML document!\n");
+			dprintf(STDERR_FILENO, "ERROR: Could not create XML document!\n");
 			quit(EXIT_FAILURE);
 		}
 
 		db_root = xmlNewNode(NULL, BAD_CAST "kc");	/* THE root node */
 		if (!db_root) {
-			dprintf(STDERR_FILENO, "Could not create root node!\n");
+			dprintf(STDERR_FILENO, "ERROR: Could not create root node!\n");
 			quit(EXIT_FAILURE);
 		}
 		xmlDocSetRootElement(db, db_root);
@@ -489,7 +489,7 @@ main(int argc, char *argv[])
 
 		keychain = xmlNewNode(NULL, BAD_CAST "keychain");	/* the first keychain ... */
 		if (!keychain) {
-			dprintf(STDERR_FILENO, "Could not create default keychain!\n");
+			dprintf(STDERR_FILENO, "ERROR: Could not create default keychain!\n");
 			quit(EXIT_FAILURE);
 		}
 		xmlAddChild(db_root, keychain);
@@ -514,7 +514,7 @@ main(int argc, char *argv[])
 		pos = kc_db_reader(&buf, bio_chain);
 
 		if (BIO_get_cipher_status(bio_chain) == 0) {
-			dprintf(STDERR_FILENO, "Failed to decrypt database file!\n");
+			dprintf(STDERR_FILENO, "ERROR: Failed to decrypt database file!\n");
 			quit(EXIT_FAILURE);
 		}
 
@@ -523,27 +523,27 @@ main(int argc, char *argv[])
 		else
 			db = xmlReadMemory(buf, pos, NULL, "UTF-8", XML_PARSE_NONET | XML_PARSE_NOERROR | XML_PARSE_NOWARNING);
 		if (!db) {
-			dprintf(STDERR_FILENO, "Could not parse XML document!\n");
+			dprintf(STDERR_FILENO, "ERROR: Could not parse XML document!\n");
 
 			if (strcmp(db_params.cipher_mode, "cbc") != 0)
-				dprintf(STDERR_FILENO, "If you have specified cfb128 or ofb for chipher mode, this could also mean that either you have entered a wrong password or specified a cipher mode other than that the database was encrypted with!\n");
+				dprintf(STDERR_FILENO, "ERROR: If you have specified cfb128 or ofb for chipher mode, this could also mean that either you have entered a wrong password or specified a cipher mode other than that the database was encrypted with!\n");
 
 			quit(EXIT_FAILURE);
 		}
 
 		/* Validate the XML structure against our kc.dtd */
 		if (!kc_validate_xml(db)) {
-			dprintf(STDERR_FILENO, "Not a valid kc XML structure ('%s')!\n", db_params.db_filename);
+			dprintf(STDERR_FILENO, "ERROR: Not a valid kc XML structure ('%s')!\n", db_params.db_filename);
 			quit(EXIT_FAILURE);
 		}
 
 		db_root = xmlDocGetRootElement(db);
 		if (!db_root) {
-			dprintf(STDERR_FILENO, "Could not find root node!\n");
+			dprintf(STDERR_FILENO, "ERROR: Could not find root node!\n");
 			quit(EXIT_FAILURE);
 		}
 		if (!db_root->children  ||  !db_root->children->next) {
-			dprintf(STDERR_FILENO, "Could not find first keychain!\n");
+			dprintf(STDERR_FILENO, "ERROR: Could not find first keychain!\n");
 			quit(EXIT_FAILURE);
 		}
 
@@ -589,10 +589,10 @@ main(int argc, char *argv[])
 		quit(EXIT_FAILURE);
 	}
 	if (history(eh, &eh_ev, H_SETSIZE, 100) < 0)
-		dprintf(STDERR_FILENO, "history(H_SETSIZE): %s\n", eh_ev.str);
+		dprintf(STDERR_FILENO, "ERROR: history(H_SETSIZE): %s\n", eh_ev.str);
 
 	if (history(eh, &eh_ev, H_SETUNIQUE, 1) < 0)
-		dprintf(STDERR_FILENO, "history(H_SETUNIQUE): %s\n", eh_ev.str);
+		dprintf(STDERR_FILENO, "ERROR: history(H_SETUNIQUE): %s\n", eh_ev.str);
 
 	/* setup editline/history parameters */
 	if (el_set(e, EL_PROMPT, prompt_str) != 0)
@@ -627,7 +627,7 @@ main(int argc, char *argv[])
 			if (errno != ENOENT)
 				perror("Error executing .editrc");
 		} else
-			dprintf(STDERR_FILENO, "Error executing .editrc\n");
+			dprintf(STDERR_FILENO, "ERROR: Error executing .editrc\n");
 	}
 	if (el_set(e, EL_EDITMODE, 1) != 0) {
 		perror("el_set(EL_EDITMODE)");

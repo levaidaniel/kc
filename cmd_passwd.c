@@ -88,29 +88,29 @@ cmd_passwd(const char *e_line, command *commands)
 
 				ssha_type = strndup(strsep(&optarg, ","), 11);
 				if (ssha_type == NULL  ||  !strlen(ssha_type)) {
-					dprintf(STDERR_FILENO, "SSH key type is empty!\n");
+					dprintf(STDERR_FILENO, "ERROR: SSH key type is empty!\n");
 					goto exiting;
 				}
 				if (	strncmp(ssha_type, "ssh-rsa", 7) != 0  &&
 					strncmp(ssha_type, "ssh-ed25519", 11) != 0
 				) {
-					dprintf(STDERR_FILENO, "SSH key type is unsupported: '%s'\n", ssha_type);
+					dprintf(STDERR_FILENO, "ERROR: SSH key type is unsupported: '%s'\n", ssha_type);
 					goto exiting;
 				}
 
 				ssha_comment = strndup(optarg, 512);
 				if (ssha_comment == NULL  ||  !strlen(ssha_comment)) {
-					dprintf(STDERR_FILENO, "SSH key comment is empty!\n");
+					dprintf(STDERR_FILENO, "ERROR: SSH key comment is empty!\n");
 					goto exiting;
 				}
 
 				if (strlcpy(db_params_tmp.ssha_type, ssha_type, sizeof(db_params_tmp.ssha_type)) >= sizeof(db_params_tmp.ssha_type)) {
-					dprintf(STDERR_FILENO, "Error while getting SSH key type.\n");
+					dprintf(STDERR_FILENO, "ERROR: Error while getting SSH key type.\n");
 					goto exiting;
 				}
 
 				if (strlcpy(db_params_tmp.ssha_comment, ssha_comment, sizeof(db_params_tmp.ssha_comment)) >= sizeof(db_params_tmp.ssha_comment)) {
-					dprintf(STDERR_FILENO, "Error while getting SSH key type.\n");
+					dprintf(STDERR_FILENO, "ERROR: Error while getting SSH key type.\n");
 					goto exiting;
 				}
 
@@ -132,7 +132,7 @@ cmd_passwd(const char *e_line, command *commands)
 
 
 	if (kc_crypt_iv_salt(&db_params_tmp) != 1) {
-		dprintf(STDERR_FILENO, "Could not generate IV and/or salt!\n");
+		dprintf(STDERR_FILENO, "ERROR: Could not generate IV and/or salt!\n");
 		goto exiting;
 	}
 
@@ -150,18 +150,18 @@ cmd_passwd(const char *e_line, command *commands)
 	if (	kc_crypt_key(&db_params_tmp) != 1  ||
 		kc_crypt_setup(bio_chain, 1, &db_params_tmp) != 1
 	) {
-		dprintf(STDERR_FILENO, "Could not setup encrypting!\n");
+		dprintf(STDERR_FILENO, "ERROR: Could not setup encrypting!\n");
 		goto exiting;
 	}
 
 
 	/* store the new IV/salt/key in our working copy of 'db_params' */
 	if (strlcpy((char *)db_params.iv, (const char*)db_params_tmp.iv, sizeof(db_params.iv)) >= sizeof(db_params.iv)) {
-		dprintf(STDERR_FILENO, "Could not copy IV!\n");
+		dprintf(STDERR_FILENO, "ERROR: Could not copy IV!\n");
 		goto exiting;
 	}
 	if (strlcpy((char *)db_params.salt, (const char*)db_params_tmp.salt, sizeof(db_params.salt)) >= sizeof(db_params.salt)) {
-		dprintf(STDERR_FILENO, "Could not copy salt!\n");
+		dprintf(STDERR_FILENO, "ERROR: Could not copy salt!\n");
 		goto exiting;
 	}
 	memcpy(db_params.key, db_params_tmp.key, KEY_LEN);
@@ -178,11 +178,11 @@ cmd_passwd(const char *e_line, command *commands)
 		goto exiting;
 	}
 	if (strlcpy((char *)db_params.ssha_type, (const char*)db_params_tmp.ssha_type, sizeof(db_params.ssha_type)) >= sizeof(db_params.ssha_type)) {
-		dprintf(STDERR_FILENO, "Could not save SSH key type!\n");
+		dprintf(STDERR_FILENO, "ERROR: Could not save SSH key type!\n");
 		goto exiting;
 	}
 	if (strlcpy((char *)db_params.ssha_comment, (const char*)db_params_tmp.ssha_comment, sizeof(db_params.ssha_comment)) >= sizeof(db_params.ssha_comment)) {
-		dprintf(STDERR_FILENO, "Could not save SSH key comment!\n");
+		dprintf(STDERR_FILENO, "ERROR: Could not save SSH key comment!\n");
 		goto exiting;
 	}
 

@@ -119,9 +119,9 @@ cmd_swap(const char *e_line, command *commands)
 
 	if (!swap_keys(&key_src, &key_dst)) {
 		if (insert)
-			dprintf(STDERR_FILENO, "Error while preparing to insert key!\n");
+			dprintf(STDERR_FILENO, "ERROR: Error while preparing to insert key!\n");
 		else
-			dprintf(STDERR_FILENO, "Error while trying to swap keys!\n");
+			dprintf(STDERR_FILENO, "ERROR: Error while trying to swap keys!\n");
 
 		return;
 	}
@@ -152,7 +152,7 @@ cmd_swap(const char *e_line, command *commands)
 				break;
 
 			if (key_dst->type != XML_ELEMENT_NODE) {
-				dprintf(STDERR_FILENO, "Error while trying to insert key! Please check your key list and reload your database without saving, if necessary!\n");
+				dprintf(STDERR_FILENO, "ERROR: Error while trying to insert key! Please check your key list and reload your database without saving, if necessary!\n");
 				if (getenv("KC_DEBUG"))
 					printf("%s(): key_dst is non-element node!\n", __func__);
 
@@ -160,7 +160,7 @@ cmd_swap(const char *e_line, command *commands)
 			}
 
 			if (!swap_keys(&key_src, &key_dst)) {
-				dprintf(STDERR_FILENO, "Error while trying to insert key! Please check your key list and reload your database without saving, if necessary!\n");
+				dprintf(STDERR_FILENO, "ERROR: Error while trying to insert key! Please check your key list and reload your database without saving, if necessary!\n");
 				if (getenv("KC_DEBUG"))
 					printf("%s(): swap_key() error while shifting nodes!\n", __func__);
 
@@ -202,7 +202,7 @@ swap_keys(xmlNodePtr *key_src, xmlNodePtr *key_dst)
 	/* duplicate the source key */
 	key_tmp_src = xmlCopyNode(*key_src, 2);
 	if (!key_tmp_src) {
-		dprintf(STDERR_FILENO, "Error duplicating source entry!\n");
+		dprintf(STDERR_FILENO, "ERROR: Error duplicating source entry!\n");
 
 		if (getenv("KC_DEBUG"))
 			printf("%s(): xmlCopyNode() error!\n", __func__);
@@ -213,7 +213,7 @@ swap_keys(xmlNodePtr *key_src, xmlNodePtr *key_dst)
 	/* duplicate the destination key */
 	key_tmp_dst = xmlCopyNode(*key_dst, 2);
 	if (!key_tmp_dst) {
-		dprintf(STDERR_FILENO, "Error duplicating destination entry!\n");
+		dprintf(STDERR_FILENO, "ERROR: Error duplicating destination entry!\n");
 
 		if (getenv("KC_DEBUG"))
 			printf("%s(): xmlCopyNode() error!\n", __func__);

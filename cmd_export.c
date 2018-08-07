@@ -117,29 +117,29 @@ cmd_export(const char *e_line, command *commands)
 
 				ssha_type = strndup(strsep(&optarg, ","), 11);
 				if (ssha_type == NULL  ||  !strlen(ssha_type)) {
-					dprintf(STDERR_FILENO, "SSH key type is empty!\n");
+					dprintf(STDERR_FILENO, "ERROR: SSH key type is empty!\n");
 					goto exiting;
 				}
 				if (	strncmp(ssha_type, "ssh-rsa", 7) != 0  &&
 					strncmp(ssha_type, "ssh-ed25519", 11) != 0
 				) {
-					dprintf(STDERR_FILENO, "SSH key type is unsupported: '%s'\n", ssha_type);
+					dprintf(STDERR_FILENO, "ERROR: SSH key type is unsupported: '%s'\n", ssha_type);
 					goto exiting;
 				}
 
 				ssha_comment = strndup(optarg, 512);
 				if (ssha_comment == NULL  ||  !strlen(ssha_comment)) {
-					dprintf(STDERR_FILENO, "SSH key comment is empty!\n");
+					dprintf(STDERR_FILENO, "ERROR: SSH key comment is empty!\n");
 					goto exiting;
 				}
 
 				if (strlcpy(db_params_new.ssha_type, ssha_type, sizeof(db_params_new.ssha_type)) >= sizeof(db_params_new.ssha_type)) {
-					dprintf(STDERR_FILENO, "Error while getting SSH key type.\n");
+					dprintf(STDERR_FILENO, "ERROR: Error while getting SSH key type.\n");
 					goto exiting;
 				}
 
 				if (strlcpy(db_params_new.ssha_comment, ssha_comment, sizeof(db_params_new.ssha_comment)) >= sizeof(db_params_new.ssha_comment)) {
-					dprintf(STDERR_FILENO, "Error while getting SSH key type.\n");
+					dprintf(STDERR_FILENO, "ERROR: Error while getting SSH key type.\n");
 					goto exiting;
 				}
 
@@ -214,7 +214,7 @@ cmd_export(const char *e_line, command *commands)
 		/* create the new document */
 		db_tmp = xmlNewDoc(BAD_CAST "1.0");
 		if (!db_tmp) {
-			dprintf(STDERR_FILENO, "Could not create the new XML document for export!\n");
+			dprintf(STDERR_FILENO, "ERROR: Could not create the new XML document for export!\n");
 
 			goto exiting;
 		}
@@ -222,7 +222,7 @@ cmd_export(const char *e_line, command *commands)
 		/* A new root node */
 		root_node_tmp = xmlNewNode(NULL, BAD_CAST "kc");
 		if (!root_node_tmp) {
-			dprintf(STDERR_FILENO, "Could not create the new root node for export!\n");
+			dprintf(STDERR_FILENO, "ERROR: Could not create the new root node for export!\n");
 
 			goto exiting;
 		}
@@ -232,7 +232,7 @@ cmd_export(const char *e_line, command *commands)
 		xmlAddChild(root_node_tmp, xmlNewText(BAD_CAST "\n\t"));
 		keychain_tmp = xmlCopyNode(keychain, 1);
 		if (!keychain_tmp) {
-			dprintf(STDERR_FILENO, "Could not duplicate keychain for export!\n");
+			dprintf(STDERR_FILENO, "ERROR: Could not duplicate keychain for export!\n");
 
 			goto exiting;
 		}
@@ -252,7 +252,7 @@ cmd_export(const char *e_line, command *commands)
 				strlen(db_params_new.db_filename) + 4 + 1)
 				>= strlen(db_params_new.db_filename) + 4 + 1)
 		{
-			dprintf(STDERR_FILENO, "Could not construct the name of the output file!\n");
+			dprintf(STDERR_FILENO, "ERROR: Could not construct the name of the output file!\n");
 
 			goto exiting;
 		}
@@ -304,7 +304,7 @@ cmd_export(const char *e_line, command *commands)
 	if (dump) {
 		if (xmlSaveFormatFileEnc(db_params_new.db_filename, db_tmp, "UTF-8", XML_SAVE_FORMAT) > 0) {
 			if (chmod(db_params_new.db_filename, S_IRUSR | S_IWUSR) < 0)
-				dprintf(STDERR_FILENO, "Could not change permissions of dump file!\n");
+				dprintf(STDERR_FILENO, "ERROR: Could not change permissions of dump file!\n");
 
 			puts("Dump OK");
 		} else
@@ -318,14 +318,14 @@ cmd_export(const char *e_line, command *commands)
 
 		bio_chain = kc_setup_bio_chain(db_params_new.db_filename, 1);
 		if (!bio_chain) {
-			dprintf(STDERR_FILENO, "Could not setup bio_chain!\n");
+			dprintf(STDERR_FILENO, "ERROR: Could not setup bio_chain!\n");
 			goto exiting;
 		}
 
 
 		/* Generate iv/salt */
 		if (kc_crypt_iv_salt(&db_params_new) != 1) {
-			dprintf(STDERR_FILENO, "Could not generate IV and/or salt!\n");
+			dprintf(STDERR_FILENO, "ERROR: Could not generate IV and/or salt!\n");
 			goto exiting;
 		}
 
@@ -344,7 +344,7 @@ cmd_export(const char *e_line, command *commands)
 		if (	kc_crypt_key(&db_params_new) != 1  ||
 			kc_crypt_setup(bio_chain, 1, &db_params_new) != 1
 		) {
-			dprintf(STDERR_FILENO, "Could not setup encrypting!\n");
+			dprintf(STDERR_FILENO, "ERROR: Could not setup encrypting!\n");
 			goto exiting;
 		}
 
