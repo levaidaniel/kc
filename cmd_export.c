@@ -76,15 +76,31 @@ cmd_export(const char *e_line, command *commands)
 	db_params_new.db_filename = NULL;
 	db_params_new.db_file = -1;
 	db_params_new.pass_filename = NULL;
-	db_params_new.kdf = strdup(db_params.kdf); malloc_check(db_params_new.kdf);
-	db_params_new.cipher = strdup(db_params.cipher); malloc_check(db_params_new.cipher);
-	db_params_new.cipher_mode = strdup(db_params.cipher_mode); malloc_check(db_params_new.cipher_mode);
+	db_params_new.kdf = strdup(db_params.kdf);
+	if (!db_params_new.kdf) {
+		perror("Could not duplicate the KDF");
+		goto exiting;
+	}
+	db_params_new.cipher = strdup(db_params.cipher);
+	if (!db_params_new.cipher) {
+		perror("Could not duplicate the cipher");
+		goto exiting;
+	}
+	db_params_new.cipher_mode = strdup(db_params.cipher_mode);
+	if (!db_params_new.cipher_mode) {
+		perror("Could not duplicate the cipher mode");
+		goto exiting;
+	}
 	db_params_new.dirty = 0;
 	db_params_new.readonly = 0;
 
 
 	/* Parse the arguments */
-	line = strdup(e_line); malloc_check(line);
+	line = strdup(e_line);
+	if (!line) {
+		perror("Could not duplicate the command line");
+		goto exiting;
+	}
 	larg(line, &largv, &largc);
 	free(line); line = NULL;
 
@@ -92,10 +108,10 @@ cmd_export(const char *e_line, command *commands)
 	while ((c = getopt(largc, largv, "A:k:c:P:e:m:")) != -1)
 		switch (c) {
 			case 'A':
-				/* in case this parameter is passed multiple times */
-				if (ssha_type) {
-					free(ssha_type); ssha_type = NULL;
-				}
+				/* in case this parameter is being parsed multiple times */
+				free(ssha_type); ssha_type = NULL;
+				free(ssha_comment); ssha_comment = NULL;
+
 				ssha_type = strndup(strsep(&optarg, ","), 11);
 				if (ssha_type == NULL  ||  !strlen(ssha_type)) {
 					dprintf(STDERR_FILENO, "SSH key type is empty!\n");
@@ -108,10 +124,6 @@ cmd_export(const char *e_line, command *commands)
 					goto exiting;
 				}
 
-				/* in case this parameter is passed multiple times */
-				if (ssha_comment) {
-					free(ssha_comment); ssha_comment = NULL;
-				}
 				ssha_comment = strndup(optarg, 512);
 				if (ssha_comment == NULL  ||  !strlen(ssha_comment)) {
 					dprintf(STDERR_FILENO, "SSH key comment is empty!\n");
@@ -122,33 +134,53 @@ cmd_export(const char *e_line, command *commands)
 					dprintf(STDERR_FILENO, "Error while getting SSH key type.\n");
 					goto exiting;
 				}
-				free(ssha_type); ssha_type = NULL;
 
 				if (strlcpy(db_params_new.ssha_comment, ssha_comment, sizeof(db_params_new.ssha_comment)) >= sizeof(db_params_new.ssha_comment)) {
 					dprintf(STDERR_FILENO, "Error while getting SSH key type.\n");
 					goto exiting;
 				}
-				free(ssha_comment); ssha_comment = NULL;
 
 				printf("Using (%s) %s identity for decryption\n", db_params_new.ssha_type, db_params_new.ssha_comment);
 			break;
 			case 'k':
-				db_params_new.db_filename = strdup(optarg); malloc_check(db_params_new.db_filename);
+				free(db_params_new.db_filename); db_params_new.db_filename = NULL;
+				db_params_new.db_filename = strdup(optarg);
+				if (!db_params_new.db_filename) {
+					perror("Could not duplicate the database file name");
+					goto exiting;
+				}
 			break;
 			case 'c':
-				cname = BAD_CAST strdup(optarg); malloc_check(cname);
+				free(cname); cname = NULL;
+				cname = BAD_CAST strdup(optarg);
+				if (!cname) {
+					perror("Could not duplicate the keychain name");
+					goto exiting;
+				}
 			break;
 			case 'P':
 				free(db_params_new.kdf); db_params_new.kdf = NULL;
-				db_params_new.kdf = strdup(optarg); malloc_check(db_params_new.kdf);
+				db_params_new.kdf = strdup(optarg);
+				if (!db_params_new.kdf) {
+					perror("Could not duplicate the KDF");
+					goto exiting;
+				}
 			break;
 			case 'e':
 				free(db_params_new.cipher); db_params_new.cipher = NULL;
-				db_params_new.cipher = strdup(optarg); malloc_check(db_params_new.cipher);
+				db_params_new.cipher = strdup(optarg);
+				if (!db_params_new.cipher) {
+					perror("Could not duplicate the cipher");
+					goto exiting;
+				}
 			break;
 			case 'm':
 				free(db_params_new.cipher_mode); db_params_new.cipher_mode = NULL;
-				db_params_new.cipher_mode = strdup(optarg); malloc_check(db_params_new.cipher_mode);
+				db_params_new.cipher_mode = strdup(optarg);
+				if (!db_params_new.cipher_mode) {
+					perror("Could not duplicate the cipher mode");
+					goto exiting;
+				}
 			break;
 			default:
 				exiting++;
