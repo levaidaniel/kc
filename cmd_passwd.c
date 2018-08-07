@@ -129,7 +129,7 @@ cmd_passwd(const char *e_line, command *commands)
 
 
 	if (kc_crypt_iv_salt(&db_params_tmp) != 1) {
-		puts("Could not generate IV and/or salt!");
+		dprintf(STDERR_FILENO, "Could not generate IV and/or salt!\n");
 		goto exiting;
 	}
 
@@ -147,7 +147,7 @@ cmd_passwd(const char *e_line, command *commands)
 	if (	kc_crypt_key(&db_params_tmp) != 1  ||
 		kc_crypt_setup(bio_chain, 1, &db_params_tmp) != 1
 	) {
-		puts("Could not setup encrypting!");
+		dprintf(STDERR_FILENO, "Could not setup encrypting!\n");
 		goto exiting;
 	}
 

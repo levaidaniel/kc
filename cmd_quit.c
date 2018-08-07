@@ -86,7 +86,7 @@ cmd_quit(const char *e_line, command *commands)
 			cmd_write(NULL, NULL);
 
 			if (db_params.dirty) {
-				puts("Database write was not successful; can not save and exit!");
+				dprintf(STDERR_FILENO, "Database write was not successful; can not save and exit!\n");
 #ifdef _READLINE
 				free((char *)e_line); e_line = NULL;
 #endif

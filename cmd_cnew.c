@@ -55,7 +55,7 @@ cmd_cnew(const char *e_line, command *commands)
 	commands = NULL;
 
 	if ((idx = count_elements(keychain->parent->children)) >= ITEMS_MAX - 1) {
-		printf("Can not create the keychain: maximum number of keychains reached, %lu.\n", ITEMS_MAX - 1);
+		dprintf(STDERR_FILENO, "Can not create the keychain: maximum number of keychains reached, %lu.\n", ITEMS_MAX - 1);
 
 		return;
 	}

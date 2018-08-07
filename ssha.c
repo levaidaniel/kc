@@ -188,7 +188,7 @@ kc_ssha_sign_request(int sock, struct kc_ssha_identity *id, char *data, unsigned
 	} while (pos < buf_len);
 
 	if (getenv("KC_DEBUG"))
-		dprintf(STDERR_FILENO, "%s(): wrote total = %zd\n", __func__, wt);
+		printf("%s(): wrote total = %zd\n", __func__, wt);
 
 
 	free(buf); buf = NULL;
@@ -220,7 +220,7 @@ kc_ssha_get_full_response(int sock)
 
 	len = get_u32(buf);
 	if (getenv("KC_DEBUG"))
-		dprintf(STDERR_FILENO, "%s(): response length = %zd\n", __func__, len);
+		printf("%s(): response length = %zd\n", __func__, len);
 
 	if (len > MAX_AGENT_REPLY_LEN) {
 		dprintf(STDERR_FILENO, "Indicated response length(%zd) is more than MAX_AGENT_REPLY_LEN(%d)\n", len, MAX_AGENT_REPLY_LEN);
@@ -237,7 +237,7 @@ kc_ssha_get_full_response(int sock)
 			buf_len_prev = buf_len;
 			buf_len = ++buf_len_mult * buf_len_base;
 			if (getenv("KC_DEBUG"))
-				dprintf(STDERR_FILENO, "%s(): realloc response buf to %zd\n", __func__, buf_len);
+				printf("%s(): realloc response buf to %zd\n", __func__, buf_len);
 			nbuf = realloc(buf, buf_len); malloc_check(nbuf);
 
 			buf = nbuf;
@@ -263,7 +263,7 @@ kc_ssha_get_full_response(int sock)
 	}
 
 	if (getenv("KC_DEBUG"))
-		dprintf(STDERR_FILENO, "%s(): read total = %zd\n", __func__, rt);
+		printf("%s(): read total = %zd\n", __func__, rt);
 
 	if (rt != len) {
 		dprintf(STDERR_FILENO, "Total read bytes is different from length indication in response\n");
@@ -301,7 +301,7 @@ kc_ssha_parse_identities(struct kc_ssha_response *response)
 
 	num_ids = get_u32(response->data+pos);
 	if (getenv("KC_DEBUG"))
-		dprintf(STDERR_FILENO, "%s(): SSH agent has %zd identities\n", __func__, num_ids);
+		printf("%s(): SSH agent has %zd identities\n", __func__, num_ids);
 
 	if (num_ids <= 0) {
 		dprintf(STDERR_FILENO, "SSH agent has no identities\n");

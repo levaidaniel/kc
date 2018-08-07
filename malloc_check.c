@@ -33,7 +33,7 @@ int
 malloc_check(void *p)
 {
 	if (p == NULL) {
-		fprintf(stderr, "%s\n", strerror(ENOMEM));
+		dprintf(STDERR_FILENO, "%s\n", strerror(ENOMEM));
 		exit(EXIT_FAILURE);
 	} else {
 		return(EXIT_SUCCESS);

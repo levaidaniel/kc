@@ -160,7 +160,7 @@ get_random_str(const unsigned int length, const unsigned char mode)
 
 	rnd_file = open(rnd_dev, O_RDONLY);
 	if (rnd_file < 0) {
-		printf("Error opening %s!", rnd_dev);
+		dprintf(STDERR_FILENO, "Error opening %s!\n", rnd_dev);
 		perror("open()");
 		return(NULL);
 	}
@@ -593,7 +593,7 @@ kc_crypt_iv_salt(struct db_parameters *db_params)
 	/* Setup the digest context */
 	mdctx = EVP_MD_CTX_create();
 	if (!mdctx) {
-		puts("Could not create digest context for IV!");
+		dprintf(STDERR_FILENO, "Could not create digest context for IV!\n");
 
 		free(iv_tmp); iv_tmp = NULL;
 		free(salt_tmp); salt_tmp = NULL;
@@ -639,7 +639,7 @@ kc_crypt_iv_salt(struct db_parameters *db_params)
 	/* Setup the digest context */
 	mdctx = EVP_MD_CTX_create();
 	if (!mdctx) {
-		puts("Could not create digest context for IV!");
+		dprintf(STDERR_FILENO, "Could not create digest context for IV!\n");
 
 		free(iv_tmp); iv_tmp = NULL;
 		free(salt_tmp); salt_tmp = NULL;
@@ -765,7 +765,7 @@ kc_crypt_setup(BIO *bio_chain, const unsigned int enc, struct db_parameters *db_
 	/* extract bio_cipher from bio_chain */
 	bio_chain = BIO_find_type(bio_chain, BIO_TYPE_CIPHER);
 	if (!bio_chain) {
-		puts("Could not find a usable cipher method!");
+		dprintf(STDERR_FILENO, "Could not find a usable cipher method!\n");
 
 		return(0);
 	}
@@ -1118,14 +1118,14 @@ kc_db_reader(char **buf, BIO *bio_chain)
 					if (getenv("KC_DEBUG"))
 						printf("%s(): BIO_read() error (don't retry): %s\n", __func__, strerror(errno));
 
-					puts("There was an error while trying to read the database!");
+					dprintf(STDERR_FILENO, "There was an error while trying to read the database!\n");
 				}
 			break;
 			case -2:
 				if (getenv("KC_DEBUG"))
 					printf("%s(): unsupported operation: %s\n", __func__, strerror(errno));
 
-				puts("There was an error while trying to read the database!");
+				dprintf(STDERR_FILENO, "There was an error while trying to read the database!\n");
 			break;
 			default:
 				pos += ret;

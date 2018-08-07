@@ -211,7 +211,7 @@ cmd_export(const char *e_line, command *commands)
 		/* create the new document */
 		db_tmp = xmlNewDoc(BAD_CAST "1.0");
 		if (!db_tmp) {
-			puts("Could not create the new XML document for export!");
+			dprintf(STDERR_FILENO, "Could not create the new XML document for export!\n");
 
 			goto exiting;
 		}
@@ -219,7 +219,7 @@ cmd_export(const char *e_line, command *commands)
 		/* A new root node */
 		root_node_tmp = xmlNewNode(NULL, BAD_CAST "kc");
 		if (!root_node_tmp) {
-			puts("Could not create the new root node for export!");
+			dprintf(STDERR_FILENO, "Could not create the new root node for export!\n");
 
 			goto exiting;
 		}
@@ -229,7 +229,7 @@ cmd_export(const char *e_line, command *commands)
 		xmlAddChild(root_node_tmp, xmlNewText(BAD_CAST "\n\t"));
 		keychain_tmp = xmlCopyNode(keychain, 1);
 		if (!keychain_tmp) {
-			puts("Could not duplicate keychain for export!");
+			dprintf(STDERR_FILENO, "Could not duplicate keychain for export!\n");
 
 			goto exiting;
 		}
@@ -249,7 +249,7 @@ cmd_export(const char *e_line, command *commands)
 				strlen(db_params_new.db_filename) + 4 + 1)
 				>= strlen(db_params_new.db_filename) + 4 + 1)
 		{
-			puts("Could not construct the name of the output file!");
+			dprintf(STDERR_FILENO, "Could not construct the name of the output file!\n");
 
 			goto exiting;
 		}
@@ -301,7 +301,7 @@ cmd_export(const char *e_line, command *commands)
 	if (dump) {
 		if (xmlSaveFormatFileEnc(db_params_new.db_filename, db_tmp, "UTF-8", XML_SAVE_FORMAT) > 0) {
 			if (chmod(db_params_new.db_filename, S_IRUSR | S_IWUSR) < 0)
-				puts("Could not change permissions of dump file!");
+				dprintf(STDERR_FILENO, "Could not change permissions of dump file!\n");
 
 			puts("Dump OK");
 		} else
@@ -315,14 +315,14 @@ cmd_export(const char *e_line, command *commands)
 
 		bio_chain = kc_setup_bio_chain(db_params_new.db_filename, 1);
 		if (!bio_chain) {
-			puts("Could not setup bio_chain!");
+			dprintf(STDERR_FILENO, "Could not setup bio_chain!\n");
 			goto exiting;
 		}
 
 
 		/* Generate iv/salt */
 		if (kc_crypt_iv_salt(&db_params_new) != 1) {
-			puts("Could not generate IV and/or salt!\n");
+			dprintf(STDERR_FILENO, "Could not generate IV and/or salt!\n");
 			goto exiting;
 		}
 
@@ -341,7 +341,7 @@ cmd_export(const char *e_line, command *commands)
 		if (	kc_crypt_key(&db_params_new) != 1  ||
 			kc_crypt_setup(bio_chain, 1, &db_params_new) != 1
 		) {
-			puts("Could not setup encrypting!");
+			dprintf(STDERR_FILENO, "Could not setup encrypting!\n");
 			goto exiting;
 		}
 

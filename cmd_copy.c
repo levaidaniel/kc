@@ -93,7 +93,7 @@ cmd_copy(const char *e_line, command *commands)
 	}
 
 	if (count_elements(keychain_dest) >= ITEMS_MAX - 1) {
-		printf("Can not copy/move the key to keychain: maximum number of keys reached, %lu.\n", ITEMS_MAX - 1);
+		dprintf(STDERR_FILENO, "Can not copy/move the key to keychain: maximum number of keys reached, %lu.\n", ITEMS_MAX - 1);
 
 		free(line); line = NULL;
 		return;
@@ -110,7 +110,7 @@ cmd_copy(const char *e_line, command *commands)
 		/* duplicate the key which is to be copied */
 		key_new = xmlCopyNode(key, 2);
 		if (!key_new) {
-			puts("Error copying entry!");
+			dprintf(STDERR_FILENO, "Error copying entry!\n");
 
 			if (getenv("KC_DEBUG"))
 				printf("%s(): xmlCopyNode() error!\n", __func__);

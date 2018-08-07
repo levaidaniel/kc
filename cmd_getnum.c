@@ -250,7 +250,7 @@ cmd_getnum(const unsigned long int idx, const unsigned long int spice)
 								fork_argv[4] = NULL;
 
 								if (execvp(fork_argv[0], fork_argv) == -1)
-									fprintf(stderr, "tmux: %s\n", strerror(errno));
+									dprintf(STDERR_FILENO, "tmux: %s\n", strerror(errno));
 
 								quit(EXIT_FAILURE);
 
@@ -303,7 +303,7 @@ cmd_getnum(const unsigned long int idx, const unsigned long int spice)
 								 * and the exec'd process will have the same environment. */
 								dup2(pipefd[0], 0);
 								if (execvp(fork_argv[0], fork_argv) == -1)
-									fprintf(stderr, "xclip: %s\n", strerror(errno));
+									dprintf(STDERR_FILENO, "xclip: %s\n", strerror(errno));
 
 								quit(EXIT_FAILURE);
 
