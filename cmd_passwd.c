@@ -171,6 +171,21 @@ cmd_passwd(const char *e_line, command *commands)
 		goto exiting;
 	}
 
+	free(db_params.kdf); db_params.kdf = NULL;
+	db_params.kdf = strdup(db_params_tmp.kdf);
+	if (!db_params.kdf) {
+		perror("Could not save the KDF");
+		goto exiting;
+	}
+	if (strlcpy((char *)db_params.ssha_type, (const char*)db_params_tmp.ssha_type, sizeof(db_params.ssha_type)) >= sizeof(db_params.ssha_type)) {
+		dprintf(STDERR_FILENO, "Could not save SSH key type!\n");
+		goto exiting;
+	}
+	if (strlcpy((char *)db_params.ssha_comment, (const char*)db_params_tmp.ssha_comment, sizeof(db_params.ssha_comment)) >= sizeof(db_params.ssha_comment)) {
+		dprintf(STDERR_FILENO, "Could not save SSH key comment!\n");
+		goto exiting;
+	}
+
 
 	cmd_write(NULL, NULL);
 	puts("Password change OK");
