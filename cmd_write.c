@@ -55,12 +55,12 @@ cmd_write(const char *e_line, command *commands)
 
 	/* initial db_params for the exported database */
 	db_params_tmp.pass = NULL;
+	db_params_tmp.db_file = -1;
 	db_params_tmp.db_filename = malloc(MAXPATHLEN);
 	if (!db_params_tmp.db_filename) {
 		perror("Could not allocate memory for the file name");
 		goto exiting;
 	}
-	db_params_tmp.db_file = -1;
 	db_params_tmp.pass_filename = NULL;
 	db_params_tmp.dirty = 0;
 	db_params_tmp.readonly = 0;
@@ -226,13 +226,13 @@ cmd_write(const char *e_line, command *commands)
 	puts("Save OK");
 
 exiting:
-	free(db_params_tmp.db_filename); db_params_tmp.db_filename = NULL;
 	free(rand_str); rand_str = NULL;
 
-	if (db_params_tmp.db_file >= 0) {
+	if (db_params_tmp.db_file >= 0)
 		close(db_params_tmp.db_file);
+	if (db_params_tmp.db_filename)
 		unlink(db_params_tmp.db_filename);
-	}
+	free(db_params_tmp.db_filename); db_params_tmp.db_filename = NULL;
 
 	if (bio_chain_tmp)
 		BIO_free_all(bio_chain_tmp);

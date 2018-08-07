@@ -72,9 +72,12 @@ cmd_import(const char *e_line, command *commands)
 	db_params_new.ssha_comment[0] = '\0';
 	db_params_new.pass = NULL;
 	db_params_new.pass_len = 0;
-	db_params_new.db_filename = NULL;
 	db_params_new.db_file = -1;
+	db_params_new.db_filename = NULL;
 	db_params_new.pass_filename = NULL;
+	db_params_new.kdf = NULL;
+	db_params_new.cipher = NULL;
+	db_params_new.cipher_mode = NULL;
 	db_params_new.kdf = strdup(db_params.kdf);
 	if (!db_params_new.kdf) {
 		perror("Could not duplicate the KDF");
@@ -494,7 +497,7 @@ cmd_import(const char *e_line, command *commands)
 	db_params.dirty = 1;
 
 exiting:
-	for (c = 0; c <= largc; c++) {
+	for (c = 0; c < largc; c++) {
 		free(largv[c]); largv[c] = NULL;
 	}
 	free(largv); largv = NULL;

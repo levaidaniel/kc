@@ -43,21 +43,15 @@ cmd_passwd(const char *e_line, command *commands)
 	db_parameters	db_params_tmp;
 
 
-	/* Parse the arguments */
-	line = strdup(e_line);
-	if (!line) {
-		perror("Could not duplicate the command line");
-		goto exiting;
-	}
-	larg(line, &largv, &largc);
-	free(line); line = NULL;
-
 	/* initial db_params for the temporary database */
 	db_params_tmp.ssha_type[0] = '\0';
 	db_params_tmp.ssha_comment[0] = '\0';
 	db_params_tmp.pass = NULL;
 	db_params_tmp.pass_len = 0;
 	db_params_tmp.pass_filename = NULL;
+	db_params_tmp.kdf = NULL;
+	db_params_tmp.cipher = NULL;
+	db_params_tmp.cipher_mode = NULL;
 	db_params_tmp.kdf = strdup(db_params.kdf);
 	if (!db_params_tmp.kdf) {
 		perror("Could not duplicate the KDF");
@@ -74,6 +68,15 @@ cmd_passwd(const char *e_line, command *commands)
 		goto exiting;
 	}
 
+
+	/* Parse the arguments */
+	line = strdup(e_line);
+	if (!line) {
+		perror("Could not duplicate the command line");
+		goto exiting;
+	}
+	larg(line, &largv, &largc);
+	free(line); line = NULL;
 
 	optind = 0;
 	while ((c = getopt(largc, largv, "A:P:")) != -1)
@@ -173,7 +176,7 @@ cmd_passwd(const char *e_line, command *commands)
 	puts("Password change OK");
 
 exiting:
-	for (c = 0; c <= largc; c++) {
+	for (c = 0; c < largc; c++) {
 		free(largv[c]); largv[c] = NULL;
 	}
 	free(largv); largv = NULL;
