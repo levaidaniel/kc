@@ -140,7 +140,7 @@ cmd_export(const char *e_line, command *commands)
 					goto exiting;
 				}
 
-				printf("Using (%s) %s identity for decryption\n", db_params_new.ssha_type, db_params_new.ssha_comment);
+				printf("Using (%s) %s identity for encryption\n", db_params_new.ssha_type, db_params_new.ssha_comment);
 			break;
 			case 'k':
 				free(db_params_new.db_filename); db_params_new.db_filename = NULL;
