@@ -122,7 +122,6 @@ cmd_passwd(const char *e_line, command *commands)
 				}
 			break;
 			default:
-				printf("DEBUG: in 'default' in switch() %s largc=%d c=%d\n", optarg, largc, c);
 				puts(commands->usage);
 				goto exiting;
 			break;
