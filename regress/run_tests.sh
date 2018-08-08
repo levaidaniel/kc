@@ -49,9 +49,11 @@ export SHA1_COMMON_1='a15dd0ffd1aef152f7d10654361c01ea1c04dfe5'
 case "$(uname -s)" in
 	Linux|CYGWIN*)
 		SHA1_BIN=$(which sha1sum)
+		RANDOM_DEV="/dev/urandom"
 	;;
 	*BSD)
 		SHA1_BIN="$(which sha1) -r"
+		RANDOM_DEV="/dev/random"
 	;;
 	*)
 		echo "unknown operating system."
@@ -59,6 +61,7 @@ case "$(uname -s)" in
 	;;
 esac
 export SHA1_BIN
+export RANDOM_DEV
 
 
 sh regress/create_db.sh; COUNTER=$(( COUNTER + 1 ))	# 1
