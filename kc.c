@@ -434,7 +434,7 @@ main(int argc, char *argv[])
 		}
 
 		if (pos > PASSWORD_MAXLEN) {
-			printf("WARNING: the password in '%s' is longer than the maximum allowed length (%d) of a password, and it was truncated to %d characters!\n\n", db_params.pass_filename, PASSWORD_MAXLEN, PASSWORD_MAXLEN);
+			printf("WARNING: the password in '%s' is longer than the maximum allowed length (%d bytes) of a password, and it was truncated to %d bytes!\n\n", db_params.pass_filename, PASSWORD_MAXLEN, PASSWORD_MAXLEN);
 			pos = PASSWORD_MAXLEN;
 		}
 
