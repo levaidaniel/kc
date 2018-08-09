@@ -87,15 +87,9 @@ main(int argc, char *argv[])
 	int		pass_file = -1;
 
 	struct stat	st;
-	const char	*default_db_dir = ".kc";
-	const char	*default_db_filename = "default.kcd";
 	char		*env_home = NULL;
 	unsigned char	newdb = 0;
 	char		*ssha_type = NULL, *ssha_comment = NULL;
-
-	char		*default_kdf = "sha512";
-	char		*default_cipher = "aes256";
-	char		*default_mode = "cbc";
 
 	xmlNodePtr	db_root = NULL;
 
@@ -128,23 +122,23 @@ main(int argc, char *argv[])
 	db_params.dirty = 0;
 	db_params.readonly = 0;
 
-	len = strlen(default_kdf) + 1;
+	len = strlen(DEFAULT_KDF) + 1;
 	db_params.kdf = malloc(len); malloc_check(db_params.kdf);
-	if (strlcpy(db_params.kdf, default_kdf, len) >= len) {
+	if (strlcpy(db_params.kdf, DEFAULT_KDF, len) >= len) {
 		dprintf(STDERR_FILENO, "ERROR: Error while setting up default database parameters.\n");
 		quit(EXIT_FAILURE);
 	}
 
-	len = strlen(default_cipher) + 1;
+	len = strlen(DEFAULT_CIPHER) + 1;
 	db_params.cipher = malloc(len); malloc_check(db_params.cipher);
-	if (strlcpy(db_params.cipher, default_cipher, len) >= len) {
+	if (strlcpy(db_params.cipher, DEFAULT_CIPHER, len) >= len) {
 		dprintf(STDERR_FILENO, "ERROR: Error while setting up default database parameters.\n");
 		quit(EXIT_FAILURE);
 	}
 
-	len = strlen(default_mode) + 1;
+	len = strlen(DEFAULT_MODE) + 1;
 	db_params.cipher_mode = malloc(len); malloc_check(db_params.cipher_mode);
-	if (strlcpy(db_params.cipher_mode, default_mode, len) >= len) {
+	if (strlcpy(db_params.cipher_mode, DEFAULT_MODE, len) >= len) {
 		dprintf(STDERR_FILENO, "ERROR: Error while setting up default database parameters.\n");
 		quit(EXIT_FAILURE);
 	}
@@ -252,11 +246,11 @@ main(int argc, char *argv[])
 
 		env_home = getenv("HOME");
 
-		len = strlen(env_home) + 1 + strlen(default_db_dir) + 1;
+		len = strlen(env_home) + 1 + strlen(DEFAULT_DB_DIR) + 1;
 		db_params.db_filename = malloc(len); malloc_check(db_params.db_filename);
 
 		/* default db directory (create it, if it doesn't exist) */
-		snprintf(db_params.db_filename, len, "%s/%s", env_home, default_db_dir);
+		snprintf(db_params.db_filename, len, "%s/%s", env_home, DEFAULT_DB_DIR);
 
 		if (stat(db_params.db_filename, &st) == 0) {
 			if (!S_ISDIR(st.st_mode)) {
@@ -274,10 +268,10 @@ main(int argc, char *argv[])
 		}
 
 		/* default db filename */
-		len += 1 + strlen(default_db_filename);
+		len += 1 + strlen(DEFAULT_DB_FILENAME);
 		db_params.db_filename = realloc(db_params.db_filename, len); malloc_check(db_params.db_filename);
 
-		snprintf(db_params.db_filename, len, "%s/%s/%s", env_home, default_db_dir, default_db_filename);
+		snprintf(db_params.db_filename, len, "%s/%s/%s", env_home, DEFAULT_DB_DIR, DEFAULT_DB_FILENAME);
 	}
 
 	/* This should be identical of what is in cmd_import.c */

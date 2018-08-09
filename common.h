@@ -36,8 +36,8 @@
 #endif
 
 
-#define	NAME	"kc"
-#define	VERSION	"2.5-dev-GIT_VERSION"
+#define	NAME		"kc"
+#define	VERSION		"2.5-dev-GIT_VERSION"
 
 #define	PASSWORD_MAXLEN	1024
 #define	IV_LEN		64
@@ -49,6 +49,12 @@
 #define	TIME_MAXLEN	11
 
 #define	ITEMS_MAX	ULONG_MAX
+
+#define	DEFAULT_DB_DIR	".kc"
+#define	DEFAULT_DB_FILENAME	"default.kcd"
+#define	DEFAULT_KDF	"sha512"
+#define	DEFAULT_CIPHER	"aes256"
+#define	DEFAULT_MODE	"cbc"
 
 
 typedef struct db_parameters {
