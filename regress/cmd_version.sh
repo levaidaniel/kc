@@ -5,7 +5,7 @@ set -e
 
 echo "test => $0"
 
-NAME=$(grep -E -e '^#define[[:space:]]+NAME' common.h |cut -f3 |tr -d '"')
+NAME=$(grep -E -e '^#define[[:space:]]+NAME' common.h |tr -s '	' |tr -s ' ' |cut -f3 |tr -d '"')
 
 if printf "version\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e "^${NAME} [[:alnum:]\.\-]+";then
 	echo "$0 test ok (version)!"
