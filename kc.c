@@ -105,7 +105,7 @@ main(int argc, char *argv[])
 	       printf("%s(): Pledging for '%s'\n", __func__, pledges);
 
 	if (pledge(pledges, NULL) != 0) {
-	       perror("Unable to pledge()!");
+	       perror("ERROR: Unable to pledge()!");
 	       quit(EXIT_FAILURE);
 	}
 #endif
@@ -298,7 +298,7 @@ main(int argc, char *argv[])
 
 		db_params.db_file = open(db_params.db_filename, O_RDWR);
 		if (db_params.db_file < 0) {
-			perror("open(database file)");
+			perror("ERROR: open(database file)");
 			quit(EXIT_FAILURE);
 		}
 
@@ -311,7 +311,7 @@ main(int argc, char *argv[])
 		db_params.iv[pos] = '\0';
 
 		if (ret < 0) {
-			perror("read IV(database file)");
+			perror("ERROR: read IV(database file)");
 			quit(EXIT_FAILURE);
 		}
 		if (pos != IV_DIGEST_LEN) {
@@ -336,7 +336,7 @@ main(int argc, char *argv[])
 		db_params.salt[pos] = '\0';
 
 		if (ret < 0) {
-			perror("read salt(database file)");
+			perror("ERROR: read salt(database file)");
 			quit(EXIT_FAILURE);
 		}
 		if (pos != SALT_DIGEST_LEN) {
@@ -353,7 +353,7 @@ main(int argc, char *argv[])
 
 		db_params.db_file = open(db_params.db_filename, O_RDWR | O_CREAT, 0600);
 		if (db_params.db_file < 0) {
-			perror("open to create(database file)");
+			perror("ERROR: open to create(database file)");
 			quit(EXIT_FAILURE);
 		}
 
@@ -397,14 +397,14 @@ main(int argc, char *argv[])
 				quit(EXIT_FAILURE);
 			}
 		} else {
-			perror("stat(password file)");
+			perror("ERROR: stat(password file)");
 			quit(EXIT_FAILURE);
 		}
 
 		/* read in the password from the specified file */
 		pass_file = open(db_params.pass_filename, O_RDONLY);
 		if (pass_file < 0) {
-			perror("open(password file)");
+			perror("ERROR: open(password file)");
 			quit(EXIT_FAILURE);
 		}
 
@@ -419,7 +419,7 @@ main(int argc, char *argv[])
 		} while (ret > 0  &&  pos < PASSWORD_MAXLEN + 1);
 
 		if (ret < 0) {
-			perror("read(password file)");
+			perror("ERROR: read(password file)");
 			quit(EXIT_FAILURE);
 		}
 		if (pos == 0) {
@@ -435,7 +435,7 @@ main(int argc, char *argv[])
 		db_params.pass_len = pos;
 
 		if (close(pass_file) < 0)
-			perror("close(password file)");
+			perror("ERROR: close(password file)");
 	} else {
 		if (strlen(db_params.ssha_type)) {
 			/* use SSH agent to generate the password */
@@ -572,14 +572,14 @@ main(int argc, char *argv[])
 	/* init editline */
 	e = el_init("kc", stdin, stdout, stderr);
 	if (!e) {
-		perror("el_init()");
+		perror("ERROR: el_init()");
 		quit(EXIT_FAILURE);
 	}
 
 	/* init editline history */
 	eh = history_init();
 	if (!eh) {
-		perror("history_init()");
+		perror("ERROR: history_init()");
 		quit(EXIT_FAILURE);
 	}
 	if (history(eh, &eh_ev, H_SETSIZE, 100) < 0)
@@ -590,47 +590,47 @@ main(int argc, char *argv[])
 
 	/* setup editline/history parameters */
 	if (el_set(e, EL_PROMPT, prompt_str) != 0)
-		perror("el_set(EL_PROMPT)");
+		perror("ERROR: el_set(EL_PROMPT)");
 
 	if (el_set(e, EL_SIGNAL, 1) != 0)
-		perror("el_set(EL_SIGNAL)");
+		perror("ERROR: el_set(EL_SIGNAL)");
 
 	if (el_set(e, EL_HIST, history, eh) != 0)
-		perror("el_set(EL_HIST)");
+		perror("ERROR: el_set(EL_HIST)");
 
 	if (el_set(e, EL_ADDFN, "TAB", "TAB completion", el_tab_complete) != 0)
-		perror("el_set(EL_ADDFN)");
+		perror("ERROR: el_set(EL_ADDFN)");
 
 	if (el_set(e, EL_BIND, "\t", "TAB", NULL) != 0)
-		perror("el_set(EL_BIND)");
+		perror("ERROR: el_set(EL_BIND)");
 
 	if (el_set(e, EL_BIND, "^R", "ed-redisplay", NULL) != 0)
-		perror("el_set(EL_BIND)");
+		perror("ERROR: el_set(EL_BIND)");
 
 	if (el_set(e, EL_BIND, "^E", "ed-move-to-end", NULL) != 0)
-		perror("el_set(EL_BIND)");
+		perror("ERROR: el_set(EL_BIND)");
 
 	if (el_set(e, EL_BIND, "^A", "ed-move-to-beg", NULL) != 0)
-		perror("el_set(EL_BIND)");
+		perror("ERROR: el_set(EL_BIND)");
 
 	if (el_set(e, EL_BIND, "^L", "ed-clear-screen", NULL) != 0)
-		perror("el_set(EL_BIND)");
+		perror("ERROR: el_set(EL_BIND)");
 
 	if (el_source(e, NULL) != 0) {
 		if (errno != 0) {
 			if (errno != ENOENT)
-				perror("Error executing .editrc");
+				perror("ERROR: Error executing .editrc");
 		} else
 			dprintf(STDERR_FILENO, "ERROR: Error executing .editrc\n");
 	}
 	if (el_set(e, EL_EDITMODE, 1) != 0) {
-		perror("el_set(EL_EDITMODE)");
+		perror("ERROR: el_set(EL_EDITMODE)");
 		quit(EXIT_FAILURE);
 	}
 #else
 	/* init readline */
 	if (rl_initialize() != 0) {
-		perror("rl_initialize()");
+		perror("ERROR: rl_initialize()");
 		quit(EXIT_FAILURE);
 	}
 
@@ -1146,7 +1146,7 @@ quit(int retval)
 			if (getenv("KC_DEBUG"))
 				printf("%s(): closed database file\n", __func__);
 		} else
-			perror("close(database file)");
+			perror("ERROR: close(database file)");
 	}
 
 #ifndef _READLINE

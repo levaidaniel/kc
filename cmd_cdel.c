@@ -77,22 +77,22 @@ cmd_cdel(const char *e_line, command *commands)
 #ifndef _READLINE
 			/* disable history temporarily */
 			if (el_set(e, EL_HIST, history, NULL) != 0) {
-				perror("el_set(EL_HIST)");
+				perror("ERROR: el_set(EL_HIST)");
 			}
 			/* clear the prompt temporarily */
 			if (el_set(e, EL_PROMPT, el_prompt_null) != 0) {
-				perror("el_set(EL_PROMPT)");
+				perror("ERROR: el_set(EL_PROMPT)");
 			}
 
 			e_line = el_gets(e, &e_count);
 
 			/* re-enable the default prompt */
 			if (el_set(e, EL_PROMPT, prompt_str) != 0) {
-				perror("el_set(EL_PROMPT)");
+				perror("ERROR: el_set(EL_PROMPT)");
 			}
 			/* re-enable history */
 			if (el_set(e, EL_HIST, history, eh) != 0) {
-				perror("el_set(EL_HIST)");
+				perror("ERROR: el_set(EL_HIST)");
 			}
 #else
 			rl_redisplay();

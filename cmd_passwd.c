@@ -54,17 +54,17 @@ cmd_passwd(const char *e_line, command *commands)
 	db_params_tmp.cipher_mode = NULL;
 	db_params_tmp.kdf = strdup(db_params.kdf);
 	if (!db_params_tmp.kdf) {
-		perror("Could not duplicate the KDF");
+		perror("ERROR: Could not duplicate the KDF");
 		goto exiting;
 	}
 	db_params_tmp.cipher = strdup(db_params.cipher);
 	if (!db_params_tmp.cipher) {
-		perror("Could not duplicate the cipher");
+		perror("ERROR: Could not duplicate the cipher");
 		goto exiting;
 	}
 	db_params_tmp.cipher_mode = strdup(db_params.cipher_mode);
 	if (!db_params_tmp.cipher_mode) {
-		perror("Could not duplicate the cipher mode");
+		perror("ERROR: Could not duplicate the cipher mode");
 		goto exiting;
 	}
 
@@ -72,7 +72,7 @@ cmd_passwd(const char *e_line, command *commands)
 	/* Parse the arguments */
 	line = strdup(e_line);
 	if (!line) {
-		perror("Could not duplicate the command line");
+		perror("ERROR: Could not duplicate the command line");
 		goto exiting;
 	}
 	larg(line, &largv, &largc);
@@ -120,7 +120,7 @@ cmd_passwd(const char *e_line, command *commands)
 				free(db_params_tmp.kdf); db_params_tmp.kdf = NULL;
 				db_params_tmp.kdf = strdup(optarg);
 				if (!db_params_tmp.kdf) {
-					perror("Could not duplicate the KDF");
+					perror("ERROR: Could not duplicate the KDF");
 					goto exiting;
 				}
 			break;
@@ -166,7 +166,7 @@ cmd_passwd(const char *e_line, command *commands)
 	}
 	memcpy(db_params.key, db_params_tmp.key, KEY_LEN);
 	if (memcmp(db_params.key, db_params_tmp.key, KEY_LEN) != 0) {
-		puts("Could copy key!");
+		dprintf("ERROR: Could not copy encryption key!");
 
 		goto exiting;
 	}
@@ -174,7 +174,7 @@ cmd_passwd(const char *e_line, command *commands)
 	free(db_params.kdf); db_params.kdf = NULL;
 	db_params.kdf = strdup(db_params_tmp.kdf);
 	if (!db_params.kdf) {
-		perror("Could not save the KDF");
+		perror("ERROR: Could not save the KDF");
 		goto exiting;
 	}
 	if (strlcpy((char *)db_params.ssha_type, (const char*)db_params_tmp.ssha_type, sizeof(db_params.ssha_type)) >= sizeof(db_params.ssha_type)) {

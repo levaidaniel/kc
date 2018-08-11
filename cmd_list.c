@@ -103,10 +103,10 @@ cmd_list(const char *e_line, command *commands)
 #ifndef _READLINE
 		/* clear the prompt temporarily */
 		if (el_set(e, EL_PROMPT, el_prompt_null) != 0) {
-			perror("el_set(EL_PROMPT)");
+			perror("ERROR: el_set(EL_PROMPT)");
 		}
 		if (el_set(e, EL_UNBUFFERED, 1) != 0) {
-			perror("el_set(EL_UNBUFFERED)");
+			perror("ERROR: el_set(EL_UNBUFFERED)");
 			return;
 		}
 #else
@@ -184,7 +184,7 @@ cmd_list(const char *e_line, command *commands)
 #ifndef _READLINE
 		/* re-enable the default prompt */
 		if (el_set(e, EL_PROMPT, prompt_str) != 0) {
-			perror("el_set(EL_PROMPT)");
+			perror("ERROR: el_set(EL_PROMPT)");
 		}
 		el_set(e, EL_UNBUFFERED, 0);
 #else

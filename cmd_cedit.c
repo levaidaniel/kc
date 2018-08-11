@@ -61,7 +61,7 @@ cmd_cedit(const char *e_line, command *commands)
 #ifndef _READLINE
 	/* disable history temporarily */
 	if (el_set(e, EL_HIST, history, NULL) != 0) {
-		perror("el_set(EL_HIST)");
+		perror("ERROR: el_set(EL_HIST)");
 	}
 
 	el_push(e, (const char *)name);
@@ -69,7 +69,7 @@ cmd_cedit(const char *e_line, command *commands)
 
 	/* re-enable history */
 	if (el_set(e, EL_HIST, history, eh) != 0) {
-		perror("el_set(EL_HIST)");
+		perror("ERROR: el_set(EL_HIST)");
 	}
 #else
 	_rl_helper_var = name;
@@ -104,7 +104,7 @@ cmd_cedit(const char *e_line, command *commands)
 #ifndef _READLINE
 	/* disable history temporarily */
 	if (el_set(e, EL_HIST, history, NULL) != 0) {
-		perror("el_set(EL_HIST)");
+		perror("ERROR: el_set(EL_HIST)");
 	}
 
 	if (description)
@@ -114,7 +114,7 @@ cmd_cedit(const char *e_line, command *commands)
 
 	/* re-enable history */
 	if (el_set(e, EL_HIST, history, eh) != 0) {
-		perror("el_set(EL_HIST)");
+		perror("ERROR: el_set(EL_HIST)");
 	}
 #else
 	if (description) {

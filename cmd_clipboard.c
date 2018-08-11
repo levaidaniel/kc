@@ -140,7 +140,7 @@ cmd_clipboard(const char *e_line, command *commands)
 				/* Copy value to tmux paste buffer */
 				switch (child = fork()) {
 					case -1:
-						perror("\nCouldn't fork(2) for tmux(1)");
+						perror("\nERROR: Couldn't fork(2) for tmux(1)");
 						break;
 					case 0:	/* Child */
 #ifndef __OpenBSD__
@@ -153,7 +153,7 @@ cmd_clipboard(const char *e_line, command *commands)
 
 						if (db_params.db_file) {
 							if (close(db_params.db_file) == -1) {
-								perror("child: close(database file)");
+								perror("ERROR: child: close(database file)");
 								exit(EXIT_FAILURE);
 							} else {
 								db_params.db_file = -1;
@@ -187,7 +187,7 @@ cmd_clipboard(const char *e_line, command *commands)
 
 				switch (child = fork()) {
 					case -1:
-						perror("\nCouldn't fork(2) for xclip(1)");
+						perror("\nERROR: Couldn't fork(2) for xclip(1)");
 						break;
 					case 0:	/* Child */
 						close(0);
@@ -199,7 +199,7 @@ cmd_clipboard(const char *e_line, command *commands)
 
 						if (db_params.db_file) {
 							if (close(db_params.db_file) == -1) {
-								perror("child: close(database file)");
+								perror("ERROR: child: close(database file)");
 								exit(EXIT_FAILURE);
 							} else {
 								db_params.db_file = -1;

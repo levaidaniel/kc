@@ -86,7 +86,7 @@ kc_ssha_identity_list_request(int sock)
 	put_u32(buf, sizeof(request));
 	w = write(sock, buf, 4);
 	if (w != 4 ) {
-		perror("socket write() error");
+		perror("ERROR: socket write() error");
 		free(buf); buf = NULL;
 		return(-1);
 	} else {
@@ -98,7 +98,7 @@ kc_ssha_identity_list_request(int sock)
 	memcpy(buf, &request, 1);
 	w = write(sock, buf, 1);
 	if (w != 1 ) {
-		perror("socket write() error");
+		perror("ERROR: socket write() error");
 		free(buf); buf = NULL;
 		return(-1);
 	}
@@ -178,7 +178,7 @@ kc_ssha_sign_request(int sock, struct kc_ssha_identity *id, char *data, unsigned
 	do {
 		w = write(sock, buf+pos, buf_len-pos);
 		if (w <= 0) {
-			perror("socket write() error");
+			perror("ERROR: socket write() error");
 			free(buf); buf = NULL;
 			return(-1);
 		}
@@ -213,7 +213,7 @@ kc_ssha_get_full_response(int sock)
 	/* first read the response's length */
 	r = read(sock, buf, 4);
 	if (r != 4 ) {
-		perror("socket read() error");
+		perror("ERROR: socket read() error");
 		free(buf); buf = NULL;
 		return(NULL);
 	};
@@ -249,7 +249,7 @@ kc_ssha_get_full_response(int sock)
 		r = read(sock, buf+(buf_len - buf_rem), rem);
 		switch (r) {
 			case -1:
-				perror("socket read() error");
+				perror("ERROR: socket read() error");
 				free(buf); buf = NULL;
 				return(NULL);
 			break;

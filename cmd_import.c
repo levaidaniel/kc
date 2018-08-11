@@ -80,17 +80,17 @@ cmd_import(const char *e_line, command *commands)
 	db_params_new.cipher_mode = NULL;
 	db_params_new.kdf = strdup(db_params.kdf);
 	if (!db_params_new.kdf) {
-		perror("Could not duplicate the KDF");
+		perror("ERROR: Could not duplicate the KDF");
 		goto exiting;
 	}
 	db_params_new.cipher = strdup(db_params.cipher);
 	if (!db_params_new.cipher) {
-		perror("Could not duplicate the cipher");
+		perror("ERROR: Could not duplicate the cipher");
 		goto exiting;
 	}
 	db_params_new.cipher_mode = strdup(db_params.cipher_mode);
 	if (!db_params_new.cipher_mode) {
-		perror("Could not duplicate the cipher mode");
+		perror("ERROR: Could not duplicate the cipher mode");
 		goto exiting;
 	}
 	db_params_new.dirty = 0;
@@ -100,7 +100,7 @@ cmd_import(const char *e_line, command *commands)
 	/* Parse the arguments */
 	line = strdup(e_line);
 	if (!line) {
-		perror("Could not duplicate the command line");
+		perror("ERROR: Could not duplicate the command line");
 		goto exiting;
 	}
 	larg(line, &largv, &largc);
@@ -148,7 +148,7 @@ cmd_import(const char *e_line, command *commands)
 				free(db_params_new.db_filename); db_params_new.db_filename = NULL;
 				db_params_new.db_filename = strdup(optarg);
 				if (!db_params_new.db_filename) {
-					perror("Could not duplicate the database file name");
+					perror("ERROR: Could not duplicate the database file name");
 					goto exiting;
 				}
 			break;
@@ -156,7 +156,7 @@ cmd_import(const char *e_line, command *commands)
 				free(db_params_new.kdf); db_params_new.kdf = NULL;
 				db_params_new.kdf = strdup(optarg);
 				if (!db_params_new.kdf) {
-					perror("Could not duplicate the KDF");
+					perror("ERROR: Could not duplicate the KDF");
 					goto exiting;
 				}
 			break;
@@ -164,7 +164,7 @@ cmd_import(const char *e_line, command *commands)
 				free(db_params_new.cipher); db_params_new.cipher = NULL;
 				db_params_new.cipher = strdup(optarg);
 				if (!db_params_new.cipher) {
-					perror("Could not duplicate the cipher");
+					perror("ERROR: Could not duplicate the cipher");
 					goto exiting;
 				}
 			break;
@@ -172,7 +172,7 @@ cmd_import(const char *e_line, command *commands)
 				free(db_params_new.cipher_mode); db_params_new.cipher_mode = NULL;
 				db_params_new.cipher_mode = strdup(optarg);
 				if (!db_params_new.cipher_mode) {
-					perror("Could not duplicate the cipher mode");
+					perror("ERROR: Could not duplicate the cipher mode");
 					goto exiting;
 				}
 			break;
@@ -241,7 +241,7 @@ cmd_import(const char *e_line, command *commands)
 
 			db_params_new.db_file = open(db_params_new.db_filename, O_RDONLY);
 			if (db_params_new.db_file < 0) {
-				perror("open(database file)");
+				perror("ERROR: open(database file)");
 
 				goto exiting;
 			}
@@ -255,7 +255,7 @@ cmd_import(const char *e_line, command *commands)
 			db_params_new.iv[pos] = '\0';
 
 			if (ret < 0) {
-				perror("import: read IV(database file)");
+				perror("ERROR: import: read IV(database file)");
 
 				goto exiting;
 			}
@@ -282,7 +282,7 @@ cmd_import(const char *e_line, command *commands)
 			db_params_new.salt[pos] = '\0';
 
 			if (ret < 0) {
-				perror("import: read salt(database file)");
+				perror("ERROR: import: read salt(database file)");
 
 				goto exiting;
 			}
@@ -295,7 +295,7 @@ cmd_import(const char *e_line, command *commands)
 			if (getenv("KC_DEBUG"))
 				printf("%s(): import: salt='%s'\n", __func__, db_params_new.salt);
 		} else {
-			perror("Could not open database file");
+			perror("ERROR: Could not open database file");
 
 			goto exiting;
 		}

@@ -91,7 +91,7 @@ cmd_edit(const char *e_line, command *commands)
 #ifndef _READLINE
 		/* disable history temporarily */
 		if (el_set(e, EL_HIST, history, NULL) != 0) {
-			perror("el_set(EL_HIST)");
+			perror("ERROR: el_set(EL_HIST)");
 		}
 #endif
 
@@ -124,7 +124,7 @@ cmd_edit(const char *e_line, command *commands)
 
 			/* re-enable history */
 			if (el_set(e, EL_HIST, history, eh) != 0) {
-				perror("el_set(EL_HIST)");
+				perror("ERROR: el_set(EL_HIST)");
 			}
 #endif
 			strlcpy(prompt_context, "", sizeof(prompt_context));
@@ -146,7 +146,7 @@ cmd_edit(const char *e_line, command *commands)
 
 		/* re-enable history */
 		if (el_set(e, EL_HIST, history, eh) != 0) {
-			perror("el_set(EL_HIST)");
+			perror("ERROR: el_set(EL_HIST)");
 		}
 #else
 		_rl_helper_var = value;

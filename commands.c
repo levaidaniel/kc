@@ -161,7 +161,7 @@ get_random_str(const unsigned int length, const unsigned char mode)
 	rnd_file = open(rnd_dev, O_RDONLY);
 	if (rnd_file < 0) {
 		dprintf(STDERR_FILENO, "ERROR: Error opening %s!\n", rnd_dev);
-		perror("open()");
+		perror("ERROR: open()");
 		return(NULL);
 	}
 
@@ -180,7 +180,7 @@ get_random_str(const unsigned int length, const unsigned char mode)
 
 					ret = read(rnd_file, tmp, 1);
 					if (ret <= 0) {
-						perror("read(random device)");
+						perror("ERROR: read(random device)");
 
 						free(rnd_str); rnd_str = NULL;
 						free(tmp); tmp = NULL;
@@ -194,7 +194,7 @@ get_random_str(const unsigned int length, const unsigned char mode)
 
 					ret = read(rnd_file, tmp, 1);
 					if (ret <= 0) {
-						perror("read(random device)");
+						perror("ERROR: read(random device)");
 
 						free(rnd_str); rnd_str = NULL;
 						free(tmp); tmp = NULL;
@@ -206,7 +206,7 @@ get_random_str(const unsigned int length, const unsigned char mode)
 			/* give anything */
 				ret = read(rnd_file, tmp, 1);
 				if (ret <= 0) {
-					perror("read(random device)");
+					perror("ERROR: read(random device)");
 
 					free(rnd_str); rnd_str = NULL;
 					free(tmp); tmp = NULL;
@@ -823,7 +823,7 @@ kc_setup_bio_chain(const char *db_filename, const unsigned char write)
 	else
 		bio_file = BIO_new_file(db_filename, "r");
 	if (!bio_file) {
-		perror("BIO_new_file()");
+		perror("ERROR: BIO_new_file()");
 		return(NULL);
 	}
 	BIO_set_close(bio_file, BIO_CLOSE);	/* On ignoring the return value: BIO_set_close() always returns 1, according to the openssl documentation. */
@@ -831,14 +831,14 @@ kc_setup_bio_chain(const char *db_filename, const unsigned char write)
 
 	bio_b64 = BIO_new(BIO_f_base64());
 	if (!bio_b64) {
-		perror("BIO_new(f_base64)");
+		perror("ERROR: BIO_new(f_base64)");
 		return(NULL);
 	}
 	bio_chain = BIO_push(bio_b64, bio_chain);
 
 	bio_cipher = BIO_new(BIO_f_cipher());
 	if (!bio_cipher) {
-		perror("BIO_new(f_cipher)");
+		perror("ERROR: BIO_new(f_cipher)");
 		return(NULL);
 	}
 	bio_chain = BIO_push(bio_cipher, bio_chain);
@@ -876,7 +876,7 @@ kc_db_writer(xmlDocPtr db, BIO *bio_chain, struct db_parameters *db_params)
 			ret = write(db_params->db_file, db_params->iv, remaining);
 
 			if (ret < 0) {
-				perror("writing IV to database file");
+				perror("ERROR: writing IV to database file");
 				return(0);
 			}
 
@@ -890,7 +890,7 @@ kc_db_writer(xmlDocPtr db, BIO *bio_chain, struct db_parameters *db_params)
 		/* Write a newline at the end */
 		ret = write(db_params->db_file, "\n", 1);
 		if (ret != 1) {
-			perror("writing IV to database file");
+			perror("ERROR: writing IV to database file");
 			return(0);
 		}
 
@@ -904,7 +904,7 @@ kc_db_writer(xmlDocPtr db, BIO *bio_chain, struct db_parameters *db_params)
 			ret = write(db_params->db_file, db_params->salt, remaining);
 
 			if (ret < 0) {
-				perror("writing salt to database file");
+				perror("ERROR: writing salt to database file");
 				return(0);
 			}
 
@@ -918,7 +918,7 @@ kc_db_writer(xmlDocPtr db, BIO *bio_chain, struct db_parameters *db_params)
 		/* Write a newline at the end */
 		ret = write(db_params->db_file, "\n", 1);
 		if (ret != 1) {
-			perror("writing salt to database file");
+			perror("ERROR: writing salt to database file");
 			return(0);
 		}
 

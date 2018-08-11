@@ -58,7 +58,7 @@ cmd_write(const char *e_line, command *commands)
 	db_params_tmp.db_file = -1;
 	db_params_tmp.db_filename = malloc(MAXPATHLEN);
 	if (!db_params_tmp.db_filename) {
-		perror("Could not allocate memory for the file name");
+		perror("ERROR: Could not allocate memory for the file name");
 		goto exiting;
 	}
 	db_params_tmp.pass_filename = NULL;
@@ -119,14 +119,14 @@ cmd_write(const char *e_line, command *commands)
 	}
 
 	if (stat(db_params_tmp.db_filename, &st) == 0) {	/* if temporary database filename exists */
-		perror("Could not create temporary database file (exists)!");
+		perror("ERROR: Could not create temporary database file (exists)!");
 
 		goto exiting;
 	}
 
 	db_params_tmp.db_file = open(db_params_tmp.db_filename, O_RDWR | O_CREAT, 0600);
 	if (db_params_tmp.db_file < 0) {
-		perror("Could not open temporary database file");
+		perror("ERROR: Could not open temporary database file");
 
 		goto exiting;
 	}
@@ -177,19 +177,19 @@ cmd_write(const char *e_line, command *commands)
 		if (getenv("KC_DEBUG"))
 			printf("%s(): closed old database file\n", __func__);
 	} else
-		perror("close(old database file)");
+		perror("ERROR: close(old database file)");
 
 
 	if (close(db_params_tmp.db_file) == 0) {
 		if (getenv("KC_DEBUG"))
 			printf("%s(): closed tmp database file\n", __func__);
 	} else
-		perror("close(tmp database file)");
+		perror("ERROR: close(tmp database file)");
 
 
 	if (rename(db_params_tmp.db_filename, db_params.db_filename) < 0) {
 		dprintf(STDERR_FILENO, "ERROR: Could not rename temporary database file!\n");
-		perror("rename(tmp db_filename, db_filename)");
+		perror("ERROR: rename(tmp db_filename, db_filename)");
 
 		goto exiting;
 	} else
@@ -201,7 +201,7 @@ cmd_write(const char *e_line, command *commands)
 	db_params.db_file = open(db_params.db_filename, O_RDONLY);
 	if (db_params.db_file < 0) {
 		dprintf(STDERR_FILENO, "ERROR: Could not reopen the new database file! This means that a file lock can not be placed on it. I suggest you to restart the application!\n");
-		perror("open(new database file)");
+		perror("ERROR: open(new database file)");
 
 		goto exiting;
 	} else
@@ -213,7 +213,7 @@ cmd_write(const char *e_line, command *commands)
 			printf("%s(): flock(new database file)\n", __func__);
 
 		dprintf(STDERR_FILENO, "ERROR: Could not lock the new database file! I suggest you to restart the application!\n");
-		perror("flock(new database file)");
+		perror("ERROR: flock(new database file)");
 
 		goto exiting;
 	} else

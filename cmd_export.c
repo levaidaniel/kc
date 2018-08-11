@@ -81,17 +81,17 @@ cmd_export(const char *e_line, command *commands)
 	db_params_new.cipher_mode = NULL;
 	db_params_new.kdf = strdup(db_params.kdf);
 	if (!db_params_new.kdf) {
-		perror("Could not duplicate the KDF");
+		perror("ERROR: Could not duplicate the KDF");
 		goto exiting;
 	}
 	db_params_new.cipher = strdup(db_params.cipher);
 	if (!db_params_new.cipher) {
-		perror("Could not duplicate the cipher");
+		perror("ERROR: Could not duplicate the cipher");
 		goto exiting;
 	}
 	db_params_new.cipher_mode = strdup(db_params.cipher_mode);
 	if (!db_params_new.cipher_mode) {
-		perror("Could not duplicate the cipher mode");
+		perror("ERROR: Could not duplicate the cipher mode");
 		goto exiting;
 	}
 	db_params_new.dirty = 0;
@@ -101,7 +101,7 @@ cmd_export(const char *e_line, command *commands)
 	/* Parse the arguments */
 	line = strdup(e_line);
 	if (!line) {
-		perror("Could not duplicate the command line");
+		perror("ERROR: Could not duplicate the command line");
 		goto exiting;
 	}
 	larg(line, &largv, &largc);
@@ -149,7 +149,7 @@ cmd_export(const char *e_line, command *commands)
 				free(db_params_new.db_filename); db_params_new.db_filename = NULL;
 				db_params_new.db_filename = strdup(optarg);
 				if (!db_params_new.db_filename) {
-					perror("Could not duplicate the database file name");
+					perror("ERROR: Could not duplicate the database file name");
 					goto exiting;
 				}
 			break;
@@ -157,7 +157,7 @@ cmd_export(const char *e_line, command *commands)
 				free(cname); cname = NULL;
 				cname = BAD_CAST strdup(optarg);
 				if (!cname) {
-					perror("Could not duplicate the keychain name");
+					perror("ERROR: Could not duplicate the keychain name");
 					goto exiting;
 				}
 			break;
@@ -165,7 +165,7 @@ cmd_export(const char *e_line, command *commands)
 				free(db_params_new.kdf); db_params_new.kdf = NULL;
 				db_params_new.kdf = strdup(optarg);
 				if (!db_params_new.kdf) {
-					perror("Could not duplicate the KDF");
+					perror("ERROR: Could not duplicate the KDF");
 					goto exiting;
 				}
 			break;
@@ -173,7 +173,7 @@ cmd_export(const char *e_line, command *commands)
 				free(db_params_new.cipher); db_params_new.cipher = NULL;
 				db_params_new.cipher = strdup(optarg);
 				if (!db_params_new.cipher) {
-					perror("Could not duplicate the cipher");
+					perror("ERROR: Could not duplicate the cipher");
 					goto exiting;
 				}
 			break;
@@ -181,7 +181,7 @@ cmd_export(const char *e_line, command *commands)
 				free(db_params_new.cipher_mode); db_params_new.cipher_mode = NULL;
 				db_params_new.cipher_mode = strdup(optarg);
 				if (!db_params_new.cipher_mode) {
-					perror("Could not duplicate the cipher mode");
+					perror("ERROR: Could not duplicate the cipher mode");
 					goto exiting;
 				}
 			break;
@@ -264,22 +264,22 @@ cmd_export(const char *e_line, command *commands)
 #ifndef _READLINE
 		/* disable history temporarily */
 		if (el_set(e, EL_HIST, history, NULL) != 0) {
-			perror("el_set(EL_HIST)");
+			perror("ERROR: el_set(EL_HIST)");
 		}
 		/* clear the prompt temporarily */
 		if (el_set(e, EL_PROMPT, el_prompt_null) != 0) {
-			perror("el_set(EL_PROMPT)");
+			perror("ERROR: el_set(EL_PROMPT)");
 		}
 
 		e_line = el_gets(e, &e_count);
 
 		/* re-enable the default prompt */
 		if (el_set(e, EL_PROMPT, prompt_str) != 0) {
-			perror("el_set(EL_PROMPT)");
+			perror("ERROR: el_set(EL_PROMPT)");
 		}
 		/* re-enable history */
 		if (el_set(e, EL_HIST, history, eh) != 0) {
-			perror("el_set(EL_HIST)");
+			perror("ERROR: el_set(EL_HIST)");
 		}
 #else
 		rl_redisplay();
@@ -308,11 +308,11 @@ cmd_export(const char *e_line, command *commands)
 
 			puts("Dump OK");
 		} else
-			printf("Failed dumping to '%s'.\n", db_params_new.db_filename);
+			dprintf(STDERR_FILENO, "ERROR: Failed dumping to '%s'.\n", db_params_new.db_filename);
 	} else {
 		db_params_new.db_file = open(db_params_new.db_filename, O_RDWR | O_CREAT, 0600);
 		if (db_params_new.db_file < 0) {
-			perror("open(database file)");
+			perror("ERROR: open(database file)");
 			goto exiting;
 		}
 
@@ -352,7 +352,7 @@ cmd_export(const char *e_line, command *commands)
 		if (kc_db_writer(db_tmp, bio_chain, &db_params_new))
 			puts("Export OK");
 		else
-			printf("Failed exporting to '%s'!\n", db_params_new.db_filename);
+			dprintf(STDERR_FILENO, "ERROR: Failed exporting to '%s'!\n", db_params_new.db_filename);
 
 	}
 

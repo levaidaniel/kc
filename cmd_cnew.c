@@ -73,14 +73,14 @@ cmd_cnew(const char *e_line, command *commands)
 #ifndef _READLINE
 		/* disable history temporarily */
 		if (el_set(e, EL_HIST, history, NULL) != 0) {
-			perror("el_set(EL_HIST)");
+			perror("ERROR: el_set(EL_HIST)");
 		}
 
 		e_line = el_gets(e, &e_count);
 
 		/* re-enable history */
 		if (el_set(e, EL_HIST, history, eh) != 0) {
-			perror("el_set(EL_HIST)");
+			perror("ERROR: el_set(EL_HIST)");
 		}
 #else
 		e_line = readline(prompt_str());
@@ -109,14 +109,14 @@ cmd_cnew(const char *e_line, command *commands)
 #ifndef _READLINE
 	/* disable history temporarily */
 	if (el_set(e, EL_HIST, history, NULL) != 0) {
-		perror("el_set(EL_HIST)");
+		perror("ERROR: el_set(EL_HIST)");
 	}
 
 	e_line = el_gets(e, &e_count);
 
 	/* re-enable history */
 	if (el_set(e, EL_HIST, history, eh) != 0) {
-		perror("el_set(EL_HIST)");
+		perror("ERROR: el_set(EL_HIST)");
 	}
 #else
 	e_line = readline(prompt_str());

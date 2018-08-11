@@ -84,10 +84,10 @@ cmd_getnum(const unsigned long int idx, const unsigned long int spice)
 #ifndef _READLINE
 		/* clear the prompt temporarily */
 		if (el_set(e, EL_PROMPT, el_prompt_null) != 0) {
-			perror("el_set(EL_PROMPT)");
+			perror("ERROR: el_set(EL_PROMPT)");
 		}
 		if (el_set(e, EL_UNBUFFERED, 1) != 0) {
-			perror("el_set(EL_UNBUFFERED)");
+			perror("ERROR: el_set(EL_UNBUFFERED)");
 
 			xmlFree(key); key = NULL;
 			xmlFree(value_nl); value_nl = NULL;
@@ -224,7 +224,7 @@ cmd_getnum(const unsigned long int idx, const unsigned long int spice)
 
 						switch (child = fork()) {
 							case -1:
-								perror("\nCouldn't fork(2) for tmux(1)");
+								perror("\nERROR: Couldn't fork(2) for tmux(1)");
 								break;
 							case 0:	/* Child */
 								close(0);	/* This is also needed for Editline's UNBUFFERED mode to continue to work properly. */
@@ -235,7 +235,7 @@ cmd_getnum(const unsigned long int idx, const unsigned long int spice)
 
 								if (db_params.db_file) {
 									if (close(db_params.db_file) == -1) {
-										perror("child: close(database file)");
+										perror("ERROR: child: close(database file)");
 										exit(EXIT_FAILURE);
 									} else {
 										db_params.db_file = -1;
@@ -270,7 +270,7 @@ cmd_getnum(const unsigned long int idx, const unsigned long int spice)
 
 						switch (child = fork()) {
 							case -1:
-								perror("\nCouldn't fork(2) for xclip(1)");
+								perror("\nERROR: Couldn't fork(2) for xclip(1)");
 								break;
 							case 0:	/* Child */
 								close(0);	/* This is also needed for Editline's UNBUFFERED mode to continue to work properly. */
@@ -282,7 +282,7 @@ cmd_getnum(const unsigned long int idx, const unsigned long int spice)
 
 								if (db_params.db_file) {
 									if (close(db_params.db_file) == -1) {
-										perror("child: close(database file)");
+										perror("ERROR: child: close(database file)");
 										exit(EXIT_FAILURE);
 									} else {
 										db_params.db_file = -1;
@@ -334,7 +334,7 @@ cmd_getnum(const unsigned long int idx, const unsigned long int spice)
 #ifndef _READLINE
 		/* re-enable the default prompt */
 		if (el_set(e, EL_PROMPT, prompt_str) != 0) {
-			perror("el_set(EL_PROMPT)");
+			perror("ERROR: el_set(EL_PROMPT)");
 		}
 		el_set(e, EL_UNBUFFERED, 0);
 #else

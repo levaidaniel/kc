@@ -109,7 +109,7 @@ cmd_searchre(const char *e_line, command *commands)
 			printf("%s(): pcre_study(): could not optimize regexp\n", __func__);
 
 		if (!error) {
-			perror("pcre_study()");
+			perror("ERROR: pcre_study()");
 			return;
 		}
 	}
