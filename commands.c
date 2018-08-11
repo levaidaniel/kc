@@ -702,7 +702,7 @@ kc_crypt_key(struct db_parameters *db_params)
 			KEY_LEN, db_params->key))
 		{
 
-			puts("Failed to generate a key from the password!");
+			dprintf(STDERR_FILENO, "ERROR: Failed to generate a key from the password!\n");
 			if (getenv("KC_DEBUG"))
 				printf("%s(): PKCS5_PBKDF2_HMAC_SHA1() error\n", __func__);
 
@@ -714,7 +714,7 @@ kc_crypt_key(struct db_parameters *db_params)
 			5000, EVP_sha512(),
 			KEY_LEN, db_params->key))
 		{
-			puts("Failed to generate a key from the password!");
+			dprintf(STDERR_FILENO, "ERROR: Failed to generate a key from the password!\n");
 			if (getenv("KC_DEBUG"))
 				printf("%s(): PKCS5_PBKDF2_HMAC() error\n", __func__);
 
@@ -725,7 +725,7 @@ kc_crypt_key(struct db_parameters *db_params)
 			db_params->salt, SALT_DIGEST_LEN + 1,
 			db_params->key, KEY_LEN, 16) != 0)
 		{
-			puts("Failed to generate a key from the password!");
+			dprintf(STDERR_FILENO, "ERROR: Failed to generate a key from the password!\n");
 			if (getenv("KC_DEBUG"))
 				printf("%s(): bcrypt_pbkdf() error\n", __func__);
 
@@ -738,7 +738,7 @@ kc_crypt_key(struct db_parameters *db_params)
 			SCRYPT_N, SCRYPT_r, SCRYPT_p,
 			db_params->key, KEY_LEN) != 0)
 		{
-			puts("Failed to generate a key from the password!");
+			dprintf(STDERR_FILENO, "ERROR: Failed to generate a key from the password!\n");
 			if (getenv("KC_DEBUG"))
 				printf("%s(): libscrypt_scrypt() error\n", __func__);
 
@@ -1018,7 +1018,7 @@ kc_validate_xml(xmlDocPtr db)
 	buf = xmlParserInputBufferCreateMem(KC_DTD, sizeof(KC_DTD), XML_CHAR_ENCODING_NONE);
 	if (!buf) {
 		if (getenv("KC_DEBUG"))
-			xmlGenericError(xmlGenericErrorContext, "Could not allocate buffer for DTD.\n");
+			xmlGenericError(xmlGenericErrorContext, "ERROR: Could not allocate buffer for DTD.\n");
 
 		return(0);
 	}
@@ -1029,7 +1029,7 @@ kc_validate_xml(xmlDocPtr db)
 	dtd = xmlIOParseDTD(NULL, buf, XML_CHAR_ENCODING_NONE);
 	if (!dtd) {
 		if (getenv("KC_DEBUG"))
-			xmlGenericError(xmlGenericErrorContext, "Could not parse kc DTD.\n");
+			xmlGenericError(xmlGenericErrorContext, "ERROR: Could not parse kc DTD.\n");
 
 		xmlFreeParserInputBuffer(buf);
 		return(0);
@@ -1038,7 +1038,7 @@ kc_validate_xml(xmlDocPtr db)
 	valid_ctx = xmlNewValidCtxt();
 	if (!valid_ctx ) {
 		if (getenv("KC_DEBUG"))
-			xmlGenericError(xmlGenericErrorContext, "Could not allocate a new validation context.\n");
+			xmlGenericError(xmlGenericErrorContext, "ERROR: Could not allocate a new validation context.\n");
 
 		xmlFreeDtd(dtd);
 		return(0);
@@ -1047,7 +1047,7 @@ kc_validate_xml(xmlDocPtr db)
 
 	if (!xmlValidateDtd(valid_ctx, db, dtd)) {
 		if (getenv("KC_DEBUG"))
-			xmlGenericError(xmlGenericErrorContext, "Validation failed against kc DTD.\n");
+			xmlGenericError(xmlGenericErrorContext, "ERROR: Validation failed against kc DTD.\n");
 
 		xmlFreeValidCtxt(valid_ctx);
 		xmlFreeDtd(dtd);

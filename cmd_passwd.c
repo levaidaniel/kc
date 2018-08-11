@@ -166,7 +166,7 @@ cmd_passwd(const char *e_line, command *commands)
 	}
 	memcpy(db_params.key, db_params_tmp.key, KEY_LEN);
 	if (memcmp(db_params.key, db_params_tmp.key, KEY_LEN) != 0) {
-		dprintf("ERROR: Could not copy encryption key!");
+		dprintf(STDERR_FILENO, "ERROR: Could not copy encryption key!");
 
 		goto exiting;
 	}

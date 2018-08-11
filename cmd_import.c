@@ -205,7 +205,7 @@ cmd_import(const char *e_line, command *commands)
 			db_new = xmlReadFile(db_params_new.db_filename, "UTF-8", XML_PARSE_NONET | XML_PARSE_NOERROR | XML_PARSE_NOWARNING);
 
 		if (!db_new) {
-			xmlGenericError(xmlGenericErrorContext, "Failed to parse XML from '%s'", db_params_new.db_filename);
+			xmlGenericError(xmlGenericErrorContext, "ERROR: Failed to parse XML from '%s'", db_params_new.db_filename);
 			if (errno == 0)
 				puts("");
 			else
@@ -341,7 +341,7 @@ cmd_import(const char *e_line, command *commands)
 			printf("%s(): read %d bytes\n", __func__, (int)ret);
 
 		if (BIO_get_cipher_status(bio_chain) == 0  &&  ret > 0) {
-			puts("Failed to decrypt import file!");
+			dprintf(STDERR_FILENO, "ERROR: Failed to decrypt import file!\n");
 
 			free(buf); buf = NULL;
 			goto exiting;
