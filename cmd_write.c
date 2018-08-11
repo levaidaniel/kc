@@ -142,7 +142,7 @@ cmd_write(const char *e_line, command *commands)
 
 	memcpy(db_params_tmp.key, db_params.key, KEY_LEN);
 	if (memcmp(db_params_tmp.key, db_params.key, KEY_LEN) != 0) {
-		dprintf(STDERR_FILENO, "ERROR: Could not duplicate the original key!\n");
+		dprintf(STDERR_FILENO, "ERROR: Could not duplicate the original encryption key!\n");
 
 		goto exiting;
 	}
