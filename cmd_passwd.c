@@ -79,7 +79,7 @@ cmd_passwd(const char *e_line, command *commands)
 	free(line); line = NULL;
 
 	optind = 0;
-	while ((c = getopt(largc, largv, "A:P:")) != -1)
+	while ((c = getopt(largc, largv, "A:P:e:m:")) != -1)
 		switch (c) {
 			case 'A':
 				/* in case this parameter is being parsed multiple times */
@@ -121,6 +121,22 @@ cmd_passwd(const char *e_line, command *commands)
 				db_params_tmp.kdf = strdup(optarg);
 				if (!db_params_tmp.kdf) {
 					perror("ERROR: Could not duplicate the KDF");
+					goto exiting;
+				}
+			break;
+			case 'e':
+				free(db_params_tmp.cipher); db_params_tmp.cipher = NULL;
+				db_params_tmp.cipher = strdup(optarg);
+				if (!db_params_tmp.cipher) {
+					perror("ERROR: Could not duplicate the cipher");
+					goto exiting;
+				}
+			break;
+			case 'm':
+				free(db_params_tmp.cipher_mode); db_params_tmp.cipher_mode = NULL;
+				db_params_tmp.cipher_mode = strdup(optarg);
+				if (!db_params_tmp.cipher_mode) {
+					perror("ERROR: Could not duplicate the cipher mode");
 					goto exiting;
 				}
 			break;
@@ -175,6 +191,18 @@ cmd_passwd(const char *e_line, command *commands)
 	db_params.kdf = strdup(db_params_tmp.kdf);
 	if (!db_params.kdf) {
 		perror("ERROR: Could not save the KDF");
+		goto exiting;
+	}
+	free(db_params.cipher); db_params.cipher = NULL;
+	db_params.cipher = strdup(db_params_tmp.cipher);
+	if (!db_params.cipher) {
+		perror("ERROR: Could not save the cipher");
+		goto exiting;
+	}
+	free(db_params.cipher_mode); db_params.cipher_mode = NULL;
+	db_params.cipher_mode = strdup(db_params_tmp.cipher_mode);
+	if (!db_params.cipher_mode) {
+		perror("ERROR: Could not save the cipher mode");
 		goto exiting;
 	}
 	if (strlcpy((char *)db_params.ssha_type, (const char*)db_params_tmp.ssha_type, sizeof(db_params.ssha_type)) >= sizeof(db_params.ssha_type)) {

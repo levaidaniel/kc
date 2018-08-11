@@ -455,15 +455,16 @@ is the key's index number in the current keychain.
 .It Ic rm Ar index
 Alias of
 .Ic del .
-.It Ic passwd Op Fl P Ar kdf
-Change the database password and optionally the KDF.
+.It Ic passwd Op Fl P Ar kdf Op Fl c Ar cipher Op Fl m Ar cipher mode
+Change the database password or SSH public key identity being used to encrypt.
+Optionally, the KDF, cipher and cipher mode can also be changed.
 All changes will be written immediately.
 .Pp
 More information about the
-.Ar kdf
-optional argument is in the
-.Fl P
-parameter description and the KDF section of this manual.
+.Ar kdf ,
+.Ar cipher ,
+.Ar cipher mode
+optional arguments are in their respective command line parameter description and the KDF and CIPHERS section of this manual.
 .It Ic help Op command
 Print application help or describe a
 .Ar command .

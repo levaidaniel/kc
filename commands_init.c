@@ -159,8 +159,8 @@ commands_init(command **commands)
 		(*commands) = (*commands)->next;
 
 		(*commands)->name = "passwd";
-		(*commands)->usage = "passwd [-A <key type,key comment>] [-P <kdf>]";
-		(*commands)->help = "Change the database password and optionally the KDF. All changes will be written immediately.";
+		(*commands)->usage = "passwd [-A <key type,key comment>] [-P <kdf>] [-e cipher] [-m cipher_mode]";
+		(*commands)->help = "Change the database password or SSH public key identity being used to encrypt. Optionally, the KDF, cipher and cipher mode can also be changed. All changes will be written immediately.";
 		(*commands)->fn = cmd_passwd;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
