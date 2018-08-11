@@ -2,7 +2,8 @@
 - Unify error messages, in that they now appear on STDERR.
 - Increase maximum allowed password length to 1024
 - Implement OpenSSH agent support to acquire a database password from a
-  signature based on the chosen SSH private key. 'export'/'import' commands
-  also support this.
+  signature based on the chosen SSH private key.
+  'export'/'import'/'passwd' commands also support this.
 - kc won't strip the last new-line character when reading the password from a
   file.
+- 'passwd' command can now change encryption cipher and mode as well.
