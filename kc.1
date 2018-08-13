@@ -143,8 +143,7 @@ For this,
 asks
 .Xr ssh-agent 1
 to sign the IV and the salt (that is being generated for an encryption key, and also used for conventional passwords) with a private key loaded into
-.Xr ssh-agent 1
-.
+.Xr ssh-agent 1 .
 This private key is looked up based on the
 .Ar key type
 and
@@ -755,10 +754,10 @@ New password again (empty to cancel):
 .It Em Using SSH agent :
 .Bd -literal
 $ ssh-add -l
-256 SHA256:3fxFML/VoUOvFr5WDPsiJH8E8dwM0/27IZtoVW7Cz/g my private key (ED25519)
+256 SHA256:3fxFML/VoUOvFr5WDPsiJH8E8dwM0/27IZtoVW7Cz/g my_private_key (ED25519)
 
-$ kc -A ssh-ed25519,my\ private\ key -k ~/.kc/my_secrets.kcd
-Using '(ssh-ed25519) my private key' identity for decryption
+$ kc -A ssh-ed25519,my_private_key -k ~/.kc/my_secrets.kcd
+Using '(ssh-ed25519) my_private_key' identity for decryption
 Creating '/home/user/.kc/my_secrets.kcd'
 Using '/home/user/.kc/my_secrets.kcd' database.
 <default% >
@@ -767,30 +766,32 @@ Using '/home/user/.kc/my_secrets.kcd' database.
 .El
 .Bl -tag -width |
 .It Sy Adding new entries :
+.Bl -tag -width |
+.It Em Simple :
 .Bd -literal
-.Em Simple :
-.Pp
 <default% > new testuser
 <default% NEW value> testpass
-.Pp
-.Em Prompt for both key and value :
-.Pp
+.Ed
+.It Em Prompt for both key and value :
+.Bd -literal
 <default% > new
 <default% NEW key> testuser2
 <default% NEW value> test_\er_pass_with_random_characters:\eA
-.Pp
-.Em Using the 'key' only as an indication :
-.Pp
+.Ed
+.It Em Using the 'key' only as an indication :
+.Bd -literal
 <default% > new www.mysecuresite.com
 <default% NEW value> user_name\enpass-word
-.Pp
-.Em Using the random and newline character sequences :
-.Pp
+.Ed
+.It Em Using the random and newline character sequences :
+.Bd -literal
 <default% > new testuser3
 <default% NEW value> \er\eR\en\ea\eA\enthis is a multiline value!
-.Pp
-.Em Creating new keychains :
-.Pp
+.Ed
+.El
+.Bl -tag -width |
+.It Em Creating new keychains :
+.Bd -literal
 <default% > cnew email_accounts
 <default% > cnew
 <default% NEW keychain name> WebSite Accounts
@@ -800,18 +801,21 @@ Using '/home/user/.kc/my_secrets.kcd' database.
 <default% NEW keychain description> Two
 Created keychain: 3. 2
 .Ed
+.El
+.El
+.Bl -tag -width |
 .It Sy Displaying, listing entries :
+.Bl -tag -width |
+.It Em Listing the keys in the current keychain :
 .Bd -literal
-.Em Listing the keys in the current keychain :
-.Pp
 <default% > list
 0. testuser
 1. testuser2
 2. www.mysecuresite.com
 3. testuser3
-.Pp
-.Em Displaying values in the current keychain :
-.Pp
+.Ed
+.It Em Displaying values in the current keychain :
+.Bd -literal
 <default% > 0
 [testuser] testpass
 <default% > 1
@@ -823,17 +827,17 @@ Created keychain: 3. 2
 [testuser3] [1/3] v#)z!9
 [testuser3] [2/3] HwRz7i
 [testuser3] [3/3] this is a multiline value!
-.Pp
-.Em Listing keychains :
-.Pp
+.Ed
+.It Em Listing keychains :
+.Bd -literal
 <default% > clist
 0. default
 1. email_accounts
 2. WebSite Accounts
 3. 2
-.Pp
-.Em Switch to another keychains :
-.Pp
+.Ed
+.It Em Switch to another keychains :
+.Bd -literal
 <default% > c email_accounts
 <email_accounts% > c 2
 <WebSite Accounts% > c 3
@@ -841,23 +845,29 @@ Created keychain: 3. 2
 <WebSite Accounts% > cc 2
 <2% >
 .Ed
+.El
+.El
+.Bl -tag -width |
 .It Sy Editing existing entries :
+.Bl -tag -width |
+.It Em Edit an entry in the current keychain :
 .Bd -literal
-.Em Edit an entry in the current keychain :
-.Pp
 <default% > edit 1
 <default% EDIT key> testuser2
 <default% EDIT value> test_pass_with_random_characters:6nzm
 <default% > 1
 [testuser2] test_pass_with_random_characters:6nzm
-.Pp
-.Em Rename a keychain :
-.Pp
+.Ed
+.It Em Rename a keychain :
+.Bd -literal
 <default% > cedit
 <default% EDIT keychain name> my_own keychain
 <default% EDIT keychain description> description
 my_own keychain% >
 .Ed
+.El
+.El
+.Bl -tag -width |
 .It Sy pwsafe_to_kc.pl :
 .Bd -literal
 # Export the pwsafe database to a cleartext file:
