@@ -62,7 +62,7 @@ char		kc_crypt_key(struct db_parameters *);
 char		kc_crypt_setup(BIO *, const unsigned int, struct db_parameters *);
 BIO		*kc_setup_bio_chain(const char *, const unsigned char);
 char		kc_db_writer(xmlDocPtr, BIO *, struct db_parameters *);
-char		kc_validate_xml(xmlDocPtr);
+char		kc_validate_xml(xmlDocPtr, char);
 int		kc_db_reader(char **, BIO *);
 
 

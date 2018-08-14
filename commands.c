@@ -1008,14 +1008,17 @@ kc_db_writer(xmlDocPtr db, BIO *bio_chain, struct db_parameters *db_params)
 
 
 char
-kc_validate_xml(xmlDocPtr db)
+kc_validate_xml(xmlDocPtr db, char legacy)
 {
 	xmlParserInputBufferPtr	buf = NULL;
 	xmlDtdPtr		dtd = NULL;
 	xmlValidCtxtPtr		valid_ctx = NULL;
 
 
-	buf = xmlParserInputBufferCreateMem(KC_DTD, sizeof(KC_DTD), XML_CHAR_ENCODING_NONE);
+	if (legacy)
+		buf = xmlParserInputBufferCreateMem(KC_DTD_LEGACY, sizeof(KC_DTD_LEGACY), XML_CHAR_ENCODING_NONE);
+	else
+		buf = xmlParserInputBufferCreateMem(KC_DTD, sizeof(KC_DTD), XML_CHAR_ENCODING_NONE);
 	if (!buf) {
 		if (getenv("KC_DEBUG"))
 			xmlGenericError(xmlGenericErrorContext, "ERROR: Could not allocate buffer for DTD.\n");

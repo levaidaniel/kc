@@ -391,23 +391,27 @@ You can combine the modifiers.
 Change the current keychain.
 .Ar keychain
 can be the keychain's index number or name.
-Index number takes priority when addressing a keychain
+Index number takes priority when addressing a keychain.
+.Pp
 .Pq see command Ic cc
 .It Ic cc Ar keychain_name
 Works like
 .Ic c ,
-but the keychain's name takes priority over its index number
+but the keychain's name takes priority over its index number.
+.Pp
 .Pq see command Ic c
 .It Ic cdel Ar keychain
 Delete a keychain.
 .Ar keychain
 can be the keychain's index number or name.
-Index number takes priority when addressing a keychain
+Index number takes priority when addressing a keychain.
+.Pp
 .Pq see command Ic ccdel
 .It Ic ccdel Ar keychain_name
 Works like
 .Ic cdel ,
-but the keychain's name takes priority over its index number
+but the keychain's name takes priority over its index number.
+.Pp
 .Pq see command Ic cdel
 .It Ic clear Op count
 Emulate a screen clearing.
@@ -493,7 +497,8 @@ When specifying
 export only that keychain.
 .Ar keychain
 can be the keychain's index number or name.
-Index number takes priority when addressing a keychain
+Index number takes priority when addressing a keychain.
+.Pp
 .Po see commands
 .Ic dump ,
 .Ic import ,
@@ -509,11 +514,12 @@ compatible XML file named
 When specifying a keychain, dump only that keychain to the XML file.
 .Ar keychain
 can be the keychain's index number or name.
-Index number takes priority when addressing a keychain
+Index number takes priority when addressing a keychain.
+.Pp
 .Pq see command Ic export
 .Em NOTE :
 the created XML file will be plain text.
-.It Ic import Fl k Ar filename Op Fl P Ar kdf Op Fl e Ar cipher Op Fl m Ar cipher_mode
+.It Ic import Fl k Ar filename Op Fl P Ar kdf Op Fl e Ar cipher Op Fl m Ar cipher_mode Op Fl o
 Import and overwrite the current database with the one from a
 .Nm
 compatible encrypted database file named
@@ -528,7 +534,12 @@ The
 .Ar cipher
 and
 .Ar cipher_mode
-optional arguments can be used to specify these parameters if they differ from the current database's
+optional arguments can be used to specify these parameters if they differ from the current database's.
+.Pp
+With the
+.Fl o
+option you can import legacy (<2.5) databases with missing attributes.
+.Pp
 .Po see commands
 .Ic importxml ,
 .Ic export ,
@@ -542,7 +553,8 @@ compatible XML file named
 .Ar filename
 must contain a properly formatted
 .Nm
-XML document
+XML document.
+.Pp
 .Po see commands
 .Ic import ,
 .Ic export ,
@@ -567,7 +579,8 @@ See the
 .Em LIMITS
 section for information about how
 .Nm
-deals with limits reached while appending
+deals with limits reached while appending.
+.Pp
 .Po see commands
 .Ic appendxml ,
 .Ic export ,
@@ -586,7 +599,8 @@ See the
 .Em LIMITS
 section for information about how
 .Nm
-deals with limits reached while appending
+deals with limits reached while appending.
+.Pp
 .Po see commands
 .Ic append ,
 .Ic export ,

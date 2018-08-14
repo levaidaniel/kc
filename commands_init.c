@@ -44,14 +44,14 @@ commands_init(command **commands)
 	if (!db_params.readonly) {
 		(*commands)->name = "append";
 		(*commands)->usage = "append -k <filename> [-P kdf] [-e cipher] [-m cipher_mode]";
-		(*commands)->help = "Append new and merge existing keychains to the database from a kc compatible encrypted database file named 'filename'. 'filename' must be a proper kc database. Please consult the manual about the key limits and how kc applies them during appending.\nSee command 'appendxml', 'export' and 'import'.";
+		(*commands)->help = "Append new and merge existing keychains to the database from a kc compatible encrypted database file named 'filename'. 'filename' must be a proper kc database. Please consult the manual about the key limits and how kc applies them during appending.\nSee commands 'appendxml', 'export' and 'import'.";
 		(*commands)->fn = cmd_import;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
 
 		(*commands)->name = "appendxml";
 		(*commands)->usage = "appendxml -k <filename>";
-		(*commands)->help = "Append new and merge existing keychains to the database from a kc compatible XML file named 'filename'. 'filename' must contain a properly formatted kc XML document. Please consult the manual about the key limits and how kc applies them during appending.\nSee command 'append', 'export' and 'import'.";
+		(*commands)->help = "Append new and merge existing keychains to the database from a kc compatible XML file named 'filename'. 'filename' must contain a properly formatted kc XML document. Please consult the manual about the key limits and how kc applies them during appending.\nSee commands 'append', 'export' and 'import'.";
 		(*commands)->fn = cmd_import;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
@@ -118,15 +118,15 @@ commands_init(command **commands)
 		(*commands) = (*commands)->next;
 
 		(*commands)->name = "import";
-		(*commands)->usage = "import -k <filename> [-A <key type,key comment>] [-P kdf] [-e cipher] [-m cipher_mode]";
-		(*commands)->help = "Import and overwrite the current database with the one from a kc compatible encrypted database file named 'filename'. 'filename' must be a proper kc database. 'kdf' and 'cipher mode' can be used to specify these parameters if they differ from the current database.\nSee command 'importxml', 'export' and 'append'.";
+		(*commands)->usage = "import -k <filename> [-A <key type,key comment>] [-P kdf] [-e cipher] [-m cipher_mode] [-o]";
+		(*commands)->help = "Import and overwrite the current database with the one from a kc compatible encrypted database file named 'filename'. 'filename' must be a proper kc database. 'kdf' and 'cipher mode' can be used to specify these parameters if they differ from the current database. With the '-o' option you can import legacy (<2.5) databases with missing attributes.\nSee commands 'importxml', 'export' and 'append'.";
 		(*commands)->fn = cmd_import;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
 
 		(*commands)->name = "importxml";
 		(*commands)->usage = "importxml -k <filename>";
-		(*commands)->help = "Import and overwrite the current database with the one from a kc compatible XML file named 'filename'. 'filename' must contain a properly formatted kc XML document.\nSee command 'import', 'export' and 'append'.";
+		(*commands)->help = "Import and overwrite the current database with the one from a kc compatible XML file named 'filename'. 'filename' must contain a properly formatted kc XML document.\nSee commands 'import', 'export' and 'append'.";
 		(*commands)->fn = cmd_import;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
@@ -243,7 +243,7 @@ commands_init(command **commands)
 
 	(*commands)->name = "export";
 	(*commands)->usage = "export -k <filename> [-A <key type,key comment>] [-P kdf] [-e cipher] [-m cipher_mode] [-c keychain]";
-	(*commands)->help = "Export the database to a kc compatible encrypted database file named 'filename' (if no extension specified, \".kcd\" will be appended). When specifying 'keychain', export only that keychain. 'keychain' can be the keychain's index number or name. Index number takes priority when addressing a keychain. 'kdf', 'cipher' and 'cipher_mode' can be used to specify a different KDF, encryption cipher and cipher mode to use while exporting the database.\nSee command 'dump', 'import' and 'append'.";
+	(*commands)->help = "Export the database to a kc compatible encrypted database file named 'filename' (if no extension specified, \".kcd\" will be appended). When specifying 'keychain', export only that keychain. 'keychain' can be the keychain's index number or name. Index number takes priority when addressing a keychain. 'kdf', 'cipher' and 'cipher_mode' can be used to specify a different KDF, encryption cipher and cipher mode to use while exporting the database.\nSee commands 'dump', 'import' and 'append'.";
 	(*commands)->fn = cmd_export;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 	(*commands) = (*commands)->next;

@@ -530,7 +530,7 @@ main(int argc, char *argv[])
 		}
 
 		/* Validate the XML structure against our kc.dtd */
-		if (!kc_validate_xml(db)) {
+		if (!kc_validate_xml(db, 0)) {
 			dprintf(STDERR_FILENO, "ERROR: Not a valid kc XML structure ('%s')!\n", db_params.db_filename);
 			quit(EXIT_FAILURE);
 		}
