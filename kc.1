@@ -731,7 +731,7 @@ To change the encryption cipher and/or its mode, you can use the
 .Ic passwd
 or
 .Ic export
-commands.
+command.
 .Pp
 See also the
 .Em CAVEATS
@@ -970,11 +970,12 @@ or
 commands.
 However, opening a database works with spaces in the key comment.
 .It
-Using user supplied passwords and SSH keys is either-or.
+Using user supplied passwords and SSH keys is mutually exclusive -- you cannot use both.
 Once
 .Nm
-has initialized a database with either one of them it can't convert it to the other.
-Using the
-.Cm export
-command can be used to overcome this.
+has initialized a database with either one of them, use the
+.Ic passwd
+or
+.Ic export
+command to switch between them.
 .El
