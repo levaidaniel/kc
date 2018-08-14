@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kc>
+	<keychain name="default" description="default&apos;s description" created="1415739448" modified="1415739448">
+		<key name="defaultkey0" value="defaultvalue0" created="1415739448" modified="1415739448"/>
+		<key name="defaultkey1" value="defaultvalue1" created="1415739448" modified="1415739448"/>
+	</keychain>
+	<keychain name="testchain" description="" created="1415739448" modified="1415739448">
+		<key name="keytest0" value="valuetest0" created="1415739448" modified="1415739448"/>
+		<key name="keytest1" value="valuetest1" created="1415739448" modified="1415739448"/>
+	</keychain>
+	<keychain name="emptychain" description="" created="1415739448" modified="1415739448">
+	</keychain>
+</kc>

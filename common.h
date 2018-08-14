@@ -82,16 +82,16 @@ typedef struct db_parameters {
 <!ELEMENT keychain (key)*> \
 <!ATTLIST keychain \
 	name CDATA #REQUIRED \
-	description CDATA #IMPLIED \
-	created CDATA #IMPLIED \
-	modified CDATA #IMPLIED> \
+	description CDATA #REQUIRED \
+	created CDATA #REQUIRED \
+	modified CDATA #REQUIRED> \
 \
 <!ELEMENT key EMPTY> \
 <!ATTLIST key \
 	name CDATA #REQUIRED \
 	value CDATA #REQUIRED \
-	created CDATA #IMPLIED \
-	modified CDATA #IMPLIED> \
+	created CDATA #REQUIRED \
+	modified CDATA #REQUIRED> \
 "
 
 

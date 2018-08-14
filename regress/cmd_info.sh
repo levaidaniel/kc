@@ -7,15 +7,15 @@ echo "test => $0"
 
 
 SHA1=$(printf "info\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." |sed -e 's/^\(Modified: \).*$/\1/' |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = '726595530fc31cbde570adb2e204afe55013f0ed' ];then
+if [ "$SHA1" = 'b8be779d660c1221728bae2857fdfe0f512f3be4' ];then
 	echo "$0 test ok (keychain description/created/modified)!"
 else
 	echo "$0 test failed (keychain description/created/modified)!"
 	exit 1
 fi
 
-SHA1=$(printf "info 0\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = '83b3b5c7809abd12d061eb0c03a39ec135845871' ];then
+SHA1=$(printf "info 0\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." |sed -e 's/^\(Modified: \).*$/\1/' |$SHA1_BIN |cut -d' ' -f1)
+if [ "$SHA1" = 'df100db2c5678400ce9bd2beb4e61e4d7fb6db14' ];then
 	echo "$0 test ok (key created/modified)!"
 else
 	echo "$0 test failed (key created/modified)!"

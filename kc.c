@@ -493,6 +493,8 @@ main(int argc, char *argv[])
 		snprintf(created, TIME_MAXLEN, "%d", (int)time(NULL));
 
 		xmlNewProp(keychain, BAD_CAST "created", BAD_CAST created);
+		xmlNewProp(keychain, BAD_CAST "modified", BAD_CAST created);
+		xmlNewProp(keychain, BAD_CAST "description", BAD_CAST "");
 		free(created); created = NULL;
 
 

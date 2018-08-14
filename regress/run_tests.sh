@@ -44,7 +44,7 @@ echo "Aborted."
 
 export SHA1_INVALID_INDEX='812e96292afbdf1b0cebb40a7db6a7ffa2e52dfe'
 export SHA1_KEYCHAIN_NOT_FOUND='f00ecea88ac8e16851779e4230ffd0871c453d40'
-export SHA1_COMMON_1='a15dd0ffd1aef152f7d10654361c01ea1c04dfe5'
+export SHA1_COMMON_1='f13bad981225a227a854257d56c0983879ed9733'
 
 case "$(uname -s)" in
 	Linux|CYGWIN*)
