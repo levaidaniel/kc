@@ -53,14 +53,19 @@ cmd_import(const char *e_line, command *commands)
 
 	xmlDocPtr	db_new = NULL;
 	xmlNodePtr	db_root = NULL, db_root_new = NULL, entry_new = NULL,
-			keychain_new = NULL, keychain_cur = NULL;
+			keychain_new = NULL, keychain_cur = NULL, db_node = NULL;
 	xmlChar		*cname = NULL;
+
+	xmlChar		*description = NULL;
+	xmlChar		*created = NULL;
+	xmlChar		*modified = NULL;
+	char		*created_now = NULL;
 
 	int		c = 0, largc = 0;
 	char		**largv = NULL;
 	char		*line = NULL;
 	char		*buf = NULL;
-	char		append = 0, xml = 0;
+	char		append = 0, xml = 0, legacy = 0;
 	ssize_t		ret = -1;
 	int		pos = 0;
 
@@ -107,7 +112,7 @@ cmd_import(const char *e_line, command *commands)
 	free(line); line = NULL;
 
 	optind = 0;
-	while ((c = getopt(largc, largv, "A:k:P:e:m:")) != -1)
+	while ((c = getopt(largc, largv, "A:k:P:e:m:o")) != -1)
 		switch (c) {
 			case 'A':
 				/* in case this parameter is being parsed multiple times */
@@ -175,6 +180,9 @@ cmd_import(const char *e_line, command *commands)
 					perror("ERROR: Could not duplicate the cipher mode");
 					goto exiting;
 				}
+			break;
+			case 'o':
+				legacy++;
 			break;
 			default:
 				puts(commands->usage);
@@ -369,7 +377,7 @@ cmd_import(const char *e_line, command *commands)
 	puts("Checking database...");
 
 
-	if (!kc_validate_xml(db_new)) {
+	if (!kc_validate_xml(db_new, legacy)) {
 		dprintf(STDERR_FILENO, "ERROR: Not a valid kc XML structure ('%s')!\n", db_params_new.db_filename);
 
 		xmlFreeDoc(db_new);
@@ -395,6 +403,19 @@ cmd_import(const char *e_line, command *commands)
 
 		/* Count the keychains in the current database */
 		count_keychains = count_elements(keychain->parent->children);
+		if (count_keychains >= ITEMS_MAX - 1) {
+			dprintf(STDERR_FILENO, "ERROR: Maximum number of keychains (%lu) already reached in current database.\n", ITEMS_MAX - 1);
+
+			xmlFreeDoc(db_new);
+			goto exiting;
+		}
+
+		if (count_elements(keychain_new->parent->children) >= ITEMS_MAX) {
+			dprintf(STDERR_FILENO, "ERROR: Number of keychains in the database being imported is larger than the allowed maximum, %lu.\n", ITEMS_MAX - 1);
+
+			xmlFreeDoc(db_new);
+			goto exiting;
+		}
 
 		/* We would like to append every keychain that is in the source database,
 		 * hence the loop.
@@ -414,14 +435,20 @@ cmd_import(const char *e_line, command *commands)
 					/* Range check
 					 * See, if the new keys would fit into the existing keychain.
 					 */
-					count_keys = count_elements(keychain_cur->children->next);
+					if (count_elements(keychain_cur->children->next) >= ITEMS_MAX - 1) {
+						dprintf(STDERR_FILENO, "ERROR: Maximum number of keys (%lu) in current keychain already reached.\n", ITEMS_MAX - 1);
+
+						xmlFreeDoc(db_new);
+						goto exiting;
+					}
+
 					count_keys_new = count_elements(keychain_new->children->next);
-					while (count_keys_new > 0  &&  count_keys < ITEMS_MAX - 1) {
+					while (count_keys_new > 0  &&  count_keys < ITEMS_MAX) {
 						count_keys++;
 						count_keys_new--;
 					}
 
-					if (count_keys_new == 0  &&  count_keys <= ITEMS_MAX - 1) {
+					if (count_keys_new == 0  &&  count_keys < ITEMS_MAX) {
 						entry_new = keychain_new->children->next;
 						while (entry_new) {
 							if (entry_new->type == XML_ELEMENT_NODE) {	/* we only care about ELEMENT nodes */
@@ -433,21 +460,34 @@ cmd_import(const char *e_line, command *commands)
 							entry_new = entry_new->next;
 						}
 					} else {
-						printf("Keys from keychain '%s' would not fit in the existing keychain; did not append.\n", xmlGetProp(keychain_new, BAD_CAST "name"));
+						dprintf(STDERR_FILENO, "ERROR: Keys from keychain '%s' would not fit in the existing keychain; could not append.\n", xmlGetProp(keychain_new, BAD_CAST "name"));
+
+						xmlFreeDoc(db_new);
+						goto exiting;
 					}
 				} else {
+					if (count_elements(keychain_new->parent->children) >= ITEMS_MAX) {
+						dprintf(STDERR_FILENO, "ERROR: Number of keys in the keychain being imported (%s) is larger than the allowed maximum, %lu.\n", xmlGetProp(keychain_new, BAD_CAST "name"), ITEMS_MAX - 1);
+
+						xmlFreeDoc(db_new);
+						goto exiting;
+					}
+
 					/* Range check
 					 * See, if the new keychain would fit into the current database.
 					 */
-					if (count_keychains + 1 <= ITEMS_MAX - 1) {
+					if (count_keychains >= ITEMS_MAX - 1) {
+						dprintf(STDERR_FILENO, "ERROR: Cannot copy keychain from database being imported: maximum number of keychains reached, %lu.\n", ITEMS_MAX - 1);
+
+						xmlFreeDoc(db_new);
+						goto exiting;
+					} else {
 						/* Create a non-existing keychain */
 						xmlAddChild(db_root, xmlNewText(BAD_CAST "\t"));
 						xmlAddChild(db_root, xmlCopyNode(keychain_new, 1));
 						xmlAddChild(db_root, xmlNewText(BAD_CAST "\n"));
 
 						count_keychains++;
-					} else {
-						dprintf(STDERR_FILENO, "ERROR: Can not create new keychain: maximum number of keychains reached, %lu.\n", ITEMS_MAX - 1);
 					}
 				}
 			}
@@ -459,29 +499,108 @@ cmd_import(const char *e_line, command *commands)
 
 		puts("Append finished.");
 	} else {
-		/* Range checks */
-
+		/* Range and attribute checks */
 		keychain_new = db_root_new->children->next;
+
+		created_now = malloc(TIME_MAXLEN);
+		if (!created_now) {
+			dprintf(STDERR_FILENO, "ERROR: Could not allocate memory for 'created' attribute!\n");
+
+			xmlFreeDoc(db_new);
+			goto exiting;
+		}
+		snprintf(created_now, TIME_MAXLEN, "%d", (int)time(NULL));
+
 
 		/* Iterate through keychains and count the keys in them */
 		while (keychain_new  &&  count_keychains < ITEMS_MAX) {
-			/* Count the keys in the keychain */
-			if (count_elements(keychain_new->children) >= ITEMS_MAX - 1) {
-				dprintf(STDERR_FILENO, "ERROR: Cannot import: maximum number of keys reached, %lu.\n", ITEMS_MAX - 1);
-
-				xmlFreeDoc(db_new);
-				goto exiting;
+			if (keychain_new->type != XML_ELEMENT_NODE) {	/* we only care about ELEMENT nodes */
+				keychain_new = keychain_new->next;
+				continue;
 			}
 
-			if (keychain_new->type == XML_ELEMENT_NODE)	/* we only care about ELEMENT nodes */
-				count_keychains++;
+			count_keychains++;
 
+
+			/* Fill in missing but mandatory keychain attributes */
+			description = xmlGetProp(keychain_new, BAD_CAST "description");
+			if (description) {
+				xmlFree(description); description = NULL;
+			} else {
+				xmlNewProp(keychain_new, BAD_CAST "description", BAD_CAST "");
+			}
+
+			modified = xmlGetProp(keychain_new, BAD_CAST "modified");
+			if (!modified)
+				xmlNewProp(keychain_new, BAD_CAST "modified", BAD_CAST created_now);
+
+			created = xmlGetProp(keychain_new, BAD_CAST "created");
+			if (created) {
+				xmlFree(created); created = NULL;
+			} else {
+				/* If there's no 'created' attribute but
+				 * there's 'modified', use that for the
+				 * creation date.
+				 * This can be the case eg. after modifying
+				 * an older database with newer kc, which would
+				 * update the 'modified' attribute but wouldn't
+				 * create a 'created' one.
+				 */
+				if (modified)
+					xmlNewProp(keychain_new, BAD_CAST "created", modified);
+				else
+					xmlNewProp(keychain_new, BAD_CAST "created", BAD_CAST created_now);
+			}
+			xmlFree(modified); modified = NULL;
+
+
+			/* Count the keys in the keychain */
+			db_node = keychain_new->children;
 			keychain_new = keychain_new->next;
+
+			/* Fill in missing but mandatory key attributes */
+			while (db_node) {
+				if (db_node->type == XML_ELEMENT_NODE) {	/* we only care about ELEMENT nodes */
+					count_keys++;
+					if (count_keys >= ITEMS_MAX) {
+						dprintf(STDERR_FILENO, "ERROR: Number of keys in the keychain being imported (%s) is larger than the allowed maximum, %lu.\n", xmlGetProp(keychain_new, BAD_CAST "name"), ITEMS_MAX - 1);
+
+						xmlFreeDoc(db_new);
+						goto exiting;
+					}
+
+
+					modified = xmlGetProp(db_node, BAD_CAST "modified");
+					if (!modified)
+						xmlNewProp(db_node, BAD_CAST "modified", BAD_CAST created_now);
+
+					created = xmlGetProp(db_node, BAD_CAST "created");
+					if (created) {
+						xmlFree(created); created = NULL;
+					} else {
+						/* If there's no 'created' attribute but
+						 * there's 'modified', use that for the
+						 * creation date.
+						 * This can be the case eg. after modifying
+						 * an older database with newer kc, which would
+						 * update the 'modified' attribute but wouldn't
+						 * create a 'created' one.
+						 */
+						if (modified)
+							xmlNewProp(db_node, BAD_CAST "created", modified);
+						else
+							xmlNewProp(db_node, BAD_CAST "created", BAD_CAST created_now);
+					}
+					xmlFree(modified); modified = NULL;
+				}
+
+				db_node = db_node->next;
+			}
 		}
 
 		/* Finished scanning the keys in the new keychains, now lets evaluate the number of keychains */
-		if (count_keychains >= ITEMS_MAX - 1) {
-			dprintf(STDERR_FILENO, "ERROR: Cannot import: maximum number of keychains reached, %lu.\n", ITEMS_MAX - 1);
+		if (count_keychains >= ITEMS_MAX) {
+			dprintf(STDERR_FILENO, "ERROR: Number of keychains in the database being imported is larger than the allowed maximum, %lu.\n", ITEMS_MAX - 1);
 
 			xmlFreeDoc(db_new);
 			goto exiting;
@@ -511,6 +630,11 @@ exiting:
 		BIO_free_all(bio_chain);
 		bio_chain = NULL;
 	}
+
+	xmlFree(description); description = NULL;
+	xmlFree(created); created = NULL;
+	free(created_now); created_now = NULL;
+	xmlFree(modified); modified = NULL;
 
 	if (db_params_new.db_file >= 0)
 		close(db_params_new.db_file);
