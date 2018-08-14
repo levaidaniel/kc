@@ -7,3 +7,11 @@
 - kc won't strip the last new-line character when reading the password from a
   file.
 - 'passwd' command can now change encryption cipher and mode as well.
+- The kc XML document type definition has changed so that now attributes
+  created, modified and description are mandatory.
+- 'import' command now has a -o option to turn on legacy database parsing with
+  the old kc DTD. One can salvage their legacy database(s) and fill in the
+  missing attributes.
+- Error message are now written to standard error output and prefixed with
+  'ERROR: '
+- Documentation and manual page fixes.
