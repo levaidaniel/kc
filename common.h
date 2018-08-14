@@ -94,6 +94,24 @@ typedef struct db_parameters {
 	modified CDATA #REQUIRED> \
 "
 
+#define	KC_DTD_LEGACY	"\
+<!ELEMENT kc (keychain)*> \
+\
+<!ELEMENT keychain (key)*> \
+<!ATTLIST keychain \
+	name CDATA #REQUIRED \
+	description CDATA #IMPLIED \
+	created CDATA #IMPLIED \
+	modified CDATA #IMPLIED> \
+\
+<!ELEMENT key EMPTY> \
+<!ATTLIST key \
+	name CDATA #REQUIRED \
+	value CDATA #REQUIRED \
+	created CDATA #IMPLIED \
+	modified CDATA #IMPLIED> \
+"
+
 
 #ifndef _READLINE
 const char	*el_prompt_null(void);
