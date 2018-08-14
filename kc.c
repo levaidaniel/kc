@@ -96,6 +96,8 @@ main(int argc, char *argv[])
 	int		c = 0;
 	size_t		len = 0;
 
+	unsigned long int	count_keychains = 0, count_keys = 0;
+
 
 #ifdef __OpenBSD__
 	char		*pledges = "cpath exec fattr flock proc rpath stdio tty unix wpath";
@@ -547,6 +549,30 @@ main(int argc, char *argv[])
 		 * be able to search in it
 		 */
 		keychain = db_root->children->next;
+
+		/* Check if the number of keychains and keys per keychains are under the allowed maximum */
+		while (keychain  &&  count_keychains < ITEMS_MAX) {
+			if (keychain->type == XML_ELEMENT_NODE)	/* we only care about ELEMENT nodes */
+				count_keychains++;
+
+			/* if the chain has keys, count them */
+			if (keychain->children) {
+				if (keychain->children->next) {
+					count_keys = count_elements(keychain->children->next);
+					if (count_keys >= ITEMS_MAX) {
+						dprintf(STDERR_FILENO, "ERROR: Number of keys in keychain '%s' is larger than the allowed maximum, %lu.\n", xmlGetProp(keychain, BAD_CAST "name"), ITEMS_MAX - 1);
+						quit(EXIT_FAILURE);
+					}
+				}
+			}
+
+			keychain = keychain->next;
+		}
+		if (count_keychains >= ITEMS_MAX) {
+			dprintf(STDERR_FILENO, "ERROR: Number of keychains in current database is larger than the allowed maximum, %lu.\n", ITEMS_MAX - 1);
+			quit(EXIT_FAILURE);
+		}
+
 
 		if (keychain_start) {
 			/* Start with the specified keychain */
