@@ -545,12 +545,9 @@ main(int argc, char *argv[])
 			quit(EXIT_FAILURE);
 		}
 
-		/* We must init 'keychain' to the first keychain of the db, to
-		 * be able to search in it
-		 */
-		keychain = db_root->children->next;
 
-		/* Check if the number of keychains and keys per keychains are under the allowed maximum */
+		/* Check if the number of keychains and keys per keychains are below the allowed maximum */
+		keychain = db_root->children->next;
 		while (keychain  &&  count_keychains < ITEMS_MAX) {
 			if (keychain->type == XML_ELEMENT_NODE)	/* we only care about ELEMENT nodes */
 				count_keychains++;
@@ -574,6 +571,10 @@ main(int argc, char *argv[])
 		}
 
 
+		/* We must init 'keychain' to the first keychain of the db, to
+		 * be able to search in it
+		 */
+		keychain = db_root->children->next;
 		if (keychain_start) {
 			/* Start with the specified keychain */
 			keychain = find_keychain(BAD_CAST keychain_start, keychain_start_name);
