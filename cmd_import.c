@@ -222,19 +222,19 @@ cmd_import(const char *e_line, command *commands)
 			printf("Opening '%s'\n",db_params_new.db_filename);
 
 			if (!S_ISLNK(st.st_mode)  &&  !S_ISREG(st.st_mode)) {
-				printf("'%s' is not a regular file or a link!\n", db_params_new.db_filename);
+				dprintf(STDERR_FILENO, "ERROR: '%s' is not a regular file or a link!\n", db_params_new.db_filename);
 
 				goto exiting;
 			}
 
 			if (st.st_size == 0) {
-				printf("'%s' is an empty file!\n", db_params_new.db_filename);
+				dprintf(STDERR_FILENO, "ERROR: '%s' is an empty file!\n", db_params_new.db_filename);
 
 				goto exiting;
 			}
 
 			if (st.st_size <= IV_DIGEST_LEN + SALT_DIGEST_LEN + 2) {
-				printf("'%s' is suspiciously small file!\n", db_params_new.db_filename);
+				dprintf(STDERR_FILENO, "ERROR: '%s' is a suspiciously small file!\n", db_params_new.db_filename);
 
 				goto exiting;
 			}
@@ -368,7 +368,7 @@ cmd_import(const char *e_line, command *commands)
 
 
 	if (!kc_validate_xml(db_new)) {
-		printf("Not a valid kc XML structure ('%s')!\n", db_params_new.db_filename);
+		dprintf(STDERR_FILENO, "ERROR: Not a valid kc XML structure ('%s')!\n", db_params_new.db_filename);
 
 		xmlFreeDoc(db_new);
 		goto exiting;
