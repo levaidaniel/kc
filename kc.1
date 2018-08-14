@@ -516,9 +516,10 @@ When specifying a keychain, dump only that keychain to the XML file.
 can be the keychain's index number or name.
 Index number takes priority when addressing a keychain.
 .Pp
-.Pq see command Ic export
 .Em NOTE :
 the created XML file will be plain text.
+.Pp
+.Pq see command Ic export
 .It Ic import Fl k Ar filename Op Fl P Ar kdf Op Fl e Ar cipher Op Fl m Ar cipher_mode Op Fl o
 Import and overwrite the current database with the one from a
 .Nm
@@ -692,6 +693,7 @@ Copy the value to the CLIPBOARD X selection, like the
 .Ic Xclip
 command.
 .El
+.Pp
 Check the
 .Em CAVEATS
 section about the clipboard commands.
@@ -724,12 +726,16 @@ on Linux and
 .Pa /dev/random
 on everything else
 .Pc as characters.
+.Pp
+To change the encryption cipher and/or its mode, you can use the
+.Ic passwd
+or
+.Ic export
+commands.
+.Pp
 See also the
 .Em CAVEATS
 section.
-To change the encryption cipher and/or its mode, you can use the
-.Ic export
-command.
 .Ss KDF
 The KDF converts the user supplied password with a generated salt to a strong key that can be used safely during encryption.
 Every SHA-* based PBKDF2 KDF uses 5000 rounds in
