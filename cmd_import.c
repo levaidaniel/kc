@@ -189,8 +189,10 @@ cmd_import(const char *e_line, command *commands)
 		xml = 1;
 
 
-	if (!db_params_new.db_filename)
+	if (!db_params_new.db_filename) {
+		puts(commands->usage);
 		goto exiting;
+	}
 
 
 	puts("Reading database...");

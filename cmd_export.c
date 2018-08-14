@@ -195,8 +195,10 @@ cmd_export(const char *e_line, command *commands)
 		dump = 1;
 
 
-	if (!db_params_new.db_filename)
+	if (!db_params_new.db_filename) {
+		puts(commands->usage);
 		goto exiting;
+	}
 
 
 	if (cname) {
