@@ -645,6 +645,7 @@ main(int argc, char *argv[])
 	if (el_set(e, EL_BIND, "^L", "ed-clear-screen", NULL) != 0)
 		perror("ERROR: el_set(EL_BIND)");
 
+#if !defined(__linux__)  &&  !defined(__CYGWIN__)
 	if (el_source(e, NULL) != 0) {
 		if (errno != 0) {
 			if (errno != ENOENT)
@@ -652,6 +653,7 @@ main(int argc, char *argv[])
 		} else
 			dprintf(STDERR_FILENO, "ERROR: Error executing .editrc\n");
 	}
+#endif
 	if (el_set(e, EL_EDITMODE, 1) != 0) {
 		perror("ERROR: el_set(EL_EDITMODE)");
 		quit(EXIT_FAILURE);
