@@ -47,7 +47,6 @@ cmd_new(const char *e_line, command *commands)
 	char			*line = NULL;
 	unsigned long int	idx = 0;
 	int			i = 0;
-
 #ifndef _READLINE
 	int		e_count = 0;
 #endif
@@ -90,8 +89,6 @@ cmd_new(const char *e_line, command *commands)
 	free(line); line = NULL;
 
 	if (xmlStrlen(key) <= 0) {	/* if we didn't get a keyname as a parameter */
-		xmlFree(key); key = NULL;
-
 		strlcpy(prompt_context, "NEW key", sizeof(prompt_context));
 
 #ifndef _READLINE
@@ -109,14 +106,10 @@ cmd_new(const char *e_line, command *commands)
 		} else {
 #ifndef _READLINE
 			el_reset(e);
-
-			/* re-enable history */
-			if (el_set(e, EL_HIST, history, eh) != 0) {
-				perror("ERROR: el_set(EL_HIST)");
-			}
 #endif
 			strlcpy(prompt_context, "", sizeof(prompt_context));
 
+			xmlFree(key); key = NULL;
 			return;
 		}
 	}
