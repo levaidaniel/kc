@@ -46,6 +46,7 @@ cmd_cnew(const char *e_line, command *commands)
 	char			*created = NULL;
 	char			*line = NULL;
 	unsigned long int	idx = 0;
+	int			i = 0;
 #ifndef _READLINE
 	int		e_count = 0;
 #endif
@@ -61,27 +62,37 @@ cmd_cnew(const char *e_line, command *commands)
 	}
 
 
+#ifndef _READLINE
+	/* disable history temporarily */
+	if (el_set(e, EL_HIST, history, NULL) != 0) {
+		perror("ERROR: el_set(EL_HIST)");
+	}
+#endif
+
 	line = strdup(e_line); malloc_check(line);
 
-	strtok(line, " ");		/* remove the command from the line */
-	name = BAD_CAST strtok(NULL, " ");	/* assign the command's first parameter (name) */
-	if (name) {
-		name = xmlStrdup(name);
-	} else {	/* if we didn't get a name as a parameter */
+	/* Search for the first space in the command line, to see if
+	 * a key name was specified. If it was, the space will be right
+	 * after the command's name.
+	 */
+	for (i = 0; line[i] != ' '  &&  line[i] != '\0'; i++) {}
+
+	/* Search for the first non-space character after the first space
+	 * after the command name; this will be start of the key's name
+	 * (if it's been specified).
+	 * If no keyname was specified, then it will be a zero sized string,
+	 * and we check for that.
+	 */
+	for (; line[i] == ' '; i++) {}
+
+	name = xmlStrdup(BAD_CAST &line[i]); malloc_check(name);
+	free(line); line = NULL;
+
+	if (xmlStrlen(name) <= 0) {	/* if we didn't get a keychain name as a parameter */
 		strlcpy(prompt_context, "NEW keychain name", sizeof(prompt_context));
 
 #ifndef _READLINE
-		/* disable history temporarily */
-		if (el_set(e, EL_HIST, history, NULL) != 0) {
-			perror("ERROR: el_set(EL_HIST)");
-		}
-
 		e_line = el_gets(e, &e_count);
-
-		/* re-enable history */
-		if (el_set(e, EL_HIST, history, eh) != 0) {
-			perror("ERROR: el_set(EL_HIST)");
-		}
 #else
 		e_line = readline(prompt_str());
 #endif
@@ -98,20 +109,17 @@ cmd_cnew(const char *e_line, command *commands)
 #endif
 			strlcpy(prompt_context, "", sizeof(prompt_context));
 
+			xmlFree(name); name = NULL;
 			return;
 		}
 	}
+	if (getenv("KC_DEBUG"))
+		printf("%s(): new keychain is '%s'\n", __func__, name);
 
-	free(line); line = NULL;
 
 	strlcpy(prompt_context, "NEW keychain description", sizeof(prompt_context));
 
 #ifndef _READLINE
-	/* disable history temporarily */
-	if (el_set(e, EL_HIST, history, NULL) != 0) {
-		perror("ERROR: el_set(EL_HIST)");
-	}
-
 	e_line = el_gets(e, &e_count);
 
 	/* re-enable history */
@@ -134,8 +142,12 @@ cmd_cnew(const char *e_line, command *commands)
 #endif
 		strlcpy(prompt_context, "", sizeof(prompt_context));
 
+		xmlFree(name); name = NULL;
 		return;
 	}
+
+	if (getenv("KC_DEBUG"))
+		printf("%s(): new keychain description is '%s'\n", __func__, description);
 
 	strlcpy(prompt_context, "", sizeof(prompt_context));
 
