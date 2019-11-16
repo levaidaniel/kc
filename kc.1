@@ -17,7 +17,7 @@
 .\"ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 .\"(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 .\"SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-.Dd July 30, 2018
+.Dd November 16, 2019
 .Dt KC 1
 .Os
 .Sh NAME
@@ -142,7 +142,9 @@ For this,
 .Nm
 asks
 .Xr ssh-agent 1
-to sign the IV and the salt (that is being generated for an encryption key, and also used for conventional passwords) with a private key loaded into
+(using the
+.Ev SSH_AUTH_SOCK
+environment variable) to sign the IV and the salt (that is being generated for an encryption key, and also used for conventional passwords) with a private key loaded into
 .Xr ssh-agent 1 .
 This private key is looked up based on the
 .Ar key type
