@@ -38,18 +38,36 @@ cmd_c(const char *e_line, command *commands)
 
 	char		*cmd = NULL, name = 0;
 	char		*line = NULL;
+	int		i = 0;
 
 
 	line = strdup(e_line); malloc_check(line);
+
+	/* Search for the first space in the command line, to see if
+	 * a key name was specified. If it was, the space will be right
+	 * after the command's name.
+	 */
+	for (i = 0; line[i] != ' '  &&  line[i] != '\0'; i++) {}
+
+	/* Search for the first non-space character after the first space
+	 * after the command name; this will be start of the key's name
+	 * (if it's been specified).
+	 * If no keyname was specified, then it will be a zero sized string,
+	 * and we check for that.
+	 */
+	for (; line[i] == ' '; i++) {}
 
 	cmd = strtok(line, " ");		/* get the command name */
 	if (strncmp(cmd, "cc", 2) == 0)
 		name = 1;			/* force to search for the keychain's name */
 
-	cname = BAD_CAST strtok(NULL, " ");		/* assign the command's parameter */
-	if (!cname) {
+	cname = xmlStrdup(BAD_CAST &line[i]); malloc_check(cname);	/* assign the command's parameter */
+	free(line); line = NULL;
+
+	if (xmlStrlen(cname) <= 0) {	/* if we didn't get a keychain name or number as a parameter */
 		puts(commands->usage);
-		free(line); line = NULL;
+
+		xmlFree(cname); cname = NULL;
 		return;
 	}
 
@@ -59,5 +77,5 @@ cmd_c(const char *e_line, command *commands)
 	else
 		puts("Keychain not found.");
 
-	free(line); line = NULL;
+	xmlFree(cname); cname = NULL;
 } /* cmd_c() */
