@@ -48,6 +48,9 @@
 #include <libscrypt.h>
 #endif
 
+#ifdef _HAVE_YUBIKEY
+#include "ykchalresp.h"
+#endif
 
 extern xmlNodePtr	keychain;
 
@@ -552,6 +555,17 @@ kc_password_read(struct db_parameters *db_params, const unsigned char new)
 	db_params->pass_len = strlen(pass1);
 	db_params->pass = malloc(db_params->pass_len); malloc_check(db_params->pass);
 	memcpy(db_params->pass, pass1, db_params->pass_len);
+
+	if (db_params->ykslot > 0) {
+		if (db_params->pass_len > 64) {
+			puts("Password cannot be longer than 64 bytes when using YubiKey challenge-response!");
+			return(-1);
+		}
+		if (!kc_ykchalresp(db_params)) {
+			puts("Error while doing YubiKey challenge-response!");
+			return(-1);
+		}
+	}
 
 	if (pass1)
 		memset(pass1, '\0', PASSWORD_MAXLEN + 1);

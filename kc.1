@@ -17,7 +17,7 @@
 .\"ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 .\"(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 .\"SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-.Dd November 16, 2019
+.Dd April 28, 2020
 .Dt KC 1
 .Os
 .Sh NAME
@@ -164,6 +164,24 @@ cannot use it in this specific way for this specific purpose.
 See also the
 .Em CAVEATS
 section for an explanation of how this can be insecure.
+.It Fl y Ar key slot device index
+Use a YubiKey to utilize its challenge-response mechanism to generate a new password from an already provided one. This is an additional layer on top of the traditional password usage, and works by using the user provided password (keyboard input or file) and putting it through the YubiKey HMAC challenge-response algorithm using the security key.
+.Pp
+There is actually only one argument to this option, and that is a two digit number. The first digit is the YubiKey slot and the second digit is the device index number. E.g.:
+.Bl -tag -offset ||| -width |
+.It Ar 10
+means slot 1 and device 0 (the first device).
+.It Ar 20
+means slot 2 and device 0 (the first device).
+.It Ar 21
+means slot 2 and device 1 (the second device) etc...
+.El
+.Pp
+It's not necessary to specify the second digit --
+.Nm
+will use the device index 0 by default, so it's sufficient to provide only one digit, i.e. the key slot.
+.Pp
+When using this option, the password can be at most 64 bytes long.
 .It Fl p Ar file
 Read password from
 .Ar file .
@@ -980,4 +998,13 @@ has initialized a database with either one of them, use the
 or
 .Ic export
 command to switch between them.
+.El
+.Pp
+YubiKey HMAC challenge-response:
+.Bl -enum -offset ||| -width |
+.It
+Supports an at most 64 bytes long password.
+.It
+Only HMAC mode is supported by
+.Nm
 .El

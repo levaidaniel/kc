@@ -38,6 +38,10 @@
 #include <sys/file.h>
 #endif
 
+#ifdef _HAVE_YUBIKEY
+#include "ykchalresp.h"
+#endif
+
 
 void		print_bio_chain(BIO *);
 #ifndef _READLINE
@@ -91,6 +95,9 @@ main(int argc, char *argv[])
 	unsigned char	newdb = 0;
 	char		*ssha_type = NULL, *ssha_comment = NULL;
 
+	unsigned long int	ykchalresp = 0;
+	char			*inv = NULL;
+
 	xmlNodePtr	db_root = NULL;
 
 	int		c = 0;
@@ -116,6 +123,8 @@ main(int argc, char *argv[])
 	/* db_param defaults */
 	db_params.ssha_type[0] = '\0';
 	db_params.ssha_comment[0] = '\0';
+	db_params.ykdev = 0;
+	db_params.ykslot = 0;
 	db_params.pass = NULL;
 	db_params.pass_len = 0;
 	db_params.db_filename = NULL;
@@ -146,7 +155,7 @@ main(int argc, char *argv[])
 	}
 
 
-	while ((c = getopt(argc, argv, "A:k:c:C:rp:P:e:m:bBvh")) != -1)
+	while ((c = getopt(argc, argv, "A:k:c:C:rp:P:e:m:y:bBvh")) != -1)
 		switch (c) {
 			case 'A':
 				/* in case this parameter is being parsed multiple times */
@@ -213,6 +222,34 @@ main(int argc, char *argv[])
 				free(db_params.cipher_mode); db_params.cipher_mode = NULL;
 				db_params.cipher_mode = strdup(optarg); malloc_check(db_params.cipher_mode);
 			break;
+			case 'y':
+				ykchalresp = strtoul(optarg, &inv, 10);
+				if (inv[0] == '\0') {
+					if (ykchalresp <= 0  ||  optarg[0] == '-') {
+						dprintf(STDERR_FILENO, "ERROR: YubiKey slot/device parameter is zero or negative.\n");
+						quit(EXIT_FAILURE);
+					} else if (ykchalresp > 29) {
+						dprintf(STDERR_FILENO, "ERROR: YubiKey slot/device parameter is too high.\n");
+						quit(EXIT_FAILURE);
+					} else if (ykchalresp < 10) {
+						db_params.ykslot = ykchalresp;
+						db_params.ykdev = 0;
+					} else {
+						db_params.ykslot = ykchalresp / 10 ;
+						db_params.ykdev = ykchalresp - (ykchalresp / 10 * 10);
+					}
+				} else {
+					dprintf(STDERR_FILENO, "ERROR: Unable to convert the YubiKey slot/device parameter.\n");
+					quit(EXIT_FAILURE);
+				}
+
+				if (db_params.ykslot > 2  ||  db_params.ykslot < 1  ) {
+					dprintf(STDERR_FILENO, "ERROR: YubiKey slot number is not 1 or 2.\n");
+					quit(EXIT_FAILURE);
+				}
+
+				printf("Using YubiKey slot #%d on device #%d\n", db_params.ykslot, db_params.ykdev);
+			break;
 			case 'b':
 				batchmode = 1;
 			break;
@@ -226,11 +263,12 @@ main(int argc, char *argv[])
 			case 'h':
 				/* FALLTHROUGH */
 			default:
-				printf( "%s [-k <file>] [-r] [-c/-C <keychain>] [-A <key type,key comment>] [-p <file>] [-P <kdf>] [-e <cipher>] [-m <mode>] [-B/-b] [-v] [-h]\n\n", argv[0]);
+				printf( "%s [-k <file>] [-r] [-c/-C <keychain>] [-A <key type,key comment>] [-y <YubiKey slot><YubiKey device index>] [-p <file>] [-P <kdf>] [-e <cipher>] [-m <mode>] [-B/-b] [-v] [-h]\n\n", argv[0]);
 				printf(	"-k <file>: Use file as database. The default is ~/.kc/default.kcd .\n"
 					"-r: Open the database in read-only mode.\n"
 					"-c/-C <keychain>: Start in <keychain>.\n"
 					"-A <key type,key comment>: Use an SSH agent to provide password.\n"
+					"-y <YubiKey slot><YubiKey device index>: Use a YubiKey to provide password.\n"
 					"-p <file>: Read password from file.\n"
 					"-P <kdf>: KDF to use.\n"
 					"-e <cipher>: Encryption cipher.\n"
@@ -435,6 +473,17 @@ main(int argc, char *argv[])
 		}
 
 		db_params.pass_len = pos;
+
+		if (db_params.ykslot > 0) {
+			if (db_params.pass_len > 64) {
+				dprintf(STDERR_FILENO, "ERROR: Password cannot be longer than 64 bytes when using YubiKey challenge-response!\n");
+				quit(EXIT_FAILURE);
+			}
+			if (!kc_ykchalresp(&db_params)) {
+				dprintf(STDERR_FILENO, "ERROR: Error while doing YubiKey challenge-response!\n");
+				quit(EXIT_FAILURE);
+			}
+		}
 
 		if (close(pass_file) < 0)
 			perror("ERROR: close(password file)");
