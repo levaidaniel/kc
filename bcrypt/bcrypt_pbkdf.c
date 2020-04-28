@@ -24,6 +24,7 @@
 #include <string.h>
 #ifdef __linux__
 #include <bsd/string.h>
+#include <bsd/stdlib.h>
 #endif
 
 #define	MINIMUM(a,b) (((a) < (b)) ? (a) : (b))
@@ -82,7 +83,7 @@ bcrypt_hash(uint8_t *sha2pass, uint8_t *sha2salt, uint8_t *out)
 		cdata[i] = Blowfish_stream2word(ciphertext, sizeof(ciphertext),
 		    &j);
 	for (i = 0; i < 64; i++)
-		blf_enc(&state, cdata, sizeof(cdata) / sizeof(uint64_t));
+		blf_enc(&state, cdata, sizeof(cdata) / (sizeof(uint64_t)));
 
 	/* copy out */
 	for (i = 0; i < BCRYPT_WORDS; i++) {
