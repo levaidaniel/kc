@@ -305,7 +305,7 @@ parse_randoms(const xmlChar *line)
 
 					free(rand_str); rand_str = NULL;
 				} else
-					puts("Random number generation failure!");
+					dprintf(STDERR_FILENO, "ERROR: Random number generation failure!\n");
 
 				i++;			/* skip the 'r' or 'R' char from "\r" or "\R" */
 			} else
@@ -558,11 +558,11 @@ kc_password_read(struct db_parameters *db_params, const unsigned char new)
 
 	if (db_params->ykslot > 0) {
 		if (db_params->pass_len > 64) {
-			puts("Password cannot be longer than 64 bytes when using YubiKey challenge-response!");
+			dprintf(STDERR_FILENO, "ERROR: Password cannot be longer than 64 bytes when using YubiKey challenge-response!\n");
 			return(-1);
 		}
 		if (!kc_ykchalresp(db_params)) {
-			puts("Error while doing YubiKey challenge-response!");
+			dprintf(STDERR_FILENO, "ERROR: Error while doing YubiKey challenge-response!\n");
 			return(-1);
 		}
 	}
@@ -590,14 +590,14 @@ kc_crypt_iv_salt(struct db_parameters *db_params)
 
 	iv_tmp = get_random_str(IV_LEN, 2);
 	if (!iv_tmp) {
-		puts("IV generation failure!");
+		dprintf(STDERR_FILENO, "ERROR: IV generation failure!\n");
 
 		return(0);
 	}
 
 	salt_tmp = get_random_str(SALT_LEN, 2);
 	if (!salt_tmp) {
-		puts("Salt generation failure!");
+		dprintf(STDERR_FILENO, "ERROR: Salt generation failure!\n");
 
 		free(iv_tmp); iv_tmp = NULL;
 		return(0);
