@@ -45,7 +45,7 @@ LDADD +=	`pkg-config --libs libxml-2.0`
 ifdef EDITLINE
 LDADD +=	-ledit -lncursesw
 else
-LDADD +=	-lreadline -ltermcap
+LDADD +=	-lreadline
 endif
 ifdef HAVE_PCRE
 LDADD +=	`pkg-config --libs libpcre`
