@@ -30,7 +30,7 @@ CFLAGS +=	-D_HAVE_LIBSCRYPT
 CFLAGS +=	-D_BUNDLED_BCRYPT
 .endif
 .ifdef HAVE_YUBIKEY
-CFLAGS +=	-D_HAVE_YUBIKEY
+CFLAGS +=	-D_HAVE_YUBIKEY `pkg-config --cflags ykpers-1`
 .endif
 
 LDADD +=	-lcrypto
@@ -50,7 +50,7 @@ LDADD +=	`pkg-config --libs libpcre`
 LDADD +=	-lscrypt
 .endif
 .ifdef HAVE_YUBIKEY
-LDADD +=	-lyubikey -lykpers-1
+LDADD +=	-lyubikey `pkg-config --libs ykpers-1`
 .endif
 
 CLEANFILES +=	regress/test*

@@ -37,7 +37,7 @@ ifdef HAVE_LIBSCRYPT
 CFLAGS +=	-D_HAVE_LIBSCRYPT
 endif
 ifdef HAVE_YUBIKEY
-CFLAGS +=	-D_HAVE_YUBIKEY
+CFLAGS +=	-D_HAVE_YUBIKEY `pkg-config --cflags ykpers-1`
 endif
 CFLAGS +=	-D_BUNDLED_BCRYPT -D_OS_LINUX
 export CFLAGS
@@ -57,7 +57,7 @@ ifdef HAVE_LIBSCRYPT
 LDADD +=	-lscrypt
 endif
 ifdef HAVE_YUBIKEY
-LDADD +=	-lyubikey -lykpers-1
+LDADD +=	-lyubikey `pkg-config --libs ykpers-1`
 endif
 
 
