@@ -476,7 +476,6 @@ main(int argc, char *argv[])
 		if (db_params.ykslot > 0) {
 			if (db_params.pass_len > 64) {
 				dprintf(STDERR_FILENO, "ERROR: Password cannot be longer than 64 bytes when using YubiKey challenge-response!\n");
-				quit(EXIT_FAILURE);
 			}
 			if (!kc_ykchalresp(&db_params)) {
 				dprintf(STDERR_FILENO, "ERROR: Error while doing YubiKey challenge-response!\n");
