@@ -34,11 +34,11 @@ void
 cmd_info(const char *e_line, command *commands)
 {
 	xmlNodePtr	db_node = NULL;
-	xmlChar		*name = NULL, *created = NULL, *modified = NULL, *description = NULL;
+	xmlChar		*name = NULL, *created = NULL, *modified = NULL, *description = NULL, *value_nl = NULL, *value = NULL;
 
 	char			key = 0;
 	char			*line = NULL, *cmd = NULL, *inv = NULL;
-	unsigned long int	idx = 0;
+	unsigned long int	idx = 0, value_len = 0, i = 0, lines = 0;
 	time_t			created_time = 0, modified_time = 0;
 
 
@@ -77,10 +77,24 @@ cmd_info(const char *e_line, command *commands)
 
 	if (db_node) {
 		name = xmlGetProp(db_node, BAD_CAST "name");
-		if (key)
+		if (key) {
 			printf("Key name: %s\n", name);
-		else
+
+			value = xmlGetProp(db_node, BAD_CAST "value");
+			value_nl = parse_newlines(value, 0);
+			xmlFree(value); value = NULL;
+
+			value_len = xmlStrlen(value_nl);
+			for (i=0; i < value_len; i++)
+				if (value_nl[i] == '\n')
+					lines++;
+			lines++;
+
+			xmlFree(value_nl); value_nl = NULL;
+			printf("Lines in value: %lu\n", lines);
+		} else {
 			printf("Keychain name: %s\n", name);
+		}
 		xmlFree(name); name = NULL;
 
 		if (!key) {

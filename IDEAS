@@ -1,4 +1,3 @@
 - somehow able to display other than the 1st line from a value in non-interactive mode. e.g.: default> 272:2 => would display the 2nd line in the value
-- 'info' to show how many lines are in the value
 - 'ls' command: sort by key name option.
 - somehow able to import binary blobs, encoded as base64 in values. (for eg.: private keys etc...)
