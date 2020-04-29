@@ -26,12 +26,12 @@
 #ifndef _YKCHALRESP_H
 #define _YKCHALRESP_H
 
-int kc_ykchalresp(struct db_parameters *);
-static void report_yk_error(void);
+#include <yubikey.h>
+#include <ykpers-1/ykcore.h>
+#include <ykpers-1/ykdef.h>
+#include <ykpers-1/ykstatus.h>
 
-/*
- * ykstatus.h is broken here with an #include <ykcore.h> line
-static int check_firmware(YK_KEY *);
-*/
+
+int kc_ykchalresp(struct db_parameters *);
 
 #endif

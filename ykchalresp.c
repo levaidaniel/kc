@@ -60,18 +60,15 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <yubikey.h>
-#include <ykpers-1/ykcore.h>
-#include <ykpers-1/ykdef.h>
-/*
-#include <ykpers-1/ykstatus.h>
-*/
-
 #include "common.h"
 #include "ykchalresp.h"
 
 
 #define	SHA1_MAX_BLOCK_SIZE	64	/* Max size of input SHA1 block */
+
+
+static int yk_check_firmware(YK_KEY *yk);
+static void yk_report_error(void);
 
 
 int
@@ -88,21 +85,16 @@ kc_ykchalresp(struct db_parameters *db_params)
 
 
 	if (!yk_init()) {
-		report_yk_error();
-		return(0);
+		goto err;
 	}
 
 	if (!(yk = yk_open_key((int)db_params->ykdev))) {
-		report_yk_error();
-		return(0);
+		goto err;
 	}
 
-/*
- * ykstatus.h is broken here with an #include <ykcore.h> line
-	if (!check_firmware(yk)) {
-		return(0);
+	if (!yk_check_firmware(yk)) {
+		goto err;
 	}
-*/
 
 	switch(db_params->ykslot) {
 		case 1:
@@ -112,7 +104,7 @@ kc_ykchalresp(struct db_parameters *db_params)
 			yk_cmd = SLOT_CHAL_HMAC2;
 			break;
 		default:
-			return(0);
+			goto err;
 	}
 
 	memset(response, 0, sizeof(response));
@@ -123,13 +115,7 @@ kc_ykchalresp(struct db_parameters *db_params)
 		db_params->pass_len, (unsigned char *)db_params->pass,
 		sizeof(response), response))
 	{
-		report_yk_error();
-		return(0);
-	}
-
-	if (yk && !yk_close_key(yk)) {
-		report_yk_error();
-		return(0);
+		goto err;
 	}
 
 	/* HMAC responses are 160 bits (i.e. 20 bytes) */
@@ -139,13 +125,22 @@ kc_ykchalresp(struct db_parameters *db_params)
 	memcpy(db_params->pass, output_buf, db_params->pass_len);
 
 
-	return(1);
+err:
+	yk_report_error();
+	if (yk && !yk_close_key(yk)) {
+		yk_report_error();
+	}
+
+	if (yk_errno) {
+		return(0);
+	} else {
+		return(1);
+	}
 } /* kc_ykchalresp() */
 
 
-/*
- * ykstatus.h is broken here with an #include <ykcore.h> line
-static int check_firmware(YK_KEY *yk)
+static int
+yk_check_firmware(YK_KEY *yk)
 {
 	YK_STATUS *st = ykds_alloc();
 
@@ -164,10 +159,11 @@ static int check_firmware(YK_KEY *yk)
 
 	ykds_free(st);
 	return 1;
-}*/ /* check_firmware() */
+}/* yk_check_firmware() */
 
 
-static void report_yk_error(void)
+static void
+yk_report_error(void)
 {
 	if (yk_errno) {
 		if (yk_errno == YK_EUSBERR) {
@@ -178,4 +174,4 @@ static void report_yk_error(void)
 				yk_strerror(yk_errno));
 		}
 	}
-}
+}/* yk_report_error */
