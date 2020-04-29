@@ -26,6 +26,9 @@
 #include "common.h"
 #include "commands.h"
 #include "ssha.h"
+#ifdef _HAVE_YUBIKEY
+#include "ykchalresp.h"
+#endif
 
 #include <signal.h>
 #include <sys/types.h>
@@ -36,10 +39,6 @@
 
 #if defined(__linux__)  ||  defined(__CYGWIN__)
 #include <sys/file.h>
-#endif
-
-#ifdef _HAVE_YUBIKEY
-#include "ykchalresp.h"
 #endif
 
 

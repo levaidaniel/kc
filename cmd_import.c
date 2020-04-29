@@ -26,6 +26,9 @@
 #include "common.h"
 #include "commands.h"
 #include "ssha.h"
+#ifdef _HAVE_YUBIKEY
+#include "ykchalresp.h"
+#endif
 
 #ifdef BSD
 #include <fcntl.h>
@@ -48,6 +51,9 @@ cmd_import(const char *e_line, command *commands)
 
 	struct stat	st;
 	char		*ssha_type = NULL, *ssha_comment = NULL;
+
+	unsigned long int	ykchalresp = 0;
+	char			*inv = NULL;
 
 	db_parameters	db_params_new;
 
@@ -75,6 +81,8 @@ cmd_import(const char *e_line, command *commands)
 	/* initial db_params parameters of the imported database */
 	db_params_new.ssha_type[0] = '\0';
 	db_params_new.ssha_comment[0] = '\0';
+	db_params_new.ykdev = 0;
+	db_params_new.ykslot = 0;
 	db_params_new.pass = NULL;
 	db_params_new.pass_len = 0;
 	db_params_new.db_file = -1;
@@ -112,7 +120,7 @@ cmd_import(const char *e_line, command *commands)
 	free(line); line = NULL;
 
 	optind = 0;
-	while ((c = getopt(largc, largv, "A:k:P:e:m:o")) != -1)
+	while ((c = getopt(largc, largv, "A:k:P:e:m:y:o")) != -1)
 		switch (c) {
 			case 'A':
 				/* in case this parameter is being parsed multiple times */
@@ -180,6 +188,34 @@ cmd_import(const char *e_line, command *commands)
 					perror("ERROR: Could not duplicate the cipher mode");
 					goto exiting;
 				}
+			break;
+			case 'y':
+				ykchalresp = strtoul(optarg, &inv, 10);
+				if (inv[0] == '\0') {
+					if (ykchalresp <= 0  ||  optarg[0] == '-') {
+						dprintf(STDERR_FILENO, "ERROR: YubiKey slot/device parameter is zero or negative.\n");
+						quit(EXIT_FAILURE);
+					} else if (ykchalresp > 29) {
+						dprintf(STDERR_FILENO, "ERROR: YubiKey slot/device parameter is too high.\n");
+						quit(EXIT_FAILURE);
+					} else if (ykchalresp < 10) {
+						db_params_new.ykslot = ykchalresp;
+						db_params_new.ykdev = 0;
+					} else {
+						db_params_new.ykslot = ykchalresp / 10 ;
+						db_params_new.ykdev = ykchalresp - (ykchalresp / 10 * 10);
+					}
+				} else {
+					dprintf(STDERR_FILENO, "ERROR: Unable to convert the YubiKey slot/device parameter.\n");
+					quit(EXIT_FAILURE);
+				}
+
+				if (db_params_new.ykslot > 2  ||  db_params_new.ykslot < 1  ) {
+					dprintf(STDERR_FILENO, "ERROR: YubiKey slot number is not 1 or 2.\n");
+					quit(EXIT_FAILURE);
+				}
+
+				printf("Using YubiKey slot #%d on device #%d\n", db_params_new.ykslot, db_params_new.ykdev);
 			break;
 			case 'o':
 				legacy++;

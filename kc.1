@@ -478,7 +478,7 @@ is the key's index number in the current keychain.
 .It Ic rm Ar index
 Alias of
 .Ic del .
-.It Ic passwd Op Fl A Ar key type,key comment Op Fl P Ar kdf Op Fl e Ar cipher Op Fl m Ar cipher mode
+.It Ic passwd Op Fl A Ar key type,key comment Op Fl y Ar key slot device index Op Fl P Ar kdf Op Fl e Ar cipher Op Fl m Ar cipher mode
 Change the database password or SSH public key identity being used to encrypt.
 Optionally, the KDF, cipher and cipher mode can also be changed.
 All changes will be written immediately.
@@ -493,7 +493,7 @@ Print application help or describe a
 .Ar command .
 .It Ic status
 Display information about the database.
-.It Ic export Fl k Ar filename Op Fl A Ar key type,key comment Op Fl P Ar kdf Op Fl e Ar cipher Op Fl m Ar cipher_mode Op Fl c Ar keychain
+.It Ic export Fl k Ar filename Op Fl A Ar key type,key comment Op Fl y Ar key slot device index Op Fl P Ar kdf Op Fl e Ar cipher Op Fl m Ar cipher_mode Op Fl c Ar keychain
 Export the database to a
 .Nm
 compatible encrypted database file named
@@ -540,7 +540,7 @@ Index number takes priority when addressing a keychain.
 the created XML file will be plain text.
 .Pp
 .Pq see command Ic export
-.It Ic import Fl k Ar filename Op Fl A Ar key type,key comment Op Fl P Ar kdf Op Fl e Ar cipher Op Fl m Ar cipher_mode Op Fl o
+.It Ic import Fl k Ar filename Op Fl A Ar key type,key comment Op Fl y Ar key slot device index Op Fl P Ar kdf Op Fl e Ar cipher Op Fl m Ar cipher_mode Op Fl o
 Import and overwrite the current database with the one from a
 .Nm
 compatible encrypted database file named

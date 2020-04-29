@@ -118,6 +118,7 @@ kc_ykchalresp(struct db_parameters *db_params)
 	memset(response, 0, sizeof(response));
 	memset(output_buf, 0, sizeof(output_buf));
 
+	printf("Remember to touch your YubiKey if necessary\n");
 	if(!yk_challenge_response(yk, yk_cmd, may_block,
 		db_params->pass_len, (unsigned char *)db_params->pass,
 		sizeof(response), response))
