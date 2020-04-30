@@ -161,6 +161,8 @@ Due to the nature of *DSA keys,
 .Nm
 cannot use it in this specific way for this specific purpose.
 .Pp
+Also worth mentioning that this actually works with agent forwarding as well, so on a remote machine one doesn't even have to have the actual private key file -- just like in any other case when you'd use SSH agent forwarding.
+.Pp
 See also the
 .Em CAVEATS
 section for an explanation of how this can be insecure.
@@ -1007,4 +1009,6 @@ Supports an at most 64 bytes long password.
 .It
 Only HMAC mode is supported by
 .Nm
+.It
+Maybe it goes without saying, but this method of password protection is not quite useful over network connections (e.g.: SSH on a remote machine), as the actual device is not plugged in there. There is an USB-over-IP implementation for Linux that could overcome this, however -- if one choses to use this setup.
 .El
