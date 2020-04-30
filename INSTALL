@@ -7,6 +7,7 @@ Prerequisites:
 Optional:
 - libpcre >= 8.12
 - libscrypt >= 1.14
+- libykpers-1 and libyubikey for YubiKey support, and v2.2+ firmware on the security key.
 
 
 Compile:
@@ -27,6 +28,7 @@ Compile:
 Options:
 HAVE_PCRE=y		This will turn on regexp support in searches, and needs libpcre.
 HAVE_LIBSCRYPT=y	This will turn on scrypt KDF support, and needs libscrypt.
+HAVE_YUBIKEY=y		This will turn on YubiKey challenge-response support, and needs libykpers-1 and libyubikey.
 BUNDLED_BCRYPT=y	To use the packaged bcrypt implementation (that comes
 			from OpenBSD). This is hardcoded in Makefile.linux, and on BSDs
 			you should specify this everywhere but on OpenBSD.

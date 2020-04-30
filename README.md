@@ -13,3 +13,5 @@ Features include (but not limited to):
 * compiles and works on \*BSD and Linux
 * editline (libedit) and readline support
 * clean and simple CLI with command and keychain completion
+* OpenSSH agent support for protecting the database
+* YubiKey challenge-response support for protecting the database
