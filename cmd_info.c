@@ -33,7 +33,7 @@ extern xmlNodePtr	keychain;
 void
 cmd_info(const char *e_line, command *commands)
 {
-	xmlNodePtr	db_node = NULL;
+	xmlNodePtr	db_node = NULL, db_node_keys = NULL;
 	xmlChar		*name = NULL, *created = NULL, *modified = NULL, *description = NULL, *value_nl = NULL, *value = NULL;
 
 	char			key = 0;
@@ -94,6 +94,15 @@ cmd_info(const char *e_line, command *commands)
 			printf("Lines in value: %lu\n", lines);
 		} else {
 			printf("Keychain name: %s\n", name);
+
+			db_node_keys = keychain->children;
+			while (db_node_keys  &&  i < ITEMS_MAX) {
+				if (db_node_keys->type == XML_ELEMENT_NODE) {
+					i++;
+				}
+				db_node_keys = db_node_keys->next;
+			}
+			printf("Number of keys: %lu\n", i);
 		}
 		xmlFree(name); name = NULL;
 
