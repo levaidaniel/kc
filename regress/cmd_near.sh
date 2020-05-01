@@ -7,12 +7,12 @@ echo "test => $0"
 
 printf "new pos3\npos3\nnew pos4\npos4\nnew pos5\npos5\nnew pos6\npos6\nnew pos7\npos7\nwrite\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}
 
-NEAR0_SHA1=$(printf "near 0\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." |$SHA1_BIN |cut -d' ' -f1)
-NEAR1_SHA1=$(printf "near 1\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." |$SHA1_BIN |cut -d' ' -f1)
-NEAR12_SHA1=$(printf "near 1 2\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." |$SHA1_BIN |cut -d' ' -f1)
-NEAR33_SHA1=$(printf "near 3 3\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." |$SHA1_BIN |cut -d' ' -f1)
-NEAR73_SHA1=$(printf "near 7 3\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." |$SHA1_BIN |cut -d' ' -f1)
-NEAR93_SHA1=$(printf "near 9 3\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." |$SHA1_BIN |cut -d' ' -f1)
+NEAR0_SHA1=$(printf "near 0\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." -e "^Using password file: ${KC_PASSFILE}" |$SHA1_BIN |cut -d' ' -f1)
+NEAR1_SHA1=$(printf "near 1\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." -e "^Using password file: ${KC_PASSFILE}" |$SHA1_BIN |cut -d' ' -f1)
+NEAR12_SHA1=$(printf "near 1 2\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." -e "^Using password file: ${KC_PASSFILE}" |$SHA1_BIN |cut -d' ' -f1)
+NEAR33_SHA1=$(printf "near 3 3\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." -e "^Using password file: ${KC_PASSFILE}" |$SHA1_BIN |cut -d' ' -f1)
+NEAR73_SHA1=$(printf "near 7 3\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." -e "^Using password file: ${KC_PASSFILE}" |$SHA1_BIN |cut -d' ' -f1)
+NEAR93_SHA1=$(printf "near 9 3\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." -e "^Using password file: ${KC_PASSFILE}" |$SHA1_BIN |cut -d' ' -f1)
 
 if [ "$NEAR0_SHA1" = 'e50b1ff17587d994b1221339f92c5f0e6eb9b410' ];then
 	echo "$0 test ok (near 0)!"

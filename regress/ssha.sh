@@ -30,7 +30,7 @@ for _type in ed25519:256 rsa:1024 rsa:2048 rsa:4096;do
 	SSH_ID_TYPE=${_type%%:*}
 	KC_ID_TYPE="ssh-${SSH_ID_TYPE}"
 	SSH_ID_FILE="regress/test_id_${_type}_ssh"
-	SSH_ID_COMMENT="PuBkEy_+*()[]{}';,.!@#^&=-/|_comment-${_type}"
+	SSH_ID_COMMENT="PuBkEy_+*()[]{}';.!@#^&=-/|_comment-${_type}"
 
 	rm -f "${SSH_ID_FILE}" "${SSH_ID_FILE}".pub
 
