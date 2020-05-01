@@ -62,8 +62,10 @@ typedef struct db_parameters {
 	int		db_file;
 	char		ssha_type[12];	/* 11 bytes for the longest supported 'ssh-ed25519' key type */
 	char		ssha_comment[513];
-	char		ykdev;
-	char		ykslot;
+	char		ssha_password;
+	char		yk_dev;
+	char		yk_slot;
+	char		yk_password;
 	char		*pass_filename;
 	char 		*pass;
 	size_t 		pass_len;

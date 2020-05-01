@@ -81,8 +81,10 @@ cmd_import(const char *e_line, command *commands)
 	/* initial db_params parameters of the imported database */
 	db_params_new.ssha_type[0] = '\0';
 	db_params_new.ssha_comment[0] = '\0';
-	db_params_new.ykdev = 0;
-	db_params_new.ykslot = 0;
+	db_params_new.ssha_password = 0;
+	db_params_new.yk_dev = 0;
+	db_params_new.yk_slot = 0;
+	db_params_new.yk_password = 0;
 	db_params_new.pass = NULL;
 	db_params_new.pass_len = 0;
 	db_params_new.db_file = -1;
@@ -139,7 +141,7 @@ cmd_import(const char *e_line, command *commands)
 					goto exiting;
 				}
 
-				ssha_comment = strndup(optarg, 512);
+				ssha_comment = strndup(strsep(&optarg, ","), 512);
 				if (ssha_comment == NULL  ||  !strlen(ssha_comment)) {
 					dprintf(STDERR_FILENO, "ERROR: SSH key comment is empty!\n");
 					goto exiting;
@@ -155,7 +157,11 @@ cmd_import(const char *e_line, command *commands)
 					goto exiting;
 				}
 
-				printf("Using (%s) %s identity for decryption\n", db_params_new.ssha_type, db_params_new.ssha_comment);
+				if (optarg  &&  strncmp(optarg, "password", 8) == 0) {
+					db_params_new.ssha_password = 1;
+				}
+
+				printf("Using (%s) %s identity%s\n", db_params_new.ssha_type, db_params_new.ssha_comment, (db_params_new.ssha_password ? " and a password" : ""));
 			break;
 			case 'k':
 				free(db_params_new.db_filename); db_params_new.db_filename = NULL;
@@ -190,32 +196,38 @@ cmd_import(const char *e_line, command *commands)
 				}
 			break;
 			case 'y':
-				ykchalresp = strtoul(optarg, &inv, 10);
+				if (optarg[0] == '-') {
+					dprintf(STDERR_FILENO, "ERROR: YubiKey slot/device parameter seems to be negative.\n");
+					quit(EXIT_FAILURE);
+				}
+
+				ykchalresp = strtoul(strsep(&optarg, ","), &inv, 10);
 				if (inv[0] == '\0') {
-					if (ykchalresp <= 0  ||  optarg[0] == '-') {
-						dprintf(STDERR_FILENO, "ERROR: YubiKey slot/device parameter is zero or negative.\n");
-						quit(EXIT_FAILURE);
-					} else if (ykchalresp > 29) {
-						dprintf(STDERR_FILENO, "ERROR: YubiKey slot/device parameter is too high.\n");
+					if (ykchalresp <= 0  ||  ykchalresp > 29) {
+						dprintf(STDERR_FILENO, "ERROR: YubiKey slot/device parameter is invalid.\n");
 						quit(EXIT_FAILURE);
 					} else if (ykchalresp < 10) {
-						db_params_new.ykslot = ykchalresp;
-						db_params_new.ykdev = 0;
+						db_params_new.yk_slot = ykchalresp;
+						db_params_new.yk_dev = 0;
 					} else {
-						db_params_new.ykslot = ykchalresp / 10 ;
-						db_params_new.ykdev = ykchalresp - (ykchalresp / 10 * 10);
+						db_params_new.yk_slot = ykchalresp / 10 ;
+						db_params_new.yk_dev = ykchalresp - (ykchalresp / 10 * 10);
 					}
 				} else {
 					dprintf(STDERR_FILENO, "ERROR: Unable to convert the YubiKey slot/device parameter.\n");
 					quit(EXIT_FAILURE);
 				}
 
-				if (db_params_new.ykslot > 2  ||  db_params_new.ykslot < 1  ) {
+				if (db_params_new.yk_slot > 2  ||  db_params_new.yk_slot < 1) {
 					dprintf(STDERR_FILENO, "ERROR: YubiKey slot number is not 1 or 2.\n");
 					quit(EXIT_FAILURE);
 				}
 
-				printf("Using YubiKey slot #%d on device #%d\n", db_params_new.ykslot, db_params_new.ykdev);
+				if (optarg  &&  strncmp(strsep(&optarg, ","), "password", 8) == 0) {
+					db_params_new.yk_password = 1;
+				}
+
+				printf("Using YubiKey slot #%d on device #%d%s\n", db_params_new.yk_slot, db_params_new.yk_dev, (db_params_new.yk_password ? " and a password" : ""));
 			break;
 			case 'o':
 				legacy++;

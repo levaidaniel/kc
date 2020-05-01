@@ -174,7 +174,7 @@ kc_ssha_identity_list_request(int sock)
 
 
 char
-kc_ssha_sign_request(int sock, struct kc_ssha_identity *id, char *data, unsigned int flags)
+kc_ssha_sign_request(int sock, struct kc_ssha_identity *id, char *data, unsigned int data_len, unsigned int flags)
 {
 	char	*buf = NULL;
 	char	len[4];
@@ -190,7 +190,7 @@ kc_ssha_sign_request(int sock, struct kc_ssha_identity *id, char *data, unsigned
 	/* 5 is the request's length field (without the flags field), plus
 	 * request that is one byte
 	 * 4 is the flags field */
-	req_len = 5 + 4 + id->pubkey_len + 4 + strlen(data);
+	req_len = 5 + 4 + id->pubkey_len + 4 + data_len;
 	buf_len = req_len + 4;	/* plus flags field */
 
 	buf = calloc(1, buf_len); malloc_check(buf);
@@ -216,14 +216,14 @@ kc_ssha_sign_request(int sock, struct kc_ssha_identity *id, char *data, unsigned
 	pos += id->pubkey_len;
 
 	/* my data's length */
-	put_u32(len, strlen(data));
+	put_u32(len, data_len);
 	memcpy(buf+pos, len, 4);
 	memset(len, 0, 4);
 	pos += 4;
 
 	/* data to sign */
-	memcpy(buf+pos, data, strlen(data));
-	pos += strlen(data);
+	memcpy(buf+pos, data, data_len);
+	pos += data_len;
 
 	/* flags */
 	/* This is not 'len' per se, I'm just using this variable. This is the
@@ -478,6 +478,7 @@ int
 kc_ssha_get_password(struct db_parameters *db_params)
 {
 	int		sock = -1;
+	unsigned int	data_to_sign_len = 0;
 	char		ret = 0;
 	char		*data_to_sign = NULL;
 	struct kc_ssha_response		*response = NULL;
@@ -545,21 +546,26 @@ kc_ssha_get_password(struct db_parameters *db_params)
 	}
 
 
+	/* set up data to be signed */
+	data_to_sign = malloc(IV_DIGEST_LEN + SALT_DIGEST_LEN + (db_params->ssha_password ? db_params->pass_len : 0)); malloc_check(data_to_sign);
+
+	memcpy(data_to_sign, db_params->iv, IV_DIGEST_LEN);
+	data_to_sign_len += IV_DIGEST_LEN;
+
+	memcpy(data_to_sign + data_to_sign_len, db_params->salt, SALT_DIGEST_LEN);
+	data_to_sign_len += SALT_DIGEST_LEN;
+
+	/* if a password is also part of the data to sign, i.e. non-automatic mode */
+	if (db_params->ssha_password) {
+		if (getenv("KC_DEBUG"))
+			printf("%s(): using a password in the data to sign\n", __func__);
+
+		memcpy(data_to_sign + data_to_sign_len, db_params->pass, db_params->pass_len);
+		data_to_sign_len += db_params->pass_len;
+	}
+
 	/* ask for a signature */
-	data_to_sign = malloc(IV_DIGEST_LEN + SALT_DIGEST_LEN + 1); malloc_check(data_to_sign);
-	if (strlcpy(data_to_sign, (const char*)db_params->iv, IV_DIGEST_LEN + 1) >= IV_DIGEST_LEN + 1) {
-		dprintf(STDERR_FILENO, "ERROR: Error while setting up SSH agent signing.\n");
-		goto exiting;
-	}
-	if (strlcat(data_to_sign, (const char*)db_params->salt, SALT_DIGEST_LEN + IV_DIGEST_LEN + 1) >= SALT_DIGEST_LEN + IV_DIGEST_LEN + 1) {
-		dprintf(STDERR_FILENO, "ERROR: Error while setting up SSH agent signing.\n");
-		goto exiting;
-	}
-
-	if (getenv("KC_DEBUG"))
-		printf("%s(): data to sign is '%s'\n", __func__, data_to_sign);
-
-	if (kc_ssha_sign_request(sock, idlist, data_to_sign, 0) < 0) {
+	if (kc_ssha_sign_request(sock, idlist, data_to_sign, data_to_sign_len, 0) < 0) {
 		dprintf(STDERR_FILENO, "ERROR: Failed to send signature request\n");
 		goto exiting;
 	}

@@ -122,8 +122,10 @@ main(int argc, char *argv[])
 	/* db_param defaults */
 	db_params.ssha_type[0] = '\0';
 	db_params.ssha_comment[0] = '\0';
-	db_params.ykdev = 0;
-	db_params.ykslot = 0;
+	db_params.ssha_password = 0;
+	db_params.yk_dev = 0;
+	db_params.yk_slot = 0;
+	db_params.yk_password = 0;
 	db_params.pass = NULL;
 	db_params.pass_len = 0;
 	db_params.db_filename = NULL;
@@ -173,7 +175,7 @@ main(int argc, char *argv[])
 					quit(EXIT_FAILURE);
 				}
 
-				ssha_comment = strndup(optarg, 512);
+				ssha_comment = strndup(strsep(&optarg, ","), 512);
 				if (ssha_comment == NULL  ||  !strlen(ssha_comment)) {
 					dprintf(STDERR_FILENO, "ERROR: SSH key comment is empty!\n");
 					quit(EXIT_FAILURE);
@@ -191,7 +193,11 @@ main(int argc, char *argv[])
 				}
 				free(ssha_comment); ssha_comment = NULL;
 
-				printf("Using (%s) %s identity for decryption\n", db_params.ssha_type, db_params.ssha_comment);
+				if (optarg  &&  strncmp(optarg, "password", 8) == 0) {
+					db_params.ssha_password = 1;
+				}
+
+				printf("Using (%s) %s identity%s\n", db_params.ssha_type, db_params.ssha_comment, (db_params.ssha_password ? " and a password" : ""));
 			break;
 			case 'k':
 				db_params.db_filename = optarg;
@@ -208,6 +214,8 @@ main(int argc, char *argv[])
 			break;
 			case 'p':
 				db_params.pass_filename = optarg;
+
+				printf("Using password file: %s\n", db_params.pass_filename);
 			break;
 			case 'P':
 				free(db_params.kdf); db_params.kdf = NULL;
@@ -222,32 +230,38 @@ main(int argc, char *argv[])
 				db_params.cipher_mode = strdup(optarg); malloc_check(db_params.cipher_mode);
 			break;
 			case 'y':
-				ykchalresp = strtoul(optarg, &inv, 10);
+				if (optarg[0] == '-') {
+					dprintf(STDERR_FILENO, "ERROR: YubiKey slot/device parameter seems to be negative.\n");
+					quit(EXIT_FAILURE);
+				}
+
+				ykchalresp = strtoul(strsep(&optarg, ","), &inv, 10);
 				if (inv[0] == '\0') {
-					if (ykchalresp <= 0  ||  optarg[0] == '-') {
-						dprintf(STDERR_FILENO, "ERROR: YubiKey slot/device parameter is zero or negative.\n");
-						quit(EXIT_FAILURE);
-					} else if (ykchalresp > 29) {
-						dprintf(STDERR_FILENO, "ERROR: YubiKey slot/device parameter is too high.\n");
+					if (ykchalresp <= 0  ||  ykchalresp > 29) {
+						dprintf(STDERR_FILENO, "ERROR: YubiKey slot/device parameter is invalid.\n");
 						quit(EXIT_FAILURE);
 					} else if (ykchalresp < 10) {
-						db_params.ykslot = ykchalresp;
-						db_params.ykdev = 0;
+						db_params.yk_slot = ykchalresp;
+						db_params.yk_dev = 0;
 					} else {
-						db_params.ykslot = ykchalresp / 10 ;
-						db_params.ykdev = ykchalresp - (ykchalresp / 10 * 10);
+						db_params.yk_slot = ykchalresp / 10 ;
+						db_params.yk_dev = ykchalresp - (ykchalresp / 10 * 10);
 					}
 				} else {
 					dprintf(STDERR_FILENO, "ERROR: Unable to convert the YubiKey slot/device parameter.\n");
 					quit(EXIT_FAILURE);
 				}
 
-				if (db_params.ykslot > 2  ||  db_params.ykslot < 1  ) {
+				if (db_params.yk_slot > 2  ||  db_params.yk_slot < 1) {
 					dprintf(STDERR_FILENO, "ERROR: YubiKey slot number is not 1 or 2.\n");
 					quit(EXIT_FAILURE);
 				}
 
-				printf("Using YubiKey slot #%d on device #%d\n", db_params.ykslot, db_params.ykdev);
+				if (optarg  &&  strncmp(strsep(&optarg, ","), "password", 8) == 0) {
+					db_params.yk_password = 1;
+				}
+
+				printf("Using YubiKey slot #%d on device #%d%s\n", db_params.yk_slot, db_params.yk_dev, (db_params.yk_password ? " and a password" : ""));
 			break;
 			case 'b':
 				batchmode = 1;
@@ -473,7 +487,7 @@ main(int argc, char *argv[])
 
 		db_params.pass_len = pos;
 
-		if (db_params.ykslot > 0) {
+		if (db_params.yk_slot  &&  db_params.yk_password) {
 			if (db_params.pass_len > 64) {
 				dprintf(STDERR_FILENO, "ERROR: Password cannot be longer than 64 bytes when using YubiKey challenge-response!\n");
 			}
@@ -481,19 +495,34 @@ main(int argc, char *argv[])
 				dprintf(STDERR_FILENO, "ERROR: Error while doing YubiKey challenge-response!\n");
 				quit(EXIT_FAILURE);
 			}
+		} else if (db_params.yk_slot  &&  !db_params.yk_password) {
+			dprintf(STDERR_FILENO, "ERROR: 'password' option is not specified for YubiKey parameter while trying to use a password file!\n");
+			quit(EXIT_FAILURE);
 		}
 
 		if (close(pass_file) < 0)
 			perror("ERROR: close(password file)");
 	} else {
-		if (strlen(db_params.ssha_type)) {
-			/* use SSH agent to generate the password */
-			if (!kc_ssha_get_password(&db_params))
-				quit(EXIT_FAILURE);
-		} else {
+		if (	(strlen(db_params.ssha_type)  &&  db_params.ssha_password)  ||
+			(db_params.yk_slot  &&  db_params.yk_password)  ||
+			(!db_params.yk_slot  &&  !strlen(db_params.ssha_type))
+		) {
+			if (getenv("KC_DEBUG"))
+				printf("%s(): getting a password for the database\n", __func__);
+
 			/* ask for the new password */
 			if (kc_password_read(&db_params, newdb) != 1)
 				quit(EXIT_FAILURE);
+		} else if (strlen(db_params.ssha_type)) {
+			/* use SSH agent to generate the password */
+			if (!kc_ssha_get_password(&db_params))
+				quit(EXIT_FAILURE);
+		} else if (db_params.yk_slot) {
+			/* use a YubiKey to generate the password */
+			if (!kc_ykchalresp(&db_params)) {
+				dprintf(STDERR_FILENO, "ERROR: Error while doing YubiKey challenge-response!\n");
+				quit(EXIT_FAILURE);
+			}
 		}
 	}
 

@@ -81,6 +81,9 @@ kc_ykchalresp(struct db_parameters *db_params)
 	unsigned char response[SHA1_MAX_BLOCK_SIZE];
 	unsigned char output_buf[(SHA1_MAX_BLOCK_SIZE * 2) + 1];
 
+	unsigned char *challenge = NULL;
+	unsigned int challenge_len = 0;
+
 	yk_errno = 0;
 
 
@@ -88,7 +91,7 @@ kc_ykchalresp(struct db_parameters *db_params)
 		goto err;
 	}
 
-	if (!(yk = yk_open_key((int)db_params->ykdev))) {
+	if (!(yk = yk_open_key((int)db_params->yk_dev))) {
 		goto err;
 	}
 
@@ -96,7 +99,7 @@ kc_ykchalresp(struct db_parameters *db_params)
 		goto err;
 	}
 
-	switch(db_params->ykslot) {
+	switch(db_params->yk_slot) {
 		case 1:
 			yk_cmd = SLOT_CHAL_HMAC1;
 			break;
@@ -110,9 +113,27 @@ kc_ykchalresp(struct db_parameters *db_params)
 	memset(response, 0, sizeof(response));
 	memset(output_buf, 0, sizeof(output_buf));
 
+	/* set up challenge */
+	if (db_params->yk_password) {
+		if (getenv("KC_DEBUG"))
+			printf("%s(): using password with yubikey\n", __func__);
+
+		challenge = (unsigned char *)db_params->pass;
+		challenge_len = db_params->pass_len;
+	} else {
+		if (getenv("KC_DEBUG"))
+			printf("%s(): automatic yubikey, without password\n", __func__);
+
+		/* this won't be the digest of the salt, but the actual decoded
+		 * salt */
+		challenge_len = SALT_LEN;
+		challenge = malloc(challenge_len); malloc_check(challenge);
+		yubikey_hex_decode((char *)challenge, (char *)db_params->salt, challenge_len);
+	}
+
 	printf("Remember to touch your YubiKey if necessary\n");
 	if(!yk_challenge_response(yk, yk_cmd, may_block,
-		db_params->pass_len, (unsigned char *)db_params->pass,
+		challenge_len, challenge,
 		sizeof(response), response))
 	{
 		goto err;

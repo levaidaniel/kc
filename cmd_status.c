@@ -59,17 +59,23 @@ cmd_status(const char *e_line, command *commands)
 	xmlSaveClose(xml_save);
 	xmlBufferFree(xml_buf);
 
+	printf("Password: ");
+	if (db_params.pass_len)
+		puts("yes");
+	else
+		puts("no");
+
 	printf("SSH agent: ");
 	if (strlen(db_params.ssha_type))
 		printf("(%s) %s\n", db_params.ssha_type, db_params.ssha_comment);
 	else
-		puts("No");
+		puts("no");
 
 	printf("YubiKey: ");
-	if (db_params.ykslot > 0)
-		printf("Slot #%d, Device #%d\n", db_params.ykslot, db_params.ykdev);
+	if (db_params.yk_slot > 0)
+		printf("Slot #%d, Device #%d\n", db_params.yk_slot, db_params.yk_dev);
 	else
-		puts("No");
+		puts("no");
 
 	printf("Password handling: %s\n", db_params.kdf);
 
