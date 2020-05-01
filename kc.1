@@ -29,7 +29,8 @@
 .Op Fl c Ar keychain name/idx
 .Op Fl C Ar keychain name
 .Op Fl r
-.Op Fl A Ar key type,key comment
+.Op Fl A Ar key-type,key-comment Op ,password
+.Op Fl y Ar Key-slotDevice-index Op ,password
 .Op Fl p Ar password file
 .Op Fl P Ar kdf
 .Op Fl e Ar cipher
@@ -136,7 +137,7 @@ commands' description.
 Open the database in read-only mode.
 .Nm
 will not try to lock the database file, and commands which could modify the database will not be available.
-.It Fl A Ar key type,key comment
+.It Fl A Ar key-type,key-comment Op ,password
 Use a signature from SSH agent as the database password.
 For this,
 .Nm
@@ -161,15 +162,23 @@ Due to the nature of *DSA keys,
 .Nm
 cannot use it in this specific way for this specific purpose.
 .Pp
-Also worth mentioning that this actually works with agent forwarding as well, so on a remote machine one doesn't even have to have the actual private key file -- just like in any other case when you'd use SSH agent forwarding.
+The key comments cannot contain comma (,) characters.
 .Pp
-See also the
-.Em CAVEATS
-section for an explanation of how this can be insecure.
-.It Fl y Ar key slot device index
+If the word
+.Ql password
+is appended to the key comment after a comma (with no whitespaces around it), then
+.Nm
+will also use the password as the input for the SSH agent signature request. Thus making it interactive (by requesting a password for decryption) instead of an automatic database opening.
+.Pp
+Also worth mentioning that this actually works with agent forwarding as well, so on a remote machine one doesn't even have to have the actual private key file -- just like in any other case when you'd use SSH agent forwarding.
+.It Fl y Ar Key-slotDevice-index Op ,password
 Use a YubiKey to utilize its challenge-response mechanism to generate a new password from an already provided one. This is an additional layer on top of the traditional password usage, and works by using the user provided password (keyboard input or file) and putting it through the YubiKey HMAC challenge-response algorithm using the security key.
 .Pp
-There is actually only one argument to this option, and that is a two digit number. The first digit is the YubiKey slot and the second digit is the device index number. E.g.:
+There is actually only one argument to this option, and that is a two digit number plus optionally the word
+.Ql password
+after a comma (with no whitespaces around it).
+.Pp
+The first digit is the YubiKey slot and the second digit is the device index number. E.g.:
 .Bl -tag -offset ||| -width |
 .It Ar 10
 means slot 1 and device 0 (the first device).
@@ -183,7 +192,13 @@ It's not necessary to specify the second digit --
 .Nm
 will use the device index 0 by default, so it's sufficient to provide only one digit, i.e. the key slot.
 .Pp
-When using this option, the password can be at most 64 bytes long.
+If the word
+.Ql password
+is appended to the number with a comma (,), then the provided password is used as the challenge with the security key, otherwise the generated random salt is the challenge (stored in the database). When using this option, the password can be at most 64 bytes long. E.g.:
+.Bl -tag -offset ||| -width |
+.It Ar 20,password
+Use the frist device, the second slot, and ask for a password to use as the challenge.
+.El
 .It Fl p Ar file
 Read password from
 .Ar file .
@@ -480,7 +495,7 @@ is the key's index number in the current keychain.
 .It Ic rm Ar index
 Alias of
 .Ic del .
-.It Ic passwd Op Fl A Ar key type,key comment Op Fl y Ar key slot device index Op Fl P Ar kdf Op Fl e Ar cipher Op Fl m Ar cipher mode
+.It Ic passwd Op Fl A Ar key-type,key-comment Op ,password Op Fl y Ar Key-slotDevice-index Op ,password Op Fl P Ar kdf Op Fl e Ar cipher Op Fl m Ar cipher mode
 Change the database password or SSH public key identity being used to encrypt.
 Optionally, the KDF, cipher and cipher mode can also be changed.
 All changes will be written immediately.
@@ -495,7 +510,7 @@ Print application help or describe a
 .Ar command .
 .It Ic status
 Display information about the database.
-.It Ic export Fl k Ar filename Op Fl A Ar key type,key comment Op Fl y Ar key slot device index Op Fl P Ar kdf Op Fl e Ar cipher Op Fl m Ar cipher_mode Op Fl c Ar keychain
+.It Ic export Fl k Ar filename Op Fl A Ar key-type,key-comment Op ,password Op Fl y Ar Key-slotDevice-index Op ,password Op Fl P Ar kdf Op Fl e Ar cipher Op Fl m Ar cipher_mode Op Fl c Ar keychain
 Export the database to a
 .Nm
 compatible encrypted database file named
@@ -542,7 +557,7 @@ Index number takes priority when addressing a keychain.
 the created XML file will be plain text.
 .Pp
 .Pq see command Ic export
-.It Ic import Fl k Ar filename Op Fl A Ar key type,key comment Op Fl y Ar key slot device index Op Fl P Ar kdf Op Fl e Ar cipher Op Fl m Ar cipher_mode Op Fl o
+.It Ic import Fl k Ar filename Op Fl A Ar key-type,key-comment Op ,password Op Fl y Ar Key-slotDevice-index Op ,password Op Fl P Ar kdf Op Fl e Ar cipher Op Fl m Ar cipher_mode Op Fl o
 Import and overwrite the current database with the one from a
 .Nm
 compatible encrypted database file named
