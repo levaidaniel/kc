@@ -14,7 +14,7 @@
 
   One can salvage their legacy database(s) and fill in the missing attributes.
 * 'new' and 'cnew' commands support spaces in key and keychain names (respectively) when specifying them on the command line.
-* 'info' command shows how many lines there are in the value.
+* 'info' command shows how many lines there are in the value, and how many keys there are in the keychain.
 * 'c' command supports keychain names with spaces in them.
 * Error message are now written to standard error output and prefixed with 'ERROR: '
 * Documentation and manual page fixes.
