@@ -7,7 +7,7 @@ echo "test => $0"
 
 
 SHA1=$(printf "info\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." -e "^Using password file: ${KC_PASSFILE}" |sed -e 's/^\(Modified: \).*$/\1/' |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = 'bec53e5b2e38c046d1aef003f46385b30a519f97' ];then
+if [ "$SHA1" = '2dba9c61df68c8e9e70559a9498b8c0570332307' ];then
 	echo "$0 test ok (keychain description/created/modified)!"
 else
 	echo "$0 test failed (keychain description/created/modified)!"
