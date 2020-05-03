@@ -33,6 +33,7 @@ TESTS=$(ls -1 regress/*.sh |grep -F -v -e"stress_test.sh" -e"run_tests.sh" |wc -
 trap '
 if [ $? -eq 0 ];then
 	printf "\nAll tests were ok! :)\n"
+	echo "Took about $((SECONDS - START)) seconds"
 else
 	printf "\nTest #$COUNTER (out of $TESTS) failed! :(\n" 1>&2
 fi
@@ -64,6 +65,7 @@ export SHA1_BIN
 export RANDOM_DEV
 
 
+START=$SECONDS
 sh regress/create_db.sh; COUNTER=$(( COUNTER + 1 ))	# 1
 sh regress/ssha.sh; COUNTER=$(( COUNTER + 1 ))		# 2
 sh regress/cmd_quit.sh; COUNTER=$(( COUNTER + 1 ))	# 3
