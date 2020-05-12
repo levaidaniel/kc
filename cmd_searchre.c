@@ -195,6 +195,6 @@ cmd_searchre(const char *e_line, command *commands)
 	e_line = NULL;
 	commands = NULL;
 
-	puts("PCRE - regular expression - support was not compiled in!");
+	dprintf(STDERR_FILENO, "PCRE - regular expression - support was not compiled in!");
 #endif
 } /* cmd_searchre() */

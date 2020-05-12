@@ -68,6 +68,7 @@ cmd_import(const char *e_line, command *commands)
 	char		*created_now = NULL;
 
 	int		c = 0, largc = 0;
+	char		*opts = NULL;
 	char		**largv = NULL;
 	char		*line = NULL;
 	char		*buf = NULL;
@@ -121,8 +122,13 @@ cmd_import(const char *e_line, command *commands)
 	larg(line, &largv, &largc);
 	free(line); line = NULL;
 
+#ifdef _HAVE_YUBIKEY
+	opts = "A:k:P:e:m:y:o";
+#else
+	opts = "A:k:P:e:m:o";
+#endif
 	optind = 0;
-	while ((c = getopt(largc, largv, "A:k:P:e:m:y:o")) != -1)
+	while ((c = getopt(largc, largv, opts)) != -1)
 		switch (c) {
 			case 'A':
 				/* in case this parameter is being parsed multiple times */
@@ -195,6 +201,7 @@ cmd_import(const char *e_line, command *commands)
 					goto exiting;
 				}
 			break;
+#ifdef _HAVE_YUBIKEY
 			case 'y':
 				if (optarg[0] == '-') {
 					dprintf(STDERR_FILENO, "ERROR: YubiKey slot/device parameter seems to be negative.\n");
@@ -229,6 +236,7 @@ cmd_import(const char *e_line, command *commands)
 
 				printf("Using YubiKey slot #%d on device #%d%s\n", db_params_new.yk_slot, db_params_new.yk_dev, (db_params_new.yk_password ? " and a password" : ""));
 			break;
+#endif
 			case 'o':
 				legacy++;
 			break;

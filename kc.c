@@ -100,6 +100,7 @@ main(int argc, char *argv[])
 	xmlNodePtr	db_root = NULL;
 
 	int		c = 0;
+	char		*opts = NULL;
 	size_t		len = 0;
 
 	unsigned long int	count_keychains = 0, count_keys = 0;
@@ -156,7 +157,12 @@ main(int argc, char *argv[])
 	}
 
 
-	while ((c = getopt(argc, argv, "A:k:c:C:rp:P:e:m:y:bBvh")) != -1)
+#ifdef _HAVE_YUBIKEY
+	opts = "A:k:c:C:rp:P:e:m:y:bBvh";
+#else
+	opts = "A:k:c:C:rp:P:e:m:bBvh";
+#endif
+	while ((c = getopt(argc, argv, opts)) != -1)
 		switch (c) {
 			case 'A':
 				/* in case this parameter is being parsed multiple times */
@@ -229,6 +235,7 @@ main(int argc, char *argv[])
 				free(db_params.cipher_mode); db_params.cipher_mode = NULL;
 				db_params.cipher_mode = strdup(optarg); malloc_check(db_params.cipher_mode);
 			break;
+#ifdef _HAVE_YUBIKEY
 			case 'y':
 				if (optarg[0] == '-') {
 					dprintf(STDERR_FILENO, "ERROR: YubiKey slot/device parameter seems to be negative.\n");
@@ -263,6 +270,7 @@ main(int argc, char *argv[])
 
 				printf("Using YubiKey slot #%d on device #%d%s\n", db_params.yk_slot, db_params.yk_dev, (db_params.yk_password ? " and a password" : ""));
 			break;
+#endif
 			case 'b':
 				batchmode = 1;
 			break;
@@ -487,6 +495,7 @@ main(int argc, char *argv[])
 
 		db_params.pass_len = pos;
 
+#ifdef _HAVE_YUBIKEY
 		if (db_params.yk_slot  &&  db_params.yk_password) {
 			if (db_params.pass_len > 64) {
 				dprintf(STDERR_FILENO, "ERROR: Password cannot be longer than 64 bytes when using YubiKey challenge-response!\n");
@@ -499,6 +508,7 @@ main(int argc, char *argv[])
 			dprintf(STDERR_FILENO, "ERROR: 'password' option is not specified for YubiKey parameter while trying to use a password file!\n");
 			quit(EXIT_FAILURE);
 		}
+#endif
 
 		if (close(pass_file) < 0)
 			perror("ERROR: close(password file)");
@@ -517,12 +527,14 @@ main(int argc, char *argv[])
 			/* use SSH agent to generate the password */
 			if (!kc_ssha_get_password(&db_params))
 				quit(EXIT_FAILURE);
+#ifdef _HAVE_YUBIKEY
 		} else if (db_params.yk_slot) {
 			/* use a YubiKey to generate the password */
 			if (!kc_ykchalresp(&db_params)) {
 				dprintf(STDERR_FILENO, "ERROR: Error while doing YubiKey challenge-response!\n");
 				quit(EXIT_FAILURE);
 			}
+#endif
 		}
 	}
 
@@ -1223,6 +1235,9 @@ version(void)
 #endif
 #ifdef	_HAVE_LIBSCRYPT
 		", SCRYPT"
+#endif
+#ifdef	_HAVE_YUBIKEY
+		", YUBIKEY"
 #endif
 		" support.");
 	puts("Written by LEVAI Daniel <leva@ecentrum.hu>");

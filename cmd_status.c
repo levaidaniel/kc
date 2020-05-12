@@ -71,11 +71,13 @@ cmd_status(const char *e_line, command *commands)
 	else
 		puts("no");
 
+#ifdef _HAVE_YUBIKEY
 	printf("YubiKey: ");
 	if (db_params.yk_slot > 0)
 		printf("Slot #%d, Device #%d\n", db_params.yk_slot, db_params.yk_dev);
 	else
 		puts("no");
+#endif
 
 	printf("Password handling: %s\n", db_params.kdf);
 

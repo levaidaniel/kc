@@ -39,6 +39,7 @@ void
 cmd_passwd(const char *e_line, command *commands)
 {
 	int	c = 0, largc = 0;
+	char	*opts = NULL;
 	char	**largv = NULL;
 	char	*line = NULL;
 	char	*ssha_type = NULL, *ssha_comment = NULL;
@@ -88,8 +89,13 @@ cmd_passwd(const char *e_line, command *commands)
 	larg(line, &largv, &largc);
 	free(line); line = NULL;
 
+#ifdef _HAVE_YUBIKEY
+	opts = "A:P:e:m:y:";
+#else
+	opts = "A:P:e:m:";
+#endif
 	optind = 0;
-	while ((c = getopt(largc, largv, "A:P:e:m:y:")) != -1)
+	while ((c = getopt(largc, largv, opts)) != -1)
 		switch (c) {
 			case 'A':
 				/* in case this parameter is being parsed multiple times */
@@ -154,6 +160,7 @@ cmd_passwd(const char *e_line, command *commands)
 					goto exiting;
 				}
 			break;
+#ifdef _HAVE_YUBIKEY
 			case 'y':
 				if (optarg[0] == '-') {
 					dprintf(STDERR_FILENO, "ERROR: YubiKey slot/device parameter seems to be negative.\n");
@@ -188,6 +195,7 @@ cmd_passwd(const char *e_line, command *commands)
 
 				printf("Using YubiKey slot #%d on device #%d%s\n", db_params.yk_slot, db_params.yk_dev, (db_params.yk_password ? " and a password" : ""));
 			break;
+#endif
 			default:
 				puts(commands->usage);
 				goto exiting;
@@ -214,12 +222,14 @@ cmd_passwd(const char *e_line, command *commands)
 		/* use SSH agent to generate the password */
 		if (!kc_ssha_get_password(&db_params_tmp))
 			goto exiting;
+#ifdef _HAVE_YUBIKEY
 	} else if (db_params_tmp.yk_slot) {
 		/* use a YubiKey to generate the password */
 		if (!kc_ykchalresp(&db_params_tmp)) {
 			dprintf(STDERR_FILENO, "ERROR: Error while doing YubiKey challenge-response!\n");
 			goto exiting;
 		}
+#endif
 	}
 
 	/* Setup cipher mode and turn on encrypting */
