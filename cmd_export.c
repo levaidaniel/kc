@@ -67,8 +67,10 @@ cmd_export(const char *e_line, command *commands)
 	struct stat	st;
 	char		*ssha_type = NULL, *ssha_comment = NULL;
 
+#ifdef _HAVE_YUBIKEY
 	unsigned long int	ykchalresp = 0;
 	char			*inv = NULL;
+#endif
 
 #ifndef _READLINE
 	int		e_count = 0;

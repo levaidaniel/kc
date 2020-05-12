@@ -44,8 +44,10 @@ cmd_passwd(const char *e_line, command *commands)
 	char	*line = NULL;
 	char	*ssha_type = NULL, *ssha_comment = NULL;
 
+#ifdef _HAVE_YUBIKEY
 	unsigned long int	ykchalresp = 0;
 	char			*inv = NULL;
+#endif
 
 	db_parameters	db_params_tmp;
 

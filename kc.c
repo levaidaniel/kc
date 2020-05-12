@@ -94,8 +94,10 @@ main(int argc, char *argv[])
 	unsigned char	newdb = 0;
 	char		*ssha_type = NULL, *ssha_comment = NULL;
 
+#ifdef _HAVE_YUBIKEY
 	unsigned long int	ykchalresp = 0;
 	char			*inv = NULL;
+#endif
 
 	xmlNodePtr	db_root = NULL;
 
