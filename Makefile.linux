@@ -11,14 +11,18 @@ SRCS +=		cmd_c.c cmd_cdel.c cmd_clear.c cmd_clipboard.c cmd_clist.c cmd_cnew.c c
 		cmd_help.c cmd_import.c cmd_info.c cmd_list.c cmd_new.c cmd_near.c \
 		cmd_passwd.c cmd_quit.c cmd_search.c cmd_searchre.c cmd_status.c \
 		cmd_swap.c cmd_version.c cmd_write.c \
-		commands.c commands_init.c ssha.c ykchalresp.c
+		commands.c commands_init.c ssha.c
 OBJS =		kc.o malloc_check.o
 OBJS +=		cmd_c.o cmd_cdel.o cmd_clear.o cmd_clipboard.o cmd_clist.o cmd_cnew.o cmd_copy.o \
 		cmd_cedit.o cmd_del.o cmd_edit.o cmd_export.o cmd_getnum.o \
 		cmd_help.o cmd_import.o cmd_info.o cmd_list.o cmd_new.o cmd_near.o \
 		cmd_passwd.o cmd_quit.o cmd_search.o cmd_searchre.o cmd_status.o \
 		cmd_swap.o cmd_version.o cmd_write.o \
-		commands.o commands_init.o ssha.o ykchalresp.o
+		commands.o commands_init.o ssha.o
+ifdef HAVE_YUBIKEY
+SRCS +=		ykchalresp.c
+OBJS +=		ykchalresp.o
+endif
 
 BCRYPT_OBJS =	${BCRYPT_DIR}/bcrypt_pbkdf.o ${BCRYPT_DIR}/blf.o ${BCRYPT_DIR}/explicit_bzero.o ${BCRYPT_DIR}/sha2.o
 

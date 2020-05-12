@@ -556,6 +556,7 @@ kc_password_read(struct db_parameters *db_params, const unsigned char new)
 	db_params->pass = malloc(db_params->pass_len); malloc_check(db_params->pass);
 	memcpy(db_params->pass, pass1, db_params->pass_len);
 
+#ifdef _HAVE_YUBIKEY
 	if (db_params->yk_slot) {
 		if (db_params->pass_len > 64) {
 			dprintf(STDERR_FILENO, "ERROR: Password cannot be longer than 64 bytes when using YubiKey challenge-response!\n");
@@ -565,6 +566,7 @@ kc_password_read(struct db_parameters *db_params, const unsigned char new)
 			return(-1);
 		}
 	}
+#endif
 
 	if (pass1)
 		memset(pass1, '\0', PASSWORD_MAXLEN + 1);
