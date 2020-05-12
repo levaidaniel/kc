@@ -11,6 +11,7 @@
 * `passwd` command can now change encryption cipher and mode as well.
 * The kc XML document type definition has changed so that now attributes created, modified and description are mandatory.
 * `import` command now has a `-o` option to turn on legacy database parsing with the old kc DTD.
+
   One can salvage their legacy database(s) and fill in the missing attributes.
 * `new` and `cnew` commands support spaces in key and keychain names (respectively) when specifying them on the command line.
 * `info` command shows how many lines there are in the value, and how many keys there are in the keychain.
