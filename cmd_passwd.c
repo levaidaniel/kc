@@ -195,7 +195,7 @@ cmd_passwd(const char *e_line, command *commands)
 					db_params_tmp.yk_password = 1;
 				}
 
-				printf("Using YubiKey slot #%d on device #%d%s\n", db_params.yk_slot, db_params.yk_dev, (db_params.yk_password ? " and a password" : ""));
+				printf("Using YubiKey slot #%d on device #%d%s\n", db_params_tmp.yk_slot, db_params_tmp.yk_dev, (db_params_tmp.yk_password ? " and a password" : ""));
 			break;
 #endif
 			default:
