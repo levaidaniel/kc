@@ -64,6 +64,7 @@
 #include "ykchalresp.h"
 
 
+#define	RESPONSE_SIZE	20	/* HMAC responses are 160 bits (i.e. 20 bytes) */
 #define	SHA1_MAX_BLOCK_SIZE	64	/* Max size of input SHA1 block */
 
 
@@ -78,6 +79,7 @@ kc_ykchalresp(struct db_parameters *db_params)
 	int yk_cmd = 0;
 
 	bool may_block = true;
+
 	unsigned char response[SHA1_MAX_BLOCK_SIZE];
 	unsigned char output_buf[(SHA1_MAX_BLOCK_SIZE * 2) + 1];
 
@@ -132,18 +134,22 @@ kc_ykchalresp(struct db_parameters *db_params)
 	}
 
 	printf("Remember to touch your YubiKey if necessary\n");
-	if(!yk_challenge_response(yk, yk_cmd, may_block,
+	if (!yk_challenge_response(yk, yk_cmd, may_block,
 		challenge_len, challenge,
 		sizeof(response), response))
 	{
 		goto err;
 	}
 
-	/* HMAC responses are 160 bits (i.e. 20 bytes) */
 	yubikey_hex_encode((char *)output_buf, (char *)response, 20);
-	memset(response, 0, sizeof(response));
+	memset(response, 0, RESPONSE_SIZE);
+
 	memset(db_params->pass, '\0', db_params->pass_len);
-	memcpy(db_params->pass, output_buf, db_params->pass_len);
+	free(db_params->pass);
+	db_params->pass = malloc(RESPONSE_SIZE * 2); malloc_check(db_params->pass);
+	memcpy(db_params->pass, output_buf, RESPONSE_SIZE * 2);
+
+	db_params->pass_len = RESPONSE_SIZE * 2;
 
 
 err:
