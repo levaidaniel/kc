@@ -108,7 +108,7 @@ main(int argc, char *argv[])
 	unsigned long int	count_keychains = 0, count_keys = 0;
 
 
-#ifdef __OpenBSD__
+#if defined(__OpenBSD__)  &&  !defined(_HAVE_YUBIKEY)
 	char		*pledges = "cpath exec fattr flock proc rpath stdio tty unix wpath";
 
 
