@@ -707,7 +707,7 @@ char
 kc_crypt_key(struct db_parameters *db_params)
 {
 	if (getenv("KC_DEBUG"))
-		printf("%s(): generating new key from pass and salt.\n", __func__);
+		printf("%s(): generating new key from pass (len:%zd) and salt.\n", __func__, db_params->pass_len);
 
 	/* Generate a proper key from the user's password */
 	if (strcmp(db_params->kdf, "sha1") == 0) {
