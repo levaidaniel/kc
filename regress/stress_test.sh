@@ -2,6 +2,8 @@
 
 set -e
 
+ulimit -c unlimited
+
 
 typeset -i i=0
 typeset -i loop=5000
@@ -29,21 +31,25 @@ echo "test => $0"
 case "$(uname -s)" in
 	Linux|CYGWIN*)
 		SHA1_BIN=$(which sha1sum)
+		RANDOM_DEV="/dev/urandom"
 	;;
 	*BSD)
 		SHA1_BIN="$(which sha1) -r"
+		RANDOM_DEV="/dev/random"
 	;;
 	*)
 		echo "unknown system."
 		exit 1
 	;;
 esac
+export SHA1_BIN
+export RANDOM_DEV
 
 
 export KC_RUN=${KC_RUN:-'./kc'}
 
 
-if ${KC_RUN} -v |grep -E -q -e '^Compiled with Readline(, PCRE)*(, SCRYPT)* support\.$';then
+if ${KC_RUN} -v |grep -E -q -e '^Compiled with Readline(, PCRE)*(, SCRYPT)*(, YUBIKEY)* support\.$';then
 	export READLINE=readline
 fi
 
@@ -59,6 +65,7 @@ export KC_PASSFILE='regress/testpass'
 sh regress/create_db.sh
 
 
+RANDOM=$$
 typeset -i offset=0
 
 # new
@@ -89,7 +96,7 @@ echo # new line
 
 if [ ${CHECK_DURING_MODIFY} -gt 0 ];then
 	SHA1=$(printf "list\n" |KC_DEBUG=yes ${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
-	if [ "$SHA1" == 'b839f4f482d77b04e82827e607035423158f56c1' ];then
+	if [ "$SHA1" == '828da68620831478eadf432fda61dffde06f6f0f' ];then
 		echo "$0 test ok (#${loop} new entry)!"
 	else
 		echo "$0 test failed (#${loop} new entry)!"
@@ -122,7 +129,7 @@ echo # new line
 
 if [ ${CHECK_DURING_MODIFY} -gt 0 ];then
 	SHA1=$(printf "list\n" |KC_DEBUG=yes ${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
-	if [ "$SHA1" == 'b839f4f482d77b04e82827e607035423158f56c1' ];then
+	if [ "$SHA1" == '828da68620831478eadf432fda61dffde06f6f0f' ];then
 		echo "$0 test ok (#${loop} inserts)!"
 	else
 		echo "$0 test failed (#${loop} inserts)!"
@@ -160,7 +167,7 @@ echo # new line
 
 if [ ${CHECK_DURING_MODIFY} -gt 0 ];then
 	SHA1=$(printf "list\n" |KC_DEBUG=yes ${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
-	if [ "$SHA1" == '264dfbfbc893baa61b57b51bdb4c38880e4466d0' ];then
+	if [ "$SHA1" == '02efaae2e73b313afd254c4d4464b84e8e63849b' ];then
 		echo "$0 test ok (#${loop} entry edit)!"
 	else
 		echo "$0 test failed (#${loop} entry edit)!"
@@ -199,7 +206,7 @@ done |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} >/dev/null
 echo # new line
 
 SHA1=$(printf "list\n" |KC_DEBUG=yes ${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e '^[[:space:]]*<.*>$' |sed -e 's/ created="[0-9]\{1,\}"//' -e 's/ modified="[0-9]\{1,\}"//' |$SHA1_BIN |cut -d' ' -f1)
-if [ "$SHA1" = '1c9090963d9f6168a9bbbb24d73dd2e7e9e991ba' ];then
+if [ "$SHA1" = 'ba72861439b641d0f7392162bb65f673765b0b3f' ];then
 	echo $0 test ok!
 else
 	echo $0 test failed!
