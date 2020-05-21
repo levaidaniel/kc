@@ -17,7 +17,6 @@
 ## Compile:
 
 ### BSD:
-
     $ make <OPTIONS>  
     $ make install  
 
@@ -52,11 +51,11 @@ These are environment variables passed to _make_ (the value doesn't matter, only
 
     **`Makefile.linux`** uses Readline and **`Makefile`** uses Editline by default.
 
-####Linux example:
+### Linux example:
     $ make -f Makefile.linux HAVE_PCRE=1 HAVE_YUBIKEY=nice HAVE_LIBSCRYPT=yeah && make -f Makefile.linux install
 
-####OpenBSD example:
+### OpenBSD example:
     $ make HAVE_PCRE=yes OS_OPENBSD=1 && make install
 
-####FreeBSD example:
+### FreeBSD example:
     $ make HAVE_PCRE=yes HAVE_LIBSCRYPT=1 BUNDLED_BCRYPT=yesplease && make install
