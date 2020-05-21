@@ -1,6 +1,4 @@
-#!/bin/sh -e
-
-set -e
+#!/bin/sh
 
 ulimit -c unlimited
 
@@ -27,15 +25,16 @@ fi
 export KC_DB='regress/test.kcd'
 export KC_PASSFILE='regress/testpass'
 
-COUNTER=1
-
-TESTS=$(ls -1 regress/*.sh |grep -F -v -e"stress_test.sh" -e"run_tests.sh" |wc -l |tr -d ' ')
 trap '
-if [ $? -eq 0 ];then
-	printf "\nAll tests were ok! :)\n"
+if [ $RETVAL -eq 0 ];then
+	if [ $SKIPPED -eq 0 ];then
+		printf "\nAll ($COUNTER) tests were ok! :)\n"
+	else
+		printf "\n$(($COUNTER - $SKIPPED)) tests were ok, $SKIPPED skipped!\n"
+	fi
 	echo "Took about $((SECONDS - START)) seconds"
 else
-	printf "\nTest #$COUNTER (out of $TESTS) failed! :(\n" 1>&2
+	printf "\nTest #$COUNTER failed! :(\n" 1>&2
 fi
 ' EXIT
 
@@ -65,35 +64,105 @@ export SHA1_BIN
 export RANDOM_DEV
 
 
-START=$SECONDS
-sh regress/create_db.sh; COUNTER=$(( COUNTER + 1 ))	# 1
-sh regress/ssha.sh; COUNTER=$(( COUNTER + 1 ))		# 2
-sh regress/cmd_quit.sh; COUNTER=$(( COUNTER + 1 ))	# 3
-sh regress/cmd_help.sh; COUNTER=$(( COUNTER + 1 ))	# 4
-sh regress/cmd_version.sh; COUNTER=$(( COUNTER + 1 ))	# 5
-sh regress/cmd_clear.sh; COUNTER=$(( COUNTER + 1 ))	# 6
-sh regress/cmd_getnum.sh; COUNTER=$(( COUNTER + 1 ))	# 7
-sh regress/cmd_list.sh; COUNTER=$(( COUNTER + 1 ))	# 8
-sh regress/cmd_clist.sh; COUNTER=$(( COUNTER + 1 ))	# 9
-sh regress/cmd_search.sh; COUNTER=$(( COUNTER + 1 ))	# 10
-sh regress/cmd_searchre.sh; COUNTER=$(( COUNTER + 1 ))	# 11
-sh regress/cmd_new.sh; COUNTER=$(( COUNTER + 1 ))	# 12
-sh regress/cmd_edit.sh; COUNTER=$(( COUNTER + 1 ))	# 13
-sh regress/cmd_info.sh; COUNTER=$(( COUNTER + 1 ))	# 14
-sh regress/cmd_swap.sh; COUNTER=$(( COUNTER + 1 ))	# 15
-sh regress/cmd_insert.sh; COUNTER=$(( COUNTER + 1 ))	# 16
-sh regress/cmd_export.sh; COUNTER=$(( COUNTER + 1 ))	# 17
-sh regress/cmd_import.sh; COUNTER=$(( COUNTER + 1 ))	# 18
-sh regress/cmd_cnew.sh; COUNTER=$(( COUNTER + 1 ))	# 19
-sh regress/cmd_cedit.sh; COUNTER=$(( COUNTER + 1 ))	# 20
-sh regress/cmd_cdel.sh; COUNTER=$(( COUNTER + 1 ))	# 21
-sh regress/cmd_c.sh; COUNTER=$(( COUNTER + 1 ))		# 22
-sh regress/cmd_copy.sh; COUNTER=$(( COUNTER + 1 ))	# 23
-sh regress/cmd_del.sh; COUNTER=$(( COUNTER + 1 ))	# 24
-sh regress/cmd_write.sh; COUNTER=$(( COUNTER + 1 ))	# 25
-sh regress/maxpassword.sh; COUNTER=$(( COUNTER + 1 ))	# 26
-sh regress/cmd_passwd.sh; COUNTER=$(( COUNTER + 1 ))	# 27
-sh regress/cmd_status.sh; COUNTER=$(( COUNTER + 1 ))	# 28
-sh regress/cmd_near.sh; COUNTER=$(( COUNTER + 1 ))	# 29
-sh regress/cmd_opt_c.sh; COUNTER=$(( COUNTER + 1 ))	# 30
-sh regress/cmd_clipboard.sh; COUNTER=$(( COUNTER + 1 ))	# 31
+typeset -i COUNTER=0
+typeset -i RETVAL=0
+typeset -i SKIPPED=0
+typeset -i START=$SECONDS
+sh regress/create_db.sh; RETVAL=$?;	COUNTER=$(( COUNTER + 1 ))	# 1
+	[ $RETVAL -eq 1 ]  &&  exit 1
+
+sh regress/ssha.sh; RETVAL=$?;		COUNTER=$(( COUNTER + 1 ))	# 2
+	[ $RETVAL -eq 1 ]  &&  exit 1
+	[ $RETVAL -eq 2 ]  &&  SKIPPED=$(( SKIPPED + 1 ))
+
+sh regress/ykchalresp.sh; RETVAL=$?;	COUNTER=$(( COUNTER + 1 ))	# 3
+	[ $RETVAL -eq 1 ]  &&  exit 1
+	[ $RETVAL -eq 2 ]  &&  SKIPPED=$(( SKIPPED + 1 ))
+
+sh regress/cmd_quit.sh; RETVAL=$?;	COUNTER=$(( COUNTER + 1 ))	# 4
+	[ $RETVAL -eq 1 ]  &&  exit 1
+
+sh regress/cmd_help.sh; RETVAL=$?;	COUNTER=$(( COUNTER + 1 ))	# 5
+	[ $RETVAL -eq 1 ]  &&  exit 1
+
+sh regress/cmd_version.sh; RETVAL=$?;	COUNTER=$(( COUNTER + 1 ))	# 6
+	[ $RETVAL -eq 1 ]  &&  exit 1
+
+sh regress/cmd_clear.sh; RETVAL=$?;	COUNTER=$(( COUNTER + 1 ))	# 7
+	[ $RETVAL -eq 1 ]  &&  exit 1
+
+sh regress/cmd_getnum.sh; RETVAL=$?;	COUNTER=$(( COUNTER + 1 ))	# 8
+	[ $RETVAL -eq 1 ]  &&  exit 1
+
+sh regress/cmd_list.sh; RETVAL=$?;	COUNTER=$(( COUNTER + 1 ))	# 9
+	[ $RETVAL -eq 1 ]  &&  exit 1
+
+sh regress/cmd_clist.sh; RETVAL=$?;	COUNTER=$(( COUNTER + 1 ))	# 10
+	[ $RETVAL -eq 1 ]  &&  exit 1
+
+sh regress/cmd_search.sh; RETVAL=$?;	COUNTER=$(( COUNTER + 1 ))	# 11
+	[ $RETVAL -eq 1 ]  &&  exit 1
+
+sh regress/cmd_searchre.sh; RETVAL=$?;	COUNTER=$(( COUNTER + 1 ))	# 12
+	[ $RETVAL -eq 1 ]  &&  exit 1
+	[ $RETVAL -eq 2 ]  &&  SKIPPED=$(( SKIPPED + 1 ))
+
+sh regress/cmd_new.sh; RETVAL=$?;	COUNTER=$(( COUNTER + 1 ))	# 13
+	[ $RETVAL -eq 1 ]  &&  exit 1
+
+sh regress/cmd_edit.sh; RETVAL=$?;	COUNTER=$(( COUNTER + 1 ))	# 14
+	[ $RETVAL -eq 1 ]  &&  exit 1
+
+sh regress/cmd_info.sh; RETVAL=$?;	COUNTER=$(( COUNTER + 1 ))	# 15
+	[ $RETVAL -eq 1 ]  &&  exit 1
+
+sh regress/cmd_swap.sh; RETVAL=$?;	COUNTER=$(( COUNTER + 1 ))	# 16
+	[ $RETVAL -eq 1 ]  &&  exit 1
+
+sh regress/cmd_insert.sh; RETVAL=$?;	COUNTER=$(( COUNTER + 1 ))	# 17
+	[ $RETVAL -eq 1 ]  &&  exit 1
+
+sh regress/cmd_export.sh; RETVAL=$?;	COUNTER=$(( COUNTER + 1 ))	# 18
+	[ $RETVAL -eq 1 ]  &&  exit 1
+
+sh regress/cmd_import.sh; RETVAL=$?;	COUNTER=$(( COUNTER + 1 ))	# 19
+	[ $RETVAL -eq 1 ]  &&  exit 1
+
+sh regress/cmd_cnew.sh; RETVAL=$?;	COUNTER=$(( COUNTER + 1 ))	# 20
+	[ $RETVAL -eq 1 ]  &&  exit 1
+
+sh regress/cmd_cedit.sh; RETVAL=$?;	COUNTER=$(( COUNTER + 1 ))	# 21
+	[ $RETVAL -eq 1 ]  &&  exit 1
+
+sh regress/cmd_cdel.sh; RETVAL=$?;	COUNTER=$(( COUNTER + 1 ))	# 22
+	[ $RETVAL -eq 1 ]  &&  exit 1
+
+sh regress/cmd_c.sh; RETVAL=$?;		COUNTER=$(( COUNTER + 1 ))	# 23
+	[ $RETVAL -eq 1 ]  &&  exit 1
+
+sh regress/cmd_copy.sh; RETVAL=$?;	COUNTER=$(( COUNTER + 1 ))	# 24
+	[ $RETVAL -eq 1 ]  &&  exit 1
+
+sh regress/cmd_del.sh; RETVAL=$?;	COUNTER=$(( COUNTER + 1 ))	# 25
+	[ $RETVAL -eq 1 ]  &&  exit 1
+
+sh regress/cmd_write.sh; RETVAL=$?;	COUNTER=$(( COUNTER + 1 ))	# 26
+	[ $RETVAL -eq 1 ]  &&  exit 1
+
+sh regress/maxpassword.sh; RETVAL=$?;	COUNTER=$(( COUNTER + 1 ))	# 27
+	[ $RETVAL -eq 1 ]  &&  exit 1
+
+sh regress/cmd_passwd.sh; RETVAL=$?;	COUNTER=$(( COUNTER + 1 ))	# 28
+	[ $RETVAL -eq 1 ]  &&  exit 1
+
+sh regress/cmd_status.sh; RETVAL=$?;	COUNTER=$(( COUNTER + 1 ))	# 29
+	[ $RETVAL -eq 1 ]  &&  exit 1
+
+sh regress/cmd_near.sh; RETVAL=$?;	COUNTER=$(( COUNTER + 1 ))	# 30
+	[ $RETVAL -eq 1 ]  &&  exit 1
+
+sh regress/cmd_opt_c.sh; RETVAL=$?;	COUNTER=$(( COUNTER + 1 ))	# 31
+	[ $RETVAL -eq 1 ]  &&  exit 1
+
+sh regress/cmd_clipboard.sh; RETVAL=$?;	COUNTER=$(( COUNTER + 1 ))	# 32
+	[ $RETVAL -eq 1 ]  &&  exit 1

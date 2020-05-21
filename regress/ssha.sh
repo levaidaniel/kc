@@ -5,22 +5,33 @@ set -e
 
 echo "test => $0"
 
+typeset -i _SKIP=0
 if [ -z "${SSH_AUTH_SOCK}" ];then
-	echo "$0 test failed (ssh-agent is not running)!"
-	exit 1
+	echo "$0 test skipped (ssh-agent is not running)!"
+	_SKIP=1
 fi
 
-# generate a new private key
-SSH_KEYGEN=$(which ssh-keygen)
-if [ $? -ne 0 ];then
-	echo "$0 test failed (cannot find ssh-keygen(1))!"
-	exit 1
+typeset -i RETVAL=0
+which ssh-keygen  ||  RETVAL=$?
+if [ $RETVAL -eq 0 ];then
+	SSH_KEYGEN=$(which ssh-keygen)
+else
+	echo "$0 test skipped (cannot find ssh-keygen(1))!"
+	_SKIP=1
 fi
-SSH_ADD=$(which ssh-add)
-if [ $? -ne 0 ];then
-	echo "$0 test failed (cannot find ssh-add(1))!"
-	exit 1
+
+RETVAL=0
+which ssh-add  ||  RETVAL=$?
+if [ $RETVAL -eq 0 ];then
+	SSH_ADD=$(which ssh-add)
+else
+	echo "$0 test skipped (cannot find ssh-add(1))!"
+	_SKIP=1
 fi
+
+
+if [ $_SKIP -eq 0 ];then
+
 
 PASSWORD='asdbqwdoijqw2189'
 KC_DB_SSHA='regress/test_ssha.kcd'
@@ -122,3 +133,10 @@ for _type in ed25519:256 rsa:1024 rsa:2048 rsa:4096;do
 	fi
 done
 ${SSH_ADD} -D
+
+
+else
+	exit 2
+fi
+
+exit 0
