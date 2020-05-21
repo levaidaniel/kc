@@ -5,9 +5,9 @@ set -e
 
 echo "test => $0"
 
-if ! ${KC_RUN} -v |grep -E -q -e '^Compiled with (Readline|Editline)(, PCRE)+(, SCRYPT)* support\.$';then
-	echo "$0 - No PCRE support was compiled in; *not testing*!"
-	exit 0
+if ! ${KC_RUN} -v |grep -E -q -e '^Compiled with (Readline|Editline)(, PCRE)+(, SCRYPT)*(, YUBIKEY)* support\.$';then
+	echo "$0 test skipped (PCRE support was not compiled in)"
+	exit 2
 fi
 
 printf "/ ^d.*.[abck]ey[0-9]$\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}
