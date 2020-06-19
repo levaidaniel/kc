@@ -34,10 +34,10 @@ else
 fi
 
 
-typeset -i _SKIP=0
+typeset -i SKIP=0
 if [ -z "${SSH_AUTH_SOCK}" ];then
-	echo "$0 test skipped (ssh-agent is not running)!"
-	_SKIP=1
+	echo "$0 SSH agent test skipped (ssh-agent is not running)!"
+	SKIP=1
 fi
 
 typeset -i RETVAL=0
@@ -45,12 +45,12 @@ which ssh-add  ||  RETVAL=$?
 if [ $RETVAL -eq 0 ];then
 	SSH_ADD=$(which ssh-add)
 else
-	echo "$0 test skipped (cannot find ssh-add(1))!"
-	_SKIP=1
+	echo "$0 SSH agent test skipped (cannot find ssh-add(1))!"
+	SKIP=1
 fi
 
 
-if [ $_SKIP -eq 0 ];then
+if [ $SKIP -eq 0 ];then
 	ssh-add regress/test_id_rsa:2048_ssh
 	if printf "passwd -A ssh-rsa,PuBkEy_+*()[]{}';.!@#^&=-/|_comment-rsa:2048,password -P bcrypt -e blowfish -m ecb\n${PASSWORD}\n${PASSWORD}\n" |${KC_RUN} -b -k ${KC_DB} -P bcrypt -p ${KC_PASSFILE};then
 		echo "$0 test ok (bcrypt KDF)!"

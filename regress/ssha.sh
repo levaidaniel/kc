@@ -5,10 +5,10 @@ set -e
 
 echo "test => $0"
 
-typeset -i _SKIP=0
+typeset -i SKIP=0
 if [ -z "${SSH_AUTH_SOCK}" ];then
 	echo "$0 test skipped (ssh-agent is not running)!"
-	_SKIP=1
+	SKIP=1
 fi
 
 typeset -i RETVAL=0
@@ -17,7 +17,7 @@ if [ $RETVAL -eq 0 ];then
 	SSH_KEYGEN=$(which ssh-keygen)
 else
 	echo "$0 test skipped (cannot find ssh-keygen(1))!"
-	_SKIP=1
+	SKIP=1
 fi
 
 RETVAL=0
@@ -26,11 +26,13 @@ if [ $RETVAL -eq 0 ];then
 	SSH_ADD=$(which ssh-add)
 else
 	echo "$0 test skipped (cannot find ssh-add(1))!"
-	_SKIP=1
+	SKIP=1
 fi
 
 
-if [ $_SKIP -eq 0 ];then
+if [ $SKIP -ne 0 ];then
+	exit 2
+fi
 
 
 PASSWORD='asdbqwdoijqw2189'
@@ -134,9 +136,5 @@ for _type in ed25519:256 rsa:1024 rsa:2048 rsa:4096;do
 done
 ${SSH_ADD} -D
 
-
-else
-	exit 2
-fi
 
 exit 0
