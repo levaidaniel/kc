@@ -57,7 +57,7 @@ cmd_getnum(const unsigned long int idx, const unsigned long int spice)
 	xmlNodePtr	db_node = NULL;
 	xmlChar		*key = NULL, *value = NULL, *value_nl = NULL, *line = NULL, *line_randomed = NULL, *tmp = NULL;
 
-	unsigned long int	lines = 0, line_req = 1, value_len = 0, line_len = 0, line_randomed_len = 0, erase_len = 0, i = 0;
+	unsigned long int	lines = 0, line_req = 1, value_len = 0, line_len = 0, line_randomed_len = 0, i = 0;
 	char		rc = 0;
 	char		*rand_str = NULL;
 	char		**fork_argv = NULL;
@@ -170,8 +170,7 @@ cmd_getnum(const unsigned long int idx, const unsigned long int spice)
 
 				/* erase (overwrite) the previously written value with spaces */
 				printf("\r");
-				erase_len = ERASE_LEN;
-				for (i = 0; i < erase_len; i++)
+				for (i = 0; i < ERASE_LEN; i++)
 					putchar(' ');
 
 				printf("\r");
@@ -256,7 +255,10 @@ cmd_getnum(const unsigned long int idx, const unsigned long int spice)
 
 								break;
 							default: /* Parent */
-								rc = 'q';
+								printf("Copying value to tmux clipboard.\n");
+#ifdef _READLINE
+								rl_redisplay();
+#endif
 								break;
 						}
 
@@ -315,7 +317,10 @@ cmd_getnum(const unsigned long int idx, const unsigned long int spice)
 								write(pipefd[1], line, line_len);
 								close(pipefd[1]);
 
-								rc = 'q';
+								printf("Copying value to X11 clipboard.\n");
+#ifdef _READLINE
+								rl_redisplay();
+#endif
 								break;
 						}
 
