@@ -5,11 +5,6 @@ set -e
 
 echo "test => $0"
 
-if ! ${KC_RUN} -v |grep -E -q -e '^Compiled with (Readline|Editline)(, PCRE)+(, SCRYPT)*(, YUBIKEY)* support\.$';then
-	echo "$0 test skipped (PCRE support was not compiled in)"
-	exit 2
-fi
-
 printf "/ ^d.*.[abck]ey[0-9]$\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}
 SHA1=$(printf "/ ^d.*.[abck]ey[0-9]+$\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." -e "^Using password file: ${KC_PASSFILE}" |$SHA1_BIN |cut -d' ' -f1)
 if [ "$SHA1" = '040b16edbb11c9e9e3da9c09389000a34d473a6a' ];then

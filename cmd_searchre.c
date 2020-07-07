@@ -25,6 +25,8 @@
 
 #ifdef	_HAVE_PCRE
 #include <pcre.h>
+#else
+#include <regex.h>
 #endif
 
 #include "common.h"
@@ -39,15 +41,22 @@ extern char		batchmode;
 void
 cmd_searchre(const char *e_line, command *commands)
 {
-#ifdef	_HAVE_PCRE
 	xmlNodePtr	db_node = NULL, search_keychain = NULL;
 	xmlChar		*key = NULL, *cname = NULL;
 
+#ifdef	_HAVE_PCRE
 	pcre		*re = NULL;
 	pcre_extra	*re_study = NULL;
 	const char	*error = NULL;
 	int		erroffset = 0;
 	int		ovector[30];
+#else
+	regex_t		preg;
+	int		regerr = 0;
+	char		*regerrbuf = NULL;
+	size_t		regerrbuf_size = 256;
+#endif
+	/* ^^^ otherwise we just use the POSIX regex library */
 
 	const char	*pattern = NULL;
 	char		chain = 0, searchall = 0, searchinv = 0, icase = 0;
@@ -97,9 +106,10 @@ cmd_searchre(const char *e_line, command *commands)
 	}
 
 
+#ifdef	_HAVE_PCRE
 	re = pcre_compile(pattern, PCRE_UTF8 | (icase ? PCRE_CASELESS : 0), &error, &erroffset, NULL);
 	if (!re) {
-		dprintf(STDERR_FILENO, "ERROR: Error in pattern at %d: (%s)\n", erroffset, error);
+		dprintf(STDERR_FILENO, "ERROR: Error in PCRE pattern at %d: (%s)\n", erroffset, error);
 		return;
 	}
 
@@ -113,6 +123,17 @@ cmd_searchre(const char *e_line, command *commands)
 			return;
 		}
 	}
+#else
+	regerr = regcomp(&preg, pattern, REG_EXTENDED | REG_NOSUB | REG_NEWLINE | (icase ? REG_ICASE : 0));
+	if (regerr != 0) {
+		regerrbuf = malloc(regerrbuf_size); malloc_check(regerrbuf);
+		regerror(regerr, &preg, regerrbuf, regerrbuf_size);
+		dprintf(STDERR_FILENO, "ERROR: Error compiling regex pattern: %s\n", regerrbuf);
+
+		free(regerrbuf);
+		return;
+	}
+#endif
 
 
 	if (searchall)
@@ -147,9 +168,17 @@ cmd_searchre(const char *e_line, command *commands)
 			if (getenv("KC_DEBUG"))
 				printf("%s(): name=%s", __func__, key);
 
+#ifdef	_HAVE_PCRE
 			search = pcre_exec(re, re_study, (const char *)key, xmlStrlen(key), 0, 0, ovector, 30);
+#else
+			search = regexec(&preg, (const char *)key, 0, 0, 0);
+#endif
 			/* poor man's XOR: */
+#ifdef	_HAVE_PCRE
 			if (((search >= 0)  ||  searchinv)  &&  !((search >= 0)  &&  searchinv)) {
+#else
+			if (((search == 0)  ||  searchinv)  &&  !((search == 0)  &&  searchinv)) {
+#endif
 				if (getenv("KC_DEBUG"))
 					printf(" <=== hit\n");
 
@@ -181,8 +210,10 @@ cmd_searchre(const char *e_line, command *commands)
 			search_keychain = NULL;		/* force the quit from the loop */
 	}
 
+#ifdef	_HAVE_PCRE
 	pcre_free(re);
 	pcre_free_study(re_study);
+#endif
 
 	if (hits > 0) {
 		if (hits > 5  &&  !batchmode)
@@ -190,11 +221,4 @@ cmd_searchre(const char *e_line, command *commands)
 	} else {
 		printf("'%s' was not found.\n", pattern);
 	}
-#else
-	/* these are unused in this function */
-	e_line = NULL;
-	commands = NULL;
-
-	dprintf(STDERR_FILENO, "PCRE - regular expression - support was not compiled in!");
-#endif
 } /* cmd_searchre() */
