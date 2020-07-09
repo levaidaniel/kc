@@ -12,6 +12,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: Replace sh symlink
+      run: sudo ln -sf bash /bin/sh
+
     - name: Install dependencies
       run: sudo apt install libbsd-dev libscrypt-dev libreadline-dev
 
@@ -28,6 +31,9 @@ jobs:
     
     steps:
     - uses: actions/checkout@v2
+
+    - name: Replace sh symlink
+      run: sudo ln -sf bash /bin/sh
 
     - name: Install dependencies
       run: sudo apt install libbsd-dev libscrypt-dev libedit-dev libncurses-dev libncursesw5-dev
