@@ -1,0 +1,17 @@
+name: test
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: build
+      run: make -f Makefile.linux
+    - name: test
+      run: make -f Makefile.linux test
