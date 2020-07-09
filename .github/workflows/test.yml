@@ -5,13 +5,40 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
-
+  test1:
+    name: readline test
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
-    - name: build
+
+    - name: Install dependencies
+      run: sudo apt install libbsd-dev libscrypt-dev libreadline-dev
+
+    - name: build readline
+      env:
+        HAVE_LIBSCRYPT: yes
+      run: make -f Makefile.linux
+    - name: test
+      run: make -f Makefile.linux test
+
+    - name: clean
+      run: make -f Makefile.linux clean
+
+  test2:
+    name: editline test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: sudo apt install libedit-dev libncurses-dev
+
+    - name: build editline
+      env:
+        EDITLINE: yes
+        HAVE_LIBSCRYPT: yes
       run: make -f Makefile.linux
     - name: test
       run: make -f Makefile.linux test
