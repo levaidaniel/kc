@@ -5,13 +5,18 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
+  test:
 
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
+    - name: Install dependencies
+      run: apt install libbsd-dev libedit-dev libscrypt-dev
     - name: build
+      env:
+        EDITLINE: yes
+        HAVE_LIBSCRYPT: yes
       run: make -f Makefile.linux
     - name: test
       run: make -f Makefile.linux test
