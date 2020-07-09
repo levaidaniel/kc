@@ -12,7 +12,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Install dependencies
-      run: apt install libbsd-dev libedit-dev libscrypt-dev
+      run: sudo apt install libbsd-dev libedit-dev libscrypt-dev
     - name: build
       env:
         EDITLINE: yes
