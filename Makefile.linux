@@ -84,7 +84,7 @@ install: all
 	install -D -o root -m 644 ${PROG}.1 ${DESTDIR}/${PREFIX}/man/man1/${PROG}.1
 
 test: all
-	sh regress/run_tests.sh
+	$(shell) regress/run_tests.sh
 
 ${PROG}: ${OBJS} ${BCRYPT_OBJS}
 	${CC} ${LDFLAGS} ${OBJS} ${BCRYPT_OBJS} -o ${PROG} ${LDADD}

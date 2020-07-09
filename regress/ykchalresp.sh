@@ -10,7 +10,7 @@ typeset -i YKVER_MAJ=0
 typeset -i YKVER_MIN=0
 typeset -i RETVAL=0
 
-which ykinfo; RETVAL=$?
+which ykinfo  ||  RETVAL=$?
 if [ $RETVAL -eq 0 ];then
 	YKINFO=$(which ykinfo)
 	YKVER=$($YKINFO -v |cut -d' ' -f2)
