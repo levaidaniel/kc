@@ -33,7 +33,7 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Install dependencies
-      run: sudo apt install libbsd-dev libscrypt-dev libedit-dev libncurses-dev
+      run: sudo apt install libbsd-dev libscrypt-dev libedit-dev libncurses-dev libncurses6 libncursesw6
 
     - name: build editline
       env:
