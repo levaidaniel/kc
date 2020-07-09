@@ -22,9 +22,6 @@ jobs:
     - name: test
       run: make -f Makefile.linux test
 
-    - name: clean
-      run: make -f Makefile.linux clean
-
   test2:
     name: editline test
     runs-on: ubuntu-latest
@@ -33,7 +30,7 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Install dependencies
-      run: sudo apt install libbsd-dev libscrypt-dev libedit-dev libncurses-dev libncursesw5 libncursesw5-dev
+      run: sudo apt install libbsd-dev libscrypt-dev libedit-dev libncurses-dev libncursesw5
 
     - name: build editline
       env:
