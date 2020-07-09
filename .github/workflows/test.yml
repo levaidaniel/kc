@@ -2,7 +2,8 @@ name: test
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - github_workflow_test
 
 jobs:
   test1:
