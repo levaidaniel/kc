@@ -16,6 +16,9 @@ jobs:
     - name: Replace sh symlink
       run: sudo ln -sf bash /bin/sh
 
+    - name: Start SSH agent
+      run: eval $(ssh-agent -s); set |fgrep -i ssh
+
     - name: Install dependencies
       run: sudo apt install libbsd-dev libscrypt-dev libreadline-dev
 
