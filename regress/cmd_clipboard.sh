@@ -7,7 +7,7 @@ echo "test => $0"
 
 if [ -z "${TMUX}" ];then
 	echo "$0 tmux(1) doesn't seem to be running, skipping"
-	exit 0
+	exit 2
 fi
 
 TMUX_CMD=$(which tmux)
