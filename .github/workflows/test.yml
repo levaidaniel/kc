@@ -16,8 +16,11 @@ jobs:
     - name: Replace sh symlink
       run: sudo ln -sf bash /bin/sh
 
+    - name: Set up environment variable for ssh agent information
+      run: echo "::set-env name=SSH_AGENT_INFO::${HOME}/ssh-agent"
+
     - name: Start SSH agent and save the environment variables
-      run: echo "::set-env name=SSH_AGENT_INFO::${HOME}/ssh-agent"; ssh-agent -s |fgrep -v echo > ${SSH_AGENT_INFO}; echo SSH_AGENT_INFO=${SSH_AGENT_INFO}
+      run: echo SSH_AGENT_INFO=${SSH_AGENT_INFO}; ssh-agent -s |fgrep -v echo > ${SSH_AGENT_INFO}
 
     - name: Install dependencies
       run: sudo apt install libbsd-dev libscrypt-dev libreadline-dev
