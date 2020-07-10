@@ -17,7 +17,7 @@ jobs:
       run: sudo ln -sf bash /bin/sh
 
     - name: Start SSH agent
-      run: eval $(ssh-agent -s); set |fgrep -i ssh
+      run: eval $(ssh-agent -s); export SSH_AUTH_SOCK SSH_AGENT_PID
 
     - name: Install dependencies
       run: sudo apt install libbsd-dev libscrypt-dev libreadline-dev
@@ -27,7 +27,7 @@ jobs:
         HAVE_LIBSCRYPT: yes
       run: make -f Makefile.linux
     - name: test
-      run: make -f Makefile.linux test
+      run: pgrep -fa ssh-agent; set |fgrep -i ssh; make -f Makefile.linux test
 
   test2:
     name: editline test
