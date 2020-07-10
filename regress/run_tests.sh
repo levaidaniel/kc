@@ -167,4 +167,5 @@ sh regress/cmd_clipboard.sh; RETVAL=$?;	COUNTER=$(( COUNTER + 1 ))	# 32
 	[ $RETVAL -eq 1 ]  &&  exit 1
 	[ $RETVAL -eq 2 ]  &&  { SKIPPED=$(( SKIPPED + 1 )); echo skipped; }
 
+true
 exit 0
