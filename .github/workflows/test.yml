@@ -25,6 +25,8 @@ jobs:
     - name: build readline
       env:
         HAVE_LIBSCRYPT: yes
+        SSH_AUTH_SOCK: ${SSH_AUTH_SOCK}
+        SSH_AGENT_PID: $SSH_AGENT_PID
       run: make -f Makefile.linux
     - name: test
       run: pgrep -fa ssh-agent; set |fgrep -i ssh; make -f Makefile.linux test
