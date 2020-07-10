@@ -105,7 +105,6 @@ sh regress/cmd_search.sh; RETVAL=$?;	COUNTER=$(( COUNTER + 1 ))	# 11
 
 sh regress/cmd_searchre.sh; RETVAL=$?;	COUNTER=$(( COUNTER + 1 ))	# 12
 	[ $RETVAL -eq 1 ]  &&  exit 1
-	[ $RETVAL -eq 2 ]  &&  SKIPPED=$(( SKIPPED + 1 ))
 
 sh regress/cmd_new.sh; RETVAL=$?;	COUNTER=$(( COUNTER + 1 ))	# 13
 	[ $RETVAL -eq 1 ]  &&  exit 1
@@ -166,5 +165,6 @@ sh regress/cmd_opt_c.sh; RETVAL=$?;	COUNTER=$(( COUNTER + 1 ))	# 31
 
 sh regress/cmd_clipboard.sh; RETVAL=$?;	COUNTER=$(( COUNTER + 1 ))	# 32
 	[ $RETVAL -eq 1 ]  &&  exit 1
+	[ $RETVAL -eq 2 ]  &&  SKIPPED=$(( SKIPPED + 1 ))
 
 exit 0
