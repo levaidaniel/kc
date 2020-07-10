@@ -10,6 +10,11 @@ typeset -i YKVER_MAJ=0
 typeset -i YKVER_MIN=0
 typeset -i RETVAL=0
 
+if ! printf "version\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e '^Compiled with (Readline|Editline)(, PCRE)*(, SCRYPT)*(, YUBIKEY)+ support\.$';then
+	SKIP=1
+	echo "$0 test skipped (kc was not compiled with Yubikey support)!"
+fi
+
 which ykinfo  ||  RETVAL=$?
 if [ $RETVAL -eq 0 ];then
 	YKINFO=$(which ykinfo)
