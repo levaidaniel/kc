@@ -68,9 +68,15 @@ bcrypt:
 OBJS +=		${BCRYPT_DIR}/bcrypt_pbkdf.o ${BCRYPT_DIR}/blf.o ${BCRYPT_DIR}/explicit_bzero.o ${BCRYPT_DIR}/sha2.o
 .endif
 
-all: ${PROG}
+set_version:
+	$(shell) if grep -E -q -e '^\#define[[:space:]]+VERSION[[:space:]]+"[0-9]\.[0-9]-dev-' common.h;then sed -E -i -e "s/(^\#define[[:space:]]+VERSION[[:space:]]+\"[0-9]\.[0-9]-dev-)(.*)\"$$/\1`git log -1 --pretty=format:%cd-%h --date=short`\"/" common.h; fi
+
+unset_version:
+	$(shell) if grep -E -q -e '^\#define[[:space:]]+VERSION[[:space:]]+"[0-9]\.[0-9]-dev-' common.h;then sed -E -i -e "s/(^\#define[[:space:]]+VERSION[[:space:]]+\"[0-9]\.[0-9]-dev-)(.*)\"$$/\1GIT_VERSION\"/" common.h; fi
+
+all: set_version ${PROG} unset_version
 
 test:
-	sh regress/run_tests.sh
+	$(shell) regress/run_tests.sh
 
 .include <bsd.prog.mk>
