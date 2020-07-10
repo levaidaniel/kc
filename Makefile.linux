@@ -86,5 +86,11 @@ install: all
 test: all
 	$(shell) regress/run_tests.sh
 
-${PROG}: ${OBJS} ${BCRYPT_OBJS}
+set_version:
+	$(shell) if grep -E -q -e '^\#define\s+VERSION\s+"[0-9]\.[0-9]-dev-' common.h;then sed -i -e "s/\(^\#define\s\+VERSION\s\+\"[0-9]\.[0-9]-dev-\)\(.*\)\"$$/\1`git log -1 --pretty=format:%cd-%h --date=short`\"/" common.h; fi
+
+unset_version:
+	$(shell) if grep -E -q -e '^\#define\s+VERSION\s+"[0-9]\.[0-9]-dev-' common.h;then sed -i -e "s/\(^\#define\s\+VERSION\s\+\"[0-9]\.[0-9]-dev-\)\(.*\)\"$$/\1GIT_VERSION\"/" common.h; fi
+
+${PROG}: set_version ${OBJS} ${BCRYPT_OBJS} unset_version
 	${CC} ${LDFLAGS} ${OBJS} ${BCRYPT_OBJS} -o ${PROG} ${LDADD}
