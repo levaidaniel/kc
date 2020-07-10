@@ -9,6 +9,8 @@ jobs:
   test1:
     name: readline test
     runs-on: ubuntu-latest
+    env:
+      SSH_AGENT_INFO: ${{ env.HOME }}/ssh-agent
 
     steps:
     - uses: actions/checkout@v2
@@ -16,8 +18,8 @@ jobs:
     - name: Replace sh symlink
       run: sudo ln -sf bash /bin/sh
 
-    - name: Start SSH agent
-      run: eval $(ssh-agent -s); export SSH_AUTH_SOCK SSH_AGENT_PID
+    - name: Start SSH agent and save the environment variables
+      run: ssh-agent -s |fgrep -v echo > $SSH_AGENT_INFO;echo SSH_AGENT_INFO=$SSH_AGENT_INFO
 
     - name: Install dependencies
       run: sudo apt install libbsd-dev libscrypt-dev libreadline-dev
@@ -27,10 +29,7 @@ jobs:
         HAVE_LIBSCRYPT: yes
       run: make -f Makefile.linux
     - name: test
-      env:
-        SSH_AUTH_SOCK: ${SSH_AUTH_SOCK}
-        SSH_AGENT_PID: $SSH_AGENT_PID
-      run: pgrep -fa ssh-agent; set |fgrep -i ssh; make -f Makefile.linux test
+      run: eval $(< $HOME/ssh-agent); make -f Makefile.linux test
 
   test2:
     name: editline test
