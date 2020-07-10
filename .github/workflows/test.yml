@@ -42,6 +42,12 @@ jobs:
     - name: Replace sh symlink
       run: sudo ln -sf bash /bin/sh
 
+    - name: Set up environment variable for ssh agent information
+      run: echo "::set-env name=SSH_AGENT_INFO::${HOME}/ssh-agent"
+
+    - name: Start SSH agent and save the environment variables
+      run: echo SSH_AGENT_INFO=${SSH_AGENT_INFO}; ssh-agent -s |fgrep -v echo > ${SSH_AGENT_INFO}
+
     - name: Install dependencies
       run: sudo apt install libbsd-dev libscrypt-dev libedit-dev libncurses-dev libncursesw5-dev
 
@@ -51,4 +57,4 @@ jobs:
         HAVE_LIBSCRYPT: yes
       run: make -f Makefile.linux
     - name: test
-      run: make -f Makefile.linux test
+      run: eval $(< ${SSH_AGENT_INFO}); set |fgrep SSH; make -f Makefile.linux test
