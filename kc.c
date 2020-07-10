@@ -299,7 +299,7 @@ main(int argc, char *argv[])
 					"-B/-b: Batch mode.\n"
 					"-v: Display version.\n"
 					"-h: This help.\n");
-				exit(EXIT_SUCCESS);
+				exit(EXIT_FAILURE);
 			break;
 		}
 
