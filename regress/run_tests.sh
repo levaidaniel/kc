@@ -73,11 +73,11 @@ sh regress/create_db.sh; RETVAL=$?;	COUNTER=$(( COUNTER + 1 ))	# 1
 
 sh regress/ssha.sh; RETVAL=$?;		COUNTER=$(( COUNTER + 1 ))	# 2
 	[ $RETVAL -eq 1 ]  &&  exit 1
-	[ $RETVAL -eq 2 ]  &&  SKIPPED=$(( SKIPPED + 1 ))
+	[ $RETVAL -eq 2 ]  &&  { SKIPPED=$(( SKIPPED + 1 )); RETVAL=0; }
 
 sh regress/ykchalresp.sh; RETVAL=$?;	COUNTER=$(( COUNTER + 1 ))	# 3
 	[ $RETVAL -eq 1 ]  &&  exit 1
-	[ $RETVAL -eq 2 ]  &&  SKIPPED=$(( SKIPPED + 1 ))
+	[ $RETVAL -eq 2 ]  &&  { SKIPPED=$(( SKIPPED + 1 )); RETVAL=0; }
 
 sh regress/cmd_quit.sh; RETVAL=$?;	COUNTER=$(( COUNTER + 1 ))	# 4
 	[ $RETVAL -eq 1 ]  &&  exit 1
@@ -105,7 +105,6 @@ sh regress/cmd_search.sh; RETVAL=$?;	COUNTER=$(( COUNTER + 1 ))	# 11
 
 sh regress/cmd_searchre.sh; RETVAL=$?;	COUNTER=$(( COUNTER + 1 ))	# 12
 	[ $RETVAL -eq 1 ]  &&  exit 1
-	[ $RETVAL -eq 2 ]  &&  SKIPPED=$(( SKIPPED + 1 ))
 
 sh regress/cmd_new.sh; RETVAL=$?;	COUNTER=$(( COUNTER + 1 ))	# 13
 	[ $RETVAL -eq 1 ]  &&  exit 1
@@ -166,5 +165,6 @@ sh regress/cmd_opt_c.sh; RETVAL=$?;	COUNTER=$(( COUNTER + 1 ))	# 31
 
 sh regress/cmd_clipboard.sh; RETVAL=$?;	COUNTER=$(( COUNTER + 1 ))	# 32
 	[ $RETVAL -eq 1 ]  &&  exit 1
+	[ $RETVAL -eq 2 ]  &&  { SKIPPED=$(( SKIPPED + 1 )); RETVAL=0; }
 
 exit 0
