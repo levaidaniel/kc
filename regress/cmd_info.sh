@@ -7,6 +7,10 @@ set -x
 echo "test => $0"
 
 
+printf "dump -k dump\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}
+cat dump.xml
+cat dump.xml |sed -e 's/^\(Modified: \).*$/\1/'
+
 SHA1=$(printf "info\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." -e "^Using password file: ${KC_PASSFILE}" |sed -e 's/^\(Modified: \).*$/\1/' |$SHA1_BIN |cut -d' ' -f1)
 if [ "$SHA1" = '2dba9c61df68c8e9e70559a9498b8c0570332307' ];then
 	echo "$0 test ok (keychain description/created/modified)!"
