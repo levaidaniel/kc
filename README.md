@@ -4,7 +4,7 @@ keychain
 A console based password storing application using an encrypted XML document as its database.
 
 Features include (but not limited to):
-* fixed string or regex based search (if compiled with pcre)
+* fixed string or regex based search
 * encrypted or plain text database import/export
 * fuzzy displaying of passwords if you suspect someone might watch your monitor
 * copy passwords to various clipboards

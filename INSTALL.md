@@ -6,7 +6,7 @@
 - openssl >= 1.0.0
 
 ### Optional
-- libpcre >= 8.12
+- libpcre >= 8.12 <= 10.0 (i.e. not PCRE2)
 - libscrypt >= 1.14
 #### For YubiKey support
   - libykpers-1 from [_yubikey-personalization_](https://github.com/Yubico/yubikey-personalization/) >= 1.20.0
@@ -25,11 +25,13 @@
     $ make -f Makefile.linux install
 
 ### Options
-These are environment variables passed to _make_ (the value doesn't matter, only the definitions).
+These are environment variables passed to _make_ (the value doesn't matter, only the definition).
 
   - `HAVE_PCRE=y`
 
-    Turn on regexp support in searches. Needs libpcre (see above).
+    Enable Perl-compatible regular expression support while searching. Needs libpcre (see above).
+
+    Note: POSIX regex is supported by default, without the need of the PCRE library and thus this option.
   - `HAVE_LIBSCRYPT=y`
 
     Turn on scrypt KDF support. Needs libscrypt (see above).
@@ -55,7 +57,7 @@ These are environment variables passed to _make_ (the value doesn't matter, only
     $ make -f Makefile.linux HAVE_PCRE=1 HAVE_YUBIKEY=nice HAVE_LIBSCRYPT=yeah && make -f Makefile.linux install
 
 ### OpenBSD example
-    $ make HAVE_PCRE=yes OS_OPENBSD=1 && make install
+    $ make OS_OPENBSD=1 && make install
 
 ### FreeBSD example
-    $ make HAVE_PCRE=yes HAVE_LIBSCRYPT=1 BUNDLED_BCRYPT=yesplease && make install
+    $ make HAVE_LIBSCRYPT=1 BUNDLED_BCRYPT=yesplease && make install
