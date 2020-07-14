@@ -372,7 +372,7 @@ cmd_export(const char *e_line, command *commands)
 	} else {
 		db_params_new.db_file = open(db_params_new.db_filename, O_RDWR | O_CREAT, 0600);
 		if (db_params_new.db_file < 0) {
-			perror("ERROR: open(database file)");
+			perror("ERROR: open(create database file)");
 			goto exiting;
 		}
 

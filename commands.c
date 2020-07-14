@@ -817,7 +817,7 @@ kc_crypt_setup(BIO *bio_chain, const unsigned int enc, struct db_parameters *db_
 	}
 
 	if (getenv("KC_DEBUG"))
-		printf("%s(): crypt setup: using %s cipher mode\n", __func__, db_params->cipher_mode);
+		printf("%s(): crypt setup: using cipher %s in %s mode\n", __func__, db_params->cipher, db_params->cipher_mode);
 
 
 	return(1);

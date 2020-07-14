@@ -126,7 +126,7 @@ cmd_write(const char *e_line, command *commands)
 
 	db_params_tmp.db_file = open(db_params_tmp.db_filename, O_RDWR | O_CREAT, 0600);
 	if (db_params_tmp.db_file < 0) {
-		perror("ERROR: Could not open temporary database file");
+		perror("ERROR: Could not create temporary database file");
 
 		goto exiting;
 	}

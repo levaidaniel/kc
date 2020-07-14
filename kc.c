@@ -416,7 +416,7 @@ main(int argc, char *argv[])
 
 		db_params.db_file = open(db_params.db_filename, O_RDWR | O_CREAT, 0600);
 		if (db_params.db_file < 0) {
-			perror("ERROR: open to create(database file)");
+			perror("ERROR: open(create database file)");
 			quit(EXIT_FAILURE);
 		}
 
