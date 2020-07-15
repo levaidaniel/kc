@@ -139,15 +139,15 @@ cmd_list(const char *e_line, command *commands)
 			&&  idx == pager_show
 			&&  pager != 0)
 			||
-			(rc == 13  ||  rc == 10)) {
+			(rc == 13  ||  rc == 10  ||  rc == 'j')) {
 
 			/* Brief pager usage info. */
-			printf("[SPC,RET,0-9,EOT,q,Q,?]");
+			printf("[SPC,RET,j,0-9,EOT,q,Q,?]");
 			fflush(stdout);
 
 			rc = 0;
 			while (	rc != ' '  &&  rc != 13  &&  rc != 10  &&
-				rc != 4  &&  rc != 'q'  &&
+				rc != 4  &&  rc != 'q'  &&  rc != 'j'  &&
 				(rc < '0'  ||  rc > '9')  &&
 				rc != 'Q') {
 #ifndef _READLINE
@@ -157,11 +157,11 @@ cmd_list(const char *e_line, command *commands)
 #endif
 				/* Full pager usage info. */
 				if (rc == '?')
-					puts("\n <SPACE>:\tNext page\n <ENTER>:\tNext line\n 1-9:\t\tNew pager value\n 'q', <EOT>:\tStop\n 'Q', 0:\tDisplay all\n");
+					puts("\n <SPACE>:\tNext page\n <ENTER>, j:\tNext line\n 1-9:\t\tNew pager value\n 'q', <EOT>:\tStop\n 'Q', 0:\tDisplay all\n");
 			}
 
 			/* Delete brief pager usage info. */
-			printf("\r                       \r");
+			printf("\r                         \r");
 
 			if (rc == 4  ||  rc == 'q')
 				break;
