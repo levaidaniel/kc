@@ -38,7 +38,7 @@ else
 	exit 1
 fi
 
-SHA1=$(printf 'new multiline\nml1\\nml2\\nml3\ninfo 3\n' |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." -e "^Using password file: ${KC_PASSFILE}" |sed -e 's/^\(Created: \).*$/\1/' -e 's/^\(Modified: \).*$/\1/' |$SHA1_BIN |cut -d' ' -f1)
+SHA1=$(printf 'new multiline\nml1\\nml2\\nml3\ninfo 3\n' |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% NEW value>' -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." -e "^Using password file: ${KC_PASSFILE}" |sed -e 's/^\(Created: \).*$/\1/' -e 's/^\(Modified: \).*$/\1/' |$SHA1_BIN |cut -d' ' -f1)
 if [ "$SHA1" = 'bfdf0c600d9449e16a3df1e50adcd6121f3db7c0' ];then
 	echo "$0 test ok (number of lines)!"
 else
