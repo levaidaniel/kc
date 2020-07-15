@@ -16,4 +16,6 @@
 * `new` and `cnew` commands support spaces in key and keychain names (respectively) when specifying them on the command line.
 * `info` command shows how many lines there are in the value, and how many keys there are in the keychain.
 * `c` command supports keychain names with spaces in them.
+* Removed support for the SHA-1 KDF
+* Added support for the SHA-3 KDF (min. OpenSSL version is 1.1.1)
 * Documentation and manual page fixes.

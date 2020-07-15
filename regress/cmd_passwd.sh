@@ -75,19 +75,26 @@ if [ $SKIP -eq 0 ];then
 	fi
 	ssh-add -d regress/test_id_rsa:2048_ssh
 
-	if echo "" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE};then
+	if printf "passwd -P bcrypt\n${PASSWORD}\n${PASSWORD}\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE};then
 		echo "$0 test ok (password, sha512 KDF, aes256 cipher, cbc cipher mode)!"
 	else
 		echo "$0 test failed (password, sha512 KDF, aes256 cipher, cbc cipher mode)!"
 		exit 1
 	fi
+fi
+
+if printf "passwd -P sha3\n${PASSWORD}\n${PASSWORD}\n" |${KC_RUN} -b -k ${KC_DB} -P bcrypt -p ${KC_PASSFILE};then
+	echo "$0 test ok (change to sha3 KDF (from bcrypt))!"
 else
-	if printf "passwd -P sha512 -e aes256 -m cbc\n${PASSWORD}\n${PASSWORD}\n" |${KC_RUN} -b -k ${KC_DB} -P bcrypt -p ${KC_PASSFILE};then
-		echo "$0 test ok (bcrypt KDF)!"
-	else
-		echo "$0 test failed (bcrypt KDF)!"
-		exit 1
-	fi
+	echo "$0 test failed (change to sha3 KDF (from bcrypt))!"
+	exit 1
+fi
+
+if printf "passwd -P sha512\n${PASSWORD}\n${PASSWORD}\n" |${KC_RUN} -b -k ${KC_DB} -P sha3 -p ${KC_PASSFILE};then
+	echo "$0 test ok (reset to sha512 from sha3 KDF)!"
+else
+	echo "$0 test failed (reset to sha512 from sha3 KDF)!"
+	exit 1
 fi
 
 

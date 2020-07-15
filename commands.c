@@ -710,16 +710,16 @@ kc_crypt_key(struct db_parameters *db_params)
 		printf("%s(): generating new key from pass (len:%zd) and salt.\n", __func__, db_params->pass_len);
 
 	/* Generate a proper key from the user's password */
-	if (strcmp(db_params->kdf, "sha1") == 0) {
-		if (!PKCS5_PBKDF2_HMAC_SHA1(db_params->pass, db_params->pass_len,
+	if (strcmp(db_params->kdf, "sha3") == 0) {
+		if (!PKCS5_PBKDF2_HMAC(db_params->pass, db_params->pass_len,
 			db_params->salt, SALT_DIGEST_LEN + 1,
-			5000,
+			5000, EVP_sha3_512(),
 			KEY_LEN, db_params->key))
 		{
 
 			dprintf(STDERR_FILENO, "ERROR: Failed to generate a key from the password!\n");
 			if (getenv("KC_DEBUG"))
-				printf("%s(): PKCS5_PBKDF2_HMAC_SHA1() error\n", __func__);
+				printf("%s(): PKCS5_PBKDF2_HMAC() error\n", __func__);
 
 			return(0);
 		}

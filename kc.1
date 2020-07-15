@@ -207,12 +207,12 @@ The last new line gets stripped.
 KDF to use with the password.
 Valid parameters are:
 .Bl -tag -offset ||| -width |
-.It Ar sha1
-OpenSSL's PKCS5 PBKDF2 with SHA-1.
+.It Ar sha3
+OpenSSL's PKCS5 PBKDF2 with SHA-3 512.
 .Nm
 uses 5000 rounds.
 .It Ar sha512
-OpenSSL's PKCS5 PBKDF2 with SHA-512.
+OpenSSL's PKCS5 PBKDF2 with SHA-2 512.
 This is the default.
 .Nm
 uses 5000 rounds.
