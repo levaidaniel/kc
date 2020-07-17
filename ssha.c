@@ -480,7 +480,8 @@ kc_ssha_get_password(struct db_parameters *db_params)
 	int		sock = -1;
 	unsigned int	data_to_sign_len = 0;
 	char		ret = 0;
-	char		*data_to_sign = NULL;
+	char		*data_to_sign = NULL, *passtmp = NULL;
+	size_t		passtmp_len = 0;
 	struct kc_ssha_response		*response = NULL;
 	struct kc_ssha_identity		*idlist = NULL, *idlist_prev = NULL;
 	struct kc_ssha_signature 	*signature = NULL;
@@ -562,6 +563,12 @@ kc_ssha_get_password(struct db_parameters *db_params)
 
 		memcpy(data_to_sign + data_to_sign_len, db_params->pass, db_params->pass_len);
 		data_to_sign_len += db_params->pass_len;
+
+		/* save the password temporarily, so that we can append it
+		 * later after the signature in the new constructed password */
+		passtmp = malloc(db_params->pass_len); malloc_check(passtmp);
+		passtmp_len = db_params->pass_len;
+		memcpy(passtmp, db_params->pass, db_params->pass_len);
 	}
 
 	/* ask for a signature */
@@ -595,9 +602,26 @@ kc_ssha_get_password(struct db_parameters *db_params)
 		goto exiting;
 	}
 
-	db_params->pass_len = signature->length;
+	memset(db_params->pass, '\0', db_params->pass_len);
+	free(db_params->pass); db_params->pass = NULL;
+	db_params->pass_len = 0;
+
+	db_params->pass_len = signature->length + passtmp_len;
 	db_params->pass = malloc(db_params->pass_len); malloc_check(db_params->pass);
-	memcpy(db_params->pass, signature->signature, db_params->pass_len);
+
+	memcpy(db_params->pass, signature->signature, signature->length);
+	/* if there's a password, then append it to the signature */
+	if (db_params->ssha_password  &&  passtmp) {
+		if (getenv("KC_DEBUG"))
+			printf("%s(): constructing new password by appending password to signature\n", __func__);
+
+		memcpy(db_params->pass + signature->length, passtmp, passtmp_len);
+
+		memset(passtmp, '\0', passtmp_len);
+		free(passtmp); passtmp = NULL;
+		passtmp_len = 0;
+	}
+
 	ret = 1;
 
 exiting:
