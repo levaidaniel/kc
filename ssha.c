@@ -591,7 +591,7 @@ kc_ssha_get_password(struct db_parameters *db_params)
 	}
 
 	if (signature->length > PASSWORD_MAXLEN) {
-		dprintf(STDERR_FILENO, "ERROR: Signature length(%zd) is larger than the allowed password length(%d)\n", signature->length * 2, PASSWORD_MAXLEN);
+		dprintf(STDERR_FILENO, "ERROR: Signature length(%zd) is larger than the allowed password length(%d)\n", signature->length, PASSWORD_MAXLEN);
 		goto exiting;
 	}
 
