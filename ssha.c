@@ -626,7 +626,7 @@ exiting:
 		free(idlist_prev); idlist_prev = NULL;
 	}
 
-	if (sock < 0)
+	if (sock > 0)
 		close(sock);
 
 
