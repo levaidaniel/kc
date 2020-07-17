@@ -389,15 +389,33 @@ cmd_export(const char *e_line, command *commands)
 			goto exiting;
 		}
 
-		/* get a password */
+		if (	db_params_new.ssha_password  ||
+			db_params_new.yk_password  ||
+			(!db_params_new.yk_slot  &&  !strlen(db_params_new.ssha_type))
+		) {
+			if (getenv("KC_DEBUG"))
+				printf("%s(): getting a password for the database\n", __func__);
+
+			/* ask for the new password */
+			if (kc_password_read(&db_params_new, 1) != 1)
+				goto exiting;
+		}
+
 		if (strlen(db_params_new.ssha_type)) {
 			/* use SSH agent to generate the password */
 			if (!kc_ssha_get_password(&db_params_new))
 				goto exiting;
-		} else {
-			/* ask for the new password */
-			if (kc_password_read(&db_params_new, 1) != 1)
+#ifdef _HAVE_YUBIKEY
+		} else if (db_params_new.yk_slot) {
+			/* use a YubiKey to generate the password */
+			if (db_params_new.yk_password  &&  db_params_new.pass_len > 64)
+				dprintf(STDERR_FILENO, "ERROR: Password cannot be longer than 64 bytes when using YubiKey challenge-response!\n");
+
+			if (!kc_ykchalresp(&db_params_new)) {
+				dprintf(STDERR_FILENO, "ERROR: Error while doing YubiKey challenge-response!\n");
 				goto exiting;
+			}
+#endif
 		}
 
 		/* Setup cipher mode and turn on encrypting */
