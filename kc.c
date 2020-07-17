@@ -498,25 +498,27 @@ main(int argc, char *argv[])
 		db_params.pass_len = pos;
 
 #ifdef _HAVE_YUBIKEY
-		if (db_params.yk_slot  &&  db_params.yk_password) {
-			if (db_params.pass_len > 64) {
-				dprintf(STDERR_FILENO, "ERROR: Password cannot be longer than 64 bytes when using YubiKey challenge-response!\n");
+		if (db_params.yk_slot) {
+			if (db_params.yk_slot  &&  !db_params.yk_password) {
+				dprintf(STDERR_FILENO, "ERROR: 'password' option is not specified for YubiKey parameter while trying to use a password file!\n");
+				quit(EXIT_FAILURE);
 			}
+
+			if (db_params.yk_password  &&  db_params.pass_len > 64)
+				dprintf(STDERR_FILENO, "ERROR: Password cannot be longer than 64 bytes when using YubiKey challenge-response!\n");
+
 			if (!kc_ykchalresp(&db_params)) {
 				dprintf(STDERR_FILENO, "ERROR: Error while doing YubiKey challenge-response!\n");
 				quit(EXIT_FAILURE);
 			}
-		} else if (db_params.yk_slot  &&  !db_params.yk_password) {
-			dprintf(STDERR_FILENO, "ERROR: 'password' option is not specified for YubiKey parameter while trying to use a password file!\n");
-			quit(EXIT_FAILURE);
 		}
 #endif
 
 		if (close(pass_file) < 0)
 			perror("ERROR: close(password file)");
 	} else {
-		if (	(strlen(db_params.ssha_type)  &&  db_params.ssha_password)  ||
-			(db_params.yk_slot  &&  db_params.yk_password)  ||
+		if (	db_params.ssha_password  ||
+			db_params.yk_password  ||
 			(!db_params.yk_slot  &&  !strlen(db_params.ssha_type))
 		) {
 			if (getenv("KC_DEBUG"))
@@ -525,13 +527,18 @@ main(int argc, char *argv[])
 			/* ask for the new password */
 			if (kc_password_read(&db_params, newdb) != 1)
 				quit(EXIT_FAILURE);
-		} else if (strlen(db_params.ssha_type)) {
+		}
+
+		if (strlen(db_params.ssha_type)) {
 			/* use SSH agent to generate the password */
 			if (!kc_ssha_get_password(&db_params))
 				quit(EXIT_FAILURE);
 #ifdef _HAVE_YUBIKEY
 		} else if (db_params.yk_slot) {
 			/* use a YubiKey to generate the password */
+			if (db_params.yk_password  &&  db_params.pass_len > 64)
+				dprintf(STDERR_FILENO, "ERROR: Password cannot be longer than 64 bytes when using YubiKey challenge-response!\n");
+
 			if (!kc_ykchalresp(&db_params)) {
 				dprintf(STDERR_FILENO, "ERROR: Error while doing YubiKey challenge-response!\n");
 				quit(EXIT_FAILURE);
