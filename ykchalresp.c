@@ -153,23 +153,24 @@ kc_ykchalresp(struct db_parameters *db_params)
 		if (getenv("KC_DEBUG"))
 			printf("%s(): constructing new password by appending password to yubikey response\n", __func__);
 
-		db_params->pass = malloc(RESPONSE_SIZE * 2 + challenge_len); malloc_check(db_params->pass);
+		db_params->pass_len = RESPONSE_SIZE * 2 + challenge_len;
+		db_params->pass = malloc(db_params->pass_len); malloc_check(db_params->pass);
+
 		/* copy the response first as the beginning of the constructed password */
 		memcpy(db_params->pass, output_buf, RESPONSE_SIZE * 2);
 		/* append the actual user password as well to the end of the constructed password
 		 * ^^^ that is now in the 'challenge' variable -- we copied it above */
 		memcpy(db_params->pass + RESPONSE_SIZE * 2, challenge, challenge_len);
-
-		db_params->pass_len = RESPONSE_SIZE * 2 + challenge_len;
 	} else {
 		if (getenv("KC_DEBUG"))
 			printf("%s(): constructing new password by appending salt digest to yubikey response\n", __func__);
 
-		db_params->pass = malloc(RESPONSE_SIZE * 2 + SALT_DIGEST_LEN); malloc_check(db_params->pass);
+		db_params->pass_len = RESPONSE_SIZE * 2 + SALT_DIGEST_LEN;
+		db_params->pass = malloc(db_params->pass_len); malloc_check(db_params->pass);
+
 		memcpy(db_params->pass, output_buf, RESPONSE_SIZE * 2);
 		memcpy(db_params->pass + RESPONSE_SIZE * 2, db_params->salt, SALT_DIGEST_LEN);
 
-		db_params->pass_len = RESPONSE_SIZE * 2 + SALT_DIGEST_LEN;
 	}
 
 err:
