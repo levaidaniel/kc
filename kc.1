@@ -17,7 +17,7 @@
 .\"ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 .\"(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 .\"SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-.Dd April 28, 2020
+.Dd July 18, 2020
 .Dt KC 1
 .Os
 .Sh NAME
@@ -44,7 +44,9 @@ The
 .Nm
 utility is a console based username and password management application using an encrypted XML document as its database.
 The database file is protected by a password that the user supplies during the creation of a new database.
-This password can be at most 256 characters long, and is converted to a key with a KDF (key derivation function).
+This password can be at most 256 characters long, and is converted to a key with a KDF
+.Po key derivation function
+.Pc
 If the supplied password (either by user input or in a password file) is longer than the allowed maximum,
 .Nm
 silently discards the rest of it.
@@ -145,7 +147,7 @@ asks
 .Xr ssh-agent 1
 (using the
 .Ev SSH_AUTH_SOCK
-environment variable) to sign the IV and the salt (that is being generated for an encryption key, and also used for conventional passwords) with a private key loaded into
+environment variable) to sign the IV and the salt of the database (and optionally a password) with a private key loaded into
 .Xr ssh-agent 1 .
 This private key is looked up based on the
 .Ar key type
@@ -153,26 +155,40 @@ and
 .Ar key comment
 separated by a comma (with no whitespaces around it).
 .Pp
-The key types supported and tested so far are RSA and ED25519, by using the type names
-.Ar ssh-rsa
-and
-.Ar ssh-ed25519
-, respectively.
+Key types supported and tested so far are RSA and ED25519, by using the type names
+.Bl -tag -offset ||| -width |
+.It Ar ssh-rsa
+.It Ar ssh-ed25519
+.El
+.Pp
+respectively.
 Due to the nature of *DSA keys,
 .Nm
-cannot use it in this specific way for this specific purpose.
+cannot use them in this specific way for this specific purpose.
 .Pp
-The key comments cannot contain comma (,) characters.
+Key comments cannot contain comma (,) characters.
 .Pp
 If the word
 .Ql password
 is appended to the key comment after a comma (with no whitespaces around it), then
 .Nm
-will also use the password as the input for the SSH agent signature request. Thus making it interactive (by requesting a password for decryption) instead of an automatic database opening.
+will also use the password (along with the IV and salt) as the input for the SSH agent signature request. Thus making it interactive (by requesting a password for decryption) instead of an automatic database opening.
+.Pp
+E.g.:
+.Bl -tag -offset ||| -width |
+.It Ar ssh-ed25519,daniel-private,password
+Search for an
+.Ql ed25519
+type key with a comment
+.Ql daniel-private
+and also ask for a password to use when opening the database.
+.El
 .Pp
 Also worth mentioning that this actually works with agent forwarding as well, so on a remote machine one doesn't even have to have the actual private key file -- just like in any other case when you'd use SSH agent forwarding.
 .It Fl y Ar Key-slotDevice-index Op ,password
-Use a YubiKey to utilize its challenge-response mechanism to generate a new password from an already provided one. This is an additional layer on top of the traditional password usage, and works by using the user provided password (keyboard input or file) and putting it through the YubiKey HMAC challenge-response algorithm using the security key.
+Use a YubiKey to utilize its challenge-response mechanism to construct the password for the database. This can be either an automatic or an interactive mode of operation (just like with SSH agent support). Without the
+.Ql password
+option the challenge will be the database salt value, thus facilitating an automatic database open.
 .Pp
 There is actually only one argument to this option, and that is a two digit number plus optionally the word
 .Ql password
@@ -194,7 +210,7 @@ will use the device index 0 by default, so it's sufficient to provide only one d
 .Pp
 If the word
 .Ql password
-is appended to the number with a comma (,), then the provided password is used as the challenge with the security key, otherwise the generated random salt is the challenge (stored in the database). When using this option, the password can be at most 64 bytes long. E.g.:
+is appended to the parameter with a comma (,), then the user-supplied password is used as the challenge with the security key -- otherwise the database's salt is the challenge (stored in the database). When using this option, the password can be at most 64 bytes long. E.g.:
 .Bl -tag -offset ||| -width |
 .It Ar 20,password
 Use the frist device, the second slot, and ask for a password to use as the challenge.
@@ -753,16 +769,12 @@ Databases are encrypted with the AES-256 cipher in CBC mode, if another cipher a
 and
 .Fl m
 options
-.Pc . Ciphers use a 128 byte key generated with a KDF (key derivation function) from the supplied password
-.Po see the
-.Em KDF
-section
-.Pc , and an IV (initialization vector) that is read from the host's specific random device
+.Pc . Ciphers use a 128 byte key generated with a KDF from the user-supplied password (and optionally a signature from an SSH agent or a HMAC response from a YubiKey), and an IV (initialization vector) that is read when first creating a database from the host's specific random device
 .Po Pa /dev/urandom
 on Linux and
 .Pa /dev/random
 on everything else
-.Pc as characters.
+.Pc .
 .Pp
 To change the encryption cipher and/or its mode, you can use the
 .Ic passwd
@@ -774,7 +786,9 @@ See also the
 .Em CAVEATS
 section.
 .Ss KDF
-The KDF converts the user supplied password with a generated salt to a strong key that can be used safely during encryption.
+The KDF
+.Po key derivation function
+.Pc converts the user supplied password with a generated salt to a strong key that can be used safely during encryption.
 Every SHA-* based PBKDF2 KDF uses 5000 rounds in
 .Nm .
 On changing the KDF in use, see the
@@ -782,8 +796,62 @@ On changing the KDF in use, see the
 option and the
 .Ic passwd
 command.
-Of course, changing the KDF with which the database was created/opened means that the new KDF must be used from then on.
-This is because changing the KDF changes the key the database was encrypted with.
+Of course, changing the KDF with which the database is created/opened means that the new KDF must be used from then on.
+This is because changing the KDF changes the key the database is encrypted with.
+.Ss PASSWORDS
+Although
+.Nm
+uses a key generated with a KDF to encrypt
+.Po and decrypt
+.Pc
+a database, one of the inputs of that is usually
+.Po but not necessarily
+.Pc
+a user-supplied password. There are currently a couple of options to consider when deciding how to create and/or use a database.
+.Bl -tag -width |
+.It A single password
+Most simple one
+.Po doesn't need any specific parameter to be specified
+.Pc , just type in a password when creating a database and use the same one when opening it. Old school.
+.It A signature based on an SSH key loaded into an SSH agent
+This method -- when used with the
+.Ar -A
+option -- takes the database IV and salt
+.Po both available when reading the database file
+.Pc
+and the SSH agent generates a
+.Ql new password
+from them. This will be the kind of gibberish that's essentially harder to guess than your average password, but takes data as input that's available directly from the database file. Thus, when someone has read access to the database file *and* the SSH agent that has the required key loaded (or the private key directly), they can open the database. This method is convenient because one doesn't have to input a password
+.Po the database open is non-interactive
+.Pc
+so it works neatly when combined with other tools -- I've used this e.g. with
+.Xr mutt 1
+to get my IMAP/SMTP password without having to type in anything when I started it.
+.Pp
+Additionally one can use a user-supplied password on top all of this
+.Po by supplying the 
+.Ar ,password
+parameter
+.Pc , that will be mixed in with the input when getting the signature from the SSH agent. Thus adding an interactive layer to the database opening, and making it harder for someone to open the database if they steal it along with the required SSH private key.
+.Pp
+What
+.Nm
+actually does is not only mixing in the password when getting the signature, but also directly appening it to the signature when using it as input with the KDF.
+.It A challenge-response from a security key
+.Nm
+supports the YubiKey's HMAC challenge-response mode
+.Po using the
+.Ar -y
+option
+.Pc
+and the response is used as the password input for the KDF. This too can have an added conveniency of not having to type in anything when opening the database, because
+.Nm
+can use only the database salt as the challenge, and so the response from the security key will be based on this. The salt is directly available from the database file, so if someone steals it *and* the required security key, they can open the database. There is however the 
+.Ar ,password
+parameter here as well, with which one can add an interactive layer on top all of this, and use the user-supplied password as the challenge. In this case, when opening the database
+.Nm
+will ask for a password and the correct security key.
+.El
 .Ss LIMITS
 .Nm
 has its limits when it comes to dealing with keychains and keys in keychains.
@@ -986,18 +1054,9 @@ This should be the user's responsibility.
 SSH agent support:
 .Bl -enum -offset ||| -width |
 .It
-Using an SSH agent (eg.: OpenSSH
-.Xr ssh-agent 1
-) to provide the password for the database is convenient but in my opinion less secure.
-.Nm
-uses a local UNIX socket to communicate with the agent, and that being a file on a local filesystem can be used to hijack your database password if you have another user with access to that UNIX socket and your database file (eg.: root).
-In other words, any user who has access to your
-.Xr ssh-agent 1
-UNIX socket and your database file will be able to open it.
-.It
 The password (signature) coming from
 .Xr ssh-agent 1
-also varies between different types of SSH keys -- different keys/key bit lengths produce different signature lengths.
+varies between different types of SSH keys -- different keys/key bit lengths produce different signature lengths.
 .It
 .Nm
 cannot handle spaces in the key comment when using the
@@ -1005,16 +1064,7 @@ cannot handle spaces in the key comment when using the
 or
 .Ic import
 commands.
-However, opening a database works with spaces in the key comment.
-.It
-Using user supplied passwords and SSH keys is mutually exclusive -- you cannot use both.
-Once
-.Nm
-has initialized a database with either one of them, use the
-.Ic passwd
-or
-.Ic export
-command to switch between them.
+Opening a database however, works with spaces in the key comment.
 .El
 .Pp
 YubiKey HMAC challenge-response:
@@ -1025,5 +1075,5 @@ Supports an at most 64 bytes long password.
 Only HMAC mode is supported by
 .Nm
 .It
-Maybe it goes without saying, but this method of password protection is not quite useful over network connections (e.g.: SSH on a remote machine), as the actual device is not plugged in there. There is, however, a USB-over-IP implementation for Linux that could overcome this -- if one choses to use this setup.
+Maybe it goes without saying, but this method of password protection is not quite useful over network connections (e.g.: SSH on a remote machine), as the actual device is not plugged in there. There is, however, a USB-over-IP implementation for Linux that could overcome this.
 .El
