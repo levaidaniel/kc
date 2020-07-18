@@ -75,19 +75,19 @@ static void yk_report_error(void);
 int
 kc_ykchalresp(struct db_parameters *db_params)
 {
-	YK_KEY *yk = 0;
-	int yk_cmd = 0;
+	YK_KEY		*yk = 0;
+	int		yk_cmd = 0;
 
-	bool may_block = true;
+	bool		may_block = true;
 
-	unsigned char response[SHA1_MAX_BLOCK_SIZE];
-	unsigned char output_buf[(SHA1_MAX_BLOCK_SIZE * 2) + 1];
+	unsigned char	response[SHA1_MAX_BLOCK_SIZE];
+	unsigned char	output_buf[(SHA1_MAX_BLOCK_SIZE * 2) + 1];
 
-	unsigned char *challenge = NULL;
-	unsigned int challenge_len = 0;
+	unsigned char	*challenge = NULL, *passtmp = NULL;
+	size_t		challenge_len = 0, passtmp_len = 0;
+
 
 	yk_errno = 0;
-
 
 	if (!yk_init()) {
 		goto err;
@@ -120,9 +120,24 @@ kc_ykchalresp(struct db_parameters *db_params)
 		if (getenv("KC_DEBUG"))
 			printf("%s(): using password with yubikey\n", __func__);
 
-		challenge = malloc(db_params->pass_len); malloc_check(challenge);
+		/* Here we not only copy the user-supplied password to the
+		 * challenge, but also append data from the salt -- as much
+		 * data as there is space left from YUBIKEY_PASSWORD_MAXLEN
+		 * after appending the user-supplied password.
+		 * Or if for some we could copy less from the salt, then
+		 * prioritize the SALT_LEN and only copy as much as we can from
+		 * the salt.
+		 */
+		challenge_len = db_params->pass_len + (YUBIKEY_PASSWORD_MAXLEN > SALT_LEN ? SALT_LEN : (YUBIKEY_PASSWORD_MAXLEN - db_params->pass_len));
+		challenge = malloc(challenge_len); malloc_check(challenge);
 		memcpy(challenge, db_params->pass, db_params->pass_len);
-		challenge_len = db_params->pass_len;
+		memcpy(challenge + db_params->pass_len, db_params->salt, (YUBIKEY_PASSWORD_MAXLEN > SALT_LEN ? SALT_LEN : (YUBIKEY_PASSWORD_MAXLEN - db_params->pass_len)));
+
+		/* save the password temporarily, so that we can append it
+		 * later after the response in the new constructed password */
+		passtmp = malloc(db_params->pass_len); malloc_check(passtmp);
+		passtmp_len = db_params->pass_len;
+		memcpy(passtmp, db_params->pass, db_params->pass_len);
 	} else {
 		if (getenv("KC_DEBUG"))
 			printf("%s(): automatic yubikey, without password\n", __func__);
@@ -149,21 +164,27 @@ kc_ykchalresp(struct db_parameters *db_params)
 	free(db_params->pass); db_params->pass = NULL;
 	db_params->pass_len = 0;
 
-	if (db_params->yk_password) {
+	/* copy the response as the constructed password */
+	db_params->pass_len = RESPONSE_SIZE * 2 + passtmp_len;
+	db_params->pass = malloc(db_params->pass_len); malloc_check(db_params->pass);
+
+	/* copy the response */
+	memcpy(db_params->pass, output_buf, RESPONSE_SIZE * 2);
+
+	/* if there's a password, then append it to the response */
+	if (db_params->yk_password  &&  passtmp) {
 		if (getenv("KC_DEBUG"))
 			printf("%s(): constructing new password by appending password to yubikey response\n", __func__);
 
-		db_params->pass_len = RESPONSE_SIZE * 2 + challenge_len;
-		db_params->pass = malloc(db_params->pass_len); malloc_check(db_params->pass);
-
-		/* copy the response first as the beginning of the constructed password */
-		memcpy(db_params->pass, output_buf, RESPONSE_SIZE * 2);
-		/* append the actual user password as well to the end of the constructed password
-		 * ^^^ that is now in the 'challenge' variable -- we copied it above */
-		memcpy(db_params->pass + RESPONSE_SIZE * 2, challenge, challenge_len);
+		/* append the actual user password as well to the end of the constructed password */
+		memcpy(db_params->pass + RESPONSE_SIZE * 2, passtmp, passtmp_len);
 	}
 
 err:
+	memset(passtmp, '\0', passtmp_len);
+	free(passtmp); passtmp = NULL;
+	passtmp_len = 0;
+
 	yk_report_error();
 	if (yk && !yk_close_key(yk)) {
 		yk_report_error();
