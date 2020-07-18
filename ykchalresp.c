@@ -165,7 +165,7 @@ kc_ykchalresp(struct db_parameters *db_params)
 	db_params->pass_len = 0;
 
 	/* copy the response as the constructed password */
-	db_params->pass_len = RESPONSE_SIZE * 2 + passtmp_len;
+	db_params->pass_len = RESPONSE_SIZE * 2 + passtmp_len > PASSWORD_MAXLEN ? PASSWORD_MAXLEN : RESPONSE_SIZE * 2 + passtmp_len;
 	db_params->pass = malloc(db_params->pass_len); malloc_check(db_params->pass);
 
 	/* copy the response */
@@ -177,7 +177,7 @@ kc_ykchalresp(struct db_parameters *db_params)
 			printf("%s(): constructing new password by appending password to yubikey response\n", __func__);
 
 		/* append the actual user password as well to the end of the constructed password */
-		memcpy(db_params->pass + RESPONSE_SIZE * 2, passtmp, passtmp_len);
+		memcpy(db_params->pass + RESPONSE_SIZE * 2, passtmp, db_params->pass_len >= RESPONSE_SIZE * 2 + passtmp_len ? passtmp_len : db_params->pass_len - RESPONSE_SIZE * 2 );
 	}
 
 err:

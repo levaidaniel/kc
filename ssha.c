@@ -606,7 +606,7 @@ kc_ssha_get_password(struct db_parameters *db_params)
 	free(db_params->pass); db_params->pass = NULL;
 	db_params->pass_len = 0;
 
-	db_params->pass_len = signature->length + passtmp_len;
+	db_params->pass_len = signature->length + passtmp_len > PASSWORD_MAXLEN ? PASSWORD_MAXLEN : signature->length + passtmp_len;
 	db_params->pass = malloc(db_params->pass_len); malloc_check(db_params->pass);
 
 	/* copy the signature as the constructed password */
@@ -617,7 +617,7 @@ kc_ssha_get_password(struct db_parameters *db_params)
 		if (getenv("KC_DEBUG"))
 			printf("%s(): constructing new password by appending password to signature\n", __func__);
 
-		memcpy(db_params->pass + signature->length, passtmp, passtmp_len);
+		memcpy(db_params->pass + signature->length, passtmp, db_params->pass_len >= signature->length + passtmp_len ? passtmp_len : db_params->pass_len - signature->length);
 	}
 
 	ret = 1;
