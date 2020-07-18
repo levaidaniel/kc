@@ -383,7 +383,7 @@ cmd_import(const char *e_line, command *commands)
 				printf("%s(): getting a password for the database\n", __func__);
 
 			/* ask for the new password */
-			if (kc_password_read(&db_params_new, 1) != 1)
+			if (kc_password_read(&db_params_new, 0) != 1)
 				goto exiting;
 		}
 
