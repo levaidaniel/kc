@@ -65,12 +65,6 @@ You quit from the display with 'q' or EOT (usually CTRL+d).
 .Pp
 The CLI supports tab-completion for commands and keychains.
 .Pp
-There is a utility in the source package (it is also available from the project website) that converts an exported pwsafe database to a
-.Nm
-compatible XML database, which can be imported using the
-.Ic importxml
-command.
-.Pp
 When saving the database
 .Po Ic write
 command
@@ -1076,4 +1070,16 @@ Only HMAC mode is supported by
 .Nm
 .It
 Maybe it goes without saying, but this method of password protection is not quite useful over network connections (e.g.: SSH on a remote machine), as the actual device is not plugged in there. There is, however, a USB-over-IP implementation for Linux that could overcome this.
+.El
+.Pp
+Miscellaneous:
+.Bl -enum -offset ||| -width |
+.It
+There is a Perl script in the source package (available from the project website) that converts an exported pwsafe database to a
+.Nm
+compatible XML database, which can be imported using the
+.Ic importxml
+command.
+.Em NOTA BENE:
+This script is really old and not maintained.
 .El
