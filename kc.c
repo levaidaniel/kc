@@ -528,6 +528,15 @@ main(int argc, char *argv[])
 
 		db_params.pass_len = pos;
 
+		if (strlen(db_params.ssha_type)) {
+			if (strlen(db_params.ssha_type)  &&  !db_params.ssha_password) {
+				dprintf(STDERR_FILENO, "ERROR: 'password' option is not specified for SSH agent parameter while trying to use a password file!\n");
+				quit(EXIT_FAILURE);
+			}
+
+			if (!kc_ssha_get_password(&db_params))
+				quit(EXIT_FAILURE);
+		}
 #ifdef _HAVE_YUBIKEY
 		if (db_params.yk_slot) {
 			if (db_params.yk_slot  &&  !db_params.yk_password) {
@@ -564,8 +573,9 @@ main(int argc, char *argv[])
 			/* use SSH agent to generate the password */
 			if (!kc_ssha_get_password(&db_params))
 				quit(EXIT_FAILURE);
+		}
 #ifdef _HAVE_YUBIKEY
-		} else if (db_params.yk_slot) {
+		if (db_params.yk_slot) {
 			/* use a YubiKey to generate the password */
 			if (db_params.yk_password  &&  db_params.pass_len > YUBIKEY_PASSWORD_MAXLEN)
 				dprintf(STDERR_FILENO, "ERROR: Password cannot be longer than %d bytes when using YubiKey challenge-response!\n", YUBIKEY_PASSWORD_MAXLEN);
@@ -574,8 +584,8 @@ main(int argc, char *argv[])
 				dprintf(STDERR_FILENO, "ERROR: Error while doing YubiKey challenge-response!\n");
 				quit(EXIT_FAILURE);
 			}
-#endif
 		}
+#endif
 	}
 
 	/* Setup cipher mode and turn on decrypting */
