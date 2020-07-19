@@ -602,12 +602,10 @@ kc_ssha_get_password(struct db_parameters *db_params)
 		goto exiting;
 	}
 
+	/* realloc ..->pass */
 	memset(db_params->pass, '\0', db_params->pass_len);
-	free(db_params->pass); db_params->pass = NULL;
-	db_params->pass_len = 0;
-
 	db_params->pass_len = signature->length + passtmp_len > PASSWORD_MAXLEN ? PASSWORD_MAXLEN : signature->length + passtmp_len;
-	db_params->pass = malloc(db_params->pass_len); malloc_check(db_params->pass);
+	db_params->pass = realloc(db_params->pass, db_params->pass_len); malloc_check(db_params->pass);
 
 	/* copy the signature as the constructed password */
 	memcpy(db_params->pass, signature->signature, signature->length);

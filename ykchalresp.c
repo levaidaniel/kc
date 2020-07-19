@@ -160,15 +160,12 @@ kc_ykchalresp(struct db_parameters *db_params)
 	yubikey_hex_encode((char *)output_buf, (char *)response, 20);
 	memset(response, 0, RESPONSE_SIZE);
 
+	/* realloc ..->pass */
 	memset(db_params->pass, '\0', db_params->pass_len);
-	free(db_params->pass); db_params->pass = NULL;
-	db_params->pass_len = 0;
+	db_params->pass_len = RESPONSE_SIZE * 2 + passtmp_len > PASSWORD_MAXLEN ? PASSWORD_MAXLEN : RESPONSE_SIZE * 2 + passtmp_len;
+	db_params->pass = realloc(db_params->pass, db_params->pass_len); malloc_check(db_params->pass);
 
 	/* copy the response as the constructed password */
-	db_params->pass_len = RESPONSE_SIZE * 2 + passtmp_len > PASSWORD_MAXLEN ? PASSWORD_MAXLEN : RESPONSE_SIZE * 2 + passtmp_len;
-	db_params->pass = malloc(db_params->pass_len); malloc_check(db_params->pass);
-
-	/* copy the response */
 	memcpy(db_params->pass, output_buf, RESPONSE_SIZE * 2);
 
 	/* if there's a password, then append it to the response */
