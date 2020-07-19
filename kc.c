@@ -136,27 +136,9 @@ main(int argc, char *argv[])
 	db_params.pass_filename = NULL;
 	db_params.dirty = 0;
 	db_params.readonly = 0;
-
-	len = strlen(DEFAULT_KDF) + 1;
-	db_params.kdf = malloc(len); malloc_check(db_params.kdf);
-	if (strlcpy(db_params.kdf, DEFAULT_KDF, len) >= len) {
-		dprintf(STDERR_FILENO, "ERROR: Error while setting up default database parameters.\n");
-		quit(EXIT_FAILURE);
-	}
-
-	len = strlen(DEFAULT_CIPHER) + 1;
-	db_params.cipher = malloc(len); malloc_check(db_params.cipher);
-	if (strlcpy(db_params.cipher, DEFAULT_CIPHER, len) >= len) {
-		dprintf(STDERR_FILENO, "ERROR: Error while setting up default database parameters.\n");
-		quit(EXIT_FAILURE);
-	}
-
-	len = strlen(DEFAULT_MODE) + 1;
-	db_params.cipher_mode = malloc(len); malloc_check(db_params.cipher_mode);
-	if (strlcpy(db_params.cipher_mode, DEFAULT_MODE, len) >= len) {
-		dprintf(STDERR_FILENO, "ERROR: Error while setting up default database parameters.\n");
-		quit(EXIT_FAILURE);
-	}
+	db_params.kdf = NULL;
+	db_params.cipher = NULL;
+	db_params.cipher_mode = NULL;
 
 
 #ifdef _HAVE_YUBIKEY
@@ -167,9 +149,11 @@ main(int argc, char *argv[])
 	while ((c = getopt(argc, argv, opts)) != -1)
 		switch (c) {
 			case 'A':
-				/* in case this parameter is being parsed multiple times */
-				free(ssha_type); ssha_type = NULL;
-				free(ssha_comment); ssha_comment = NULL;
+				if (strlen(db_params.ssha_type)  ||  strlen(db_params.ssha_comment)) {
+					dprintf(STDERR_FILENO, "ERROR: please specify the '-%c' option only once!\n", c);
+					quit(EXIT_FAILURE);
+				}
+
 
 				ssha_type = strndup(strsep(&optarg, ","), 11);
 				if (ssha_type == NULL  ||  !strlen(ssha_type)) {
@@ -193,19 +177,15 @@ main(int argc, char *argv[])
 					dprintf(STDERR_FILENO, "ERROR: Error while getting SSH key type.\n");
 					quit(EXIT_FAILURE);
 				}
-				free(ssha_type); ssha_type = NULL;
 
 				if (strlcpy(db_params.ssha_comment, ssha_comment, sizeof(db_params.ssha_comment)) >= sizeof(db_params.ssha_comment)) {
 					dprintf(STDERR_FILENO, "ERROR: Error while getting SSH key comment.\n");
 					quit(EXIT_FAILURE);
 				}
-				free(ssha_comment); ssha_comment = NULL;
 
 				if (optarg  &&  strncmp(optarg, "password", 8) == 0) {
 					db_params.ssha_password = 1;
 				}
-
-				printf("Using (%s) %s identity%s\n", db_params.ssha_type, db_params.ssha_comment, (db_params.ssha_password ? " and a password" : ""));
 			break;
 			case 'k':
 				db_params.db_filename = optarg;
@@ -226,19 +206,34 @@ main(int argc, char *argv[])
 				printf("Using password file: %s\n", db_params.pass_filename);
 			break;
 			case 'P':
-				free(db_params.kdf); db_params.kdf = NULL;
+				if (db_params.kdf) {
+					dprintf(STDERR_FILENO, "ERROR: please specify the '-%c' option only once!\n", c);
+					quit(EXIT_FAILURE);
+				}
 				db_params.kdf = strdup(optarg); malloc_check(db_params.kdf);
 			break;
 			case 'e':
-				free(db_params.cipher); db_params.cipher = NULL;
+				if (db_params.cipher) {
+					dprintf(STDERR_FILENO, "ERROR: please specify the '-%c' option only once!\n", c);
+					quit(EXIT_FAILURE);
+				}
 				db_params.cipher = strdup(optarg); malloc_check(db_params.cipher);
 			break;
 			case 'm':
-				free(db_params.cipher_mode); db_params.cipher_mode = NULL;
+				if (db_params.cipher_mode) {
+					dprintf(STDERR_FILENO, "ERROR: please specify the '-%c' option only once!\n", c);
+					quit(EXIT_FAILURE);
+				}
 				db_params.cipher_mode = strdup(optarg); malloc_check(db_params.cipher_mode);
 			break;
 #ifdef _HAVE_YUBIKEY
 			case 'y':
+				if (db_params.yk_slot) {
+					dprintf(STDERR_FILENO, "ERROR: please specify the '-%c' option only once!\n", c);
+					quit(EXIT_FAILURE);
+				}
+
+
 				if (optarg[0] == '-') {
 					dprintf(STDERR_FILENO, "ERROR: YubiKey slot/device parameter seems to be negative.\n");
 					quit(EXIT_FAILURE);
@@ -269,8 +264,6 @@ main(int argc, char *argv[])
 				if (optarg  &&  strncmp(strsep(&optarg, ","), "password", 8) == 0) {
 					db_params.yk_password = 1;
 				}
-
-				printf("Using YubiKey slot #%d on device #%d%s\n", db_params.yk_slot, db_params.yk_dev, (db_params.yk_password ? " and a password" : ""));
 			break;
 #endif
 			case 'b':
@@ -303,6 +296,44 @@ main(int argc, char *argv[])
 			break;
 		}
 
+	/* clean up after option parsing */
+	free(ssha_type); ssha_type = NULL;
+	free(ssha_comment); ssha_comment = NULL;
+
+	/* print some status information after parsing the options */
+	if (strlen(db_params.ssha_type))
+		printf("Using (%s) %s identity%s\n", db_params.ssha_type, db_params.ssha_comment, (db_params.ssha_password ? " and a password" : ""));
+	if (db_params.yk_slot)
+		printf("Using YubiKey slot #%d on device #%d%s\n", db_params.yk_slot, db_params.yk_dev, (db_params.yk_password ? " and a password" : ""));
+
+
+	/* db_param defaults if none were specified */
+	if (!db_params.kdf) {
+		len = strlen(DEFAULT_KDF) + 1;
+		db_params.kdf = malloc(len); malloc_check(db_params.kdf);
+		if (strlcpy(db_params.kdf, DEFAULT_KDF, len) >= len) {
+			dprintf(STDERR_FILENO, "ERROR: Error while setting up default database parameters.\n");
+			quit(EXIT_FAILURE);
+		}
+	}
+
+	if (!db_params.cipher) {
+		len = strlen(DEFAULT_CIPHER) + 1;
+		db_params.cipher = malloc(len); malloc_check(db_params.cipher);
+		if (strlcpy(db_params.cipher, DEFAULT_CIPHER, len) >= len) {
+			dprintf(STDERR_FILENO, "ERROR: Error while setting up default database parameters.\n");
+			quit(EXIT_FAILURE);
+		}
+	}
+
+	if (!db_params.cipher_mode) {
+		len = strlen(DEFAULT_MODE) + 1;
+		db_params.cipher_mode = malloc(len); malloc_check(db_params.cipher_mode);
+		if (strlcpy(db_params.cipher_mode, DEFAULT_MODE, len) >= len) {
+			dprintf(STDERR_FILENO, "ERROR: Error while setting up default database parameters.\n");
+			quit(EXIT_FAILURE);
+		}
+	}
 
 	if (!db_params.db_filename) {
 		/* using default database */
