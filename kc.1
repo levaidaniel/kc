@@ -1,4 +1,4 @@
-.\"Copyright (c) 2011-2018 LEVAI Daniel
+.\"Copyright (c) 2011-2020 LEVAI Daniel
 .\"All rights reserved.
 .\"Redistribution and use in source and binary forms, with or without
 .\"modification, are permitted provided that the following conditions are met:
@@ -886,6 +886,16 @@ This means that
 will not create a keychain if it would not fit in the limit, and it will not append keys to an existing keychain if they would not fit in the limit.
 However, for example, if a database that is being appended contains a keychain whose keys could not fit in the existing keychain, and also contains a keychain whose keys could fit in the existing keychain, then the one that could fit will be appended, and the one that could not will not be appended.
 This means that appending is atomic on the keychain level (or keys level, if you like), and not atomic on the database level.
+.Ss SUPPORTED DEVICES
+.Bl -tag -width |
+.It SSH agent
+OpenSSH agent supported is based on RFC
+.Ql draft-miller-ssh-agent-01 ,
+available at:
+.Lk https://tools.ietf.org/id/draft-miller-ssh-agent-01.html
+.It Security key
+YubiKey 5 NFC has been used during testing.
+.El
 .Sh EXAMPLES
 .Bl -tag -width |
 .It Sy Creating a new database:
