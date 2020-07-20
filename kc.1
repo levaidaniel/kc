@@ -17,7 +17,7 @@
 .\"ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 .\"(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 .\"SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-.Dd July 18, 2020
+.Dd July 20, 2020
 .Dt KC 1
 .Os
 .Sh NAME
@@ -97,7 +97,9 @@ Currently there is no character set conversion taking place in the program.
 In this case this means you must be ready to display anything you type in.
 If somehow you still end up with texts you can not display properly, and for whatever reason you can not edit them in
 .Nm ,
-you can "repair" such database by dumping its content to a
+you can
+.Qq repair
+such database by dumping its content to a
 .Nm
 XML file
 .Po see the
@@ -300,13 +302,27 @@ is specified; then it will be used as the key's name.
 .Pp
 Character sequences can be used in values:
 .Pp
-"\en" - create a new line, and make the result a multiline value.
+.Qq \en
+- create a new line, and make the result a multiline value.
 .Pp
-"\er", "\eR" - these will be replaced with 2 and 4 (respectively) random printable characters.
+.Qq \er ,
+.Qq \eR
+- these will be replaced with 2 and 4
+.Po respectively
+.Pc
+random printable characters.
 .Pp
-"\ea", "\eA" - these will be replaced with 2 and 4 (respectively) random alpha-numeric characters.
+.Qq \ea ,
+.Qq \eA
+- these will be replaced with 2 and 4
+.Po respectively
+.Pc
+random alpha-numeric characters.
 .Pp
-Character sequences are to be used in values, regardless of their order or count, and can be escaped using double backslashes (eg.: "\e\ea").
+Character sequences are to be used in values, regardless of their order or count, and can be escaped using double backslashes
+.Po eg.:
+.Qq \e\ea
+.Pc .
 .It Ic list Op pager Op offset
 List
 .Ar pager
@@ -782,7 +798,7 @@ section.
 .Ss KDF
 The KDF
 .Po key derivation function
-.Pc converts the user supplied password with a generated salt to a strong key that can be used safely during encryption.
+.Pc converts the constructed password (either directly from the user input or after being treated with one of the relevant functions like an SSH agent or a security key) with a generated salt to a strong key that can be used safely during encryption.
 Every SHA-* based PBKDF2 KDF uses 5000 rounds in
 .Nm .
 On changing the KDF in use, see the
@@ -845,7 +861,20 @@ can use only the database salt as the challenge, and so the response from the se
 parameter here as well, with which one can add an interactive layer on top all of this, and use the user-supplied password as the challenge. In this case, when opening the database
 .Nm
 will ask for a password and the correct security key.
+.It Combining authentication features
+Now, knowing that database passwords can be generated with the help of an SSH agent and a YubiKey security key with a user-supplied password, another thing one can do besides using either one of the above functions, is to combine all of these. If -- and only if -- SSH agent signing and security key challenge-response are used with a password
+.Po see
+.Ar ,password
+parameter for both of these
+.Pc
+then
+.Nm
+will treat the user-supplied password first with the SSH agent and then subsequently with the security key, thus requiring the user's password, the SSH private key and the security key to open the database later on. This may sound convoluted, and I'm not even sure if it's worth the
+.Qq trouble ,
+nevertheless, it is a possibility and I think it shows how the separate features are built up.
 .El
+.Pp
+At the end of the day, all these functions do is provide a password to be used with the KDF to generate a key from it. Choose one that you deem secure enough, convenient and works for you.
 .Ss LIMITS
 .Nm
 has its limits when it comes to dealing with keychains and keys in keychains.
