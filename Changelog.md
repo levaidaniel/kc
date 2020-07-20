@@ -17,6 +17,8 @@
 * `info` command shows how many lines there are in the value, and how many keys there are in the keychain.
 * `c` command supports keychain names with spaces in them.
 * Removed support for the SHA-1 KDF.
-* Added support for the SHA-3 KDF (min. OpenSSL version is 1.1.1).
+
+  If you've been using the SHA-1 based KDF, before you upgrade, you need to change that to anything else with the 'passwd' or the 'export' command. Note that you would've had to explicitly specify this to use, as the default has always been SHA-2 512.
+* Added support for the SHA-3 KDF (min. OpenSSL version is now 1.1.1).
 * Added support for POSIX regex functions (it can be used instead of PCRE).
 * Documentation and manual page fixes.
