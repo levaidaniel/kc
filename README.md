@@ -1,5 +1,5 @@
-keychain
-========
+kc
+==
 
 A console based password storing application using an encrypted XML document as its database.
 It has a clean and simple command line interface and works on \*BSD and Linux.
