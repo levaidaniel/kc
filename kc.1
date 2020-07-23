@@ -17,7 +17,7 @@
 .\"ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 .\"(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 .\"SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-.Dd July 20, 2020
+.Dd July 23, 2020
 .Dt KC 1
 .Os
 .Sh NAME
@@ -40,16 +40,11 @@
 .Op Fl v
 .Op Fl h
 .Sh DESCRIPTION
-The
 .Nm
-utility is a console based username and password management application using an encrypted XML document as its database.
-The database file is protected by a password that the user supplies during the creation of a new database.
-This password can be at most 256 characters long, and is converted to a key with a KDF
-.Po key derivation function
-.Pc
-If the supplied password (either by user input or in a password file) is longer than the allowed maximum,
-.Nm
-silently discards the rest of it.
+is a console based username and password management application using an encrypted XML document as its database.
+The database file is encrypted with a key that is generated from a user-supplied password and/or a security key and/or an SSH agent. Database encryption (and thus decryption) can be made interactive or non-interactive in that it could require user input (i.e. a password) or a response for a challenge from a security key, or a signature from an SSH agent. See the
+.Em PASSWORDS
+section on how to even combine all (or some) of these.
 .Pp
 A database file can contain multiple keychains, and keychains in turn can contain multiple keys (usernames if you like) and values (passwords if you like).
 .Pp
@@ -60,8 +55,14 @@ the
 command shows the available commands, and usage information for them.
 If you're in a hurry, for starters, you create a new entry with the
 .Ic new
+command and save it with
+.Ic write .
+You can see the stored keys with the
+.Ic list
 command, then entering only a number in the command line will display the entry with the given index.
-You quit from the display with 'q' or EOT (usually CTRL+d).
+You quit from the value display with
+.Ql q
+or EOT (usually CTRL+d).
 .Pp
 The CLI supports tab-completion for commands and keychains.
 .Pp
@@ -74,42 +75,6 @@ will create a temporary file (under the same directory as the opened database fi
 When this succeeds, only then will
 .Nm
 replace the old database with the new one, so you will always have a usable and intact (but potentially older) version of your database file.
-.Pp
-.Em NOTE :
-It is considered a good practice, to periodically manually backup the database file(s) you use with
-.Nm .
-This could just mean a simple:
-.Bd -literal -offset |||
-$ cp ~/.kc/default ~/.kc/default-bkp
-.Ed
-.Pp
-.Nm
-doesn't try excessively hard to recover from hard and/or non-recoverable errors (OS, memory, disk etc...), and in some cases this could mean that it will simply exit with an appropriate error message.
-No need to worry, but keep this in mind like you would with a common word processor or text editor and save
-.Pq Ic write
-periodically, for example when you edit many keys at once.
-See also the
-.Em CAVEATS
-section regarding this.
-.Pp
-.Em NOTE :
-Currently there is no character set conversion taking place in the program.
-In this case this means you must be ready to display anything you type in.
-If somehow you still end up with texts you can not display properly, and for whatever reason you can not edit them in
-.Nm ,
-you can
-.Qq repair
-such database by dumping its content to a
-.Nm
-XML file
-.Po see the
-.Ic dump
-command below
-.Pc , converting the plain text XML file to a working character set, then importing back that XML file
-.Po see the
-.Ic importxml
-command below
-.Pc .
 .Ss PARAMETERS
 .Bl -tag -offset ||| -width |
 .It Fl k Ar file
@@ -846,7 +811,9 @@ parameter
 .Pp
 What
 .Nm
-actually does is not only mixing in the password when getting the signature, but also directly appening it to the signature when using it as input with the KDF.
+actually does is not only mixing in the password when getting the signature, but also directly appending it to the signature when using it as input with the KDF. In this case, when opening the database
+.Nm
+will ask for a password and the SSH agent for a signature based on the correct private key.
 .It A challenge-response from a security key
 .Nm
 supports the YubiKey's HMAC challenge-response mode
@@ -856,9 +823,11 @@ option
 .Pc
 and the response is used as the password input for the KDF. This too can have an added conveniency of not having to type in anything when opening the database, because
 .Nm
-can use only the database salt as the challenge, and so the response from the security key will be based on this. The salt is directly available from the database file, so if someone steals it *and* the required security key, they can open the database. There is however the 
+can use only the database salt as the challenge, and so the response from the security key will be based on this. The salt is directly available from the database file, so if someone steals it *and* the required security key, they can open the database.
+.Pp
+There is however the 
 .Ar ,password
-parameter here as well, with which one can add an interactive layer on top all of this, and use the user-supplied password as the challenge. In this case, when opening the database
+parameter here as well, with which one can add an interactive layer on top all of this, and use the user-supplied password (combined with the salt if it's not long enough) as the challenge. In this case, when opening the database
 .Nm
 will ask for a password and the correct security key.
 .It Combining authentication features
@@ -874,7 +843,7 @@ will treat the user-supplied password first with the SSH agent and then subseque
 nevertheless, it is a possibility and I think it shows how the separate features are built up.
 .El
 .Pp
-At the end of the day, all these functions do is provide a password to be used with the KDF to generate a key from it. Choose one that you deem secure enough, convenient and works for you.
+At the end of the day, all these functions do is provide a password to be used with the KDF to generate a key from it. Choose one that you deem secure enough, is convenient and works for you.
 .Ss LIMITS
 .Nm
 has its limits when it comes to dealing with keychains and keys in keychains.
@@ -1058,19 +1027,6 @@ was written by
 Source, information, bugs:
 https://github.com/levaidaniel/kc
 .Sh CAVEATS
-If you use
-.Ar cfb128
-or
-.Ar ofb
-as the cipher mode, there is no specific sign if you enter a wrong password during the opening of a database; in this case the database would seem to be corrupt after decrypting, and
-.Nm
-will not be able to open it.
-.Pp
-There is no character conversion taking place for the input fields.
-.Pp
-.Nm
-will exit without saving the database (with a corresponding error message) when an out-of-memory condition arises.
-.Pp
 Fair warnings before using the clipboard features:
 .Bl -enum -offset ||| -width |
 .It
@@ -1113,6 +1069,41 @@ Maybe it goes without saying, but this method of password protection is not quit
 .Pp
 Miscellaneous:
 .Bl -enum -offset ||| -width |
+.It
+It is considered a good practice, to periodically manually backup the database file(s) you use with
+.Nm .
+This could just mean a simple:
+.Bd -literal -offset |||
+$ cp ~/.kc/default ~/.kc/default-bkp
+.Ed
+.It
+.Nm
+doesn't try excessively hard to recover from hard and/or non-recoverable errors (OS, memory, disk etc...), and in some cases this could mean that it will simply exit (without saving the database) with an appropriate error message.
+No need to worry, but keep this in mind like you would with a common word processor or text editor and save periodically, for example when you edit many keys at once.
+.It
+There is no character set conversion taking place in the program. In this case this means you must be ready to display anything you type in. If somehow you still end up with texts you can not display properly, and for whatever reason you can not edit them in
+.Nm ,
+you can
+.Qq repair
+such database by dumping its content to a
+.Nm
+XML file
+.Po see the
+.Ic dump
+command
+.Pc , converting the plain text XML file to a working character set, then importing back that XML file
+.Po see the
+.Ic importxml
+command
+.Pc .
+.It
+If you use
+.Ar cfb128
+or
+.Ar ofb
+as the cipher mode, there is no specific sign if you enter a wrong password during the opening of a database; in this case the database will seem to be corrupt after decrypting, and
+.Nm
+simply will not be able to open it.
 .It
 There is a Perl script in the source package (available from the project website) that converts an exported pwsafe database to a
 .Nm
