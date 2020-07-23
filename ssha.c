@@ -615,7 +615,7 @@ kc_ssha_get_password(struct db_parameters *db_params)
 		if (getenv("KC_DEBUG"))
 			printf("%s(): constructing new password by appending password to signature\n", __func__);
 
-		memcpy(db_params->pass + signature->length, passtmp, db_params->pass_len >= signature->length + passtmp_len ? passtmp_len : db_params->pass_len - signature->length);
+		memcpy(db_params->pass + signature->length, passtmp, signature->length + passtmp_len > db_params->pass_len ? db_params->pass_len - signature->length : passtmp_len);
 	}
 
 	ret = 1;
