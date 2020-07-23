@@ -1072,7 +1072,7 @@ kc_validate_xml(xmlDocPtr db, char legacy)
 int
 kc_db_reader(char **buf, BIO *bio_chain)
 {
-	int		pos = 0, buf_size = 1024;
+	int		pos = 0, buf_size = 0, read_size = 4096;
 	ssize_t		ret = -1;
 
 
@@ -1087,8 +1087,6 @@ kc_db_reader(char **buf, BIO *bio_chain)
 
 
 	/* Read the database */
-	*buf = calloc(1, buf_size); malloc_check(*buf);
-
 	if (getenv("KC_DEBUG"))
 		printf("%s(): reading database\n", __func__);
 
@@ -1096,8 +1094,10 @@ kc_db_reader(char **buf, BIO *bio_chain)
 	do {
 		/* if we've reached the size of 'buf', grow it */
 		if (buf_size <= pos) {
-			buf_size += 1024;
+			buf_size += read_size;
 			*buf = realloc(*buf, buf_size); malloc_check(*buf);
+			if (getenv("KC_DEBUG"))
+				printf("%s(): buf_size: %d\n", __func__, buf_size);
 		}
 
 		ret = BIO_read(bio_chain, *buf + pos, buf_size - pos);
