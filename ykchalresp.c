@@ -64,7 +64,6 @@
 #include "ykchalresp.h"
 
 
-#define	RESPONSE_SIZE	20	/* HMAC responses are 160 bits (i.e. 20 bytes) */
 #define	SHA1_MAX_BLOCK_SIZE	64	/* Max size of input SHA1 block */
 
 
@@ -81,7 +80,6 @@ kc_ykchalresp(struct db_parameters *db_params)
 	bool		may_block = true;
 
 	unsigned char	response[SHA1_MAX_BLOCK_SIZE];
-	unsigned char	output_buf[(SHA1_MAX_BLOCK_SIZE * 2) + 1];
 
 	unsigned char	*challenge = NULL, *passtmp = NULL;
 	size_t		challenge_len = 0, passtmp_len = 0;
@@ -118,8 +116,6 @@ kc_ykchalresp(struct db_parameters *db_params)
 			goto err;
 	}
 
-	memset(response, 0, sizeof(response));
-	memset(output_buf, 0, sizeof(output_buf));
 
 	/* set up challenge */
 	if (db_params->yk_password) {
@@ -128,16 +124,18 @@ kc_ykchalresp(struct db_parameters *db_params)
 
 		/* Here we not only copy the user-supplied password to the
 		 * challenge, but also append data from the salt -- as much
-		 * data as there is space left from YUBIKEY_PASSWORD_MAXLEN
+		 * data as there is space left from YUBIKEY_CHALLENGE_MAXLEN
 		 * after appending the user-supplied password.
 		 * Or if for some we could copy less from the salt, then
 		 * prioritize the SALT_LEN and only copy as much as we can from
 		 * the salt.
 		 */
-		challenge_len = db_params->pass_len + (YUBIKEY_PASSWORD_MAXLEN > SALT_LEN ? SALT_LEN : (YUBIKEY_PASSWORD_MAXLEN - db_params->pass_len));
+		challenge_len = db_params->pass_len + SALT_LEN > YUBIKEY_CHALLENGE_MAXLEN ? YUBIKEY_CHALLENGE_MAXLEN : db_params->pass_len + SALT_LEN;
 		challenge = malloc(challenge_len); malloc_check(challenge);
 		memcpy(challenge, db_params->pass, db_params->pass_len);
-		memcpy(challenge + db_params->pass_len, db_params->salt, (YUBIKEY_PASSWORD_MAXLEN > SALT_LEN ? SALT_LEN : (YUBIKEY_PASSWORD_MAXLEN - db_params->pass_len)));
+		memcpy(challenge + db_params->pass_len, db_params->salt, db_params->pass_len + SALT_LEN > challenge_len ? challenge_len - db_params->pass_len : SALT_LEN);
+		if (getenv("KC_DEBUG"))
+			printf("%s(): the challenge is filled with %zu bytes from salt after %zu bytes of password\n", __func__, challenge_len - db_params->pass_len, db_params->pass_len);
 
 		/* save the password temporarily, so that we can append it
 		 * later after the response in the new constructed password */
@@ -153,9 +151,13 @@ kc_ykchalresp(struct db_parameters *db_params)
 		challenge_len = SALT_LEN;
 		challenge = malloc(challenge_len); malloc_check(challenge);
 		yubikey_hex_decode((char *)challenge, (char *)db_params->salt, challenge_len);
+		if (getenv("KC_DEBUG"))
+			printf("%s(): the challenge is filled with %zu bytes from salt\n", __func__, challenge_len);
 	}
 
+
 	printf("Remember to touch your YubiKey if necessary\n");
+	memset(response, 0, sizeof(response));
 	if (!yk_challenge_response(yk, yk_cmd, may_block,
 		challenge_len, challenge,
 		sizeof(response), response))
@@ -163,16 +165,14 @@ kc_ykchalresp(struct db_parameters *db_params)
 		goto err;
 	}
 
-	yubikey_hex_encode((char *)output_buf, (char *)response, 20);
-	memset(response, 0, RESPONSE_SIZE);
-
 	/* realloc ..->pass */
 	memset(db_params->pass, '\0', db_params->pass_len);
-	db_params->pass_len = RESPONSE_SIZE * 2 + passtmp_len > PASSWORD_MAXLEN ? PASSWORD_MAXLEN : RESPONSE_SIZE * 2 + passtmp_len;
+	db_params->pass_len = sizeof(response) + passtmp_len > PASSWORD_MAXLEN ? PASSWORD_MAXLEN : sizeof(response) + passtmp_len;
 	db_params->pass = realloc(db_params->pass, db_params->pass_len); malloc_check(db_params->pass);
 
 	/* copy the response as the constructed password */
-	memcpy(db_params->pass, output_buf, RESPONSE_SIZE * 2);
+	memcpy(db_params->pass, response, sizeof(response) > db_params->pass_len ? db_params->pass_len : sizeof(response));
+	memset(response, 0, sizeof(response));
 
 	/* if there's a password, then append it to the response */
 	if (db_params->yk_password  &&  passtmp) {
@@ -180,7 +180,7 @@ kc_ykchalresp(struct db_parameters *db_params)
 			printf("%s(): constructing new password by appending password to yubikey response\n", __func__);
 
 		/* append the actual user password as well to the end of the constructed password */
-		memcpy(db_params->pass + RESPONSE_SIZE * 2, passtmp, db_params->pass_len >= RESPONSE_SIZE * 2 + passtmp_len ? passtmp_len : db_params->pass_len - RESPONSE_SIZE * 2 );
+		memcpy(db_params->pass + sizeof(response), passtmp, sizeof(response) + passtmp_len > db_params->pass_len ? db_params->pass_len - sizeof(response) : passtmp_len);
 	}
 
 err:
