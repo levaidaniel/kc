@@ -544,9 +544,6 @@ main(int argc, char *argv[])
 				quit(EXIT_FAILURE);
 			}
 
-			if (db_params.yk_password  &&  db_params.pass_len > YUBIKEY_PASSWORD_MAXLEN)
-				dprintf(STDERR_FILENO, "ERROR: Password cannot be longer than %d bytes when using YubiKey challenge-response!\n", YUBIKEY_PASSWORD_MAXLEN);
-
 			if (!kc_ykchalresp(&db_params)) {
 				dprintf(STDERR_FILENO, "ERROR: Error while doing YubiKey challenge-response!\n");
 				quit(EXIT_FAILURE);
@@ -577,9 +574,6 @@ main(int argc, char *argv[])
 #ifdef _HAVE_YUBIKEY
 		if (db_params.yk_slot) {
 			/* use a YubiKey to generate the password */
-			if (db_params.yk_password  &&  db_params.pass_len > YUBIKEY_PASSWORD_MAXLEN)
-				dprintf(STDERR_FILENO, "ERROR: Password cannot be longer than %d bytes when using YubiKey challenge-response!\n", YUBIKEY_PASSWORD_MAXLEN);
-
 			if (!kc_ykchalresp(&db_params)) {
 				dprintf(STDERR_FILENO, "ERROR: Error while doing YubiKey challenge-response!\n");
 				quit(EXIT_FAILURE);

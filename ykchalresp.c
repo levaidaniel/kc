@@ -101,6 +101,12 @@ kc_ykchalresp(struct db_parameters *db_params)
 		goto err;
 	}
 
+	if (db_params->yk_password  &&  db_params->pass_len > YUBIKEY_CHALLENGE_MAXLEN) {
+		dprintf(STDERR_FILENO, "ERROR: Password cannot be longer than %d bytes when using YubiKey challenge-response!\n", YUBIKEY_CHALLENGE_MAXLEN);
+		yk_errno = YK_EWRONGSIZ;
+		goto err;
+	}
+
 	switch(db_params->yk_slot) {
 		case 1:
 			yk_cmd = SLOT_CHAL_HMAC1;

@@ -31,7 +31,7 @@
 #include <ykpers-1/ykdef.h>
 #include <ykpers-1/ykstatus.h>
 
-#define YUBIKEY_PASSWORD_MAXLEN	64
+#define YUBIKEY_CHALLENGE_MAXLEN	64
 
 int kc_ykchalresp(struct db_parameters *);
 
