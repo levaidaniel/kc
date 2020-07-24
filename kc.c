@@ -134,23 +134,24 @@ main(int argc, char *argv[])
 	db_params.db_filename = NULL;
 	db_params.db_file = -1;
 	db_params.pass_filename = NULL;
-	db_params.dirty = 0;
-	db_params.readonly = 0;
 	db_params.kdf = NULL;
+	db_params.kdf_reps = 0;
 	db_params.cipher = NULL;
 	db_params.cipher_mode = NULL;
+	db_params.dirty = 0;
+	db_params.readonly = 0;
 
 
 #ifdef _HAVE_YUBIKEY
-	opts = "A:k:c:C:rp:P:e:m:y:bBvh";
+	opts = "A:k:c:C:rp:P:R:e:m:y:bBvh";
 #else
-	opts = "A:k:c:C:rp:P:e:m:bBvh";
+	opts = "A:k:c:C:rp:P:R:e:m:bBvh";
 #endif
 	while ((c = getopt(argc, argv, opts)) != -1)
 		switch (c) {
 			case 'A':
 				if (strlen(db_params.ssha_type)  ||  strlen(db_params.ssha_comment)) {
-					dprintf(STDERR_FILENO, "ERROR: please specify the '-%c' option only once!\n", c);
+					dprintf(STDERR_FILENO, "ERROR: Please specify the '-%c' option only once!\n", c);
 					quit(EXIT_FAILURE);
 				}
 
@@ -207,21 +208,39 @@ main(int argc, char *argv[])
 			break;
 			case 'P':
 				if (db_params.kdf) {
-					dprintf(STDERR_FILENO, "ERROR: please specify the '-%c' option only once!\n", c);
+					dprintf(STDERR_FILENO, "ERROR: Please specify the '-%c' option only once!\n", c);
 					quit(EXIT_FAILURE);
 				}
 				db_params.kdf = strdup(optarg); malloc_check(db_params.kdf);
 			break;
+			case 'R':
+				if (db_params.kdf_reps) {
+					dprintf(STDERR_FILENO, "ERROR: Please specify the '-%c' option only once!\n", c);
+					quit(EXIT_FAILURE);
+				}
+
+
+				if (optarg[0] == '-') {
+					dprintf(STDERR_FILENO, "ERROR: KDF iterations parameter seems to be negative.\n");
+					quit(EXIT_FAILURE);
+				}
+
+				db_params.kdf_reps = strtoul(optarg, &inv, 10);
+				if (inv[0] != '\0') {
+					dprintf(STDERR_FILENO, "ERROR: Unable to convert the KDF iterations parameter.\n");
+					quit(EXIT_FAILURE);
+				}
+			break;
 			case 'e':
 				if (db_params.cipher) {
-					dprintf(STDERR_FILENO, "ERROR: please specify the '-%c' option only once!\n", c);
+					dprintf(STDERR_FILENO, "ERROR: Please specify the '-%c' option only once!\n", c);
 					quit(EXIT_FAILURE);
 				}
 				db_params.cipher = strdup(optarg); malloc_check(db_params.cipher);
 			break;
 			case 'm':
 				if (db_params.cipher_mode) {
-					dprintf(STDERR_FILENO, "ERROR: please specify the '-%c' option only once!\n", c);
+					dprintf(STDERR_FILENO, "ERROR: Please specify the '-%c' option only once!\n", c);
 					quit(EXIT_FAILURE);
 				}
 				db_params.cipher_mode = strdup(optarg); malloc_check(db_params.cipher_mode);
@@ -229,7 +248,7 @@ main(int argc, char *argv[])
 #ifdef _HAVE_YUBIKEY
 			case 'y':
 				if (db_params.yk_slot) {
-					dprintf(STDERR_FILENO, "ERROR: please specify the '-%c' option only once!\n", c);
+					dprintf(STDERR_FILENO, "ERROR: Please specify the '-%c' option only once!\n", c);
 					quit(EXIT_FAILURE);
 				}
 
@@ -279,7 +298,7 @@ main(int argc, char *argv[])
 			case 'h':
 				/* FALLTHROUGH */
 			default:
-				printf( "%s [-k <file>] [-r] [-c/-C <keychain>] [-A <key type,key comment>] [-y <YubiKey slot><YubiKey device index>] [-p <file>] [-P <kdf>] [-e <cipher>] [-m <mode>] [-B/-b] [-v] [-h]\n\n", argv[0]);
+				printf( "%s [-k <file>] [-r] [-c/-C <keychain>] [-A <key type,key comment>] [-y <YubiKey slot><YubiKey device index>] [-p <file>] [-P <kdf>] [-R <kdf iterations>] [-e <cipher>] [-m <mode>] [-B/-b] [-v] [-h]\n\n", argv[0]);
 				printf(	"-k <file>: Use file as database. The default is ~/.kc/default.kcd .\n"
 					"-r: Open the database in read-only mode.\n"
 					"-c/-C <keychain>: Start in <keychain>.\n"
@@ -287,6 +306,7 @@ main(int argc, char *argv[])
 					"-y <YubiKey slot><YubiKey device index>: Use a YubiKey to provide password.\n"
 					"-p <file>: Read password from file.\n"
 					"-P <kdf>: KDF to use.\n"
+					"-R <iterations>: Number of KDF iterations to use.\n"
 					"-e <cipher>: Encryption cipher.\n"
 					"-m <mode>: Cipher mode.\n"
 					"-B/-b: Batch mode.\n"
@@ -301,6 +321,13 @@ main(int argc, char *argv[])
 	free(ssha_comment); ssha_comment = NULL;
 
 	/* print some status information after parsing the options */
+	if (	(strlen(db_params.ssha_type)  &&  db_params.yk_slot)  &&
+		(!db_params.ssha_password  ||  !db_params.yk_password)
+	) {
+		dprintf(STDERR_FILENO, "ERROR: Using -A and -y together only makes sense with the ',password' parameter for both of them!\n");
+		quit(EXIT_FAILURE);
+	}
+
 	if (strlen(db_params.ssha_type))
 		printf("Using (%s) %s identity%s\n", db_params.ssha_type, db_params.ssha_comment, (db_params.ssha_password ? " and a password" : ""));
 	if (db_params.yk_slot)
@@ -312,8 +339,24 @@ main(int argc, char *argv[])
 		len = strlen(DEFAULT_KDF) + 1;
 		db_params.kdf = malloc(len); malloc_check(db_params.kdf);
 		if (strlcpy(db_params.kdf, DEFAULT_KDF, len) >= len) {
-			dprintf(STDERR_FILENO, "ERROR: Error while setting up default database parameters.\n");
+			dprintf(STDERR_FILENO, "ERROR: Error while setting up default database parameters (kdf).\n");
 			quit(EXIT_FAILURE);
+		}
+	}
+
+	if (db_params.kdf_reps) {
+		if (strncmp(db_params.kdf, "sha", 3) == 0  &&  db_params.kdf_reps < 1000) {
+			dprintf(STDERR_FILENO, "ERROR: When using %s KDF, iterations (-R option) should be at least 1000 (the default is %d)\n", db_params.kdf, KC_PKCS_PBKDF2_ITERATIONS);
+			quit(EXIT_FAILURE);
+		} else if (strcmp(db_params.kdf, "bcrypt") == 0  &&  db_params.kdf_reps < 16) {
+			dprintf(STDERR_FILENO, "ERROR: When using %s KDF, iterations (-R option) should be at least 16 (the default is %d)\n", db_params.kdf, KC_BCRYPT_PBKDF_ROUNDS);
+			quit(EXIT_FAILURE);
+		}
+	} else {
+		if (strncmp(db_params.kdf, "sha", 3) == 0) {
+			db_params.kdf_reps = KC_PKCS_PBKDF2_ITERATIONS;
+		} else if (strcmp(db_params.kdf, "bcrypt") == 0) {
+			db_params.kdf_reps = KC_BCRYPT_PBKDF_ROUNDS;
 		}
 	}
 
@@ -321,7 +364,7 @@ main(int argc, char *argv[])
 		len = strlen(DEFAULT_CIPHER) + 1;
 		db_params.cipher = malloc(len); malloc_check(db_params.cipher);
 		if (strlcpy(db_params.cipher, DEFAULT_CIPHER, len) >= len) {
-			dprintf(STDERR_FILENO, "ERROR: Error while setting up default database parameters.\n");
+			dprintf(STDERR_FILENO, "ERROR: Error while setting up default database parameters (cipher).\n");
 			quit(EXIT_FAILURE);
 		}
 	}
@@ -330,7 +373,7 @@ main(int argc, char *argv[])
 		len = strlen(DEFAULT_MODE) + 1;
 		db_params.cipher_mode = malloc(len); malloc_check(db_params.cipher_mode);
 		if (strlcpy(db_params.cipher_mode, DEFAULT_MODE, len) >= len) {
-			dprintf(STDERR_FILENO, "ERROR: Error while setting up default database parameters.\n");
+			dprintf(STDERR_FILENO, "ERROR: Error while setting up default database parameters (cipher mode).\n");
 			quit(EXIT_FAILURE);
 		}
 	}
@@ -528,15 +571,6 @@ main(int argc, char *argv[])
 
 		db_params.pass_len = pos;
 
-		if (strlen(db_params.ssha_type)) {
-			if (strlen(db_params.ssha_type)  &&  !db_params.ssha_password) {
-				dprintf(STDERR_FILENO, "ERROR: 'password' option is not specified for SSH agent parameter while trying to use a password file!\n");
-				quit(EXIT_FAILURE);
-			}
-
-			if (!kc_ssha_get_password(&db_params))
-				quit(EXIT_FAILURE);
-		}
 #ifdef _HAVE_YUBIKEY
 		if (db_params.yk_slot) {
 			if (db_params.yk_slot  &&  !db_params.yk_password) {
@@ -550,6 +584,15 @@ main(int argc, char *argv[])
 			}
 		}
 #endif
+		if (strlen(db_params.ssha_type)) {
+			if (strlen(db_params.ssha_type)  &&  !db_params.ssha_password) {
+				dprintf(STDERR_FILENO, "ERROR: 'password' option is not specified for SSH agent parameter while trying to use a password file!\n");
+				quit(EXIT_FAILURE);
+			}
+
+			if (!kc_ssha_get_password(&db_params))
+				quit(EXIT_FAILURE);
+		}
 
 		if (close(pass_file) < 0)
 			perror("ERROR: close(password file)");
@@ -566,11 +609,6 @@ main(int argc, char *argv[])
 				quit(EXIT_FAILURE);
 		}
 
-		if (strlen(db_params.ssha_type)) {
-			/* use SSH agent to generate the password */
-			if (!kc_ssha_get_password(&db_params))
-				quit(EXIT_FAILURE);
-		}
 #ifdef _HAVE_YUBIKEY
 		if (db_params.yk_slot) {
 			/* use a YubiKey to generate the password */
@@ -580,6 +618,11 @@ main(int argc, char *argv[])
 			}
 		}
 #endif
+		if (strlen(db_params.ssha_type)) {
+			/* use SSH agent to generate the password */
+			if (!kc_ssha_get_password(&db_params))
+				quit(EXIT_FAILURE);
+		}
 	}
 
 	/* Setup cipher mode and turn on decrypting */

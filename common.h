@@ -56,6 +56,9 @@
 #define	DEFAULT_CIPHER	"aes256"
 #define	DEFAULT_MODE	"cbc"
 
+#define KC_BCRYPT_PBKDF_ROUNDS		36
+#define KC_PKCS_PBKDF2_ITERATIONS	100000
+
 
 typedef struct db_parameters {
 	char		*db_filename;
@@ -70,6 +73,7 @@ typedef struct db_parameters {
 	char 		*pass;
 	size_t 		pass_len;
 	char		*kdf;
+	unsigned long int	kdf_reps;
 	char		*cipher;
 	char		*cipher_mode;
 	unsigned char	iv[IV_DIGEST_LEN + 1];

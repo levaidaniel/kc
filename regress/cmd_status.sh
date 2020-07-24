@@ -11,7 +11,7 @@ xml_size=$(echo "status" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v
 ssh_agent=$(echo "status" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." -e "^Using password file: ${KC_PASSFILE}" |grep -E -e '^SSH agent:')
 yubikey=$(echo "status" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." -e "^Using password file: ${KC_PASSFILE}" |grep -E -e '^YubiKey:')
 encryption=$(echo "status" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." -e "^Using password file: ${KC_PASSFILE}" |grep -E -e '^Encryption:')
-kdf=$(echo "status" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." -e "^Using password file: ${KC_PASSFILE}" |grep -E -e '^Password handling:')
+kdf=$(echo "status" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." -e "^Using password file: ${KC_PASSFILE}" |grep -E -e '^Password function:')
 read_only=$(echo "status" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." -e "^Using password file: ${KC_PASSFILE}" |grep -E -e '^Read-only: ')
 modified=$(echo "status" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." -e "^Using password file: ${KC_PASSFILE}" |grep -E -e '^Modified: ')
 
@@ -50,7 +50,7 @@ else
 	exit 1
 fi
 
-if [ "$kdf" = 'Password handling: sha512' ];then
+if [ "$kdf" = 'Password function: sha512 (100000 iterations)' ];then
 	echo "$0 test ok (kdf)!"
 else
 	echo "$0 test failed (kdf)!"

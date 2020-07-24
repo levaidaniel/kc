@@ -75,10 +75,17 @@ if [ $SKIP -eq 0 ];then
 	fi
 	ssh-add -d regress/test_id_rsa:2048_ssh
 
-	if printf "passwd -P bcrypt\n${PASSWORD}\n${PASSWORD}\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE};then
+	if printf "passwd -R 1000\n${PASSWORD}\n${PASSWORD}\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE};then
 		echo "$0 test ok (password, sha512 KDF, aes256 cipher, cbc cipher mode)!"
 	else
 		echo "$0 test failed (password, sha512 KDF, aes256 cipher, cbc cipher mode)!"
+		exit 1
+	fi
+
+	if printf "passwd -P bcrypt\n${PASSWORD}\n${PASSWORD}\n" |${KC_RUN} -R 1000 -b -k ${KC_DB} -p ${KC_PASSFILE};then
+		echo "$0 test ok (password, sha512 KDF (1000 rounds), aes256 cipher, cbc cipher mode)!"
+	else
+		echo "$0 test failed (password, sha512 KDF (1000 rounds), aes256 cipher, cbc cipher mode)!"
 		exit 1
 	fi
 fi

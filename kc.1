@@ -17,7 +17,7 @@
 .\"ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 .\"(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 .\"SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-.Dd July 23, 2020
+.Dd July 24, 2020
 .Dt KC 1
 .Os
 .Sh NAME
@@ -33,8 +33,9 @@
 .Op Fl y Ar Key-slotDevice-index Op ,password
 .Op Fl p Ar password file
 .Op Fl P Ar kdf
+.Op Fl R Ar kdf iterations
 .Op Fl e Ar cipher
-.Op Fl m Ar mode
+.Op Fl m Ar cipher mode
 .Op Fl b
 .Op Fl B
 .Op Fl v
@@ -149,7 +150,7 @@ Also worth mentioning that this actually works with agent forwarding as well, so
 .It Fl y Ar Key-slotDevice-index Op ,password
 Use a YubiKey to utilize its challenge-response mechanism to construct the password for the database. This can be either an automatic or an interactive mode of operation (just like with SSH agent support). Without the
 .Ql password
-option the challenge will be the database salt value, thus facilitating an automatic database open.
+parameter the challenge will be the database salt value, thus facilitating an automatic database open.
 .Pp
 There is actually only one argument to this option, and that is a two digit number plus optionally the word
 .Ql password
@@ -186,17 +187,11 @@ Valid parameters are:
 .Bl -tag -offset ||| -width |
 .It Ar sha3
 OpenSSL's PKCS5 PBKDF2 with SHA-3 512.
-.Nm
-uses 5000 rounds.
 .It Ar sha512
 OpenSSL's PKCS5 PBKDF2 with SHA-2 512.
 This is the default.
-.Nm
-uses 5000 rounds.
 .It Ar bcrypt
-Bcrypt PBKDF based on Blowfish.
-.Nm
-uses 16 rounds, and this is slightly slower than the SHA-* variants.
+Bcrypt PBKDF based on Blowfish. This is slower than the SHA-* or scrypt variants.
 On Linux, a bundled bcrypt implementation from
 .Ox
 is used, and its version is the one that was available at the time of this
@@ -206,8 +201,16 @@ release.
 If compiled with libscrypt,
 .Nm
 can use the scrypt KDF.
-This can be slow on older machines, but therein lies the algorithm's strength.
+The speed of this is somewhere between SHA-* and bcrypt. The
+.Fl R
+option is ignored when using this.
 .El
+.Pp
+More information is in the
+.Em KDF
+section.
+.It Fl R Ar iterations
+Number of iterations or rounds to use with the KDF.
 .Pp
 More information is in the
 .Em KDF
@@ -220,19 +223,19 @@ Valid parameters are:
 This is the default
 .It Ar blowfish
 .El
-.It Fl m Ar mode
+.It Fl m Ar cipher mode
 Cipher mode for database encryption.
 Different encryption ciphers can have different modes.
 The valid parameters are:
 .Bl -tag -offset || -width |
-.It aes256
+.It When using Ar aes256
 .Bl -tag -offset ||| -width |
 .It Ar cbc
 This is the default
 .It Ar cfb128
 .It Ar ofb
 .El
-.It blowfish
+.It When using Ar blowfish
 .Bl -tag -offset ||| -width |
 .It Ar cbc
 .It Ar ecb
@@ -486,7 +489,7 @@ is the key's index number in the current keychain.
 .It Ic rm Ar index
 Alias of
 .Ic del .
-.It Ic passwd Op Fl A Ar key-type,key-comment Op ,password Op Fl y Ar Key-slotDevice-index Op ,password Op Fl P Ar kdf Op Fl e Ar cipher Op Fl m Ar cipher mode
+.It Ic passwd Op Fl A Ar key-type,key-comment Op ,password Op Fl y Ar Key-slotDevice-index Op ,password Op Fl P Ar kdf Op Fl R Ar kdf iterations Op Fl e Ar cipher Op Fl m Ar cipher mode
 Change the database password or SSH public key identity being used to encrypt.
 Optionally, the KDF, cipher and cipher mode can also be changed.
 All changes will be written immediately.
@@ -495,13 +498,13 @@ More information about the
 .Ar kdf ,
 .Ar cipher ,
 .Ar cipher mode
-optional arguments are in their respective command line parameter description and the KDF and CIPHERS section of this manual.
+optional arguments are in their respective command line parameter description and the KDF and CIPHERS sections of this manual.
 .It Ic help Op command
 Print application help or describe a
 .Ar command .
 .It Ic status
 Display information about the database.
-.It Ic export Fl k Ar filename Op Fl A Ar key-type,key-comment Op ,password Op Fl y Ar Key-slotDevice-index Op ,password Op Fl P Ar kdf Op Fl e Ar cipher Op Fl m Ar cipher_mode Op Fl c Ar keychain
+.It Ic export Fl k Ar filename Op Fl A Ar key-type,key-comment Op ,password Op Fl y Ar Key-slotDevice-index Op ,password Op Fl P Ar kdf Op Fl R Ar kdf iterations Op Fl e Ar cipher Op Fl m Ar cipher mode Op Fl c Ar keychain
 Export the database to a
 .Nm
 compatible encrypted database file named
@@ -512,7 +515,7 @@ Optional arguments
 .Ar kdf ,
 .Ar cipher
 and
-.Ar cipher_mode
+.Ar cipher mode
 can be used to specify a different KDF, encryption cipher and cipher mode to be used while exporting the database.
 This doesn't change the current database's parameters, but when importing this exported database, the parameters in use must be the same
 .Po or specified explicitly when using the
@@ -548,7 +551,7 @@ Index number takes priority when addressing a keychain.
 the created XML file will be plain text.
 .Pp
 .Pq see command Ic export
-.It Ic import Fl k Ar filename Op Fl A Ar key-type,key-comment Op ,password Op Fl y Ar Key-slotDevice-index Op ,password Op Fl P Ar kdf Op Fl e Ar cipher Op Fl m Ar cipher_mode Op Fl o
+.It Ic import Fl k Ar filename Op Fl A Ar key-type,key-comment Op ,password Op Fl y Ar Key-slotDevice-index Op ,password Op Fl P Ar kdf Op Fl R Ar kdf iterations Op Fl e Ar cipher Op Fl m Ar cipher mode Op Fl o
 Import and overwrite the current database with the one from a
 .Nm
 compatible encrypted database file named
@@ -562,7 +565,7 @@ The
 .Ar kdf
 .Ar cipher
 and
-.Ar cipher_mode
+.Ar cipher mode
 optional arguments can be used to specify these parameters if they differ from the current database's.
 .Pp
 With the
@@ -589,7 +592,7 @@ XML document.
 .Ic export ,
 .Ic append
 .Pc
-.It Ic append Fl k Ar filename Op Fl P Ar kdf Op Fl m Ar cipher_mode
+.It Ic append Fl k Ar filename Op Fl P Ar kdf Op Fl m Ar cipher mode
 Append new and merge existing keychains to the database from a
 .Nm
 compatible encrypted database file named
@@ -602,7 +605,7 @@ database.
 The
 .Ar kdf
 and
-.Ar cipher_mode
+.Ar cipher mode
 optional arguments can be used to specify these parameters if they differ from the current database's.
 See the
 .Em LIMITS
@@ -738,13 +741,13 @@ You don't even have to pay attention to the original length of the password, bec
 This of course only makes sense if the form is a password input field, so you (and everybody else) just see stars or dots in place of the password.
 .El
 .Ss CIPHERS
-Databases are encrypted with the AES-256 cipher in CBC mode, if another cipher and mode was not specified explicitly.
+Databases are encrypted with the AES-256 cipher in CBC mode, if another cipher and mode was not specified explicitly
 .Po see the
 .Fl e
 and
 .Fl m
 options
-.Pc . Ciphers use a 128 byte key generated with a KDF from the user-supplied password (and optionally a signature from an SSH agent or a HMAC response from a YubiKey), and an IV (initialization vector) that is read when first creating a database from the host's specific random device
+.Pc . Ciphers use a key generated with a KDF from the user-supplied password (and optionally a signature from an SSH agent or a HMAC response from a YubiKey), and an IV (initialization vector) that is read when first creating a database from the host's specific random device
 .Po Pa /dev/urandom
 on Linux and
 .Pa /dev/random
@@ -764,15 +767,18 @@ section.
 The KDF
 .Po key derivation function
 .Pc converts the constructed password (either directly from the user input or after being treated with one of the relevant functions like an SSH agent or a security key) with a generated salt to a strong key that can be used safely during encryption.
-Every SHA-* based PBKDF2 KDF uses 5000 rounds in
-.Nm .
-On changing the KDF in use, see the
-.Fl P
-option and the
+.Pp
+Every SHA-* based PBKDF2 function uses 100000 iterations and the bcrypt KDF uses 36 rounds by default. If you're using
+.Nm
+on an old enough (quite old) hardware, you might reckon that these numbers are too high, or in other words, opening a database takes too much time. See option
+.Fl R
+if you really think you should change this. And remember, after saving/exporting a database with a certain number of KDF rounds or iterations, you must use the same number when trying to open it.
+.Pp
+On changing the KDF being used, see the
 .Ic passwd
-command.
-Of course, changing the KDF with which the database is created/opened means that the new KDF must be used from then on.
-This is because changing the KDF changes the key the database is encrypted with.
+command and the
+.Fl P
+option.
 .Ss PASSWORDS
 Although
 .Nm
@@ -877,8 +883,20 @@ Using '/home/user/.kc/my_passwords.kcd' database.
 New password (empty to cancel):
 New password again (empty to cancel):
 <default% >
+
+<default% > status
+Database file: /home/user/.kc/my_passwords.kcd (/home/user/.kc/my_passwords.kcd)
+XML structure size: 148 bytes
+Password: yes
+SSH agent: no
+YubiKey: no
+Password function: bcrypt (36 rounds)
+Encryption: aes256, cbc
+Read-only: no
+Modified: yes
+<default% >
 .Ed
-.It Em Using SSH agent :
+.It Em Using an SSH agent without a password:
 .Bd -literal
 $ ssh-add -l
 256 SHA256:3fxFML/VoUOvFr5WDPsiJH8E8dwM0/27IZtoVW7Cz/g my_private_key (ED25519)
@@ -887,6 +905,41 @@ $ kc -A ssh-ed25519,my_private_key -k ~/.kc/my_secrets.kcd
 Using '(ssh-ed25519) my_private_key' identity for decryption
 Creating '/home/user/.kc/my_secrets.kcd'
 Using '/home/user/.kc/my_secrets.kcd' database.
+<default% >
+
+<default% > status
+Database file: /home/user/.kc/my_secrets.kcd (/home/user/.kc/my_secrets.kcd)
+XML structure size: 148 bytes
+Password: no
+SSH agent: (ssh-ed25519) my_private_key
+YubiKey: no
+Password function: sha512 (100000 iterations)
+Encryption: aes256, cbc
+Read-only: no
+Modified: yes
+<default% >
+.Ed
+.It Em Using a YubiKey security key and a password:
+.Bd -literal
+$ kc -y 2,password -k .kc/passwords_and_secrets.kcd
+Using YubiKey slot #2 on device #0 and a password
+Creating '/home/user/.kc/passwords_and_secrets.kcd'
+Using '/home/user/.kc/passwords_and_secrets.kcd' database.
+New password (empty to cancel):
+New password again (empty to cancel):
+Remember to touch your YubiKey if necessary
+<default% > 
+
+<default% > status
+Database file: .kc/passwords_and_secrets.kcd (/home/user/.kc/passwords_and_secrets.kcd)
+XML structure size: 148 bytes
+Password: yes
+SSH agent: no
+YubiKey: Slot #2, Device #0
+Password function: sha512 (100000 iterations)
+Encryption: aes256, cbc
+Read-only: no
+Modified: yes
 <default% >
 .Ed
 .El

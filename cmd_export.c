@@ -60,6 +60,7 @@ cmd_export(const char *e_line, command *commands)
 	db_parameters	db_params_new;
 
 	int		c = 0, largc = 0;
+	size_t		len = 0;
 	char		*opts = NULL;
 	char		**largv = NULL;
 	char		*line = NULL;
@@ -90,23 +91,9 @@ cmd_export(const char *e_line, command *commands)
 	db_params_new.db_filename = NULL;
 	db_params_new.pass_filename = NULL;
 	db_params_new.kdf = NULL;
+	db_params_new.kdf_reps = 0;
 	db_params_new.cipher = NULL;
 	db_params_new.cipher_mode = NULL;
-	db_params_new.kdf = strdup(db_params.kdf);
-	if (!db_params_new.kdf) {
-		perror("ERROR: Could not duplicate the KDF");
-		goto exiting;
-	}
-	db_params_new.cipher = strdup(db_params.cipher);
-	if (!db_params_new.cipher) {
-		perror("ERROR: Could not duplicate the cipher");
-		goto exiting;
-	}
-	db_params_new.cipher_mode = strdup(db_params.cipher_mode);
-	if (!db_params_new.cipher_mode) {
-		perror("ERROR: Could not duplicate the cipher mode");
-		goto exiting;
-	}
 	db_params_new.dirty = 0;
 	db_params_new.readonly = 0;
 
@@ -121,17 +108,19 @@ cmd_export(const char *e_line, command *commands)
 	free(line); line = NULL;
 
 #ifdef _HAVE_YUBIKEY
-	opts = "A:k:c:P:e:m:y:";
+	opts = "A:k:c:P:R:e:m:y:";
 #else
-	opts = "A:k:c:P:e:m:";
+	opts = "A:k:c:P:R:e:m:";
 #endif
 	optind = 0;
 	while ((c = getopt(largc, largv, opts)) != -1)
 		switch (c) {
 			case 'A':
-				/* in case this parameter is being parsed multiple times */
-				free(ssha_type); ssha_type = NULL;
-				free(ssha_comment); ssha_comment = NULL;
+				if (strlen(db_params_new.ssha_type)  ||  strlen(db_params_new.ssha_comment)) {
+					dprintf(STDERR_FILENO, "ERROR: Please specify the '-%c' option only once!\n", c);
+					goto exiting;
+				}
+
 
 				ssha_type = strndup(strsep(&optarg, ","), 11);
 				if (ssha_type == NULL  ||  !strlen(ssha_type)) {
@@ -164,8 +153,6 @@ cmd_export(const char *e_line, command *commands)
 				if (optarg  &&  strncmp(optarg, "password", 8) == 0) {
 					db_params_new.ssha_password = 1;
 				}
-
-				printf("Using (%s) %s identity%s\n", db_params_new.ssha_type, db_params_new.ssha_comment, (db_params_new.ssha_password ? " and a password" : ""));
 			break;
 			case 'k':
 				free(db_params_new.db_filename); db_params_new.db_filename = NULL;
@@ -184,41 +171,62 @@ cmd_export(const char *e_line, command *commands)
 				}
 			break;
 			case 'P':
-				free(db_params_new.kdf); db_params_new.kdf = NULL;
+				if (db_params_new.kdf) {
+					dprintf(STDERR_FILENO, "ERROR: Please specify the '-%c' option only once!\n", c);
+					goto exiting;
+				}
 				db_params_new.kdf = strdup(optarg);
-				if (!db_params_new.kdf) {
-					perror("ERROR: Could not duplicate the KDF");
+			break;
+			case 'R':
+				if (db_params_new.kdf_reps) {
+					dprintf(STDERR_FILENO, "ERROR: Please specify the '-%c' option only once!\n", c);
+					goto exiting;
+				}
+
+
+				if (optarg[0] == '-') {
+					dprintf(STDERR_FILENO, "ERROR: KDF iterations parameter seems to be negative.\n");
+					goto exiting;
+				}
+
+				db_params_new.kdf_reps = strtoul(optarg, &inv, 10);
+				if (inv[0] != '\0') {
+					dprintf(STDERR_FILENO, "ERROR: Unable to convert the KDF iterations parameter.\n");
 					goto exiting;
 				}
 			break;
 			case 'e':
-				free(db_params_new.cipher); db_params_new.cipher = NULL;
-				db_params_new.cipher = strdup(optarg);
-				if (!db_params_new.cipher) {
-					perror("ERROR: Could not duplicate the cipher");
+				if (db_params_new.cipher) {
+					dprintf(STDERR_FILENO, "ERROR: Please specify the '-%c' option only once!\n", c);
 					goto exiting;
 				}
+				db_params_new.cipher = strdup(optarg);
 			break;
 			case 'm':
-				free(db_params_new.cipher_mode); db_params_new.cipher_mode = NULL;
-				db_params_new.cipher_mode = strdup(optarg);
-				if (!db_params_new.cipher_mode) {
-					perror("ERROR: Could not duplicate the cipher mode");
+				if (db_params_new.cipher_mode) {
+					dprintf(STDERR_FILENO, "ERROR: Please specify the '-%c' option only once!\n", c);
 					goto exiting;
 				}
+				db_params_new.cipher_mode = strdup(optarg);
 			break;
 #ifdef _HAVE_YUBIKEY
 			case 'y':
+				if (db_params_new.yk_slot) {
+					dprintf(STDERR_FILENO, "ERROR: Please specify the '-%c' option only once!\n", c);
+					goto exiting;
+				}
+
+
 				if (optarg[0] == '-') {
 					dprintf(STDERR_FILENO, "ERROR: YubiKey slot/device parameter seems to be negative.\n");
-					quit(EXIT_FAILURE);
+					goto exiting;
 				}
 
 				ykchalresp = strtoul(strsep(&optarg, ","), &inv, 10);
 				if (inv[0] == '\0') {
 					if (ykchalresp <= 0  ||  ykchalresp > 29) {
 						dprintf(STDERR_FILENO, "ERROR: YubiKey slot/device parameter is invalid.\n");
-						quit(EXIT_FAILURE);
+						goto exiting;
 					} else if (ykchalresp < 10) {
 						db_params_new.yk_slot = ykchalresp;
 						db_params_new.yk_dev = 0;
@@ -228,19 +236,17 @@ cmd_export(const char *e_line, command *commands)
 					}
 				} else {
 					dprintf(STDERR_FILENO, "ERROR: Unable to convert the YubiKey slot/device parameter.\n");
-					quit(EXIT_FAILURE);
+					goto exiting;
 				}
 
 				if (db_params_new.yk_slot > 2  ||  db_params_new.yk_slot < 1) {
 					dprintf(STDERR_FILENO, "ERROR: YubiKey slot number is not 1 or 2.\n");
-					quit(EXIT_FAILURE);
+					goto exiting;
 				}
 
 				if (optarg  &&  strncmp(strsep(&optarg, ","), "password", 8) == 0) {
 					db_params_new.yk_password = 1;
 				}
-
-				printf("Using YubiKey slot #%d on device #%d%s\n", db_params_new.yk_slot, db_params_new.yk_dev, (db_params_new.yk_password ? " and a password" : ""));
 			break;
 #endif
 			default:
@@ -248,6 +254,86 @@ cmd_export(const char *e_line, command *commands)
 				goto exiting;
 			break;
 		}
+
+	/* clean up after option parsing */
+	free(ssha_type); ssha_type = NULL;
+	free(ssha_comment); ssha_comment = NULL;
+
+	/* print some status information after parsing the options */
+	if (	(strlen(db_params_new.ssha_type)  &&  db_params_new.yk_slot)  &&
+		(!db_params_new.ssha_password  ||  !db_params_new.yk_password)
+	) {
+		dprintf(STDERR_FILENO, "ERROR: Using -A and -y together only makes sense with the ',password' parameter for both of them!\n");
+		goto exiting;
+	}
+
+	if (strlen(db_params_new.ssha_type))
+		printf("Using (%s) %s identity%s\n", db_params_new.ssha_type, db_params_new.ssha_comment, (db_params_new.ssha_password ? " and a password" : ""));
+	if (db_params_new.yk_slot)
+		printf("Using YubiKey slot #%d on device #%d%s\n", db_params_new.yk_slot, db_params_new.yk_dev, (db_params_new.yk_password ? " and a password" : ""));
+
+
+	/* db_param_new defaults, if none were specified */
+	if (!db_params_new.kdf) {
+		len = strlen(DEFAULT_KDF) + 1;
+		db_params_new.kdf = malloc(len); malloc_check(db_params_new.kdf);
+		if (strlcpy(db_params_new.kdf, DEFAULT_KDF, len) >= len) {
+			dprintf(STDERR_FILENO, "ERROR: Error while setting up default database parameters (kdf).\n");
+			goto exiting;
+		}
+	}
+
+	/* reset kdf reps only if kdf was changed and no -R option was
+	 * specified */
+	if (!db_params_new.kdf_reps) {
+		/* -R option was not specified, because our default is 0 */
+		if (strcmp(db_params.kdf, db_params_new.kdf) == 0) {
+			db_params_new.kdf_reps = db_params.kdf_reps;
+		} else {
+			if (strncmp(db_params_new.kdf, "sha", 3) == 0) {
+				db_params_new.kdf_reps = KC_PKCS_PBKDF2_ITERATIONS;
+			} else if (strcmp(db_params_new.kdf, "bcrypt") == 0) {
+				db_params_new.kdf_reps = KC_BCRYPT_PBKDF_ROUNDS;
+			}
+		}
+	}
+	if (strncmp(db_params_new.kdf, "sha", 3) == 0  &&  db_params_new.kdf_reps < 1000) {
+		dprintf(STDERR_FILENO, "ERROR: When using %s KDF, iterations (-R option) should be at least 1000 (the default is %d)\n", db_params_new.kdf, KC_PKCS_PBKDF2_ITERATIONS);
+		goto exiting;
+	} else if (strcmp(db_params_new.kdf, "bcrypt") == 0  &&  db_params_new.kdf_reps < 16) {
+		dprintf(STDERR_FILENO, "ERROR: When using %s KDF, iterations (-R option) should be at least 16 (the default is %d)\n", db_params_new.kdf, KC_BCRYPT_PBKDF_ROUNDS);
+		goto exiting;
+	}
+
+	if (!db_params_new.cipher) {
+		len = strlen(DEFAULT_CIPHER) + 1;
+		db_params_new.cipher = malloc(len); malloc_check(db_params_new.cipher);
+		if (strlcpy(db_params_new.cipher, DEFAULT_CIPHER, len) >= len) {
+			dprintf(STDERR_FILENO, "ERROR: Error while setting up default database parameters (cipher).\n");
+			quit(EXIT_FAILURE);
+		}
+	}
+
+	/* reset cipher mode only if cipher was changed and no -m option was
+	 * specified */
+	if (!db_params_new.cipher_mode) {
+		/* -m option was not specified, because our default is NULL */
+		if (strcmp(db_params.cipher, db_params_new.cipher) == 0) {
+			db_params_new.cipher_mode = strdup(db_params.cipher_mode);
+			if (!db_params_new.cipher_mode) {
+				perror("ERROR: Could not duplicate the cipher mode");
+				goto exiting;
+			}
+		} else {
+			len = strlen(DEFAULT_MODE) + 1;
+			db_params_new.cipher_mode = malloc(len); malloc_check(db_params_new.cipher_mode);
+			if (strlcpy(db_params_new.cipher_mode, DEFAULT_MODE, len) >= len) {
+				dprintf(STDERR_FILENO, "ERROR: Error while setting up default database parameters (cipher mode).\n");
+				goto exiting;
+			}
+		}
+	}
+
 
 	if (strcmp(largv[0], "dump") == 0)
 		dump = 1;
@@ -401,21 +487,19 @@ cmd_export(const char *e_line, command *commands)
 				goto exiting;
 		}
 
-		if (strlen(db_params_new.ssha_type)) {
-			/* use SSH agent to generate the password */
-			if (!kc_ssha_get_password(&db_params_new))
-				goto exiting;
 #ifdef _HAVE_YUBIKEY
-		} else if (db_params_new.yk_slot) {
+		if (db_params_new.yk_slot) {
 			/* use a YubiKey to generate the password */
-			if (db_params_new.yk_password  &&  db_params_new.pass_len > 64)
-				dprintf(STDERR_FILENO, "ERROR: Password cannot be longer than 64 bytes when using YubiKey challenge-response!\n");
-
 			if (!kc_ykchalresp(&db_params_new)) {
 				dprintf(STDERR_FILENO, "ERROR: Error while doing YubiKey challenge-response!\n");
 				goto exiting;
 			}
+		}
 #endif
+		if (strlen(db_params_new.ssha_type)) {
+			/* use SSH agent to generate the password */
+			if (!kc_ssha_get_password(&db_params_new))
+				goto exiting;
 		}
 
 		/* Setup cipher mode and turn on encrypting */

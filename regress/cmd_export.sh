@@ -41,6 +41,22 @@ else
 fi
 
 
+rm -f regress/test_export.kcd
+printf "export -R 16 -P bcrypt -k regress/test_export\n${PASSWORD}\n${PASSWORD}\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}
+
+if [ ! -r "regress/test_export.kcd" ];then
+	echo "$0 test failed (unreadable export file, bcrypt (16 rounds))!"
+	exit 1
+fi
+
+if printf "${PASSWORD}" |${KC_RUN} -b -k regress/test_export.kcd -P bcrypt -R 16;then
+	echo "$0 test ok (export, bcrypt (16 rounds))!"
+else
+	echo "$0 test failed (export, bcrypt (16 rounds))!"
+	exit 1
+fi
+
+
 if [ ${SCRYPT} ];then
 	rm -f regress/test_export.kcd
 	printf "export -k regress/test_export -P scrypt\n${PASSWORD}\n${PASSWORD}\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}

@@ -701,7 +701,7 @@ kc_crypt_key(struct db_parameters *db_params)
 	if (strcmp(db_params->kdf, "sha3") == 0) {
 		if (!PKCS5_PBKDF2_HMAC(db_params->pass, db_params->pass_len,
 			db_params->salt, SALT_DIGEST_LEN + 1,
-			5000, EVP_sha3_512(),
+			db_params->kdf_reps, EVP_sha3_512(),
 			KEY_LEN, db_params->key))
 		{
 
@@ -714,7 +714,7 @@ kc_crypt_key(struct db_parameters *db_params)
 	} else if (strcmp(db_params->kdf, "sha512") == 0) {
 		if (!PKCS5_PBKDF2_HMAC(db_params->pass, db_params->pass_len,
 			db_params->salt, SALT_DIGEST_LEN + 1,
-			5000, EVP_sha512(),
+			db_params->kdf_reps, EVP_sha512(),
 			KEY_LEN, db_params->key))
 		{
 			dprintf(STDERR_FILENO, "ERROR: Failed to generate a key from the password!\n");
@@ -726,7 +726,7 @@ kc_crypt_key(struct db_parameters *db_params)
 	} else if (strcmp(db_params->kdf, "bcrypt") == 0) {
 		if (bcrypt_pbkdf(db_params->pass, db_params->pass_len,
 			db_params->salt, SALT_DIGEST_LEN + 1,
-			db_params->key, KEY_LEN, 16) != 0)
+			db_params->key, KEY_LEN, db_params->kdf_reps) != 0)
 		{
 			dprintf(STDERR_FILENO, "ERROR: Failed to generate a key from the password!\n");
 			if (getenv("KC_DEBUG"))
@@ -762,7 +762,7 @@ char
 kc_crypt_setup(BIO *bio_chain, const unsigned int enc, struct db_parameters *db_params)
 {
 	if (getenv("KC_DEBUG"))
-		printf("%s(): crypt setup: using %s based KDF\n", __func__, db_params->kdf);
+		printf("%s(): crypt setup: using %s based KDF (%lu iterations)\n", __func__, db_params->kdf, db_params->kdf_reps);
 
 
 	/* extract bio_cipher from bio_chain */

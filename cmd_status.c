@@ -60,7 +60,10 @@ cmd_status(const char *e_line, command *commands)
 	xmlBufferFree(xml_buf);
 
 	printf("Password: ");
-	if (db_params.pass_len)
+	if (	(strlen(db_params.ssha_type)  &&  db_params.ssha_password)  ||
+		(db_params.yk_slot  &&  db_params.yk_password)  ||
+		(!strlen(db_params.ssha_type)  &&  !db_params.yk_slot)
+	)
 		puts("yes");
 	else
 		puts("no");
@@ -73,13 +76,13 @@ cmd_status(const char *e_line, command *commands)
 
 	printf("YubiKey: ");
 #ifdef _HAVE_YUBIKEY
-	if (db_params.yk_slot > 0)
+	if (db_params.yk_slot)
 		printf("Slot #%d, Device #%d\n", db_params.yk_slot, db_params.yk_dev);
 	else
 #endif
 		puts("no");
 
-	printf("Password handling: %s\n", db_params.kdf);
+	printf("Password function: %s (%lu %s)\n", db_params.kdf, db_params.kdf_reps, strncmp(db_params.kdf, "bcrypt", 6) == 0 ? "rounds" : "iterations");
 
 	printf("Encryption: %s, %s\n", db_params.cipher, db_params.cipher_mode);
 
