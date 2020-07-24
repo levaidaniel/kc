@@ -61,7 +61,7 @@ cmd_export(const char *e_line, command *commands)
 
 	int		c = 0, largc = 0;
 	size_t		len = 0;
-	char		*opts = NULL;
+	char		*opts = NULL, *inv = NULL;
 	char		**largv = NULL;
 	char		*line = NULL;
 	char		dump = 0;
@@ -70,7 +70,6 @@ cmd_export(const char *e_line, command *commands)
 
 #ifdef _HAVE_YUBIKEY
 	unsigned long int	ykchalresp = 0;
-	char			*inv = NULL;
 #endif
 
 #ifndef _READLINE

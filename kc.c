@@ -96,13 +96,12 @@ main(int argc, char *argv[])
 
 #ifdef _HAVE_YUBIKEY
 	unsigned long int	ykchalresp = 0;
-	char			*inv = NULL;
 #endif
 
 	xmlNodePtr	db_root = NULL;
 
 	int		c = 0;
-	char		*opts = NULL;
+	char		*opts = NULL, *inv = NULL;
 	size_t		len = 0;
 
 	unsigned long int	count_keychains = 0, count_keys = 0;
