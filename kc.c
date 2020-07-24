@@ -698,7 +698,7 @@ main(int argc, char *argv[])
 			dprintf(STDERR_FILENO, "ERROR: Could not parse XML document!\n");
 
 			if (strcmp(db_params.cipher_mode, "cbc") != 0)
-				dprintf(STDERR_FILENO, "ERROR: If you have specified cfb128 or ofb for chipher mode, this could also mean that either you have entered a wrong password or specified a cipher mode other than that the database was encrypted with!\n");
+				dprintf(STDERR_FILENO, "ERROR: If you have specified cfb, ctr or ofb for chipher mode, this could also mean that either you have entered a wrong password or specified a cipher mode other than that the database was encrypted with!\n");
 
 			quit(EXIT_FAILURE);
 		}

@@ -52,25 +52,25 @@ fi
 
 if [ $SKIP -eq 0 ];then
 	ssh-add regress/test_id_rsa:2048_ssh
-	if printf "passwd -A ssh-rsa,PuBkEy_+*()[]{}';.!@#^&=-/|_comment-rsa:2048,password -P bcrypt -e blowfish -m ecb\n${PASSWORD}\n${PASSWORD}\n" |${KC_RUN} -b -k ${KC_DB} -P bcrypt -p ${KC_PASSFILE};then
+	if printf "passwd -A ssh-rsa,PuBkEy_+*()[]{}';.!@#^&=-/|_comment-rsa:2048,password -P bcrypt -e blowfish -m ofb\n${PASSWORD}\n${PASSWORD}\n" |${KC_RUN} -b -k ${KC_DB} -P bcrypt -p ${KC_PASSFILE};then
 		echo "$0 test ok (bcrypt KDF)!"
 	else
 		echo "$0 test failed (bcrypt KDF)!"
 		exit 1
 	fi
 
-	if printf "${PASSWORD}\n${PASSWORD}\npasswd -A ssh-rsa,PuBkEy_+*()[]{}';.!@#^&=-/|_comment-rsa:2048 -P bcrypt -e blowfish -m ecb\n" |${KC_RUN} -b -k ${KC_DB} -P bcrypt -e blowfish -m ecb -A "ssh-rsa,PuBkEy_+*()[]{}';.!@#^&=-/|_comment-rsa:2048,password";then
-		echo "$0 test ok (SSH agent with password, bcrypt KDF, blowfish cipher, ecb cipher mode)!"
+	if printf "${PASSWORD}\n${PASSWORD}\npasswd -A ssh-rsa,PuBkEy_+*()[]{}';.!@#^&=-/|_comment-rsa:2048 -P bcrypt -e blowfish -m ofb\n" |${KC_RUN} -b -k ${KC_DB} -P bcrypt -e blowfish -m ofb -A "ssh-rsa,PuBkEy_+*()[]{}';.!@#^&=-/|_comment-rsa:2048,password";then
+		echo "$0 test ok (SSH agent with password, bcrypt KDF, blowfish cipher, ofb cipher mode)!"
 	else
-		echo "$0 test failed (SSH agent with password, bcrypt KDF, blowfish cipher, ecb cipher mode)!"
+		echo "$0 test failed (SSH agent with password, bcrypt KDF, blowfish cipher, ofb cipher mode)!"
 		exit 1
 	fi
 
 	# Also fake an invalid parameter
-	if printf "passwd --help\npasswd -P sha512 -e aes256 -m cbc\n${PASSWORD}\n${PASSWORD}\n" |${KC_RUN} -b -k ${KC_DB} -P bcrypt -e blowfish -m ecb -A "ssh-rsa,PuBkEy_+*()[]{}';.!@#^&=-/|_comment-rsa:2048";then
-		echo "$0 test ok (SSH agent, bcrypt KDF, blowfish cipher, ecb cipher mode)!"
+	if printf "passwd --help\npasswd -P sha512 -e aes256 -m cbc\n${PASSWORD}\n${PASSWORD}\n" |${KC_RUN} -b -k ${KC_DB} -P bcrypt -e blowfish -m ofb -A "ssh-rsa,PuBkEy_+*()[]{}';.!@#^&=-/|_comment-rsa:2048";then
+		echo "$0 test ok (SSH agent, bcrypt KDF, blowfish cipher, ofb cipher mode)!"
 	else
-		echo "$0 test failed (SSH agent, bcrypt KDF, blowfish cipher, ecb cipher mode)!"
+		echo "$0 test failed (SSH agent, bcrypt KDF, blowfish cipher, ofb cipher mode)!"
 		exit 1
 	fi
 	ssh-add -d regress/test_id_rsa:2048_ssh

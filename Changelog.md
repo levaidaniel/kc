@@ -19,6 +19,12 @@
 * Removed support for the SHA-1 KDF.
 
   If you've been using the SHA-1 based KDF, before you upgrade, you need to change that to anything else with the 'passwd' or the 'export' command. Note that you would've had to explicitly specify this to use, as the default has always been SHA-2 512.
+* Added '-R' option to specify the iterations/rounds to be used with the KDFs.
 * Added support for the SHA-3 KDF (min. OpenSSL version is now 1.1.1).
+* SHA-\* KDF default iterations changed to 100000 and bcrypt KDF default rounds changed to 36.
+
+  Opening older datases where the defaults were smaller is possible with the '-R' option.
+* Added support for aes256 ctr cipher mode.
+* Removed support for blowfish ecb cipher mode.
 * Added support for POSIX regex functions (it can be used instead of PCRE).
 * Documentation and manual page fixes.

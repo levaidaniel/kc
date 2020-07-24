@@ -232,14 +232,14 @@ The valid parameters are:
 .Bl -tag -offset ||| -width |
 .It Ar cbc
 This is the default
-.It Ar cfb128
+.It Ar cfb
 .It Ar ofb
+.It Ar ctr
 .El
 .It When using Ar blowfish
 .Bl -tag -offset ||| -width |
 .It Ar cbc
-.It Ar ecb
-.It Ar cfb64
+.It Ar cfb
 .It Ar ofb
 .El
 .El
@@ -1151,10 +1151,11 @@ command
 .Pc .
 .It
 If you use
-.Ar cfb128
+.Ar cfb ,
+.Ar ctr
 or
 .Ar ofb
-as the cipher mode, there is no specific sign if you enter a wrong password during the opening of a database; in this case the database will seem to be corrupt after decrypting, and
+as the cipher mode, there is no specific sign if you enter a wrong password during opening a database; in this case the database will seem to be corrupt after decrypting, and
 .Nm
 simply will not be able to open it.
 .It

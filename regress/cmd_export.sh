@@ -9,14 +9,14 @@ echo "test => $0"
 PASSWORD=aabbccdd112233
 
 rm -f regress/test_export.kcd
-printf "export -k regress/test_export -e blowfish -m ecb\n${PASSWORD}\n${PASSWORD}\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}
+printf "export -k regress/test_export -e blowfish -m ofb\n${PASSWORD}\n${PASSWORD}\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}
 
 if [ ! -r "regress/test_export.kcd" ];then
 	echo "$0 test failed (unreadable export file, blowfish)!"
 	exit 1
 fi
 
-if printf "${PASSWORD}" |${KC_RUN} -b -k regress/test_export.kcd -e blowfish -m ecb;then
+if printf "${PASSWORD}" |${KC_RUN} -b -k regress/test_export.kcd -e blowfish -m ofb;then
 	echo "$0 test ok (export, blowfish)!"
 else
 	echo "$0 test failed (export, blowfish)!"
@@ -78,14 +78,14 @@ fi
 # This test must be the last one that writes test_export.kcd,
 # because the cmd_import.sh test will use this as its input.
 rm -f regress/test_export.kcd
-printf "export -k regress/test_export -P bcrypt -m cfb128\n${PASSWORD}\n${PASSWORD}\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}
+printf "export -k regress/test_export -P bcrypt -m cfb\n${PASSWORD}\n${PASSWORD}\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}
 
 if [ ! -r "regress/test_export.kcd" ];then
 	echo "$0 test failed (unreadable export file)!"
 	exit 1
 fi
 
-if printf "${PASSWORD}" |${KC_RUN} -b -k regress/test_export.kcd -P bcrypt -m cfb128;then
+if printf "${PASSWORD}" |${KC_RUN} -b -k regress/test_export.kcd -P bcrypt -m cfb;then
 	echo "$0 test ok (export)!"
 else
 	echo "$0 test failed (export)!"
