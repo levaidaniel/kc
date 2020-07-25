@@ -145,7 +145,7 @@ cmd_export(const char *e_line, command *commands)
 				}
 
 				if (strlcpy(db_params_new.ssha_comment, ssha_comment, sizeof(db_params_new.ssha_comment)) >= sizeof(db_params_new.ssha_comment)) {
-					dprintf(STDERR_FILENO, "ERROR: Error while getting SSH key type.\n");
+					dprintf(STDERR_FILENO, "ERROR: Error while getting SSH key comment.\n");
 					goto exiting;
 				}
 
