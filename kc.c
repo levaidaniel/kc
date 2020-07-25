@@ -682,6 +682,8 @@ main(int argc, char *argv[])
 		 * to warn the user when exiting to save.
 		 */
 		db_params.dirty = 1;
+
+		cmd_status(NULL, NULL);
 	} else {	/* existing database file */
 		pos = kc_db_reader(&buf, bio_chain);
 
