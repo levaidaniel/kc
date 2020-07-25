@@ -46,7 +46,8 @@ export SHA1_INVALID_INDEX='812e96292afbdf1b0cebb40a7db6a7ffa2e52dfe'
 export SHA1_KEYCHAIN_NOT_FOUND='f00ecea88ac8e16851779e4230ffd0871c453d40'
 export SHA1_COMMON_1='f13bad981225a227a854257d56c0983879ed9733'
 
-case "$(uname -s)" in
+SYSTEM=$(uname -s)
+case "${SYSTEM}" in
 	Linux|CYGWIN*)
 		SHA1_BIN=$(which sha1sum)
 		RANDOM_DEV="/dev/urandom"
@@ -62,6 +63,7 @@ case "$(uname -s)" in
 esac
 export SHA1_BIN
 export RANDOM_DEV
+export SYSTEM
 
 
 typeset -i COUNTER=0
