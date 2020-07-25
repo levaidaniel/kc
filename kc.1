@@ -30,7 +30,7 @@
 .Op Fl C Ar keychain name
 .Op Fl r
 .Op Fl A Ar key-type,key-comment Op ,password
-.Op Fl y Ar Key-slotDevice-index Op ,password
+.Op Fl Y Ar Key-slotDevice-index Op ,password
 .Op Fl p Ar password file
 .Op Fl P Ar kdf
 .Op Fl R Ar kdf iterations
@@ -147,7 +147,7 @@ and also ask for a password to use when opening the database.
 .El
 .Pp
 Also worth mentioning that this actually works with agent forwarding as well, so on a remote machine one doesn't even have to have the actual private key file -- just like in any other case when you'd use SSH agent forwarding.
-.It Fl y Ar Key-slotDevice-index Op ,password
+.It Fl Y Ar Key-slotDevice-index Op ,password
 Use a YubiKey to utilize its challenge-response mechanism to construct the password for the database. This can be either an automatic or an interactive mode of operation (just like with SSH agent support). Without the
 .Ql password
 parameter the challenge will be the database salt value, thus facilitating an automatic database open.
@@ -489,7 +489,7 @@ is the key's index number in the current keychain.
 .It Ic rm Ar index
 Alias of
 .Ic del .
-.It Ic passwd Op Fl A Ar key-type,key-comment Op ,password Op Fl y Ar Key-slotDevice-index Op ,password Op Fl P Ar kdf Op Fl R Ar kdf iterations Op Fl e Ar cipher Op Fl m Ar cipher mode
+.It Ic passwd Op Fl A Ar key-type,key-comment Op ,password Op Fl Y Ar Key-slotDevice-index Op ,password Op Fl P Ar kdf Op Fl R Ar kdf iterations Op Fl e Ar cipher Op Fl m Ar cipher mode
 Change the database password or SSH public key identity being used to encrypt.
 Optionally, the KDF, cipher and cipher mode can also be changed.
 All changes will be written immediately.
@@ -504,7 +504,7 @@ Print application help or describe a
 .Ar command .
 .It Ic status
 Display information about the database.
-.It Ic export Fl k Ar filename Op Fl A Ar key-type,key-comment Op ,password Op Fl y Ar Key-slotDevice-index Op ,password Op Fl P Ar kdf Op Fl R Ar kdf iterations Op Fl e Ar cipher Op Fl m Ar cipher mode Op Fl c Ar keychain
+.It Ic export Fl k Ar filename Op Fl A Ar key-type,key-comment Op ,password Op Fl Y Ar Key-slotDevice-index Op ,password Op Fl P Ar kdf Op Fl R Ar kdf iterations Op Fl e Ar cipher Op Fl m Ar cipher mode Op Fl c Ar keychain
 Export the database to a
 .Nm
 compatible encrypted database file named
@@ -551,7 +551,7 @@ Index number takes priority when addressing a keychain.
 the created XML file will be plain text.
 .Pp
 .Pq see command Ic export
-.It Ic import Fl k Ar filename Op Fl A Ar key-type,key-comment Op ,password Op Fl y Ar Key-slotDevice-index Op ,password Op Fl P Ar kdf Op Fl R Ar kdf iterations Op Fl e Ar cipher Op Fl m Ar cipher mode Op Fl o
+.It Ic import Fl k Ar filename Op Fl A Ar key-type,key-comment Op ,password Op Fl Y Ar Key-slotDevice-index Op ,password Op Fl P Ar kdf Op Fl R Ar kdf iterations Op Fl e Ar cipher Op Fl m Ar cipher mode Op Fl o
 Import and overwrite the current database with the one from a
 .Nm
 compatible encrypted database file named
@@ -796,7 +796,7 @@ Most simple one
 .Pc , just type in a password when creating a database and use the same one when opening it. Old school.
 .It A signature based on an SSH key loaded into an SSH agent
 This method -- when used with the
-.Ar -A
+.Op -A
 option -- takes the database IV and salt
 .Po both available when reading the database file
 .Pc
@@ -824,7 +824,7 @@ will ask for a password and the SSH agent for a signature based on the correct p
 .Nm
 supports the YubiKey's HMAC challenge-response mode
 .Po using the
-.Ar -y
+.Op -Y
 option
 .Pc
 and the response is used as the password input for the KDF. This too can have an added conveniency of not having to type in anything when opening the database, because
@@ -921,7 +921,7 @@ Modified: yes
 .Ed
 .It Em Using a YubiKey security key and a password:
 .Bd -literal
-$ kc -y 2,password -k .kc/passwords_and_secrets.kcd
+$ kc -Y 2,password -k .kc/passwords_and_secrets.kcd
 Using YubiKey slot #2 on device #0 and a password
 Creating '/home/user/.kc/passwords_and_secrets.kcd'
 Using '/home/user/.kc/passwords_and_secrets.kcd' database.

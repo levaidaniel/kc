@@ -107,7 +107,7 @@ cmd_export(const char *e_line, command *commands)
 	free(line); line = NULL;
 
 #ifdef _HAVE_YUBIKEY
-	opts = "A:k:c:P:R:e:m:y:";
+	opts = "A:k:c:P:R:e:m:Y:";
 #else
 	opts = "A:k:c:P:R:e:m:";
 #endif
@@ -209,7 +209,7 @@ cmd_export(const char *e_line, command *commands)
 				db_params_new.cipher_mode = strdup(optarg);
 			break;
 #ifdef _HAVE_YUBIKEY
-			case 'y':
+			case 'Y':
 				if (db_params_new.yk_slot) {
 					dprintf(STDERR_FILENO, "ERROR: Please specify the '-%c' option only once!\n", c);
 					goto exiting;
@@ -262,7 +262,7 @@ cmd_export(const char *e_line, command *commands)
 	if (	(strlen(db_params_new.ssha_type)  &&  db_params_new.yk_slot)  &&
 		(!db_params_new.ssha_password  ||  !db_params_new.yk_password)
 	) {
-		dprintf(STDERR_FILENO, "ERROR: Using -A and -y together only makes sense with the ',password' parameter for both of them!\n");
+		dprintf(STDERR_FILENO, "ERROR: Using -A and -Y together only makes sense with the ',password' parameter for both of them!\n");
 		goto exiting;
 	}
 

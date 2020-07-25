@@ -41,7 +41,7 @@ PASSWORD='asdbqwdoijqw2189'
 KC_DB_YK='regress/test_yk.kcd'
 rm -f "${KC_DB_YK}"
 
-printf "${PASSWORD}\n${PASSWORD}\nwrite\n" |${KC_RUN} -y 2,password -b -k ${KC_DB_YK}
+printf "${PASSWORD}\n${PASSWORD}\nwrite\n" |${KC_RUN} -Y 2,password -b -k ${KC_DB_YK}
 if [ $? -eq 0 ];then
 	echo "$0 test ok (create new db, with password)!"
 else
@@ -49,21 +49,21 @@ else
 	exit 1
 fi
 
-if echo "${PASSWORD}" |${KC_RUN} -y 2,password -b -k ${KC_DB_YK};then
+if echo "${PASSWORD}" |${KC_RUN} -Y 2,password -b -k ${KC_DB_YK};then
 	echo "$0 test ok (open db, with password)!"
 else
 	echo "$0 test failed (open db, with password)!"
 	exit 1
 fi
 
-if printf "${PASSWORD}\npasswd -y 2\n" |${KC_RUN} -y 2,password -b -k ${KC_DB_YK};then
+if printf "${PASSWORD}\npasswd -Y 2\n" |${KC_RUN} -Y 2,password -b -k ${KC_DB_YK};then
 	echo "$0 test ok (passwd change, without password)!"
 else
 	echo "$0 test failed (passwd change, without password)!"
 	exit 1
 fi
 
-if echo "write" |${KC_RUN} -y 2 -b -k ${KC_DB_YK};then
+if echo "write" |${KC_RUN} -Y 2 -b -k ${KC_DB_YK};then
 	echo "$0 test ok (open db, without password)!"
 else
 	echo "$0 test failed (open db, without password)!"

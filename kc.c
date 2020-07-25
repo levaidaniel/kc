@@ -142,7 +142,7 @@ main(int argc, char *argv[])
 
 
 #ifdef _HAVE_YUBIKEY
-	opts = "A:k:c:C:rp:P:R:e:m:y:bBvh";
+	opts = "A:k:c:C:rp:P:R:e:m:Y:bBvh";
 #else
 	opts = "A:k:c:C:rp:P:R:e:m:bBvh";
 #endif
@@ -245,7 +245,7 @@ main(int argc, char *argv[])
 				db_params.cipher_mode = strdup(optarg); malloc_check(db_params.cipher_mode);
 			break;
 #ifdef _HAVE_YUBIKEY
-			case 'y':
+			case 'Y':
 				if (db_params.yk_slot) {
 					dprintf(STDERR_FILENO, "ERROR: Please specify the '-%c' option only once!\n", c);
 					quit(EXIT_FAILURE);
@@ -297,12 +297,12 @@ main(int argc, char *argv[])
 			case 'h':
 				/* FALLTHROUGH */
 			default:
-				printf( "%s [-k <file>] [-r] [-c/-C <keychain>] [-A <key type,key comment>] [-y <YubiKey slot><YubiKey device index>] [-p <file>] [-P <kdf>] [-R <kdf iterations>] [-e <cipher>] [-m <mode>] [-B/-b] [-v] [-h]\n\n", argv[0]);
+				printf( "%s [-k <file>] [-r] [-c/-C <keychain>] [-A <key type,key comment>] [-Y <YubiKey slot><YubiKey device index>] [-p <file>] [-P <kdf>] [-R <kdf iterations>] [-e <cipher>] [-m <mode>] [-B/-b] [-v] [-h]\n\n", argv[0]);
 				printf(	"-k <file>: Use file as database. The default is ~/.kc/default.kcd .\n"
 					"-r: Open the database in read-only mode.\n"
 					"-c/-C <keychain>: Start in <keychain>.\n"
 					"-A <key type,key comment>: Use an SSH agent to provide password.\n"
-					"-y <YubiKey slot><YubiKey device index>: Use a YubiKey to provide password.\n"
+					"-Y <YubiKey slot><YubiKey device index>: Use a YubiKey to provide password.\n"
 					"-p <file>: Read password from file.\n"
 					"-P <kdf>: KDF to use.\n"
 					"-R <iterations>: Number of KDF iterations to use.\n"
@@ -310,7 +310,8 @@ main(int argc, char *argv[])
 					"-m <mode>: Cipher mode.\n"
 					"-B/-b: Batch mode.\n"
 					"-v: Display version.\n"
-					"-h: This help.\n");
+					"-h: This help.\n"
+					"\nPlease see the manual for more information.\n");
 				exit(EXIT_FAILURE);
 			break;
 		}
@@ -323,7 +324,7 @@ main(int argc, char *argv[])
 	if (	(strlen(db_params.ssha_type)  &&  db_params.yk_slot)  &&
 		(!db_params.ssha_password  ||  !db_params.yk_password)
 	) {
-		dprintf(STDERR_FILENO, "ERROR: Using -A and -y together only makes sense with the ',password' parameter for both of them!\n");
+		dprintf(STDERR_FILENO, "ERROR: Using -A and -Y together only makes sense with the ',password' parameter for both of them!\n");
 		quit(EXIT_FAILURE);
 	}
 
