@@ -580,18 +580,8 @@ kc_crypt_iv_salt(struct db_parameters *db_params)
 	iv_tmp = get_random_str(IV_LEN, 2);
 	if (!iv_tmp) {
 		dprintf(STDERR_FILENO, "ERROR: IV generation failure!\n");
-
 		return(0);
 	}
-
-	salt_tmp = get_random_str(SALT_LEN, 2);
-	if (!salt_tmp) {
-		dprintf(STDERR_FILENO, "ERROR: Salt generation failure!\n");
-
-		free(iv_tmp); iv_tmp = NULL;
-		return(0);
-	}
-
 
 	/* Setup the digest context */
 	mdctx = EVP_MD_CTX_create();
@@ -599,7 +589,6 @@ kc_crypt_iv_salt(struct db_parameters *db_params)
 		dprintf(STDERR_FILENO, "ERROR: Could not create digest context for IV!\n");
 
 		free(iv_tmp); iv_tmp = NULL;
-		free(salt_tmp); salt_tmp = NULL;
 		return(0);
 	}
 	EVP_DigestInit_ex(mdctx, EVP_sha512(), NULL);
@@ -615,23 +604,15 @@ kc_crypt_iv_salt(struct db_parameters *db_params)
 		snprintf(hex_tmp, 3, "%02x", digested[i]);
 
 		if (!i) {
-			if (strlcpy(	(char *)db_params->iv,
-					hex_tmp,
+			if (strlcpy(	(char *)db_params->iv, hex_tmp,
 					IV_DIGEST_LEN + 1)
 					>= IV_DIGEST_LEN + 1)
-			{
-				free(salt_tmp); salt_tmp = NULL;
 				return(0);
-			}
 		} else {
-			if (strlcat(	(char *)db_params->iv,
-					hex_tmp,
+			if (strlcat(	(char *)db_params->iv, hex_tmp,
 					IV_DIGEST_LEN + 1)
 					>= IV_DIGEST_LEN + 1)
-			{
-				free(salt_tmp); salt_tmp = NULL;
 				return(0);
-			}
 		}
 	}
 
@@ -639,12 +620,17 @@ kc_crypt_iv_salt(struct db_parameters *db_params)
 		printf("%s(): iv='%s'\n", __func__, db_params->iv);
 
 
+	salt_tmp = get_random_str(SALT_LEN, 2);
+	if (!salt_tmp) {
+		dprintf(STDERR_FILENO, "ERROR: Salt generation failure!\n");
+		return(0);
+	}
+
 	/* Setup the digest context */
 	mdctx = EVP_MD_CTX_create();
 	if (!mdctx) {
 		dprintf(STDERR_FILENO, "ERROR: Could not create digest context for IV!\n");
 
-		free(iv_tmp); iv_tmp = NULL;
 		free(salt_tmp); salt_tmp = NULL;
 		return(0);
 	}
@@ -661,25 +647,15 @@ kc_crypt_iv_salt(struct db_parameters *db_params)
 		snprintf(hex_tmp, 3, "%02x", digested[i]);
 
 		if (!i) {
-			if (strlcpy(	(char *)db_params->salt,
-					hex_tmp,
+			if (strlcpy(	(char *)db_params->salt, hex_tmp,
 					SALT_DIGEST_LEN + 1)
 					>= SALT_DIGEST_LEN + 1)
-			{
-				free(iv_tmp); iv_tmp = NULL;
-				free(salt_tmp); salt_tmp = NULL;
 				return(0);
-			}
 		} else {
-			if (strlcat(	(char *)db_params->salt,
-					hex_tmp,
+			if (strlcat(	(char *)db_params->salt, hex_tmp,
 					SALT_DIGEST_LEN + 1)
 					>= SALT_DIGEST_LEN + 1)
-			{
-				free(iv_tmp); iv_tmp = NULL;
-				free(salt_tmp); salt_tmp = NULL;
 				return(0);
-			}
 		}
 	}
 
