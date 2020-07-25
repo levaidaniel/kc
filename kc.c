@@ -411,7 +411,7 @@ main(int argc, char *argv[])
 		snprintf(db_params.db_filename, len, "%s/%s/%s", env_home, DEFAULT_DB_DIR, DEFAULT_DB_FILENAME);
 	}
 
-	/* This should be identical of what is in cmd_import.c */
+	/* This should be identical to what is in cmd_import.c */
 	/* if db_filename exists */
 	if (stat(db_params.db_filename, &st) == 0) {
 		newdb = 0;

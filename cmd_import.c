@@ -369,33 +369,29 @@ cmd_import(const char *e_line, command *commands)
 	} else {
 		/* encrypted database import */
 
-		/* This should be identical of what is in kc.c */
+		/* This should be identical to what is in kc.c */
 		if (stat(db_params_new.db_filename, &st) == 0) {
 
 			printf("Opening '%s'\n",db_params_new.db_filename);
 
 			if (!S_ISLNK(st.st_mode)  &&  !S_ISREG(st.st_mode)) {
 				dprintf(STDERR_FILENO, "ERROR: '%s' is not a regular file or a link!\n", db_params_new.db_filename);
-
 				goto exiting;
 			}
 
 			if (st.st_size == 0) {
 				dprintf(STDERR_FILENO, "ERROR: '%s' is an empty file!\n", db_params_new.db_filename);
-
 				goto exiting;
 			}
 
 			if (st.st_size <= IV_DIGEST_LEN + SALT_DIGEST_LEN + 2) {
 				dprintf(STDERR_FILENO, "ERROR: '%s' is a suspiciously small file!\n", db_params_new.db_filename);
-
 				goto exiting;
 			}
 
 			db_params_new.db_file = open(db_params_new.db_filename, O_RDONLY);
 			if (db_params_new.db_file < 0) {
 				perror("ERROR: open(database file)");
-
 				goto exiting;
 			}
 
@@ -409,12 +405,10 @@ cmd_import(const char *e_line, command *commands)
 
 			if (ret < 0) {
 				perror("ERROR: import: read IV(database file)");
-
 				goto exiting;
 			}
 			if (pos != IV_DIGEST_LEN) {
 				dprintf(STDERR_FILENO, "ERROR: Could not read IV from database file!\n");
-
 				goto exiting;
 			}
 
@@ -436,12 +430,10 @@ cmd_import(const char *e_line, command *commands)
 
 			if (ret < 0) {
 				perror("ERROR: import: read salt(database file)");
-
 				goto exiting;
 			}
 			if (pos != SALT_DIGEST_LEN) {
 				dprintf(STDERR_FILENO, "ERROR: Could not read salt from database file!\n");
-
 				goto exiting;
 			}
 
@@ -449,14 +441,12 @@ cmd_import(const char *e_line, command *commands)
 				printf("%s(): import: salt='%s'\n", __func__, db_params_new.salt);
 		} else {
 			perror("ERROR: Could not open database file");
-
 			goto exiting;
 		}
 
 		bio_chain = kc_setup_bio_chain(db_params_new.db_filename, 0);
 		if (!bio_chain) {
 			dprintf(STDERR_FILENO, "ERROR: Could not setup bio_chain!\n");
-
 			goto exiting;
 		}
 
@@ -500,7 +490,6 @@ cmd_import(const char *e_line, command *commands)
 		/* kc_crypt_key() and kc_crypt_setup() check from a few lines above */
 		if (!ret) {
 			dprintf(STDERR_FILENO, "ERROR: Could not setup decrypting!\n");
-
 			goto exiting;
 		}
 
@@ -527,7 +516,6 @@ cmd_import(const char *e_line, command *commands)
 
 		if (!db_new) {
 			dprintf(STDERR_FILENO, "ERROR: Could not parse XML document!\n");
-
 			goto exiting;
 		}
 	}
