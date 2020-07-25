@@ -74,10 +74,10 @@ cmd_status(const char *e_line, command *commands)
 	else
 		puts("no");
 
-	printf("YubiKey: ");
+	printf("Security key: ");
 #ifdef _HAVE_YUBIKEY
 	if (db_params.yk_slot)
-		printf("Slot #%d, Device #%d\n", db_params.yk_slot, db_params.yk_dev);
+		printf("YubiKey slot #%d at device #%d\n", db_params.yk_slot, db_params.yk_dev);
 	else
 #endif
 		puts("no");
