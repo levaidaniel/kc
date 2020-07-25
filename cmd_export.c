@@ -508,6 +508,7 @@ cmd_export(const char *e_line, command *commands)
 			dprintf(STDERR_FILENO, "ERROR: Could not setup encrypting!\n");
 			goto exiting;
 		}
+		memset(db_params_new.key, '\0', KEY_LEN);
 
 
 		if (kc_db_writer(db_tmp, bio_chain, &db_params_new))

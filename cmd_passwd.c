@@ -345,6 +345,7 @@ cmd_passwd(const char *e_line, command *commands)
 
 		goto exiting;
 	}
+	memset(db_params_tmp.key, '\0', KEY_LEN);
 
 	free(db_params.kdf); db_params.kdf = NULL;
 	db_params.kdf = strdup(db_params_tmp.kdf);

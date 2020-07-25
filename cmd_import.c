@@ -786,6 +786,7 @@ exiting:
 	if (db_params_new.db_file >= 0)
 		close(db_params_new.db_file);
 
+	memset(db_params_new.key, '\0', KEY_LEN);
 	if (db_params_new.pass) {
 		memset(db_params_new.pass, '\0', db_params_new.pass_len);
 		free(db_params_new.pass); db_params_new.pass = NULL;
