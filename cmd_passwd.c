@@ -331,7 +331,17 @@ cmd_passwd(const char *e_line, command *commands)
 	}
 
 
-	/* store the new IV/salt/key in our working copy of 'db_params' */
+	/* store the new key, IV and salt in our working copy of 'db_params' */
+	memcpy(db_params.key, db_params_tmp.key, KEY_LEN);
+	if (memcmp(db_params.key, db_params_tmp.key, KEY_LEN) != 0) {
+		dprintf(STDERR_FILENO, "ERROR: Could not copy encryption key!");
+		goto exiting;
+	}
+	memset(db_params_tmp.key, '\0', KEY_LEN);
+	if (db_params_tmp.pass)
+		memset(db_params_tmp.pass, '\0', db_params_tmp.pass_len);
+	free(db_params_tmp.pass); db_params_tmp.pass = NULL;
+
 	if (strlcpy((char *)db_params.iv, (const char*)db_params_tmp.iv, sizeof(db_params.iv)) >= sizeof(db_params.iv)) {
 		dprintf(STDERR_FILENO, "ERROR: Could not copy IV!\n");
 		goto exiting;
@@ -340,13 +350,6 @@ cmd_passwd(const char *e_line, command *commands)
 		dprintf(STDERR_FILENO, "ERROR: Could not copy salt!\n");
 		goto exiting;
 	}
-	memcpy(db_params.key, db_params_tmp.key, KEY_LEN);
-	if (memcmp(db_params.key, db_params_tmp.key, KEY_LEN) != 0) {
-		dprintf(STDERR_FILENO, "ERROR: Could not copy encryption key!");
-
-		goto exiting;
-	}
-	memset(db_params_tmp.key, '\0', KEY_LEN);
 
 	free(db_params.kdf); db_params.kdf = NULL;
 	db_params.kdf = strdup(db_params_tmp.kdf);
@@ -397,10 +400,10 @@ exiting:
 	free(ssha_comment); ssha_comment = NULL;
 
 	memset(db_params_tmp.key, '\0', KEY_LEN);
-	if (db_params_tmp.pass) {
+	if (db_params_tmp.pass)
 		memset(db_params_tmp.pass, '\0', db_params_tmp.pass_len);
-		free(db_params_tmp.pass); db_params_tmp.pass = NULL;
-	}
+	free(db_params_tmp.pass); db_params_tmp.pass = NULL;
+
 	free(db_params_tmp.kdf); db_params_tmp.kdf = NULL;
 	free(db_params_tmp.cipher); db_params_tmp.cipher = NULL;
 	free(db_params_tmp.cipher_mode); db_params_tmp.cipher_mode = NULL;

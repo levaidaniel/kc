@@ -509,6 +509,9 @@ cmd_export(const char *e_line, command *commands)
 			goto exiting;
 		}
 		memset(db_params_new.key, '\0', KEY_LEN);
+		if (db_params_new.pass)
+			memset(db_params_new.pass, '\0', db_params_new.pass_len);
+		free(db_params_new.pass); db_params_new.pass = NULL;
 
 
 		if (kc_db_writer(db_tmp, bio_chain, &db_params_new))
@@ -542,10 +545,10 @@ exiting:
 	free(cname); cname = NULL;
 
 	memset(db_params_new.key, '\0', KEY_LEN);
-	if (db_params_new.pass) {
+	if (db_params_new.pass)
 		memset(db_params_new.pass, '\0', db_params_new.pass_len);
-		free(db_params_new.pass); db_params_new.pass = NULL;
-	}
+	free(db_params_new.pass); db_params_new.pass = NULL;
+
 	free(db_params_new.kdf); db_params_new.kdf = NULL;
 	free(db_params_new.cipher); db_params_new.cipher = NULL;
 	free(db_params_new.cipher_mode); db_params_new.cipher_mode = NULL;

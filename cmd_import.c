@@ -482,7 +482,6 @@ cmd_import(const char *e_line, command *commands)
 
 		/* from here on now, we don't need to store the key or the password text anymore */
 		memset(db_params_new.key, '\0', KEY_LEN);
-
 		if (db_params_new.pass)
 			memset(db_params_new.pass, '\0', db_params_new.pass_len);
 		free(db_params_new.pass); db_params_new.pass = NULL;
@@ -787,10 +786,10 @@ exiting:
 		close(db_params_new.db_file);
 
 	memset(db_params_new.key, '\0', KEY_LEN);
-	if (db_params_new.pass) {
+	if (db_params_new.pass)
 		memset(db_params_new.pass, '\0', db_params_new.pass_len);
-		free(db_params_new.pass); db_params_new.pass = NULL;
-	}
+	free(db_params_new.pass); db_params_new.pass = NULL;
+
 	free(db_params_new.kdf); db_params_new.kdf = NULL;
 	free(db_params_new.cipher); db_params_new.cipher = NULL;
 	free(db_params_new.cipher_mode); db_params_new.cipher_mode = NULL;
