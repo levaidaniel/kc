@@ -227,12 +227,12 @@ cmd_passwd(const char *e_line, command *commands)
 		printf("Using YubiKey slot #%d on device #%d%s\n", db_params_tmp.yk_slot, db_params_tmp.yk_dev, (db_params_tmp.yk_password ? " and a password" : ""));
 
 
-	/* db_param_tmp defaults, if none were specified */
+	/* use original KDF, if none was specified */
 	if (!db_params_tmp.kdf) {
-		len = strlen(DEFAULT_KDF) + 1;
+		len = strlen(db_params.kdf) + 1;
 		db_params_tmp.kdf = malloc(len); malloc_check(db_params_tmp.kdf);
-		if (strlcpy(db_params_tmp.kdf, DEFAULT_KDF, len) >= len) {
-			dprintf(STDERR_FILENO, "ERROR: Error while setting up default database parameters (kdf).\n");
+		if (strlcpy(db_params_tmp.kdf, db_params.kdf, len) >= len) {
+			dprintf(STDERR_FILENO, "ERROR: Error while setting up database parameters (kdf).\n");
 			goto exiting;
 		}
 	}
@@ -259,11 +259,12 @@ cmd_passwd(const char *e_line, command *commands)
 		goto exiting;
 	}
 
+	/* use original encryption cipher, if none was specified */
 	if (!db_params_tmp.cipher) {
-		len = strlen(DEFAULT_CIPHER) + 1;
+		len = strlen(db_params.cipher) + 1;
 		db_params_tmp.cipher = malloc(len); malloc_check(db_params_tmp.cipher);
-		if (strlcpy(db_params_tmp.cipher, DEFAULT_CIPHER, len) >= len) {
-			dprintf(STDERR_FILENO, "ERROR: Error while setting up default database parameters (cipher).\n");
+		if (strlcpy(db_params_tmp.cipher, db_params.cipher, len) >= len) {
+			dprintf(STDERR_FILENO, "ERROR: Error while setting up database parameters (cipher).\n");
 			quit(EXIT_FAILURE);
 		}
 	}
