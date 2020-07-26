@@ -383,6 +383,7 @@ cmd_passwd(const char *e_line, command *commands)
 
 	db_params.pass_len = db_params_tmp.pass_len;
 
+	cmd_status(NULL, NULL);
 	cmd_write(NULL, NULL);
 	puts("Password change OK");
 
