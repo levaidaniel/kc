@@ -59,7 +59,7 @@ if [ $SKIP -eq 0 ];then
 		exit 1
 	fi
 
-	if printf "${PASSWORD}\n${PASSWORD}\npasswd -A ssh-rsa,PuBkEy_+*()[]{}';.!@#^&=-/|_comment-rsa:2048 -P bcrypt -e blowfish -m cfb\n" |${KC_RUN} -b -k ${KC_DB} -P bcrypt -e blowfish -m cfb -A "ssh-rsa,PuBkEy_+*()[]{}';.!@#^&=-/|_comment-rsa:2048,password";then
+	if printf "${PASSWORD}\npasswd -A ssh-rsa,PuBkEy_+*()[]{}';.!@#^&=-/|_comment-rsa:2048 -P bcrypt -e blowfish -m cfb\n" |${KC_RUN} -b -k ${KC_DB} -P bcrypt -e blowfish -m cfb -A "ssh-rsa,PuBkEy_+*()[]{}';.!@#^&=-/|_comment-rsa:2048,password";then
 		echo "$0 test ok (SSH agent with password, bcrypt KDF, blowfish cipher, cfb cipher mode)!"
 	else
 		echo "$0 test failed (SSH agent with password, bcrypt KDF, blowfish cipher, cfb cipher mode)!"
