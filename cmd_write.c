@@ -74,12 +74,10 @@ cmd_write(const char *e_line, command *commands)
 			>= IV_DIGEST_LEN + 1)
 	{
 		dprintf(STDERR_FILENO, "ERROR: Could not duplicate the original IV!\n");
-
 		goto exiting;
 	}
 	if (strncmp((const char *)db_params_tmp.iv, (const char *)db_params.iv, IV_DIGEST_LEN) != 0) {
 		puts("The new and the original IV do not match!");
-
 		goto exiting;
 	}
 
@@ -89,12 +87,10 @@ cmd_write(const char *e_line, command *commands)
 			>= SALT_DIGEST_LEN + 1)
 	{
 		dprintf(STDERR_FILENO, "ERROR: Could not duplicate the original salt!\n");
-
 		goto exiting;
 	}
 	if (strncmp((const char *)db_params_tmp.salt, (const char *)db_params.salt, SALT_DIGEST_LEN) != 0) {
 		puts("The new and the original salt do not match!");
-
 		goto exiting;
 	}
 
@@ -103,32 +99,27 @@ cmd_write(const char *e_line, command *commands)
 
 	if (strlcpy(db_params_tmp.db_filename, db_params.db_filename, MAXPATHLEN) >= MAXPATHLEN) {
 		dprintf(STDERR_FILENO, "ERROR: Could not construct a temporary filename!\n");
-
 		goto exiting;
 	}
 
 	rand_str = get_random_str(6, 0);
 	if (!rand_str) {
 		dprintf(STDERR_FILENO, "ERROR: Could not create a random string for a temporary filename!\n");
-
 		goto exiting;
 	}
 	if (strlcat(db_params_tmp.db_filename, rand_str, MAXPATHLEN) >= MAXPATHLEN) {
 		dprintf(STDERR_FILENO, "ERROR: Could not construct a temporary filename #2!\n");
-
 		goto exiting;
 	}
 
 	if (stat(db_params_tmp.db_filename, &st) == 0) {	/* if temporary database filename exists */
 		perror("ERROR: Could not create temporary database file (exists)!");
-
 		goto exiting;
 	}
 
 	db_params_tmp.db_file = open(db_params_tmp.db_filename, O_RDWR | O_CREAT, 0600);
 	if (db_params_tmp.db_file < 0) {
 		perror("ERROR: Could not create temporary database file");
-
 		goto exiting;
 	}
 
@@ -136,7 +127,6 @@ cmd_write(const char *e_line, command *commands)
 	bio_chain_tmp = kc_setup_bio_chain(db_params_tmp.db_filename, 1);
 	if (!bio_chain_tmp) {
 		dprintf(STDERR_FILENO, "ERROR: Could not setup bio_chain_tmp!\n");
-
 		goto exiting;
 	}
 
@@ -144,13 +134,11 @@ cmd_write(const char *e_line, command *commands)
 	memcpy(db_params_tmp.key, db_params.key, KEY_LEN);
 	if (memcmp(db_params_tmp.key, db_params.key, KEY_LEN) != 0) {
 		dprintf(STDERR_FILENO, "ERROR: Could not duplicate the original encryption key!\n");
-
 		goto exiting;
 	}
 	/* Setup cipher mode, turn on encrypting, etc... */
 	if (!kc_crypt_setup(bio_chain_tmp, 1, &db_params_tmp)) {
 		dprintf(STDERR_FILENO, "ERROR: Could not setup encrypting!\n");
-
 		goto exiting;
 	}
 	memset(db_params_tmp.key, '\0', KEY_LEN);
@@ -158,7 +146,6 @@ cmd_write(const char *e_line, command *commands)
 
 	if (!kc_db_writer(db, bio_chain_tmp, &db_params_tmp)) {
 		dprintf(STDERR_FILENO, "ERROR: There was an error while trying to save the database!\n");
-
 		goto exiting;
 	}
 
@@ -169,7 +156,6 @@ cmd_write(const char *e_line, command *commands)
 
 	if (st.st_size <= IV_DIGEST_LEN + SALT_DIGEST_LEN + 2) {
 		puts("Temporary database file became unusually small!");
-
 		goto exiting;
 	}
 
