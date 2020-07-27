@@ -621,7 +621,8 @@ kc_ssha_get_password(struct db_parameters *db_params)
 	ret = 1;
 
 exiting:
-	memset(passtmp, '\0', passtmp_len);
+	if (passtmp)
+		memset(passtmp, '\0', passtmp_len);
 	free(passtmp); passtmp = NULL;
 	passtmp_len = 0;
 

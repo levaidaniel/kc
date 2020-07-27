@@ -184,7 +184,8 @@ kc_ykchalresp(struct db_parameters *db_params)
 	}
 
 err:
-	memset(passtmp, '\0', passtmp_len);
+	if (passtmp)
+		memset(passtmp, '\0', passtmp_len);
 	free(passtmp); passtmp = NULL;
 	passtmp_len = 0;
 
