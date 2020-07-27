@@ -11,6 +11,7 @@ regress/test*
 # Core files
 kc.core
 core
+coredumps
 
 # Vim swap files
 .*.swp
