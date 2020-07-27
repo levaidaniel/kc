@@ -42,7 +42,6 @@ cmd_clipboard(const char *e_line, command *commands)
 	unsigned char		app = 0;	/* 1=tmux, 2=xclip PRIMARY, 3=xclip CLIPBOARD */
 
 	char		**fork_argv = NULL;
-	int		child;
 	int		pipefd[2];
 
 
@@ -138,7 +137,7 @@ cmd_clipboard(const char *e_line, command *commands)
 		switch (app) {
 			case 1:
 				/* Copy value to tmux paste buffer */
-				switch (child = fork()) {
+				switch (fork()) {
 					case -1:
 						perror("\nERROR: Couldn't fork(2) for tmux(1)");
 						break;
@@ -185,7 +184,7 @@ cmd_clipboard(const char *e_line, command *commands)
 
 				pipe(pipefd);
 
-				switch (child = fork()) {
+				switch (fork()) {
 					case -1:
 						perror("\nERROR: Couldn't fork(2) for xclip(1)");
 						break;
