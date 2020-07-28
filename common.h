@@ -46,6 +46,9 @@
 #define	SALT_DIGEST_LEN	128
 #define	KEY_LEN		128
 
+#define KC_BCRYPT_PBKDF_ROUNDS		36
+#define KC_PKCS_PBKDF2_ITERATIONS	100000
+
 #define	TIME_MAXLEN	11
 
 #define	ITEMS_MAX	ULONG_MAX
@@ -55,9 +58,6 @@
 #define	DEFAULT_KDF	"sha512"
 #define	DEFAULT_CIPHER	"aes256"
 #define	DEFAULT_MODE	"cbc"
-
-#define KC_BCRYPT_PBKDF_ROUNDS		36
-#define KC_PKCS_PBKDF2_ITERATIONS	100000
 
 
 typedef struct db_parameters {
