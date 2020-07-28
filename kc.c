@@ -625,6 +625,12 @@ main(int argc, char *argv[])
 		}
 	}
 
+
+	if (newdb)
+		puts("Initializing...");
+	else
+		puts("Decrypting...");
+
 	/* Setup cipher mode and turn on decrypting */
 	if (	kc_crypt_key(&db_params) != 1  ||
 		kc_crypt_setup(bio_chain, 0, &db_params) != 1
