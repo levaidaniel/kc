@@ -113,6 +113,11 @@ cmd_cnew(const char *e_line, command *commands)
 			return;
 		}
 	}
+
+	/* remove trailing space(s) from the keychain name */
+	while (name[xmlStrlen(name) - 1] == ' ')
+		name[xmlStrlen(name) - 1] = '\0';
+
 	if (getenv("KC_DEBUG"))
 		printf("%s(): new keychain is '%s'\n", __func__, name);
 

@@ -71,6 +71,10 @@ cmd_c(const char *e_line, command *commands)
 		return;
 	}
 
+	/* remove trailing space(s) from the keychain name */
+	while (cname[xmlStrlen(cname) - 1] == ' ')
+		cname[xmlStrlen(cname) - 1] = '\0';
+
 	db_node = find_keychain(cname, name);
 	if (db_node)
 		keychain = db_node;

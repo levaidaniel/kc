@@ -14,8 +14,10 @@
 
   One can salvage their legacy database(s) and fill in the missing attributes.
 * `new` and `cnew` commands support spaces in key and keychain names (respectively) when specifying them on the command line.
+
+  With the exception being that any trailing spaces from a keychain name will be stripped.
 * `info` command shows how many lines there are in the value, and how many keys there are in the keychain.
-* `c` command supports keychain names with spaces in them.
+* `c` command supports keychain names with spaces in them, with the exception being that any trailing spaces from a keychain name will be stripped.
 * Removed support for the SHA-1 KDF.
 
   If you've been using the SHA-1 based KDF, before you upgrade, you need to change that to anything else with the 'passwd' or the 'export' command. Note that you would've had to explicitly specify this to use, as the default has always been SHA-2 512.
@@ -24,7 +26,7 @@
 * SHA-\* KDF default iterations changed to 100000 and bcrypt KDF default rounds changed to 36.
 
   Opening older datases where the defaults were smaller is possible with the '-R' option.
-* Added support for aes256 ctr cipher mode.
-* Removed support for blowfish ecb cipher mode.
+* Added support for aes256 ctr encryption cipher mode.
+* Removed support for blowfish ecb encryption cipher mode.
 * Added support for POSIX regex functions (it can be used instead of PCRE).
 * Documentation and manual page fixes.
