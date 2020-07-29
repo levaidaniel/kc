@@ -6,7 +6,7 @@ set -e
 echo "test => $0"
 
 
-SHA1=$(printf "info\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." -e "^Using password file: ${KC_PASSFILE}" |sed -e 's/^\(Created: \).*$/\1/' -e 's/^\(Modified: \).*$/\1/' |$SHA1_BIN |cut -d' ' -f1)
+SHA1=$(printf "info\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." -e "^Using password file: ${KC_PASSFILE}" -e "^Decrypting\.\.\." |sed -e 's/^\(Created: \).*$/\1/' -e 's/^\(Modified: \).*$/\1/' |$SHA1_BIN |cut -d' ' -f1)
 if [ "$SHA1" = 'bb1acfb7755f2b6c4852268f4f0a6f34ea98c98e' ];then
 	echo "$0 test ok (keychain description/created/modified)!"
 else
@@ -14,7 +14,7 @@ else
 	exit 1
 fi
 
-SHA1=$(printf "info 0\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." -e "^Using password file: ${KC_PASSFILE}" |sed -e 's/^\(Created: \).*$/\1/' -e 's/^\(Modified: \).*$/\1/' |$SHA1_BIN |cut -d' ' -f1)
+SHA1=$(printf "info 0\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." -e "^Using password file: ${KC_PASSFILE}" -e "^Decrypting\.\.\." |sed -e 's/^\(Created: \).*$/\1/' -e 's/^\(Modified: \).*$/\1/' |$SHA1_BIN |cut -d' ' -f1)
 if [ "$SHA1" = 'baaa95a6be6964811f8cbc962cb697b3e4dff386' ];then
 	echo "$0 test ok (key created/modified)!"
 else
@@ -38,7 +38,7 @@ else
 	exit 1
 fi
 
-SHA1=$(printf 'new multiline\nml1\\nml2\\nml3\ninfo 3\n' |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% NEW value>' -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." -e "^Using password file: ${KC_PASSFILE}" |sed -e 's/^\(Created: \).*$/\1/' -e 's/^\(Modified: \).*$/\1/' |$SHA1_BIN |cut -d' ' -f1)
+SHA1=$(printf 'new multiline\nml1\\nml2\\nml3\ninfo 3\n' |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% NEW value>' -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." -e "^Using password file: ${KC_PASSFILE}" -e "^Decrypting\.\.\." |sed -e 's/^\(Created: \).*$/\1/' -e 's/^\(Modified: \).*$/\1/' |$SHA1_BIN |cut -d' ' -f1)
 if [ "$SHA1" = 'bfdf0c600d9449e16a3df1e50adcd6121f3db7c0' ];then
 	echo "$0 test ok (number of lines)!"
 else
