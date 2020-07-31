@@ -477,6 +477,8 @@ cmd_import(const char *e_line, command *commands)
 				goto exiting;
 		}
 
+		puts("Decrypting...");
+
 		/* Setup cipher mode and turn on decrypting */
 		ret = kc_crypt_key(&db_params_new)  &&  kc_crypt_setup(bio_chain, 0, &db_params_new);
 

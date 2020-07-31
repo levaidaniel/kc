@@ -322,6 +322,8 @@ cmd_passwd(const char *e_line, command *commands)
 			goto exiting;
 	}
 
+	puts("Encrypting...");
+
 	/* Setup cipher mode and turn on encrypting */
 	if (	kc_crypt_key(&db_params_tmp) != 1  ||
 		kc_crypt_setup(bio_chain, 1, &db_params_tmp) != 1
