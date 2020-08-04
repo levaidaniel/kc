@@ -76,6 +76,12 @@ will create a temporary file (under the same directory as the opened database fi
 When this succeeds, only then will
 .Nm
 replace the old database with the new one, so you will always have a usable and intact (but potentially older) version of your database file.
+.Pp
+On OpenBSD
+.Nm
+tries to use
+.Xr pledge 2
+but see also the CAVEATS section.
 .Ss PARAMETERS
 .Bl -tag -offset ||| -width |
 .It Fl k Ar file
@@ -186,7 +192,9 @@ KDF to use with the password.
 Valid parameters are:
 .Bl -tag -offset ||| -width |
 .It Ar sha3
-OpenSSL's PKCS5 PBKDF2 with SHA-3 512.
+OpenSSL's PKCS5 PBKDF2 with SHA-3 512
+.Po not available in LibreSSL on OpenBSD
+.Pc .
 .It Ar sha512
 OpenSSL's PKCS5 PBKDF2 with SHA-2 512.
 This is the default.
@@ -1158,6 +1166,15 @@ or
 as the cipher mode, there is no specific sign if you enter a wrong password during opening a database; in this case the database will seem to be corrupt after decrypting, and
 .Nm
 simply will not be able to open it.
+.It
+On OpenBSD
+.Nm
+uses
+.Xr pledge 2
+to restrict its access to certain functions, but only when
+.Em not
+compiled with YubiKey support. Currently the way yubikey libraries access USB devices cannot be allowed by any promise for
+.Xr pledge 2 .
 .It
 There is a Perl script in the source package (available from the project website) that converts an exported pwsafe database to a
 .Nm
