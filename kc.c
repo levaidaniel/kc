@@ -57,8 +57,6 @@ command		*commands_first = NULL;
 
 xmlDocPtr	db = NULL;
 xmlNodePtr	keychain = NULL;
-char		*keychain_start = NULL;
-char		keychain_start_name = 0;
 
 unsigned char	batchmode = 0;
 
@@ -92,17 +90,13 @@ main(int argc, char *argv[])
 	struct stat	st;
 	char		*env_home = NULL;
 	unsigned char	newdb = 0;
-	char		*ssha_type = NULL, *ssha_comment = NULL;
-
-#ifdef _HAVE_YUBIKEY
-	unsigned long int	ykchalresp = 0;
-#endif
 
 	xmlNodePtr	db_root = NULL;
 
-	int		c = 0;
-	char		*opts = NULL, *inv = NULL;
+	char		*opts = NULL;
 	size_t		len = 0;
+
+	extra_parameters	params;
 
 	unsigned long int	count_keychains = 0, count_keys = 0;
 
@@ -120,6 +114,10 @@ main(int argc, char *argv[])
 	}
 #endif
 
+
+	params.caller = "main";
+	params.keychain_start = NULL;
+	params.keychain_start_name = 0;
 
 	/* db_param defaults */
 	db_params.ssha_type[0] = '\0';
@@ -146,179 +144,37 @@ main(int argc, char *argv[])
 #else
 	opts = "A:k:c:C:rp:P:R:e:m:bBvh";
 #endif
-	while ((c = getopt(argc, argv, opts)) != -1)
-		switch (c) {
-			case 'A':
-				if (strlen(db_params.ssha_type)  ||  strlen(db_params.ssha_comment)) {
-					dprintf(STDERR_FILENO, "ERROR: Please specify the '-%c' option only once!\n", c);
-					quit(EXIT_FAILURE);
-				}
-
-
-				ssha_type = strndup(strsep(&optarg, ","), 11);
-				if (ssha_type == NULL  ||  !strlen(ssha_type)) {
-					dprintf(STDERR_FILENO, "ERROR: SSH key type is empty!\n");
-					quit(EXIT_FAILURE);
-				}
-				if (	strncmp(ssha_type, "ssh-rsa", 7) != 0  &&
-					strncmp(ssha_type, "ssh-ed25519", 11) != 0
-				) {
-					dprintf(STDERR_FILENO, "ERROR: SSH key type is unsupported: '%s'\n", ssha_type);
-					quit(EXIT_FAILURE);
-				}
-
-				ssha_comment = strndup(strsep(&optarg, ","), 512);
-				if (ssha_comment == NULL  ||  !strlen(ssha_comment)) {
-					dprintf(STDERR_FILENO, "ERROR: SSH key comment is empty!\n");
-					quit(EXIT_FAILURE);
-				}
-
-				if (strlcpy(db_params.ssha_type, ssha_type, sizeof(db_params.ssha_type)) >= sizeof(db_params.ssha_type)) {
-					dprintf(STDERR_FILENO, "ERROR: Error while getting SSH key type.\n");
-					quit(EXIT_FAILURE);
-				}
-
-				if (strlcpy(db_params.ssha_comment, ssha_comment, sizeof(db_params.ssha_comment)) >= sizeof(db_params.ssha_comment)) {
-					dprintf(STDERR_FILENO, "ERROR: Error while getting SSH key comment.\n");
-					quit(EXIT_FAILURE);
-				}
-
-				if (optarg  &&  strncmp(optarg, "password", 8) == 0) {
-					db_params.ssha_password = 1;
-				}
-			break;
-			case 'k':
-				db_params.db_filename = optarg;
-			break;
-			case 'c':
-				keychain_start = optarg;
-			break;
-			case 'C':
-				keychain_start = optarg;
-				keychain_start_name = 1;
-			break;
-			case 'r':
-				db_params.readonly = 1;
-			break;
-			case 'p':
-				db_params.pass_filename = optarg;
-
-				printf("Using password file: %s\n", db_params.pass_filename);
-			break;
-			case 'P':
-				if (db_params.kdf) {
-					dprintf(STDERR_FILENO, "ERROR: Please specify the '-%c' option only once!\n", c);
-					quit(EXIT_FAILURE);
-				}
-				db_params.kdf = strdup(optarg); malloc_check(db_params.kdf);
-			break;
-			case 'R':
-				if (db_params.kdf_reps) {
-					dprintf(STDERR_FILENO, "ERROR: Please specify the '-%c' option only once!\n", c);
-					quit(EXIT_FAILURE);
-				}
-
-
-				if (optarg[0] == '-') {
-					dprintf(STDERR_FILENO, "ERROR: KDF iterations parameter seems to be negative.\n");
-					quit(EXIT_FAILURE);
-				}
-
-				db_params.kdf_reps = strtoul(optarg, &inv, 10);
-				if (inv[0] != '\0') {
-					dprintf(STDERR_FILENO, "ERROR: Unable to convert the KDF iterations parameter.\n");
-					quit(EXIT_FAILURE);
-				}
-			break;
-			case 'e':
-				if (db_params.cipher) {
-					dprintf(STDERR_FILENO, "ERROR: Please specify the '-%c' option only once!\n", c);
-					quit(EXIT_FAILURE);
-				}
-				db_params.cipher = strdup(optarg); malloc_check(db_params.cipher);
-			break;
-			case 'm':
-				if (db_params.cipher_mode) {
-					dprintf(STDERR_FILENO, "ERROR: Please specify the '-%c' option only once!\n", c);
-					quit(EXIT_FAILURE);
-				}
-				db_params.cipher_mode = strdup(optarg); malloc_check(db_params.cipher_mode);
-			break;
-#ifdef _HAVE_YUBIKEY
-			case 'Y':
-				if (db_params.yk_slot) {
-					dprintf(STDERR_FILENO, "ERROR: Please specify the '-%c' option only once!\n", c);
-					quit(EXIT_FAILURE);
-				}
-
-
-				if (optarg[0] == '-') {
-					dprintf(STDERR_FILENO, "ERROR: YubiKey slot/device parameter seems to be negative.\n");
-					quit(EXIT_FAILURE);
-				}
-
-				ykchalresp = strtoul(strsep(&optarg, ","), &inv, 10);
-				if (inv[0] == '\0') {
-					if (ykchalresp <= 0  ||  ykchalresp > 29) {
-						dprintf(STDERR_FILENO, "ERROR: YubiKey slot/device parameter is invalid.\n");
-						quit(EXIT_FAILURE);
-					} else if (ykchalresp < 10) {
-						db_params.yk_slot = ykchalresp;
-						db_params.yk_dev = 0;
-					} else {
-						db_params.yk_slot = ykchalresp / 10 ;
-						db_params.yk_dev = ykchalresp - (ykchalresp / 10 * 10);
-					}
-				} else {
-					dprintf(STDERR_FILENO, "ERROR: Unable to convert the YubiKey slot/device parameter.\n");
-					quit(EXIT_FAILURE);
-				}
-
-				if (db_params.yk_slot > 2  ||  db_params.yk_slot < 1) {
-					dprintf(STDERR_FILENO, "ERROR: YubiKey slot number is not 1 or 2.\n");
-					quit(EXIT_FAILURE);
-				}
-
-				if (optarg  &&  strncmp(strsep(&optarg, ","), "password", 8) == 0) {
-					db_params.yk_password = 1;
-				}
-			break;
-#endif
-			case 'b':
-				batchmode = 1;
-			break;
-			case 'B':
-				batchmode = 2;
-			break;
-			case 'v':
-				version();
-				exit(EXIT_SUCCESS);
-			break;
-			case 'h':
-				/* FALLTHROUGH */
-			default:
-				printf( "%s [-k <file>] [-r] [-c/-C <keychain>] [-A <key type,key comment>] [-Y <YubiKey slot><YubiKey device index>] [-p <file>] [-P <kdf>] [-R <kdf iterations>] [-e <cipher>] [-m <mode>] [-B/-b] [-v] [-h]\n\n", argv[0]);
-				printf(	"-k <file>: Use file as database. The default is ~/.kc/default.kcd .\n"
-					"-r: Open the database in read-only mode.\n"
-					"-c/-C <keychain>: Start in <keychain>.\n"
-					"-A <key type,key comment>: Use an SSH agent to provide password.\n"
-					"-Y <YubiKey slot><YubiKey device index>: Use a YubiKey to provide password.\n"
-					"-p <file>: Read password from file.\n"
-					"-P <kdf>: KDF to use.\n"
-					"-R <iterations>: Number of KDF iterations to use.\n"
-					"-e <cipher>: Encryption cipher.\n"
-					"-m <mode>: Cipher mode.\n"
-					"-B/-b: Batch mode.\n"
-					"-v: Display version.\n"
-					"-h: This help.\n"
-					"\nPlease see the manual for more information.\n");
-				exit(EXIT_FAILURE);
-			break;
-		}
-
-	/* clean up after option parsing */
-	free(ssha_type); ssha_type = NULL;
-	free(ssha_comment); ssha_comment = NULL;
+	switch (kc_arg_parser(argc, argv, opts, &db_params, &params)) {
+		case -1:
+			quit(EXIT_FAILURE);
+		break;
+		case 0:
+			printf( "%s [-k <file>] [-r] [-c/-C <keychain>] [-A <key type,key comment>] [-Y <YubiKey slot><YubiKey device index>] [-p <file>] [-P <kdf>] [-R <kdf iterations>] [-e <cipher>] [-m <mode>] [-B/-b] [-v] [-h]\n\n", argv[0]);
+			printf(	"-k <file>: Use file as database. The default is ~/.kc/default.kcd .\n"
+				"-r: Open the database in read-only mode.\n"
+				"-c/-C <keychain>: Start in <keychain>.\n"
+				"-A <key type,key comment>: Use an SSH agent to provide password.\n"
+				"-Y <YubiKey slot><YubiKey device index>: Use a YubiKey to provide password.\n"
+				"-p <file>: Read password from file.\n"
+				"-P <kdf>: KDF to use.\n"
+				"-R <iterations>: Number of KDF iterations to use.\n"
+				"-e <cipher>: Encryption cipher.\n"
+				"-m <mode>: Cipher mode.\n"
+				"-B/-b: Batch mode.\n"
+				"-v: Display version.\n"
+				"-h: This help.\n"
+				"\nPlease see the manual for more information.\n");
+			quit(EXIT_SUCCESS);
+		break;
+		case 1:
+			if (getenv("KC_DEBUG"))
+				printf("%s(): Parameter parsing is successful.\n", __func__);
+		break;
+		case 2:
+			version();
+			quit(EXIT_SUCCESS);
+		break;
+	}
 
 	/* print some status information after parsing the options */
 	if (	(strlen(db_params.ssha_type)  &&  db_params.yk_slot)  &&
@@ -758,13 +614,13 @@ main(int argc, char *argv[])
 		 * be able to search in it
 		 */
 		keychain = db_root->children->next;
-		if (keychain_start) {
+		if (params.keychain_start) {
 			/* Start with the specified keychain */
-			keychain = find_keychain(BAD_CAST keychain_start, keychain_start_name);
+			keychain = find_keychain(BAD_CAST params.keychain_start, params.keychain_start_name);
 			if (keychain) {
-				printf("Starting with keychain '%s'.\n", keychain_start);
+				printf("Starting with keychain '%s'.\n", params.keychain_start);
 			} else {
-				printf("Keychain '%s' not found, starting with the first one!\n", keychain_start);
+				printf("Keychain '%s' not found, starting with the first one!\n", params.keychain_start);
 				keychain = db_root->children->next;
 			}
 		} else {

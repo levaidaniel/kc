@@ -83,6 +83,20 @@ typedef struct db_parameters {
 	unsigned char	readonly;
 } db_parameters;
 
+typedef struct extra_parameters {
+	char		*caller;
+
+	/* for main() */
+	char		*keychain_start;
+	char		keychain_start_name;
+
+	/* for cmd_export() */
+	xmlChar		*cname;
+
+	/* for cmd_import() */
+	char		legacy;
+} extra_parameters;
+
 
 #define	KC_DTD	"\
 <!ELEMENT kc (keychain)*> \

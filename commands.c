@@ -1124,3 +1124,211 @@ kc_db_reader(char **buf, BIO *bio_chain)
 
 	return(pos);
 } /* kc_db_reader() */
+
+
+char kc_arg_parser(int largc, char **largv, const char *opts, db_parameters *db_params, extra_parameters *extra_params)
+{
+	char		*ssha_type = NULL, *ssha_comment = NULL;
+
+#ifdef _HAVE_YUBIKEY
+	unsigned long int	ykchalresp = 0;
+#endif
+	char		*inv = NULL;
+	int		c = 0;
+
+
+	if (getenv("KC_DEBUG"))
+		printf("%s(): caller='%s'\n", __func__, extra_params->caller);
+
+	optind = 0;
+	while ((c = getopt(largc, largv, opts)) != -1)
+		switch (c) {
+			case 'c':
+				if (strncmp(extra_params->caller, "main", 4) == 0) {
+					extra_params->keychain_start = optarg;
+				} else if (strncmp(extra_params->caller, "export", 6) == 0) {
+					free(extra_params->cname); extra_params->cname = NULL;
+					extra_params->cname = BAD_CAST strdup(optarg);
+					if (!extra_params->cname) {
+						perror("ERROR: Could not duplicate the keychain name");
+						return(-1);
+					}
+				}
+			break;
+			case 'C':
+				if (strncmp(extra_params->caller, "main", 4) == 0) {
+					extra_params->keychain_start = optarg;
+					extra_params->keychain_start_name = 1;
+				}
+			break;
+			case 'r':
+				if (strncmp(extra_params->caller, "main", 4) == 0) {
+					db_params->readonly = 1;
+				}
+			break;
+			case 'p':
+				if (strncmp(extra_params->caller, "main", 4) == 0) {
+					db_params->pass_filename = optarg;
+					printf("Using password file: %s\n", db_params->pass_filename);
+				}
+			break;
+			case 'b':
+				if (strncmp(extra_params->caller, "main", 4) == 0)
+					batchmode = 1;
+			break;
+			case 'B':
+				if (strncmp(extra_params->caller, "main", 4) == 0)
+					batchmode = 2;
+			break;
+			case 'A':
+				if (strlen(db_params->ssha_type)  ||  strlen(db_params->ssha_comment)) {
+					dprintf(STDERR_FILENO, "ERROR: Please specify the '-%c' option only once!\n", c);
+					return(-1);
+				}
+
+
+				ssha_type = strndup(strsep(&optarg, ","), 11);
+				if (ssha_type == NULL  ||  !strlen(ssha_type)) {
+					dprintf(STDERR_FILENO, "ERROR: SSH key type is empty!\n");
+					return(-1);
+				}
+				if (	strncmp(ssha_type, "ssh-rsa", 7) != 0  &&
+					strncmp(ssha_type, "ssh-ed25519", 11) != 0
+				) {
+					dprintf(STDERR_FILENO, "ERROR: SSH key type is unsupported: '%s'\n", ssha_type);
+					return(-1);
+				}
+
+				ssha_comment = strndup(strsep(&optarg, ","), 512);
+				if (ssha_comment == NULL  ||  !strlen(ssha_comment)) {
+					dprintf(STDERR_FILENO, "ERROR: SSH key comment is empty!\n");
+					return(-1);
+				}
+
+				if (strlcpy(db_params->ssha_type, ssha_type, sizeof(db_params->ssha_type)) >= sizeof(db_params->ssha_type)) {
+					dprintf(STDERR_FILENO, "ERROR: Error while getting SSH key type.\n");
+					return(-1);
+				}
+
+				if (strlcpy(db_params->ssha_comment, ssha_comment, sizeof(db_params->ssha_comment)) >= sizeof(db_params->ssha_comment)) {
+					dprintf(STDERR_FILENO, "ERROR: Error while getting SSH key comment.\n");
+					return(-1);
+				}
+
+				if (optarg  &&  strncmp(optarg, "password", 8) == 0) {
+					db_params->ssha_password = 1;
+				}
+			break;
+			case 'k':
+				if (strncmp(extra_params->caller, "main", 4) == 0) {
+					db_params->db_filename = optarg;
+				} else if (strncmp(extra_params->caller, "export", 6) == 0  ||
+					strncmp(extra_params->caller, "import", 6) == 0
+				) {
+					free(db_params->db_filename); db_params->db_filename = NULL;
+					db_params->db_filename = strdup(optarg);
+					if (!db_params->db_filename) {
+						perror("ERROR: Could not duplicate the database file name");
+						return(-1);
+					}
+				}
+			break;
+			case 'P':
+				if (db_params->kdf) {
+					dprintf(STDERR_FILENO, "ERROR: Please specify the '-%c' option only once!\n", c);
+					return(-1);
+				}
+				db_params->kdf = strdup(optarg); malloc_check(db_params->kdf);
+			break;
+			case 'R':
+				if (db_params->kdf_reps) {
+					dprintf(STDERR_FILENO, "ERROR: Please specify the '-%c' option only once!\n", c);
+					return(-1);
+				}
+
+
+				if (optarg[0] == '-') {
+					dprintf(STDERR_FILENO, "ERROR: KDF iterations parameter seems to be negative.\n");
+					return(-1);
+				}
+
+				db_params->kdf_reps = strtoul(optarg, &inv, 10);
+				if (inv[0] != '\0') {
+					dprintf(STDERR_FILENO, "ERROR: Unable to convert the KDF iterations parameter.\n");
+					return(-1);
+				}
+			break;
+			case 'e':
+				if (db_params->cipher) {
+					dprintf(STDERR_FILENO, "ERROR: Please specify the '-%c' option only once!\n", c);
+					return(-1);
+				}
+				db_params->cipher = strdup(optarg); malloc_check(db_params->cipher);
+			break;
+			case 'm':
+				if (db_params->cipher_mode) {
+					dprintf(STDERR_FILENO, "ERROR: Please specify the '-%c' option only once!\n", c);
+					return(-1);
+				}
+				db_params->cipher_mode = strdup(optarg); malloc_check(db_params->cipher_mode);
+			break;
+#ifdef _HAVE_YUBIKEY
+			case 'Y':
+				if (db_params->yk_slot) {
+					dprintf(STDERR_FILENO, "ERROR: Please specify the '-%c' option only once!\n", c);
+					return(-1);
+				}
+
+
+				if (optarg[0] == '-') {
+					dprintf(STDERR_FILENO, "ERROR: YubiKey slot/device parameter seems to be negative.\n");
+					return(-1);
+				}
+
+				ykchalresp = strtoul(strsep(&optarg, ","), &inv, 10);
+				if (inv[0] == '\0') {
+					if (ykchalresp <= 0  ||  ykchalresp > 29) {
+						dprintf(STDERR_FILENO, "ERROR: YubiKey slot/device parameter is invalid.\n");
+						return(-1);
+					} else if (ykchalresp < 10) {
+						db_params->yk_slot = ykchalresp;
+						db_params->yk_dev = 0;
+					} else {
+						db_params->yk_slot = ykchalresp / 10 ;
+						db_params->yk_dev = ykchalresp - (ykchalresp / 10 * 10);
+					}
+				} else {
+					dprintf(STDERR_FILENO, "ERROR: Unable to convert the YubiKey slot/device parameter.\n");
+					return(-1);
+				}
+
+				if (db_params->yk_slot > 2  ||  db_params->yk_slot < 1) {
+					dprintf(STDERR_FILENO, "ERROR: YubiKey slot number is not 1 or 2.\n");
+					return(-1);
+				}
+
+				if (optarg  &&  strncmp(strsep(&optarg, ","), "password", 8) == 0) {
+					db_params->yk_password = 1;
+				}
+			break;
+#endif
+			case 'o':
+				if (strncmp(extra_params->caller, "import", 6) == 0)
+					extra_params->legacy++;
+			break;
+			case 'v':
+				if (strncmp(extra_params->caller, "main", 4) == 0)
+					return(2);
+			break;
+			case 'h':
+			default:
+				return(0);
+			break;
+		}
+
+	/* clean up after option parsing */
+	free(ssha_type); ssha_type = NULL;
+	free(ssha_comment); ssha_comment = NULL;
+
+	return(1);
+} /* kc_arg_parser() */

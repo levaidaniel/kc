@@ -50,11 +50,8 @@ cmd_import(const char *e_line, command *commands)
 	BIO		*bio_chain = NULL;
 
 	struct stat	st;
-	char		*ssha_type = NULL, *ssha_comment = NULL;
 
-#ifdef _HAVE_YUBIKEY
-	unsigned long int	ykchalresp = 0;
-#endif
+	extra_parameters	params;
 
 	db_parameters	db_params_new;
 
@@ -70,16 +67,19 @@ cmd_import(const char *e_line, command *commands)
 
 	int		c = 0, largc = 0;
 	size_t		len = 0;
-	char		*opts = NULL, *inv = NULL;
+	char		*opts = NULL;
 	char		**largv = NULL;
 	char		*line = NULL;
 	char		*buf = NULL;
-	char		append = 0, xml = 0, legacy = 0;
+	char		append = 0, xml = 0;
 	ssize_t		ret = -1;
 	int		pos = 0;
 
 	unsigned long int	count_keychains = 0, count_keys = 0, count_keys_new = 0;
 
+
+	params.caller = "import";
+	params.legacy = 0;
 
 	/* initial db_params parameters of the imported database */
 	db_params_new.ssha_type[0] = '\0';
@@ -115,147 +115,19 @@ cmd_import(const char *e_line, command *commands)
 #else
 	opts = "A:k:P:R:e:m:o";
 #endif
-	optind = 0;
-	while ((c = getopt(largc, largv, opts)) != -1)
-		switch (c) {
-			case 'A':
-				if (strlen(db_params_new.ssha_type)  ||  strlen(db_params_new.ssha_comment)) {
-					dprintf(STDERR_FILENO, "ERROR: Please specify the '-%c' option only once!\n", c);
-					goto exiting;
-				}
-
-
-				ssha_type = strndup(strsep(&optarg, ","), 11);
-				if (ssha_type == NULL  ||  !strlen(ssha_type)) {
-					dprintf(STDERR_FILENO, "ERROR: SSH key type is empty!\n");
-					goto exiting;
-				}
-				if (	strncmp(ssha_type, "ssh-rsa", 7) != 0  &&
-					strncmp(ssha_type, "ssh-ed25519", 11) != 0
-				) {
-					dprintf(STDERR_FILENO, "ERROR: SSH key type is unsupported: '%s'\n", ssha_type);
-					goto exiting;
-				}
-
-				ssha_comment = strndup(strsep(&optarg, ","), 512);
-				if (ssha_comment == NULL  ||  !strlen(ssha_comment)) {
-					dprintf(STDERR_FILENO, "ERROR: SSH key comment is empty!\n");
-					goto exiting;
-				}
-
-				if (strlcpy(db_params_new.ssha_type, ssha_type, sizeof(db_params_new.ssha_type)) >= sizeof(db_params_new.ssha_type)) {
-					dprintf(STDERR_FILENO, "ERROR: Error while getting SSH key type.\n");
-					goto exiting;
-				}
-
-				if (strlcpy(db_params_new.ssha_comment, ssha_comment, sizeof(db_params_new.ssha_comment)) >= sizeof(db_params_new.ssha_comment)) {
-					dprintf(STDERR_FILENO, "ERROR: Error while getting SSH key comment.\n");
-					goto exiting;
-				}
-
-				if (optarg  &&  strncmp(optarg, "password", 8) == 0) {
-					db_params_new.ssha_password = 1;
-				}
-			break;
-			case 'k':
-				free(db_params_new.db_filename); db_params_new.db_filename = NULL;
-				db_params_new.db_filename = strdup(optarg);
-				if (!db_params_new.db_filename) {
-					perror("ERROR: Could not duplicate the database file name");
-					goto exiting;
-				}
-			break;
-			case 'P':
-				if (db_params_new.kdf) {
-					dprintf(STDERR_FILENO, "ERROR: Please specify the '-%c' option only once!\n", c);
-					goto exiting;
-				}
-				db_params_new.kdf = strdup(optarg);
-			break;
-			case 'R':
-				if (db_params_new.kdf_reps) {
-					dprintf(STDERR_FILENO, "ERROR: Please specify the '-%c' option only once!\n", c);
-					goto exiting;
-				}
-
-
-				if (optarg[0] == '-') {
-					dprintf(STDERR_FILENO, "ERROR: KDF iterations parameter seems to be negative.\n");
-					goto exiting;
-				}
-
-				db_params_new.kdf_reps = strtoul(optarg, &inv, 10);
-				if (inv[0] != '\0') {
-					dprintf(STDERR_FILENO, "ERROR: Unable to convert the KDF iterations parameter.\n");
-					goto exiting;
-				}
-			break;
-			case 'e':
-				db_params_new.cipher = strdup(optarg);
-				if (db_params_new.cipher) {
-					dprintf(STDERR_FILENO, "ERROR: Please specify the '-%c' option only once!\n", c);
-					goto exiting;
-				}
-			break;
-			case 'm':
-				if (db_params_new.cipher_mode) {
-					dprintf(STDERR_FILENO, "ERROR: Please specify the '-%c' option only once!\n", c);
-					goto exiting;
-				}
-				db_params_new.cipher_mode = strdup(optarg);
-			break;
-#ifdef _HAVE_YUBIKEY
-			case 'Y':
-				if (db_params_new.yk_slot) {
-					dprintf(STDERR_FILENO, "ERROR: Please specify the '-%c' option only once!\n", c);
-					goto exiting;
-				}
-
-
-				if (optarg[0] == '-') {
-					dprintf(STDERR_FILENO, "ERROR: YubiKey slot/device parameter seems to be negative.\n");
-					quit(EXIT_FAILURE);
-				}
-
-				ykchalresp = strtoul(strsep(&optarg, ","), &inv, 10);
-				if (inv[0] == '\0') {
-					if (ykchalresp <= 0  ||  ykchalresp > 29) {
-						dprintf(STDERR_FILENO, "ERROR: YubiKey slot/device parameter is invalid.\n");
-						quit(EXIT_FAILURE);
-					} else if (ykchalresp < 10) {
-						db_params_new.yk_slot = ykchalresp;
-						db_params_new.yk_dev = 0;
-					} else {
-						db_params_new.yk_slot = ykchalresp / 10 ;
-						db_params_new.yk_dev = ykchalresp - (ykchalresp / 10 * 10);
-					}
-				} else {
-					dprintf(STDERR_FILENO, "ERROR: Unable to convert the YubiKey slot/device parameter.\n");
-					quit(EXIT_FAILURE);
-				}
-
-				if (db_params_new.yk_slot > 2  ||  db_params_new.yk_slot < 1) {
-					dprintf(STDERR_FILENO, "ERROR: YubiKey slot number is not 1 or 2.\n");
-					quit(EXIT_FAILURE);
-				}
-
-				if (optarg  &&  strncmp(strsep(&optarg, ","), "password", 8) == 0) {
-					db_params_new.yk_password = 1;
-				}
-			break;
-#endif
-			case 'o':
-				legacy++;
-			break;
-			default:
-				puts(commands->usage);
-				goto exiting;
-			break;
-		}
-
-	/* clean up after option parsing */
-	free(ssha_type); ssha_type = NULL;
-	free(ssha_comment); ssha_comment = NULL;
+	switch (kc_arg_parser(largc, largv, opts, &db_params_new, &params)) {
+		case -1:
+			goto exiting;
+		break;
+		case 0:
+			puts(commands->usage);
+			goto exiting;
+		break;
+		case 1:
+			if (getenv("KC_DEBUG"))
+				printf("%s(): Parameter parsing is successful.\n", __func__);
+		break;
+	}
 
 	/* print some status information after parsing the options */
 	if (	(strlen(db_params_new.ssha_type)  &&  db_params_new.yk_slot)  &&
@@ -525,7 +397,7 @@ cmd_import(const char *e_line, command *commands)
 	puts("Checking database...");
 
 
-	if (!kc_validate_xml(db_new, legacy)) {
+	if (!kc_validate_xml(db_new, params.legacy)) {
 		dprintf(STDERR_FILENO, "ERROR: Not a valid kc XML structure ('%s')!\n", db_params_new.db_filename);
 
 		xmlFreeDoc(db_new);
@@ -770,9 +642,6 @@ exiting:
 		free(largv[c]); largv[c] = NULL;
 	}
 	free(largv); largv = NULL;
-
-	free(ssha_type); ssha_type = NULL;
-	free(ssha_comment); ssha_comment = NULL;
 
 	if (bio_chain) {
 		BIO_free_all(bio_chain);
