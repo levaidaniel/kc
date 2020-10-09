@@ -44,6 +44,11 @@ cmd_passwd(const char *e_line, command *commands)
 	char	**largv = NULL;
 	char	*line = NULL;
 
+#ifdef _HAVE_YUBIKEY
+	yk_array	*yk = NULL;
+	char		yk_pass = 0;
+#endif
+
 	extra_parameters	params;
 
 	db_parameters	db_params_tmp;
@@ -55,9 +60,7 @@ cmd_passwd(const char *e_line, command *commands)
 	db_params_tmp.ssha_type[0] = '\0';
 	db_params_tmp.ssha_comment[0] = '\0';
 	db_params_tmp.ssha_password = 0;
-	db_params_tmp.yk_dev = 0;
-	db_params_tmp.yk_slot = 0;
-	db_params_tmp.yk_password = 0;
+	db_params_tmp.yk = NULL;
 	db_params_tmp.pass = NULL;
 	db_params_tmp.pass_len = 0;
 	db_params_tmp.pass_filename = NULL;
@@ -95,9 +98,19 @@ cmd_passwd(const char *e_line, command *commands)
 		break;
 	}
 
+	/* collect some information about security key usage */
+	yk = db_params_tmp.yk;
+	while (yk) {
+		if (yk->yk_password) {
+			yk_pass++;
+			break;
+		}
+		yk = yk->next;
+	}
+
 	/* print some status information after parsing the options */
-	if (	(strlen(db_params_tmp.ssha_type)  &&  db_params_tmp.yk_slot)  &&
-		(!db_params_tmp.ssha_password  ||  !db_params_tmp.yk_password)
+	if (	(strlen(db_params_tmp.ssha_type)  &&  db_params_tmp.yk)  &&
+		(!db_params_tmp.ssha_password  ||  !yk_pass)
 	) {
 		dprintf(STDERR_FILENO, "ERROR: Using -A and -Y together only makes sense with the ',password' parameter for both of them!\n");
 		goto exiting;
@@ -105,8 +118,6 @@ cmd_passwd(const char *e_line, command *commands)
 
 	if (strlen(db_params_tmp.ssha_type))
 		printf("Using (%s) %s identity%s\n", db_params_tmp.ssha_type, db_params_tmp.ssha_comment, (db_params_tmp.ssha_password ? " and a password" : ""));
-	if (db_params_tmp.yk_slot)
-		printf("Using YubiKey slot #%d on device #%d%s\n", db_params_tmp.yk_slot, db_params_tmp.yk_dev, (db_params_tmp.yk_password ? " and a password" : ""));
 
 
 	/* use original KDF, if none was specified */
@@ -178,8 +189,8 @@ cmd_passwd(const char *e_line, command *commands)
 	}
 
 	if (	db_params_tmp.ssha_password  ||
-		db_params_tmp.yk_password  ||
-		(!db_params_tmp.yk_slot  &&  !strlen(db_params_tmp.ssha_type))
+		yk_pass  ||
+		(!db_params_tmp.yk  &&  !strlen(db_params_tmp.ssha_type))
 	) {
 		if (getenv("KC_DEBUG"))
 			printf("%s(): getting a password for the database\n", __func__);
@@ -190,7 +201,7 @@ cmd_passwd(const char *e_line, command *commands)
 	}
 
 #ifdef _HAVE_YUBIKEY
-	if (db_params_tmp.yk_slot) {
+	if (db_params_tmp.yk) {
 		/* use a YubiKey to generate the password */
 		if (!kc_ykchalresp(&db_params_tmp)) {
 			dprintf(STDERR_FILENO, "ERROR: Error while doing YubiKey challenge-response!\n");
@@ -264,9 +275,7 @@ cmd_passwd(const char *e_line, command *commands)
 	}
 	db_params.ssha_password = db_params_tmp.ssha_password;
 
-	db_params.yk_slot = db_params_tmp.yk_slot;
-	db_params.yk_dev = db_params_tmp.yk_dev;
-	db_params.yk_password = db_params_tmp.yk_password;
+	db_params.yk = db_params_tmp.yk;
 
 	db_params.pass_len = db_params_tmp.pass_len;
 

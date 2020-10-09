@@ -39,6 +39,11 @@ cmd_status(const char *e_line, command *commands)
 	xmlSaveCtxtPtr		xml_save = NULL;
 	xmlBufferPtr		xml_buf = NULL;
 
+#ifdef _HAVE_YUBIKEY
+	yk_array	*yk = NULL;
+	char		yk_pass = 0;
+#endif
+
 
 	/* these are unused in this function */
 	e_line = NULL;
@@ -59,10 +64,30 @@ cmd_status(const char *e_line, command *commands)
 	xmlSaveClose(xml_save);
 	xmlBufferFree(xml_buf);
 
+	printf("Security key(s): ");
+#ifdef _HAVE_YUBIKEY
+	yk = db_params.yk;
+
+	if (yk) {
+		puts("");
+
+		while (yk) {
+			printf(" YubiKey slot #%d on device #%d%s\n", yk->yk_slot, yk->yk_dev, (yk->yk_password ? " and a password" : ""));
+			if (yk->yk_password)
+				yk_pass++;
+			yk = yk->next;
+		}
+	} else {
+		puts("no");
+	}
+#else
+	puts("no");
+#endif
+
 	printf("Password: ");
 	if (	(strlen(db_params.ssha_type)  &&  db_params.ssha_password)  ||
-		(db_params.yk_slot  &&  db_params.yk_password)  ||
-		(!strlen(db_params.ssha_type)  &&  !db_params.yk_slot)
+		(db_params.yk  &&  yk_pass)  ||
+		(!strlen(db_params.ssha_type)  &&  !db_params.yk)
 	)
 		puts("yes");
 	else
@@ -72,14 +97,6 @@ cmd_status(const char *e_line, command *commands)
 	if (strlen(db_params.ssha_type))
 		printf("(%s) %s\n", db_params.ssha_type, db_params.ssha_comment);
 	else
-		puts("no");
-
-	printf("Security key: ");
-#ifdef _HAVE_YUBIKEY
-	if (db_params.yk_slot)
-		printf("YubiKey slot #%d at device #%d\n", db_params.yk_slot, db_params.yk_dev);
-	else
-#endif
 		puts("no");
 
 	printf("Password function: %s (%lu %s)\n", db_params.kdf, db_params.kdf_reps, strncmp(db_params.kdf, "bcrypt", 6) == 0 ? "rounds" : "iterations");

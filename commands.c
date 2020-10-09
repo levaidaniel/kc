@@ -1132,13 +1132,15 @@ char kc_arg_parser(int largc, char **largv, const char *opts, db_parameters *db_
 
 #ifdef _HAVE_YUBIKEY
 	unsigned long int	ykchalresp = 0;
+	yk_array		*yk = NULL;
+	yk_array		*yk_1st = NULL;
 #endif
 	char		*inv = NULL;
 	int		c = 0;
 
 
 	if (getenv("KC_DEBUG"))
-		printf("%s(): caller='%s'\n", __func__, extra_params->caller);
+		printf("%s(): caller='%s' with opts='%s'\n", __func__, extra_params->caller, opts);
 
 	optind = 0;
 	while ((c = getopt(largc, largv, opts)) != -1)
@@ -1274,41 +1276,60 @@ char kc_arg_parser(int largc, char **largv, const char *opts, db_parameters *db_
 			break;
 #ifdef _HAVE_YUBIKEY
 			case 'Y':
-				if (db_params->yk_slot) {
-					dprintf(STDERR_FILENO, "ERROR: Please specify the '-%c' option only once!\n", c);
-					return(-1);
-				}
-
-
 				if (optarg[0] == '-') {
 					dprintf(STDERR_FILENO, "ERROR: YubiKey slot/device parameter seems to be negative.\n");
 					return(-1);
 				}
+
+				yk = malloc(sizeof(yk_array)); malloc_check(yk);
+				yk->yk_slot = 0;
+				yk->yk_dev = 0;
+				yk->yk_password = 0;
+				yk->next = NULL;
 
 				ykchalresp = strtoul(strsep(&optarg, ","), &inv, 10);
 				if (inv[0] == '\0') {
 					if (ykchalresp <= 0  ||  ykchalresp > 29) {
 						dprintf(STDERR_FILENO, "ERROR: YubiKey slot/device parameter is invalid.\n");
 						return(-1);
-					} else if (ykchalresp < 10) {
-						db_params->yk_slot = ykchalresp;
-						db_params->yk_dev = 0;
+					}
+
+					if (ykchalresp < 10) {
+						yk->yk_slot = ykchalresp;
+
+						yk->yk_dev = 0;
 					} else {
-						db_params->yk_slot = ykchalresp / 10 ;
-						db_params->yk_dev = ykchalresp - (ykchalresp / 10 * 10);
+						yk->yk_slot = ykchalresp / 10;
+
+						yk->yk_dev = ykchalresp - (ykchalresp / 10 * 10);
 					}
 				} else {
 					dprintf(STDERR_FILENO, "ERROR: Unable to convert the YubiKey slot/device parameter.\n");
 					return(-1);
 				}
 
-				if (db_params->yk_slot > 2  ||  db_params->yk_slot < 1) {
+				if (yk->yk_slot > 2  ||  yk->yk_slot < 1) {
 					dprintf(STDERR_FILENO, "ERROR: YubiKey slot number is not 1 or 2.\n");
 					return(-1);
 				}
 
 				if (optarg  &&  strncmp(strsep(&optarg, ","), "password", 8) == 0) {
-					db_params->yk_password = 1;
+					yk->yk_password = 1;
+				}
+
+				if (!(db_params->yk)) {
+					db_params->yk = yk;
+				} else {
+					yk_1st = db_params->yk;
+
+					while (db_params->yk) {
+						if (!(db_params->yk->next))
+							break;
+						db_params->yk = db_params->yk->next;
+					}
+
+					db_params->yk->next = yk;
+					db_params->yk = yk_1st;
 				}
 			break;
 #endif

@@ -67,15 +67,16 @@
 #define	SHA1_MAX_BLOCK_SIZE	64	/* Max size of input SHA1 block */
 
 
-static int yk_check_firmware(YK_KEY *yk);
-static void yk_report_error(void);
+static int yk_check_firmware(YK_KEY *);
+static void yk_report_error(yk_array *);
 
 
 int
 kc_ykchalresp(struct db_parameters *db_params)
 {
-	YK_KEY		*yk = 0;
+	YK_KEY		*yk_key = 0;
 	int		yk_cmd = 0;
+	yk_array	*yk = NULL;
 
 	bool		may_block = true;
 
@@ -91,96 +92,106 @@ kc_ykchalresp(struct db_parameters *db_params)
 		goto err;
 	}
 
-	if (!(yk = yk_open_key((int)db_params->yk_dev))) {
-		goto err;
-	}
+	yk = db_params->yk;
+	while (yk) {
+		printf("Using YubiKey slot #%d on device #%d%s\n", yk->yk_slot, yk->yk_dev, (yk->yk_password ? " and a password" : ""));
 
-	if (!yk_check_firmware(yk)) {
-		goto err;
-	}
+		if (getenv("KC_DEBUG"))
+			printf("%s() yk array:\nyk->yk_slot = %d\nyk->yk_dev = %d\nyk->yk_password = %d\n", __func__, yk->yk_slot, yk->yk_dev, yk->yk_password);
 
-	if (db_params->yk_password  &&  db_params->pass_len > YUBIKEY_CHALLENGE_MAXLEN) {
-		dprintf(STDERR_FILENO, "ERROR: Password cannot be longer than %d bytes when using YubiKey challenge-response!\n", YUBIKEY_CHALLENGE_MAXLEN);
-		yk_errno = YK_EWRONGSIZ;
-		goto err;
-	}
-
-	switch(db_params->yk_slot) {
-		case 1:
-			yk_cmd = SLOT_CHAL_HMAC1;
-			break;
-		case 2:
-			yk_cmd = SLOT_CHAL_HMAC2;
-			break;
-		default:
+		if (!(yk_key = yk_open_key((int)yk->yk_dev))) {
 			goto err;
-	}
+		}
+
+		if (!yk_check_firmware(yk_key)) {
+			goto err;
+		}
+
+		if (yk->yk_password  &&  db_params->pass_len > YUBIKEY_CHALLENGE_MAXLEN) {
+			dprintf(STDERR_FILENO, "ERROR: Password cannot be longer than %d bytes when using YubiKey challenge-response!\n", YUBIKEY_CHALLENGE_MAXLEN);
+			yk_errno = YK_EWRONGSIZ;
+			goto err;
+		}
+
+		switch(yk->yk_slot) {
+			case 1:
+				yk_cmd = SLOT_CHAL_HMAC1;
+				break;
+			case 2:
+				yk_cmd = SLOT_CHAL_HMAC2;
+				break;
+			default:
+				goto err;
+		}
 
 
-	/* set up challenge */
-	if (db_params->yk_password) {
-		if (getenv("KC_DEBUG"))
-			printf("%s(): using password with yubikey\n", __func__);
+		/* set up challenge */
+		if (yk->yk_password) {
+			if (getenv("KC_DEBUG"))
+				printf("%s(): using password with yubikey\n", __func__);
 
-		/* Here we not only copy the user-supplied password to the
-		 * challenge, but also append data from the salt -- as much
-		 * data as there is space left from YUBIKEY_CHALLENGE_MAXLEN
-		 * after appending the user-supplied password.
-		 * Or if for some we could copy less from the salt, then
-		 * prioritize the SALT_LEN and only copy as much as we can from
-		 * the salt.
-		 */
-		challenge_len = db_params->pass_len + SALT_LEN > YUBIKEY_CHALLENGE_MAXLEN ? YUBIKEY_CHALLENGE_MAXLEN : db_params->pass_len + SALT_LEN;
-		challenge = malloc(challenge_len); malloc_check(challenge);
-		memcpy(challenge, db_params->pass, db_params->pass_len);
-		memcpy(challenge + db_params->pass_len, db_params->salt, db_params->pass_len + SALT_LEN > challenge_len ? challenge_len - db_params->pass_len : SALT_LEN);
-		if (getenv("KC_DEBUG"))
-			printf("%s(): the challenge is filled with %zu bytes from salt after %zu bytes of password\n", __func__, challenge_len - db_params->pass_len, db_params->pass_len);
+			/* Here we not only copy the user-supplied password to the
+			 * challenge, but also append data from the salt -- as much
+			 * data as there is space left from YUBIKEY_CHALLENGE_MAXLEN
+			 * after appending the user-supplied password.
+			 * Or if for some reason we could copy less from the salt, then
+			 * prioritize the SALT_LEN and only copy as much as we can from
+			 * the salt.
+			 */
+			challenge_len = db_params->pass_len + SALT_LEN > YUBIKEY_CHALLENGE_MAXLEN ? YUBIKEY_CHALLENGE_MAXLEN : db_params->pass_len + SALT_LEN;
+			challenge = malloc(challenge_len); malloc_check(challenge);
+			memcpy(challenge, db_params->pass, db_params->pass_len);
+			memcpy(challenge + db_params->pass_len, db_params->salt, db_params->pass_len + SALT_LEN > challenge_len ? challenge_len - db_params->pass_len : SALT_LEN);
+			if (getenv("KC_DEBUG"))
+				printf("%s(): the challenge is filled with %zu bytes from salt after %zu bytes of password\n", __func__, challenge_len - db_params->pass_len, db_params->pass_len);
 
-		/* save the password temporarily, so that we can append it
-		 * later after the response in the new constructed password */
-		passtmp = malloc(db_params->pass_len); malloc_check(passtmp);
-		passtmp_len = db_params->pass_len;
-		memcpy(passtmp, db_params->pass, db_params->pass_len);
-	} else {
-		if (getenv("KC_DEBUG"))
-			printf("%s(): automatic yubikey, without password\n", __func__);
+			/* save the password temporarily, so that we can append it
+			 * later after the response in the new constructed password */
+			passtmp = malloc(db_params->pass_len); malloc_check(passtmp);
+			passtmp_len = db_params->pass_len;
+			memcpy(passtmp, db_params->pass, db_params->pass_len);
+		} else {
+			if (getenv("KC_DEBUG"))
+				printf("%s(): automatic yubikey, without password\n", __func__);
 
-		/* this won't be the digest of the salt, but the actual decoded
-		 * salt */
-		challenge_len = SALT_LEN;
-		challenge = malloc(challenge_len); malloc_check(challenge);
-		yubikey_hex_decode((char *)challenge, (char *)db_params->salt, challenge_len);
-		if (getenv("KC_DEBUG"))
-			printf("%s(): the challenge is filled with %zu bytes from salt\n", __func__, challenge_len);
-	}
+			/* this won't be the digest of the salt, but the actual decoded
+			 * salt */
+			challenge_len = SALT_LEN;
+			challenge = malloc(challenge_len); malloc_check(challenge);
+			yubikey_hex_decode((char *)challenge, (char *)db_params->salt, challenge_len);
+			if (getenv("KC_DEBUG"))
+				printf("%s(): the challenge is filled with %zu bytes from salt\n", __func__, challenge_len);
+		}
 
 
-	printf("Remember to touch your YubiKey if necessary\n");
-	memset(response, 0, sizeof(response));
-	if (!yk_challenge_response(yk, yk_cmd, may_block,
-		challenge_len, challenge,
-		sizeof(response), response))
-	{
-		goto err;
-	}
+		printf("Remember to touch your YubiKey if necessary\n");
+		memset(response, 0, sizeof(response));
+		if (!yk_challenge_response(yk_key, yk_cmd, may_block,
+			challenge_len, challenge,
+			sizeof(response), response))
+		{
+			goto err;
+		}
 
-	/* realloc ..->pass */
-	memset(db_params->pass, '\0', db_params->pass_len);
-	db_params->pass_len = sizeof(response) + passtmp_len > PASSWORD_MAXLEN ? PASSWORD_MAXLEN : sizeof(response) + passtmp_len;
-	db_params->pass = realloc(db_params->pass, db_params->pass_len); malloc_check(db_params->pass);
+		/* realloc ..->pass */
+		memset(db_params->pass, '\0', db_params->pass_len);
+		db_params->pass_len = sizeof(response) + passtmp_len > PASSWORD_MAXLEN ? PASSWORD_MAXLEN : sizeof(response) + passtmp_len;
+		db_params->pass = realloc(db_params->pass, db_params->pass_len); malloc_check(db_params->pass);
 
-	/* copy the response as the constructed password */
-	memcpy(db_params->pass, response, sizeof(response) > db_params->pass_len ? db_params->pass_len : sizeof(response));
-	memset(response, 0, sizeof(response));
+		/* copy the response as the constructed password */
+		memcpy(db_params->pass, response, sizeof(response) > db_params->pass_len ? db_params->pass_len : sizeof(response));
+		memset(response, 0, sizeof(response));
 
-	/* if there's a password, then append it to the response */
-	if (db_params->yk_password  &&  passtmp) {
-		if (getenv("KC_DEBUG"))
-			printf("%s(): constructing new password by appending password to yubikey response\n", __func__);
+		/* if there's a password, then append it to the response */
+		if (yk->yk_password  &&  passtmp) {
+			if (getenv("KC_DEBUG"))
+				printf("%s(): constructing new password by appending password to yubikey response\n", __func__);
 
-		/* append the actual user password as well to the end of the constructed password */
-		memcpy(db_params->pass + sizeof(response), passtmp, sizeof(response) + passtmp_len > db_params->pass_len ? db_params->pass_len - sizeof(response) : passtmp_len);
+			/* append the actual user password as well to the end of the constructed password */
+			memcpy(db_params->pass + sizeof(response), passtmp, sizeof(response) + passtmp_len > db_params->pass_len ? db_params->pass_len - sizeof(response) : passtmp_len);
+		}
+
+		yk = yk->next;
 	}
 
 err:
@@ -189,9 +200,9 @@ err:
 	free(passtmp); passtmp = NULL;
 	passtmp_len = 0;
 
-	yk_report_error();
-	if (yk && !yk_close_key(yk)) {
-		yk_report_error();
+	yk_report_error(yk);
+	if (yk_key && !yk_close_key(yk_key)) {
+		yk_report_error(yk);
 	}
 
 	if (yk_errno) {
@@ -203,11 +214,11 @@ err:
 
 
 static int
-yk_check_firmware(YK_KEY *yk)
+yk_check_firmware(YK_KEY *yk_key)
 {
 	YK_STATUS *st = ykds_alloc();
 
-	if (!yk_get_status(yk, st)) {
+	if (!yk_get_status(yk_key, st)) {
 		ykds_free(st);
 		return 0;
 	}
@@ -226,15 +237,15 @@ yk_check_firmware(YK_KEY *yk)
 
 
 static void
-yk_report_error(void)
+yk_report_error(yk_array *yk)
 {
 	if (yk_errno) {
 		if (yk_errno == YK_EUSBERR) {
 			fprintf(stderr, "USB error: %s\n",
 				yk_usb_strerror());
 		} else {
-			fprintf(stderr, "YubiKey core error: %s\n",
-				yk_strerror(yk_errno));
+			fprintf(stderr, "YubiKey core error (Device#%d, Slot#%d): %s\n",
+				yk->yk_dev, yk->yk_slot, yk_strerror(yk_errno));
 		}
 	}
 }/* yk_report_error */

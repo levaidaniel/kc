@@ -37,7 +37,7 @@
 
 
 #define	NAME		"kc"
-#define	VERSION		"2.5-dev-GIT_VERSION"
+#define	VERSION		"2.5-dev-2020-10-03-a7308d1"
 
 #define	PASSWORD_MAXLEN	1024
 #define	IV_LEN		64
@@ -60,15 +60,20 @@
 #define	DEFAULT_MODE	"cbc"
 
 
+typedef struct yk_array {
+	char		yk_dev;
+	char		yk_slot;
+	char		yk_password;
+	struct yk_array *next;
+} yk_array;
+
 typedef struct db_parameters {
 	char		*db_filename;
 	int		db_file;
 	char		ssha_type[12];	/* 11 bytes for the longest supported 'ssh-ed25519' key type */
 	char		ssha_comment[513];
 	char		ssha_password;
-	char		yk_dev;
-	char		yk_slot;
-	char		yk_password;
+	yk_array	*yk;
 	char		*pass_filename;
 	char 		*pass;
 	size_t 		pass_len;
