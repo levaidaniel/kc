@@ -96,11 +96,6 @@ main(int argc, char *argv[])
 	char		*opts = NULL;
 	size_t		len = 0;
 
-#ifdef _HAVE_YUBIKEY
-	yk_array	*yk = NULL;
-	char		yk_pass = 0;
-#endif
-
 	extra_parameters	params;
 
 	unsigned long int	count_keychains = 0, count_keys = 0;
@@ -129,6 +124,7 @@ main(int argc, char *argv[])
 	db_params.ssha_comment[0] = '\0';
 	db_params.ssha_password = 0;
 	db_params.yk = NULL;
+	db_params.yk_password = 0;
 	db_params.pass = NULL;
 	db_params.pass_len = 0;
 	db_params.db_filename = NULL;
@@ -179,19 +175,9 @@ main(int argc, char *argv[])
 		break;
 	}
 
-	/* collect some information about security key usage */
-	yk = db_params.yk;
-	while (yk) {
-		if (yk->yk_password) {
-			yk_pass++;
-			break;
-		}
-		yk = yk->next;
-	}
-
 	/* print some status information after parsing the options */
 	if (	(strlen(db_params.ssha_type)  &&  db_params.yk)  &&
-		(!db_params.ssha_password  ||  !yk_pass)
+		(!db_params.ssha_password  ||  !db_params.yk_password)
 	) {
 		dprintf(STDERR_FILENO, "ERROR: Using -A and -Y together only makes sense with the ',password' parameter for both of them!\n");
 		quit(EXIT_FAILURE);
@@ -440,7 +426,7 @@ main(int argc, char *argv[])
 
 #ifdef _HAVE_YUBIKEY
 		if (db_params.yk) {
-			if (!yk_pass) {
+			if (!db_params.yk_password) {
 				dprintf(STDERR_FILENO, "ERROR: 'password' option is not specified for YubiKey parameter while trying to use a password file!\n");
 				quit(EXIT_FAILURE);
 			}
@@ -465,7 +451,7 @@ main(int argc, char *argv[])
 			perror("ERROR: close(password file)");
 	} else {
 		if (	db_params.ssha_password  ||
-			yk_pass  ||
+			db_params.yk_password  ||
 			(!db_params.yk  &&  !strlen(db_params.ssha_type))
 		) {
 			if (getenv("KC_DEBUG"))

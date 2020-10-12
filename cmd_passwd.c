@@ -44,11 +44,6 @@ cmd_passwd(const char *e_line, command *commands)
 	char	**largv = NULL;
 	char	*line = NULL;
 
-#ifdef _HAVE_YUBIKEY
-	yk_array	*yk = NULL;
-	char		yk_pass = 0;
-#endif
-
 	extra_parameters	params;
 
 	db_parameters	db_params_tmp;
@@ -61,6 +56,7 @@ cmd_passwd(const char *e_line, command *commands)
 	db_params_tmp.ssha_comment[0] = '\0';
 	db_params_tmp.ssha_password = 0;
 	db_params_tmp.yk = NULL;
+	db_params_tmp.yk_password = 0;
 	db_params_tmp.pass = NULL;
 	db_params_tmp.pass_len = 0;
 	db_params_tmp.pass_filename = NULL;
@@ -98,19 +94,9 @@ cmd_passwd(const char *e_line, command *commands)
 		break;
 	}
 
-	/* collect some information about security key usage */
-	yk = db_params_tmp.yk;
-	while (yk) {
-		if (yk->yk_password) {
-			yk_pass++;
-			break;
-		}
-		yk = yk->next;
-	}
-
 	/* print some status information after parsing the options */
 	if (	(strlen(db_params_tmp.ssha_type)  &&  db_params_tmp.yk)  &&
-		(!db_params_tmp.ssha_password  ||  !yk_pass)
+		(!db_params_tmp.ssha_password  ||  !db_params_tmp.yk_password)
 	) {
 		dprintf(STDERR_FILENO, "ERROR: Using -A and -Y together only makes sense with the ',password' parameter for both of them!\n");
 		goto exiting;
@@ -189,7 +175,7 @@ cmd_passwd(const char *e_line, command *commands)
 	}
 
 	if (	db_params_tmp.ssha_password  ||
-		yk_pass  ||
+		db_params_tmp.yk_password  ||
 		(!db_params_tmp.yk  &&  !strlen(db_params_tmp.ssha_type))
 	) {
 		if (getenv("KC_DEBUG"))

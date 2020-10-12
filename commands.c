@@ -1284,7 +1284,6 @@ char kc_arg_parser(int largc, char **largv, const char *opts, db_parameters *db_
 				yk = malloc(sizeof(yk_array)); malloc_check(yk);
 				yk->yk_slot = 0;
 				yk->yk_dev = 0;
-				yk->yk_password = 0;
 				yk->next = NULL;
 
 				ykchalresp = strtoul(strsep(&optarg, ","), &inv, 10);
@@ -1313,9 +1312,9 @@ char kc_arg_parser(int largc, char **largv, const char *opts, db_parameters *db_
 					return(-1);
 				}
 
-				if (optarg  &&  strncmp(strsep(&optarg, ","), "password", 8) == 0) {
-					yk->yk_password = 1;
-				}
+				if (optarg  &&  strncmp(strsep(&optarg, ","), "password", 8) == 0)
+					db_params->yk_password++;
+
 
 				if (!(db_params->yk)) {
 					db_params->yk = yk;

@@ -37,7 +37,7 @@
 
 
 #define	NAME		"kc"
-#define	VERSION		"2.5-dev-2020-10-03-a7308d1"
+#define	VERSION		"2.5-dev-GIT_VERSION"
 
 #define	PASSWORD_MAXLEN	1024
 #define	IV_LEN		64
@@ -63,7 +63,6 @@
 typedef struct yk_array {
 	char		yk_dev;
 	char		yk_slot;
-	char		yk_password;
 	struct yk_array *next;
 } yk_array;
 
@@ -74,6 +73,7 @@ typedef struct db_parameters {
 	char		ssha_comment[513];
 	char		ssha_password;
 	yk_array	*yk;
+	unsigned char	yk_password;
 	char		*pass_filename;
 	char 		*pass;
 	size_t 		pass_len;

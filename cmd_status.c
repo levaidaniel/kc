@@ -41,7 +41,6 @@ cmd_status(const char *e_line, command *commands)
 
 #ifdef _HAVE_YUBIKEY
 	yk_array	*yk = NULL;
-	char		yk_pass = 0;
 #endif
 
 
@@ -72,9 +71,7 @@ cmd_status(const char *e_line, command *commands)
 		puts("");
 
 		while (yk) {
-			printf(" YubiKey slot #%d on device #%d%s\n", yk->yk_slot, yk->yk_dev, (yk->yk_password ? " and a password" : ""));
-			if (yk->yk_password)
-				yk_pass++;
+			printf(" YubiKey slot #%d on device #%d\n", yk->yk_slot, yk->yk_dev);
 			yk = yk->next;
 		}
 	} else {
@@ -86,7 +83,7 @@ cmd_status(const char *e_line, command *commands)
 
 	printf("Password: ");
 	if (	(strlen(db_params.ssha_type)  &&  db_params.ssha_password)  ||
-		(db_params.yk  &&  yk_pass)  ||
+		db_params.yk_password  ||
 		(!strlen(db_params.ssha_type)  &&  !db_params.yk)
 	)
 		puts("yes");
