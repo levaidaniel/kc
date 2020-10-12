@@ -83,8 +83,8 @@ kc_ykchalresp(struct db_parameters *db_params)
 	char		*userpass = NULL;
 	unsigned char	response[SHA1_MAX_BLOCK_SIZE];
 
-	unsigned char	*challenge = NULL, *passtmp = NULL;
-	size_t		challenge_len = 0, passtmp_len = 0, copied = 0, userpass_len = 0, yk_counter = 0;
+	unsigned char	*challenge = NULL;
+	size_t		challenge_len = 0, copied = 0, userpass_len = 0, yk_counter = 0;
 
 
 	yk_errno = 0;
@@ -240,10 +240,10 @@ kc_ykchalresp(struct db_parameters *db_params)
 		printf("%s(): pass_len: %zu\n", __func__, db_params->pass_len);
 
 err:
-	if (passtmp)
-		memset(passtmp, '\0', passtmp_len);
-	free(passtmp); passtmp = NULL;
-	passtmp_len = 0;
+	if (userpass)
+		memset(userpass, '\0', userpass_len);
+	free(userpass); userpass = NULL;
+	userpass_len = 0;
 
 	yk_report_error(yk);
 	if (yk_key && !yk_close_key(yk_key)) {
