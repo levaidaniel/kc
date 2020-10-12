@@ -107,12 +107,12 @@ kc_ykchalresp(struct db_parameters *db_params)
 	while (yk) {
 		yk_counter++;
 
-		printf("Using YubiKey slot #%d on device #%d\n", yk->yk_slot, yk->yk_dev);
+		printf("Using YubiKey slot #%d on device #%d\n", yk->slot, yk->dev);
 
 		if (getenv("KC_DEBUG"))
-			printf("%s() yk_counter: %zu, yk array:\nyk->yk_slot = %d\nyk->yk_dev = %d\n", __func__, yk_counter, yk->yk_slot, yk->yk_dev);
+			printf("%s() yk_counter: %zu, yk array:\nyk->slot = %d\nyk->dev = %d\n", __func__, yk_counter, yk->slot, yk->dev);
 
-		if (!(yk_key = yk_open_key((int)yk->yk_dev))) {
+		if (!(yk_key = yk_open_key((int)yk->dev))) {
 			goto err;
 		}
 
@@ -126,7 +126,7 @@ kc_ykchalresp(struct db_parameters *db_params)
 			goto err;
 		}
 
-		switch(yk->yk_slot) {
+		switch(yk->slot) {
 			case 1:
 				yk_cmd = SLOT_CHAL_HMAC1;
 				break;
@@ -290,19 +290,7 @@ yk_report_error(yk_array *yk)
 				yk_usb_strerror());
 		} else {
 			fprintf(stderr, "YubiKey core error (Device#%d, Slot#%d): %s\n",
-				yk->yk_dev, yk->yk_slot, yk_strerror(yk_errno));
+				yk->dev, yk->slot, yk_strerror(yk_errno));
 		}
 	}
 }/* yk_report_error() */
-
-
-unsigned int yk_get_serial(YK_KEY *yk_key)
-{
-	unsigned int serial = 0;
-	int ret = 0;
-
-
-	yk_get_serial(yk_key, 1, 0, &serial);
-
-	return(serial);
-} /*  yk_get_serial() */

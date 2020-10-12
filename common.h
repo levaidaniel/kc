@@ -61,8 +61,8 @@
 
 
 typedef struct yk_array {
-	char		yk_dev;
-	char		yk_slot;
+	char		dev;
+	char		slot;
 	struct yk_array *next;
 } yk_array;
 

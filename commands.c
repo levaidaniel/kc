@@ -1282,8 +1282,8 @@ char kc_arg_parser(int largc, char **largv, const char *opts, db_parameters *db_
 				}
 
 				yk = malloc(sizeof(yk_array)); malloc_check(yk);
-				yk->yk_slot = 0;
-				yk->yk_dev = 0;
+				yk->slot = 0;
+				yk->dev = 0;
 				yk->next = NULL;
 
 				ykchalresp = strtoul(strsep(&optarg, ","), &inv, 10);
@@ -1294,20 +1294,20 @@ char kc_arg_parser(int largc, char **largv, const char *opts, db_parameters *db_
 					}
 
 					if (ykchalresp < 10) {
-						yk->yk_slot = ykchalresp;
+						yk->slot = ykchalresp;
 
-						yk->yk_dev = 0;
+						yk->dev = 0;
 					} else {
-						yk->yk_slot = ykchalresp / 10;
+						yk->slot = ykchalresp / 10;
 
-						yk->yk_dev = ykchalresp - (ykchalresp / 10 * 10);
+						yk->dev = ykchalresp - (ykchalresp / 10 * 10);
 					}
 				} else {
 					dprintf(STDERR_FILENO, "ERROR: Unable to convert the YubiKey slot/device parameter.\n");
 					return(-1);
 				}
 
-				if (yk->yk_slot > 2  ||  yk->yk_slot < 1) {
+				if (yk->slot > 2  ||  yk->slot < 1) {
 					dprintf(STDERR_FILENO, "ERROR: YubiKey slot number is not 1 or 2.\n");
 					return(-1);
 				}
