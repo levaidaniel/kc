@@ -76,7 +76,8 @@ kc_ykchalresp(struct db_parameters *db_params)
 {
 	YK_KEY		*yk_key = 0;
 	int		yk_cmd = 0;
-	yk_array	*yk = NULL;
+	yk_array	*yk = db_params->yk;
+	unsigned int	yk_serial = 0;
 
 	bool		may_block = true;
 
@@ -103,6 +104,38 @@ kc_ykchalresp(struct db_parameters *db_params)
 		memcpy(userpass, db_params->pass, db_params->pass_len);
 	}
 
+	while (yk) {
+		/* If a YubiKey serial number was provided instead of a device
+		 * index, try to lookup the device index from the serial
+		 * number and store it in the yk list item's 'dev' member.
+		 */
+		if (yk->serial) {
+			yk->dev = -1;
+			for (yk_counter = 0; 1; yk_counter++) {
+				if (!(yk_key = yk_open_key(yk_counter)))
+					break;
+
+				if (yk_get_serial(yk_key, 1, 0, &yk_serial)) {
+					if (yk->serial == yk_serial)
+						yk->dev = yk_counter;
+				} else {
+					dprintf(STDERR_FILENO, "ERROR: Could not read serial number from YubiKey device #%zu!\n", yk_counter);
+					goto err;
+				}
+			}
+
+			if (yk->dev < 0) {
+				dprintf(STDERR_FILENO, "ERROR: Could not find YubiKey device with serial number %d!\n", yk->serial);
+				yk_errno = YK_ENOKEY;
+				goto err;
+			}
+		}
+
+		yk = yk->next;
+	}
+
+	yk_errno = 0;
+	yk_counter = 0;
 	yk = db_params->yk;
 	while (yk) {
 		yk_counter++;
@@ -110,7 +143,8 @@ kc_ykchalresp(struct db_parameters *db_params)
 		printf("Using YubiKey slot #%d on device #%d\n", yk->slot, yk->dev);
 
 		if (getenv("KC_DEBUG"))
-			printf("%s() yk_counter: %zu, yk array:\nyk->slot = %d\nyk->dev = %d\n", __func__, yk_counter, yk->slot, yk->dev);
+			printf("%s() yk_counter: %zu, yk array:\nyk->slot = %d\nyk->dev = %d\nyk->serial = %d\n", __func__, yk_counter, yk->slot, yk->dev, yk->serial);
+
 
 		if (!(yk_key = yk_open_key((int)yk->dev))) {
 			goto err;
@@ -134,6 +168,8 @@ kc_ykchalresp(struct db_parameters *db_params)
 				yk_cmd = SLOT_CHAL_HMAC2;
 				break;
 			default:
+				dprintf(STDERR_FILENO, "ERROR: YubiKey slot #%d is invalid!\n", yk->slot);
+				yk_errno = YK_EINVALIDCMD;
 				goto err;
 		}
 

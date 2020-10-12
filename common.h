@@ -63,6 +63,7 @@
 typedef struct yk_array {
 	char		dev;
 	char		slot;
+	unsigned int	serial;
 	struct yk_array *next;
 } yk_array;
 

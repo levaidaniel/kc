@@ -1134,6 +1134,8 @@ char kc_arg_parser(int largc, char **largv, const char *opts, db_parameters *db_
 	unsigned long int	ykchalresp = 0;
 	yk_array		*yk = NULL;
 	yk_array		*yk_1st = NULL;
+
+	char			*param = NULL;
 #endif
 	char		*inv = NULL;
 	int		c = 0;
@@ -1284,35 +1286,53 @@ char kc_arg_parser(int largc, char **largv, const char *opts, db_parameters *db_
 				yk = malloc(sizeof(yk_array)); malloc_check(yk);
 				yk->slot = 0;
 				yk->dev = 0;
+				yk->serial = 0;
 				yk->next = NULL;
 
+				/* slot number */
 				ykchalresp = strtoul(strsep(&optarg, ","), &inv, 10);
 				if (inv[0] == '\0') {
-					if (ykchalresp <= 0  ||  ykchalresp > 29) {
-						dprintf(STDERR_FILENO, "ERROR: YubiKey slot/device parameter is invalid.\n");
+					if (ykchalresp > 2  ||  ykchalresp < 1) {
+						dprintf(STDERR_FILENO, "ERROR: YubiKey slot number is not 1 or 2.\n");
 						return(-1);
 					}
 
-					if (ykchalresp < 10) {
-						yk->slot = ykchalresp;
-
-						yk->dev = 0;
-					} else {
-						yk->slot = ykchalresp / 10;
-
-						yk->dev = ykchalresp - (ykchalresp / 10 * 10);
-					}
+					yk->slot = ykchalresp;
 				} else {
-					dprintf(STDERR_FILENO, "ERROR: Unable to convert the YubiKey slot/device parameter.\n");
+					dprintf(STDERR_FILENO, "ERROR: Unable to convert the YubiKey slot parameter.\n");
 					return(-1);
 				}
 
-				if (yk->slot > 2  ||  yk->slot < 1) {
-					dprintf(STDERR_FILENO, "ERROR: YubiKey slot number is not 1 or 2.\n");
-					return(-1);
+				/* device index or serial number */
+				if (optarg) {
+					param = strsep(&optarg, ",");
+					ykchalresp = strtoul(param, &inv, 10);
+					if (inv[0] == '\0') {
+						if (ykchalresp < 0) {
+							dprintf(STDERR_FILENO, "ERROR: YubiKey device parameter is invalid.\n");
+							return(-1);
+						}
+
+						/* I guess this'll be an arbitrary limit on
+						 * how many YubiKeys can be used -> 10 */
+						if (ykchalresp < 10)
+							yk->dev = ykchalresp;
+						else
+							yk->serial = ykchalresp;
+					}
+					/* no error handling here, this can
+					 * still be the ',password' parameter,
+					 * in which case we default to device #0
+					 */
 				}
 
-				if (optarg  &&  strncmp(strsep(&optarg, ","), "password", 8) == 0)
+				/* ',password' parameter, either the remnant of
+				 * the previous 'device' parameter parsing or
+				 * actually the third parameter in
+				 * -Yslot,device,password */
+				if (param  &&  strncmp(param, "password", 8) == 0)
+					db_params->yk_password++;
+				else if (optarg  &&  strncmp(strsep(&optarg, ","), "password", 8) == 0)
 					db_params->yk_password++;
 
 
