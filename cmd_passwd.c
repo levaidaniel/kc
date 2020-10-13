@@ -25,10 +25,6 @@
 
 #include "common.h"
 #include "commands.h"
-#include "ssha.h"
-#ifdef _HAVE_YUBIKEY
-#include "ykchalresp.h"
-#endif
 
 
 extern db_parameters	db_params;
@@ -174,30 +170,9 @@ cmd_passwd(const char *e_line, command *commands)
 		goto exiting;
 	}
 
-	if (	db_params_tmp.ssha_password  ||
-		db_params_tmp.yk_password  ||
-		(!db_params_tmp.yk  &&  !strlen(db_params_tmp.ssha_type))
-	) {
-		if (getenv("KC_DEBUG"))
-			printf("%s(): getting a password for the database\n", __func__);
-
-		/* ask for the new password */
-		if (kc_password_read(&db_params_tmp, 1) != 1)
-			goto exiting;
-	}
-
-#ifdef _HAVE_YUBIKEY
-	if (db_params_tmp.yk) {
-		/* use a YubiKey to generate the password */
-		if (!kc_ykchalresp(&db_params_tmp)) {
-			dprintf(STDERR_FILENO, "ERROR: Error while doing YubiKey challenge-response!\n");
-			goto exiting;
-		}
-	}
-#endif
-	if (strlen(db_params_tmp.ssha_type)) {
-		/* use SSH agent to generate the password */
-		if (!kc_ssha_get_password(&db_params_tmp))
+	/* Get a password into the database */
+	if (kc_crypt_pass(&db_params_tmp, 1) != 1) {
+			dprintf(STDERR_FILENO, "ERROR: Could not get a password!\n");
 			goto exiting;
 	}
 

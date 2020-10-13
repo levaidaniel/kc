@@ -25,10 +25,6 @@
 
 #include "common.h"
 #include "commands.h"
-#include "ssha.h"
-#ifdef _HAVE_YUBIKEY
-#include "ykchalresp.h"
-#endif
 
 #include <signal.h>
 #include <sys/types.h>
@@ -85,7 +81,6 @@ main(int argc, char *argv[])
 	char		*buf = NULL;
 	ssize_t		ret = -1;
 	int		pos = 0;
-	int		pass_file = -1;
 
 	struct stat	st;
 	char		*env_home = NULL;
@@ -376,108 +371,11 @@ main(int argc, char *argv[])
 		print_bio_chain(bio_chain);
 
 
-	/* Get the password one way or another */
-	if (db_params.pass_filename) {	/* we were given a password file name */
-		if (getenv("KC_DEBUG"))
-			printf("%s(): opening password file\n", __func__);
-
-		if (stat(db_params.pass_filename, &st) == 0) {
-			if (!S_ISLNK(st.st_mode)  &&  !S_ISREG(st.st_mode)) {
-				dprintf(STDERR_FILENO, "ERROR: '%s' is not a regular file or a link!\n", db_params.pass_filename);
-				quit(EXIT_FAILURE);
-			}
-		} else {
-			perror("ERROR: stat(password file)");
+	/* Get a password into the database */
+	if (kc_crypt_pass(&db_params, newdb) != 1) {
+			dprintf(STDERR_FILENO, "ERROR: Could not get a password!\n");
 			quit(EXIT_FAILURE);
-		}
-
-		/* read in the password from the specified file */
-		pass_file = open(db_params.pass_filename, O_RDONLY);
-		if (pass_file < 0) {
-			perror("ERROR: open(password file)");
-			quit(EXIT_FAILURE);
-		}
-
-		db_params.pass = malloc(PASSWORD_MAXLEN + 1); malloc_check(db_params.pass);
-		pos = 0;
-		/* We read PASSWORD_MAXLEN plus one byte, to see if the password in the
-		 * password file is longer than PASSWORD_MAXLEN.
-		 */
-		do {
-			ret = read(pass_file, db_params.pass + pos, PASSWORD_MAXLEN + 1 - pos);
-			pos += ret;
-		} while (ret > 0  &&  pos < PASSWORD_MAXLEN + 1);
-
-		if (ret < 0) {
-			perror("ERROR: read(password file)");
-			quit(EXIT_FAILURE);
-		}
-		if (pos == 0) {
-			dprintf(STDERR_FILENO, "ERROR: Password file must not be empty!\n");
-			quit(EXIT_FAILURE);
-		}
-
-		if (pos > PASSWORD_MAXLEN) {
-			printf("WARNING: the password in '%s' is longer than the maximum allowed length (%d bytes) of a password, and it was truncated to %d bytes!\n\n", db_params.pass_filename, PASSWORD_MAXLEN, PASSWORD_MAXLEN);
-			pos = PASSWORD_MAXLEN;
-		}
-
-		db_params.pass_len = pos;
-
-#ifdef _HAVE_YUBIKEY
-		if (db_params.yk) {
-			if (!db_params.yk_password) {
-				dprintf(STDERR_FILENO, "ERROR: 'password' option is not specified for YubiKey parameter while trying to use a password file!\n");
-				quit(EXIT_FAILURE);
-			}
-
-			if (!kc_ykchalresp(&db_params)) {
-				dprintf(STDERR_FILENO, "ERROR: Error while doing YubiKey challenge-response!\n");
-				quit(EXIT_FAILURE);
-			}
-		}
-#endif
-		if (strlen(db_params.ssha_type)) {
-			if (strlen(db_params.ssha_type)  &&  !db_params.ssha_password) {
-				dprintf(STDERR_FILENO, "ERROR: 'password' option is not specified for SSH agent parameter while trying to use a password file!\n");
-				quit(EXIT_FAILURE);
-			}
-
-			if (!kc_ssha_get_password(&db_params))
-				quit(EXIT_FAILURE);
-		}
-
-		if (close(pass_file) < 0)
-			perror("ERROR: close(password file)");
-	} else {
-		if (	db_params.ssha_password  ||
-			db_params.yk_password  ||
-			(!db_params.yk  &&  !strlen(db_params.ssha_type))
-		) {
-			if (getenv("KC_DEBUG"))
-				printf("%s(): getting a password for the database\n", __func__);
-
-			/* ask for the new password */
-			if (kc_password_read(&db_params, newdb) != 1)
-				quit(EXIT_FAILURE);
-		}
-
-#ifdef _HAVE_YUBIKEY
-		if (db_params.yk) {
-			/* use a YubiKey to generate the password */
-			if (!kc_ykchalresp(&db_params)) {
-				dprintf(STDERR_FILENO, "ERROR: Error while doing YubiKey challenge-response!\n");
-				quit(EXIT_FAILURE);
-			}
-		}
-#endif
-		if (strlen(db_params.ssha_type)) {
-			/* use SSH agent to generate the password */
-			if (!kc_ssha_get_password(&db_params))
-				quit(EXIT_FAILURE);
-		}
 	}
-
 
 	if (newdb)
 		puts("Initializing...");
