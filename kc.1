@@ -17,7 +17,7 @@
 .\"ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 .\"(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 .\"SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-.Dd July 24, 2020
+.Dd October 13, 2020
 .Dt KC 1
 .Os
 .Sh NAME
@@ -29,8 +29,8 @@
 .Op Fl c Ar keychain name/idx
 .Op Fl C Ar keychain name
 .Op Fl r
-.Op Fl A Ar key-type,key-comment Op ,password
-.Op Fl Y Ar Key-slotDevice-index Op ,password
+.Op Fl A Ar key-type,key-comment Op Ql ,password
+.Op Fl Y Ar key-slot Op ,device-index|serial-number Op Ql ,password
 .Op Fl p Ar password file
 .Op Fl P Ar kdf
 .Op Fl R Ar kdf iterations
@@ -153,36 +153,55 @@ and also ask for a password to use when opening the database.
 .El
 .Pp
 Also worth mentioning that this actually works with agent forwarding as well, so on a remote machine one doesn't even have to have the actual private key file -- just like in any other case when you'd use SSH agent forwarding.
-.It Fl Y Ar Key-slotDevice-index Op ,password
+.It Fl Y Ar key-slot Op ,device-index|serial-number Op Ql ,password
 Use a YubiKey to utilize its challenge-response mechanism to construct the password for the database. This can be either an automatic or an interactive mode of operation (just like with SSH agent support). Without the
 .Ql password
 parameter the challenge will be the database salt value, thus facilitating an automatic database open.
 .Pp
-There is actually only one argument to this option, and that is a two digit number plus optionally the word
-.Ql password
-after a comma (with no whitespaces around it).
+This is a comma-sperated list of parameters, and the only mandatory argument to this option is the slot number. If the device index or serial number in the second field is missing, the first available device
+.Po index #0
+.Pc is used. The third
+.Po or second, if the index or serial is missing
+.Pc field can be the literal word
+.Ql password .
 .Pp
-The first digit is the YubiKey slot and the second digit is the device index number. E.g.:
+E.g.:
 .Bl -tag -offset ||| -width |
-.It Ar 10
+.It Ar 2
+means slot 2 and implicitly device 0 (the first device).
+.It Ar 2,password
+means slot 2 and implicitly device 0 (the first device), and also use a user-supplied password.
+.It Ar 1,0
 means slot 1 and device 0 (the first device).
-.It Ar 20
+.It Ar 2,0
 means slot 2 and device 0 (the first device).
-.It Ar 21
-means slot 2 and device 1 (the second device) etc...
+.It Ar 2,1
+means slot 2 and device 1 (the second device).
+.It Ar 2,3,password
+means slot 2 and device 3 (the third device), and also use a user-supplied password.
+.It Ar 2,12345678,password
+means slot 2 and the device with the serial number 12345678, and also use a user-supplied password.
 .El
 .Pp
-It's not necessary to specify the second digit --
-.Nm
-will use the device index 0 by default, so it's sufficient to provide only one digit, i.e. the key slot.
-.Pp
-If the word
+If the
 .Ql password
-is appended to the parameter with a comma (,), then the user-supplied password is used as the challenge with the security key -- otherwise the database's salt is the challenge (stored in the database). When using this option, the password can be at most 64 bytes long. E.g.:
+parameter is specified, then the user-supplied password is used as the challenge with the security key -- otherwise the database's salt is the challenge (stored in the database). When using this option, the password can be at most 64 bytes long. E.g.:
 .Bl -tag -offset ||| -width |
-.It Ar 20,password
+.It Ar 2,0,password
 Use the frist device, the second slot, and ask for a password to use as the challenge.
 .El
+.Pp
+.Em Using multiple security keys:
+.Pp
+It's possible to use multiple security keys by specifying this option two or more times. In this case
+.Nm
+will use the specified security keys in the order these options are specified, and each subsequent device will re-use the previous output
+.Po response
+.Pc as its challenge, chaining together the security keys. The database can only be opened when using all of the provided security keys, and by specifying these options in the same exact order. To work around the dynamic assignment of device numbers based on the order one plugs in their security keys, serial numbers can be used instead of the device index number to explicitly specify which security key to use.
+.Pp
+When using multiple security keys, any one of the
+.Ql password
+parameters turns on the usage of the user-supplied password.
 .It Fl p Ar file
 Read password from
 .Ar file .
