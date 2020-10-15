@@ -148,7 +148,9 @@ main(int argc, char *argv[])
 				"-r: Open the database in read-only mode.\n"
 				"-c/-C <keychain>: Start in <keychain>.\n"
 				"-A <key type,key comment>: Use an SSH agent to provide password.\n"
+#ifdef _HAVE_YUBIKEY
 				"-Y <YubiKey slot><YubiKey device index>: Use a YubiKey to provide password.\n"
+#endif
 				"-p <file>: Read password from file.\n"
 				"-P <kdf>: KDF to use.\n"
 				"-R <iterations>: Number of KDF iterations to use.\n"
