@@ -162,7 +162,7 @@ cmd_import(const char *e_line, command *commands)
 		db_params_new.cipher = malloc(len); malloc_check(db_params_new.cipher);
 		if (strlcpy(db_params_new.cipher, DEFAULT_CIPHER, len) >= len) {
 			dprintf(STDERR_FILENO, "ERROR: Error while setting up default database parameters (cipher).\n");
-			quit(EXIT_FAILURE);
+			goto exiting;
 		}
 	}
 

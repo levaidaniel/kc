@@ -129,7 +129,7 @@ cmd_passwd(const char *e_line, command *commands)
 		db_params_tmp.cipher = malloc(len); malloc_check(db_params_tmp.cipher);
 		if (strlcpy(db_params_tmp.cipher, db_params.cipher, len) >= len) {
 			dprintf(STDERR_FILENO, "ERROR: Error while setting up database parameters (cipher).\n");
-			quit(EXIT_FAILURE);
+			goto exiting;
 		}
 	}
 
