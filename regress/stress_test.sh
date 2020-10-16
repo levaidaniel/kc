@@ -49,7 +49,7 @@ export RANDOM_DEV
 export KC_RUN=${KC_RUN:-'./kc'}
 
 
-if ${KC_RUN} -v |grep -E -q -e '^Compiled with Readline(, PCRE)*(, SCRYPT)*(, YUBIKEY)* support\.$';then
+if ${KC_RUN} -v |grep -E -q -e '^Compiled with Readline(, PCRE)*(, scrypt)*(, YubiKey)* support\.$';then
 	export READLINE=readline
 fi
 

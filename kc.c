@@ -1075,10 +1075,10 @@ version(void)
 		", PCRE"
 #endif
 #ifdef	_HAVE_LIBSCRYPT
-		", SCRYPT"
+		", scrypt"
 #endif
 #ifdef	_HAVE_YUBIKEY
-		", YUBIKEY"
+		", YubiKey"
 #endif
 		" support.");
 	puts("Written by LEVAI Daniel <leva@ecentrum.hu>");

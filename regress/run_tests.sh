@@ -17,7 +17,7 @@ VERSION=$( ${KC_RUN} -v |grep -E -e '^Compiled with' )
 if echo "${VERSION}" |grep -F -q -e 'Readline';then
 	export READLINE=readline
 fi
-if echo "${VERSION}" |grep -F -q -e 'SCRYPT';then
+if echo "${VERSION}" |grep -F -q -e 'scrypt';then
 	export SCRYPT=scrypt
 fi
 
