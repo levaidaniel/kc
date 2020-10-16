@@ -61,7 +61,6 @@ cmd_getnum(const unsigned long int idx, const unsigned long int spice)
 	char		rc = 0;
 	char		*rand_str = NULL;
 	char		**fork_argv = NULL;
-	int		child;
 	int		pipefd[2];
 
 
@@ -221,7 +220,7 @@ cmd_getnum(const unsigned long int idx, const unsigned long int spice)
 						/* This is duplicated in cmd_clipboard.c */
 						/* Copy value to tmux paste buffer */
 
-						switch (child = fork()) {
+						switch (fork()) {
 							case -1:
 								perror("\nERROR: Couldn't fork(2) for tmux(1)");
 								break;
@@ -270,7 +269,7 @@ cmd_getnum(const unsigned long int idx, const unsigned long int spice)
 
 						pipe(pipefd);
 
-						switch (child = fork()) {
+						switch (fork()) {
 							case -1:
 								perror("\nERROR: Couldn't fork(2) for xclip(1)");
 								break;
