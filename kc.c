@@ -143,7 +143,11 @@ main(int argc, char *argv[])
 			quit(EXIT_FAILURE);
 		break;
 		case 0:
-			printf( "%s [-k <file>] [-r] [-c/-C <keychain>] [-A <key type,key comment>] [-Y <YubiKey slot><YubiKey device index>] [-p <file>] [-P <kdf>] [-R <kdf iterations>] [-e <cipher>] [-m <mode>] [-B/-b] [-v] [-h]\n\n", argv[0]);
+			printf( "%s [-k <file>] [-r] [-c/-C <keychain>] [-A <key type,key comment>] "
+#ifdef _HAVE_YUBIKEY
+				"[-Y <YubiKey slot><YubiKey device index>] "
+#endif
+				"[-p <file>] [-P <kdf>] [-R <kdf iterations>] [-e <cipher>] [-m <mode>] [-B/-b] [-v] [-h]\n\n", argv[0]);
 			printf(	"-k <file>: Use file as database. The default is ~/.kc/default.kcd .\n"
 				"-r: Open the database in read-only mode.\n"
 				"-c/-C <keychain>: Start in <keychain>.\n"
@@ -171,17 +175,6 @@ main(int argc, char *argv[])
 			quit(EXIT_SUCCESS);
 		break;
 	}
-
-	/* print some status information after parsing the options */
-	if (	(strlen(db_params.ssha_type)  &&  db_params.yk)  &&
-		(!db_params.ssha_password  ||  !db_params.yk_password)
-	) {
-		dprintf(STDERR_FILENO, "ERROR: Using -A and -Y together only makes sense with the ',password' parameter for both of them!\n");
-		quit(EXIT_FAILURE);
-	}
-
-	if (strlen(db_params.ssha_type))
-		printf("Using (%s) %s identity%s\n", db_params.ssha_type, db_params.ssha_comment, (db_params.ssha_password ? " and a password" : ""));
 
 
 	/* db_param defaults if none were specified */

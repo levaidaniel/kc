@@ -124,17 +124,6 @@ cmd_import(const char *e_line, command *commands)
 		break;
 	}
 
-	/* print some status information after parsing the options */
-	if (	(strlen(db_params_new.ssha_type)  &&  db_params_new.yk)  &&
-		(!db_params_new.ssha_password  ||  !db_params_new.yk_password)
-	) {
-		dprintf(STDERR_FILENO, "ERROR: Using -A and -Y together only makes sense with the ',password' parameter for both of them!\n");
-		goto exiting;
-	}
-
-	if (strlen(db_params_new.ssha_type))
-		printf("Using (%s) %s identity%s\n", db_params_new.ssha_type, db_params_new.ssha_comment, (db_params_new.ssha_password ? " and a password" : ""));
-
 
 	/* db_param_new defaults, if none were specified */
 	if (!db_params_new.kdf) {

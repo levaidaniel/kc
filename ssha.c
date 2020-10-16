@@ -487,6 +487,9 @@ kc_ssha_get_password(struct db_parameters *db_params)
 	struct kc_ssha_signature 	*signature = NULL;
 
 
+	if (strlen(db_params->ssha_type))
+		printf("Using (%s) %s identity%s\n", db_params->ssha_type, db_params->ssha_comment, (db_params->ssha_password ? " and a password" : ""));
+
 	sock = kc_ssha_connect();
 	if (sock < 0) {
 		dprintf(STDERR_FILENO, "ERROR: Couldn't establish UNIX socket connection\n");

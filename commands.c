@@ -1489,5 +1489,14 @@ char kc_arg_parser(int largc, char **largv, const char *opts, db_parameters *db_
 	free(ssha_type); ssha_type = NULL;
 	free(ssha_comment); ssha_comment = NULL;
 
+	/* print some status information after parsing the options */
+	if (	(strlen(db_params->ssha_type)  &&  db_params->yk)  &&
+		(!db_params->ssha_password  ||  !db_params->yk_password)
+	) {
+		dprintf(STDERR_FILENO, "ERROR: Using -A and -Y together only makes sense with the ',password' parameter for both of them!\n");
+		return(-1);
+	}
+
+
 	return(1);
 } /* kc_arg_parser() */

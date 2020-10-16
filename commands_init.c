@@ -118,7 +118,11 @@ commands_init(command **commands)
 		(*commands) = (*commands)->next;
 
 		(*commands)->name = "import";
-		(*commands)->usage = "import -k <filename> [-A key type,key comment[,password]] [-Y Key-slotDevice-index[,password]] [-P kdf] [-R kdf iterations] [-e cipher] [-m cipher mode] [-o]";
+		(*commands)->usage = "import -k <filename> [-A key type,key comment[,password]] "
+#ifdef _HAVE_YUBIKEY
+			"[-Y Key-slotDevice-index[,password]] "
+#endif
+			"[-P kdf] [-R kdf iterations] [-e cipher] [-m cipher mode] [-o]";
 		(*commands)->help = "Import and overwrite the current database with the one from a kc compatible encrypted database file named 'filename'. 'filename' must be a proper kc database. 'kdf' and 'cipher mode' can be used to specify these parameters if they differ from the current database. With the '-o' option you can import legacy (<2.5) databases with missing attributes.\nSee commands 'importxml', 'export' and 'append'.";
 		(*commands)->fn = cmd_import;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
@@ -159,7 +163,11 @@ commands_init(command **commands)
 		(*commands) = (*commands)->next;
 
 		(*commands)->name = "passwd";
-		(*commands)->usage = "passwd [-A key type,key comment[,password]] [-Y Key-slotDevice-index[,password]] [-P kdf] [-R kdf iterations] [-e cipher] [-m cipher mode]";
+		(*commands)->usage = "passwd [-A key type,key comment[,password]] "
+#ifdef _HAVE_YUBIKEY
+			"[-Y Key-slotDevice-index[,password]] "
+#endif
+			"[-P kdf] [-R kdf iterations] [-e cipher] [-m cipher mode]";
 		(*commands)->help = "Change the database password or SSH public key identity being used to encrypt. Optionally, the KDF, cipher and cipher mode can also be changed. All changes will be written immediately.";
 		(*commands)->fn = cmd_passwd;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
@@ -242,7 +250,11 @@ commands_init(command **commands)
 	(*commands) = (*commands)->next;
 
 	(*commands)->name = "export";
-	(*commands)->usage = "export -k <filename> [-A key type,key comment[,password]] [-Y Key-slotDevice-index[,password]] [-P kdf] [-R kdf iterations] [-e cipher] [-m cipher mode] [-c keychain]";
+	(*commands)->usage = "export -k <filename> [-A key type,key comment[,password]] "
+#ifdef _HAVE_YUBIKEY
+		"[-Y Key-slotDevice-index[,password]] "
+#endif
+		"[-P kdf] [-R kdf iterations] [-e cipher] [-m cipher mode] [-c keychain]";
 	(*commands)->help = "Export the database to a kc compatible encrypted database file named 'filename' (if no extension specified, \".kcd\" will be appended). When specifying 'keychain', export only that keychain. 'keychain' can be the keychain's index number or name. Index number takes priority when addressing a keychain. 'kdf', 'cipher' and 'cipher mode' can be used to specify a different KDF, encryption cipher and cipher mode to use while exporting the database.\nSee commands 'dump', 'import' and 'append'.";
 	(*commands)->fn = cmd_export;
 	(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
