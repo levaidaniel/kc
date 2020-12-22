@@ -110,8 +110,13 @@ kc_ykchalresp(struct db_parameters *db_params)
 		 * number and store it in the yk list item's 'dev' member.
 		 */
 		if (yk->serial) {
+			if (getenv("KC_DEBUG"))
+				printf("%s(): searching for a device with serial: %d\n", __func__, yk->serial);
+
 			yk->dev = -1;
 			for (yk_counter = 0; 1; yk_counter++) {
+				if (getenv("KC_DEBUG"))
+					printf("%s(): trying to open device with index #%zu, slot = %d, dev = %d, serial = %d\n", __func__, yk_counter, yk->slot, yk->dev, yk->serial);
 				if (!(yk_key = yk_open_key(yk_counter)))
 					break;
 
@@ -143,13 +148,17 @@ kc_ykchalresp(struct db_parameters *db_params)
 		printf("Using YubiKey slot #%d on device #%d\n", yk->slot, yk->dev);
 
 		if (getenv("KC_DEBUG"))
-			printf("%s() yk_counter: %zu, yk array:\nyk->slot = %d\nyk->dev = %d\nyk->serial = %d\n", __func__, yk_counter, yk->slot, yk->dev, yk->serial);
+			printf("%s(): yk_counter: %zu, yk array:\nyk->slot = %d\nyk->dev = %d\nyk->serial = %d\n", __func__, yk_counter, yk->slot, yk->dev, yk->serial);
 
 
+		if (getenv("KC_DEBUG"))
+			printf("%s(): trying to open device with index #%d\n", __func__, yk->dev);
 		if (!(yk_key = yk_open_key((int)yk->dev))) {
 			goto err;
 		}
 
+		if (getenv("KC_DEBUG"))
+			printf("%s(): checking firmware version\n", __func__);
 		if (!yk_check_firmware(yk_key)) {
 			goto err;
 		}
