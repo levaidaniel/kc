@@ -17,7 +17,7 @@ jobs:
       run: sudo ln -sf bash /bin/sh
 
     - name: Set up environment variable for ssh agent information
-      run: echo "::set-env name=SSH_AGENT_INFO::${HOME}/ssh-agent"
+      run: echo "SSH_AGENT_INFO=${HOME}/ssh-agent" >> $GITHUB_ENV
 
     - name: Start SSH agent and save the environment variables
       run: echo SSH_AGENT_INFO=${SSH_AGENT_INFO}; ssh-agent -s |fgrep -v echo > ${SSH_AGENT_INFO}
@@ -43,7 +43,7 @@ jobs:
       run: sudo ln -sf bash /bin/sh
 
     - name: Set up environment variable for ssh agent information
-      run: echo "::set-env name=SSH_AGENT_INFO::${HOME}/ssh-agent"
+      run: echo "SSH_AGENT_INFO=${HOME}/ssh-agent" >> $GITHUB_ENV
 
     - name: Start SSH agent and save the environment variables
       run: echo SSH_AGENT_INFO=${SSH_AGENT_INFO}; ssh-agent -s |fgrep -v echo > ${SSH_AGENT_INFO}
