@@ -597,14 +597,14 @@ optional arguments can be used to specify these parameters if they differ from t
 .Pp
 With the
 .Fl o
-option you can import legacy (<2.5) databases with missing attributes.
+option you can import legacy (<v2.5) databases with missing attributes.
 .Pp
 .Po see commands
 .Ic importxml ,
 .Ic export ,
 .Ic append
 .Pc
-.It Ic importxml Fl k Ar filename
+.It Ic importxml Fl k Ar filename Op Fl o
 Import and overwrite the current database with the one from a
 .Nm
 compatible XML file named
@@ -613,6 +613,10 @@ compatible XML file named
 must contain a properly formatted
 .Nm
 XML document.
+.Pp
+With the
+.Fl o
+option you can import legacy (<v2.5) XML files with missing attributes.
 .Pp
 .Po see commands
 .Ic import ,

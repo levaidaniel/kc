@@ -123,14 +123,14 @@ commands_init(command **commands)
 			"[-Y Key-slotDevice-index[,password]] "
 #endif
 			"[-P kdf] [-R kdf iterations] [-e cipher] [-m cipher mode] [-o]";
-		(*commands)->help = "Import and overwrite the current database with the one from a kc compatible encrypted database file named 'filename'. 'filename' must be a proper kc database. 'kdf' and 'cipher mode' can be used to specify these parameters if they differ from the current database. With the '-o' option you can import legacy (<2.5) databases with missing attributes.\nSee commands 'importxml', 'export' and 'append'.";
+		(*commands)->help = "Import and overwrite the current database with the one from a kc compatible encrypted database file named 'filename'. 'filename' must be a proper kc database. 'kdf' and 'cipher mode' can be used to specify these parameters if they differ from the current database. With the '-o' option you can import legacy (<v2.5) databases with missing attributes.\nSee commands 'importxml', 'export' and 'append'.";
 		(*commands)->fn = cmd_import;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
 
 		(*commands)->name = "importxml";
-		(*commands)->usage = "importxml -k <filename>";
-		(*commands)->help = "Import and overwrite the current database with the one from a kc compatible XML file named 'filename'. 'filename' must contain a properly formatted kc XML document.\nSee commands 'import', 'export' and 'append'.";
+		(*commands)->usage = "importxml -k <filename> [-o]";
+		(*commands)->help = "Import and overwrite the current database with the one from a kc compatible XML file named 'filename'. 'filename' must contain a properly formatted kc XML document. With the '-o' option you can import legacy (<v2.5) XML files with missing attributes.\nSee commands 'import', 'export' and 'append'.";
 		(*commands)->fn = cmd_import;
 		(*commands)->next = (command *)malloc(sizeof(command)); malloc_check((*commands)->next);
 		(*commands) = (*commands)->next;
