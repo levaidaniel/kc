@@ -1,4 +1,4 @@
-/*	$OpenBSD: sha2.c,v 1.17 2014/12/31 16:56:55 tedu Exp $	*/
+/*	$OpenBSD: sha2.c,v 1.19 2021/03/12 10:22:46 jsg Exp $	*/
 
 /*
  * FILE:	sha2.c
@@ -73,7 +73,7 @@ void	explicit_bzero(void *, size_t);
  * Please make sure that your system defines BYTE_ORDER.  If your
  * architecture is little-endian, make sure it also defines
  * LITTLE_ENDIAN and that the two (BYTE_ORDER and LITTLE_ENDIAN) are
- * equivilent.
+ * equivalent.
  *
  * If your system does not define the above, then you can do so by
  * hand like this:
@@ -434,7 +434,7 @@ SHA256Transform(u_int32_t *state, const u_int8_t *data)
 void
 SHA256Update(SHA2_CTX *context, const void *dataptr, size_t len)
 {
-	const u_int8_t *data = dataptr;
+	const uint8_t *data = dataptr;
 	size_t	freespace, usedspace;
 
 	/* Calling with no data is valid (we do nothing) */
