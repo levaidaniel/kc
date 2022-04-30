@@ -17,7 +17,7 @@
 .\"ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 .\"(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 .\"SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-.Dd October 13, 2020
+.Dd April 29, 2022
 .Dt KC 1
 .Os
 .Sh NAME
@@ -205,7 +205,6 @@ parameters turns on the usage of the user-supplied password.
 .It Fl p Ar file
 Read password from
 .Ar file .
-The last new line gets stripped.
 .It Fl P Ar kdf
 KDF to use with the password.
 Valid parameters are:
@@ -735,6 +734,11 @@ Alias of
 .It Ic any number
 To display a key's value, you enter the key's index (ie.: only a number) into the command line, then it will display the entry with the given index.
 You quit from the display with 'q' or EOT (usually CTRL+d).
+.Pp
+Rarely one needs to actually look at the passwords being stored, there are convenient commands
+.Po Ic Xclip xclip tmux
+.Pc
+.Pp
 By specifying another number after the index (eg.: '12 2' -- here 12 is the index, and 2 is the extra number (spice) after it), that many random characters will be displayed between the value's characters.
 You can navigate up/down through a multiline value's lines with keys j/k, n/p, f/b, +/-, [/], {/}, </>, <SPACE>, <ENTER>, <BACKSPACE>.
 Typing a number between 1-9 will jump directly to that line.
@@ -744,15 +748,17 @@ It is possible to copy the displayed value to a clipboard (or such) with these h
 .It t
 Copy the value to the tmux paste buffer like the
 .Ic tmux
+.Nm
 command.
 .It x
-Copy the value to the PRIMARY X selection.
-like the
+Copy the value to the PRIMARY X selection like the
 .Ic xclip
+.Nm
 command.
 .It X
-Copy the value to the CLIPBOARD X selection, like the
+Copy the value to the CLIPBOARD X selection like the
 .Ic Xclip
+.Nm
 command.
 .El
 .Pp
@@ -833,7 +839,9 @@ option -- takes the database IV and salt
 .Pc
 and the SSH agent generates a
 .Ql new password
-from them. This will be the kind of gibberish that's essentially harder to guess than your average password, but takes data as input that's available directly from the database file. Thus, when someone has read access to the database file *and* the SSH agent that has the required key loaded (or the private key directly), they can open the database. This method is convenient because one doesn't have to input a password
+from them. This will be the kind of gibberish that's essentially harder to guess than your average password, but takes data as input that's available directly from the database file. Thus, when someone has read access to the database file
+.Em and
+the SSH agent that has the required key loaded (or the private key directly), they can open the database. This method is convenient because one doesn't have to input a password
 .Po the database open is non-interactive
 .Pc
 so it works neatly when combined with other tools -- I've used this e.g. with
@@ -860,15 +868,23 @@ option
 .Pc
 and the response is used as the password input for the KDF. This too can have an added conveniency of not having to type in anything when opening the database, because
 .Nm
-can use only the database salt as the challenge, and so the response from the security key will be based on this. The salt is directly available from the database file, so if someone steals it *and* the required security key, they can open the database.
+can use only the database salt as the challenge, and so the response from the security key will be based on this. The salt is directly available from the database file, so if someone steals it
+.Em and
+the required security key, they can open the database.
 .Pp
 There is however the 
 .Ar ,password
 parameter here as well, with which one can add an interactive layer on top all of this, and use the user-supplied password (combined with the salt if it's not long enough) as the challenge. In this case, when opening the database
 .Nm
 will ask for a password and the correct security key.
+.Pp
+More than one security key can be used in order for
+.Nm
+to require all of them in the right order when opening a database. See the
+.Op -Y
+option on how this works.
 .It Combining authentication features
-Now, knowing that database passwords can be generated with the help of an SSH agent and a YubiKey security key with a user-supplied password, another thing one can do besides using either one of the above functions, is to combine all of these. If -- and only if -- SSH agent signing and security key challenge-response are used with a password
+Now, knowing that database passwords can be generated with the help of an SSH agent and a YubiKey security key with a user-supplied password, another thing one can do besides using either one of the above functions, is to combine any of these. If -- and only if -- SSH agent signing and security key challenge-response are used with a password
 .Po see
 .Ar ,password
 parameter for both of these
