@@ -17,7 +17,7 @@
 .\"ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 .\"(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 .\"SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-.Dd April 29, 2022
+.Dd $Mdocdate: April 30 2022 $
 .Dt KC 1
 .Os
 .Sh NAME
@@ -42,12 +42,29 @@
 .Op Fl h
 .Sh DESCRIPTION
 .Nm
-is a console based username and password management application using an encrypted XML document as its database.
-The database file is encrypted with a key that is generated from a user-supplied password and/or a security key and/or an SSH agent. Database encryption (and thus decryption) can be made interactive or non-interactive in that it could require user input (i.e. a password) or a response for a challenge from a security key, or a signature from an SSH agent. See the
+is a console based username and password management application using an
+encrypted XML document as its database.
+The database file is encrypted with a key that is generated from a
+user-supplied password and/or a security key and/or an SSH agent.
+Database encryption
+.Po and thus decryption
+.Pc can be made interactive or
+non-interactive in that it could require user input
+.Po i.e. a password
+.Pc or a
+response for a challenge from a security key, or a signature from an SSH agent.
+See the
 .Em PASSWORDS
-section on how to even combine all (or some) of these.
+section on how to even combine all
+.Po or some
+.Pc of these.
 .Pp
-A database file can contain multiple keychains, and keychains in turn can contain multiple keys (usernames if you like) and values (passwords if you like).
+A database file can contain multiple keychains, and keychains in turn can
+contain multiple keys
+.Po usernames if you like
+.Pc and values
+.Po passwords if you like
+.Pc .
 .Pp
 After starting
 .Nm
@@ -60,22 +77,30 @@ command and save it with
 .Ic write .
 You can see the stored keys with the
 .Ic list
-command, then entering only a number in the command line will display the entry with the given index.
+command, then entering only a number in the command line will display the entry
+with the given index.
 You quit from the value display with
 .Ql q
-or EOT (usually CTRL+d).
+or EOT
+.Po usually CTRL+d
+.Pc .
 .Pp
 The CLI supports tab-completion for commands and keychains.
 .Pp
 When saving the database
-.Po Ic write
-command
+.Po Ic write command
 .Pc
 .Nm
-will create a temporary file (under the same directory as the opened database file), and will first try to save the whole database to that temporary database file.
+will create a temporary file
+.Po under the same directory as the opened database file
+.Pc , and will first try to save the whole database to that temporary database
+file.
 When this succeeds, only then will
 .Nm
-replace the old database with the new one, so you will always have a usable and intact (but potentially older) version of your database file.
+replace the old database with the new one, so you will always have a usable and
+intact
+.Po but potentially older
+.Pc version of your database file.
 .Pp
 On OpenBSD
 .Nm
@@ -106,7 +131,8 @@ commands' description.
 .It Fl r
 Open the database in read-only mode.
 .Nm
-will not try to lock the database file, and commands which could modify the database will not be available.
+will not try to lock the database file, and commands which could modify the
+database will not be available.
 .It Fl A Ar key-type,key-comment Op ,password
 Use a signature from SSH agent as the database password.
 For this,
@@ -115,7 +141,8 @@ asks
 .Xr ssh-agent 1
 (using the
 .Ev SSH_AUTH_SOCK
-environment variable) to sign the IV and the salt of the database (and optionally a password) with a private key loaded into
+environment variable) to sign the IV and the salt of the database (and
+optionally a password) with a private key loaded into
 .Xr ssh-agent 1 .
 This private key is looked up based on the
 .Ar key type
@@ -123,7 +150,8 @@ and
 .Ar key comment
 separated by a comma (with no whitespaces around it).
 .Pp
-Key types supported and tested so far are RSA and ED25519, by using the type names
+Key types supported and tested so far are RSA and ED25519, by using the type
+names
 .Bl -tag -offset ||| -width |
 .It Ar ssh-rsa
 .It Ar ssh-ed25519
@@ -138,9 +166,13 @@ Key comments cannot contain comma (,) characters.
 .Pp
 If the word
 .Ql password
-is appended to the key comment after a comma (with no whitespaces around it), then
+is appended to the key comment after a comma (with no whitespaces around it),
+then
 .Nm
-will also use the password (along with the IV and salt) as the input for the SSH agent signature request. Thus making it interactive (by requesting a password for decryption) instead of an automatic database opening.
+will also use the password (along with the IV and salt) as the input for the
+SSH agent signature request.
+Thus making it interactive (by requesting a password for decryption) instead of
+an automatic database opening.
 .Pp
 E.g.:
 .Bl -tag -offset ||| -width |
@@ -152,13 +184,23 @@ type key with a comment
 and also ask for a password to use when opening the database.
 .El
 .Pp
-Also worth mentioning that this actually works with agent forwarding as well, so on a remote machine one doesn't even have to have the actual private key file -- just like in any other case when you'd use SSH agent forwarding.
+Also worth mentioning that this actually works with agent forwarding as well,
+so on a remote machine one doesn't even have to have the actual private key
+file \(em just like in any other case when you'd use SSH agent forwarding.
 .It Fl Y Ar key-slot Op ,device-index|serial-number Op Ql ,password
-Use a YubiKey to utilize its challenge-response mechanism to construct the password for the database. This can be either an automatic or an interactive mode of operation (just like with SSH agent support). Without the
+Use a YubiKey to utilize its challenge-response mechanism to construct the
+password for the database.
+This can be either an automatic or an interactive mode of operation (just like
+with SSH agent support).
+Without the
 .Ql password
-parameter the challenge will be the database salt value, thus facilitating an automatic database open.
+parameter the challenge will be the database salt value, thus facilitating an
+automatic database open.
 .Pp
-This is a comma-sperated list of parameters, and the only mandatory argument to this option is the slot number. If the device index or serial number in the second field is missing, the first available device
+This is a comma-sperated list of parameters, and the only mandatory argument to
+this option is the slot number.
+If the device index or serial number in the second field is missing, the first
+available device
 .Po index #0
 .Pc is used. The third
 .Po or second, if the index or serial is missing
@@ -170,7 +212,8 @@ E.g.:
 .It Ar 2
 means slot 2 and implicitly device 0 (the first device).
 .It Ar 2,password
-means slot 2 and implicitly device 0 (the first device), and also use a user-supplied password.
+means slot 2 and implicitly device 0 (the first device), and also use a
+user-supplied password.
 .It Ar 1,0
 means slot 1 and device 0 (the first device).
 .It Ar 2,0
@@ -178,26 +221,41 @@ means slot 2 and device 0 (the first device).
 .It Ar 2,1
 means slot 2 and device 1 (the second device).
 .It Ar 2,3,password
-means slot 2 and device 3 (the third device), and also use a user-supplied password.
+means slot 2 and device 3 (the third device), and also use a user-supplied
+password.
 .It Ar 2,12345678,password
-means slot 2 and the device with the serial number 12345678, and also use a user-supplied password.
+means slot 2 and the device with the serial number 12345678, and also use a
+user-supplied password.
 .El
 .Pp
 If the
 .Ql password
-parameter is specified, then the user-supplied password is used as the challenge with the security key -- otherwise the database's salt is the challenge (stored in the database). When using this option, the password can be at most 64 bytes long. E.g.:
+parameter is specified, then the user-supplied password is used as the
+challenge with the security key \(em otherwise the database's salt is the
+challenge (stored in the database).
+When using this option, the password can be at most 64 bytes long.
+E.g.:
 .Bl -tag -offset ||| -width |
 .It Ar 2,0,password
-Use the frist device, the second slot, and ask for a password to use as the challenge.
+Use the frist device, the second slot, and ask for a password to use as the
+challenge.
 .El
 .Pp
 .Em Using multiple security keys:
 .Pp
-It's possible to use multiple security keys by specifying this option two or more times. In this case
+It's possible to use multiple security keys by specifying this option two or
+more times.
+In this case
 .Nm
-will use the specified security keys in the order these options are specified, and each subsequent device will re-use the previous output
+will use the specified security keys in the order these options are specified,
+and each subsequent device will re-use the previous output
 .Po response
-.Pc as its challenge, chaining together the security keys. The database can only be opened when using all of the provided security keys, and by specifying these options in the same exact order. To work around the dynamic assignment of device numbers based on the order one plugs in their security keys, serial numbers can be used instead of the device index number to explicitly specify which security key to use.
+.Pc as its challenge, chaining together the security keys.
+The database can only be opened when using all of the provided security keys,
+and by specifying these options in the same exact order.
+To work around the dynamic assignment of device numbers based on the order one
+plugs in their security keys, serial numbers can be used instead of the device
+index number to explicitly specify which security key to use.
 .Pp
 When using multiple security keys, any one of the
 .Ql password
@@ -217,7 +275,8 @@ OpenSSL's PKCS5 PBKDF2 with SHA-3 512
 OpenSSL's PKCS5 PBKDF2 with SHA-2 512.
 This is the default.
 .It Ar bcrypt
-Bcrypt PBKDF based on Blowfish. This is slower than the SHA-* or scrypt variants.
+Bcrypt PBKDF based on Blowfish.
+This is slower than the SHA-* or scrypt variants.
 On Linux, a bundled bcrypt implementation from
 .Ox
 is used, and its version is the one that was available at the time of this
@@ -227,7 +286,8 @@ release.
 If compiled with libscrypt,
 .Nm
 can use the scrypt KDF.
-The speed of this is somewhere between SHA-* and bcrypt. The
+The speed of this is somewhere between SHA-* and bcrypt.
+The
 .Fl R
 option is ignored when using this.
 .El
@@ -276,7 +336,9 @@ section.
 .It Fl b
 Batch mode.
 Enable reading commands and the password from standard input.
-In this case, the password must be on the first line (like it would be in interactive mode).
+In this case, the password must be on the first line
+.Po like it would be in interactive mode
+.Pc .
 .It Fl B
 Batch mode.
 Enable reading commands from standard input, but prompt for the password.
@@ -313,7 +375,8 @@ random printable characters.
 .Pc
 random alpha-numeric characters.
 .Pp
-Character sequences are to be used in values, regardless of their order or count, and can be escaped using double backslashes
+Character sequences are to be used in values, regardless of their order or
+count, and can be escaped using double backslashes
 .Po eg.:
 .Qq \e\ea
 .Pc .
@@ -524,7 +587,8 @@ More information about the
 .Ar kdf ,
 .Ar cipher ,
 .Ar cipher mode
-optional arguments are in their respective command line parameter description and the KDF and CIPHERS sections of this manual.
+optional arguments are in their respective command line parameter description
+and the KDF and CIPHERS sections of this manual.
 .It Ic help Op command
 Print application help or describe a
 .Ar command .
@@ -542,8 +606,10 @@ Optional arguments
 .Ar cipher
 and
 .Ar cipher mode
-can be used to specify a different KDF, encryption cipher and cipher mode to be used while exporting the database.
-This doesn't change the current database's parameters, but when importing this exported database, the parameters in use must be the same
+can be used to specify a different KDF, encryption cipher and cipher mode to be
+used while exporting the database.
+This doesn't change the current database's parameters, but when importing this
+exported database, the parameters in use must be the same
 .Po or specified explicitly when using the
 .Ic import
 command
@@ -592,7 +658,8 @@ The
 .Ar cipher
 and
 .Ar cipher mode
-optional arguments can be used to specify these parameters if they differ from the current database's.
+optional arguments can be used to specify these parameters if they differ from
+the current database's.
 .Pp
 With the
 .Fl o
@@ -636,7 +703,8 @@ The
 .Ar kdf
 and
 .Ar cipher mode
-optional arguments can be used to specify these parameters if they differ from the current database's.
+optional arguments can be used to specify these parameters if they differ from
+the current database's.
 See the
 .Em LIMITS
 section for information about how
@@ -705,7 +773,11 @@ section about the clipboard commands.
 .It Ic xclip Ar index Op line
 Copy the value of
 .Ar index
-to the CLIPBOARD (aka.: CTRL+c - CTRL+v) or PRIMARY X11 selection (ie.: middle mouse button), depending on the first
+to the CLIPBOARD
+.Po aka.: CTRL+c - CTRL+v
+.Pc or PRIMARY X11 selection
+.Po ie.: middle mouse button
+.Pc , depending on the first
 .Sq x
 character's case, respectively.
 .Ar index
@@ -713,7 +785,9 @@ is the key's index number in the current keychain.
 .Ar line
 can be used to specify the line number to copy, if
 .Ar index
-is a multiline value (defaults to 1).
+is a multiline value
+.Po defaults to 1
+.Pc .
 .Pp
 These will try to execute the
 .Xr xclip 1
@@ -732,18 +806,30 @@ Save the database.
 Alias of
 .Ic write .
 .It Ic any number
-To display a key's value, you enter the key's index (ie.: only a number) into the command line, then it will display the entry with the given index.
-You quit from the display with 'q' or EOT (usually CTRL+d).
+To display a key's value, you enter the key's index
+.Po ie.: only a number
+.Pc into the command line, then it will display the entry with the given index.
+You quit from the display with 'q' or EOT
+.Po usually CTRL+d
+.Pc .
 .Pp
-Rarely one needs to actually look at the passwords being stored, there are convenient commands
+Rarely one needs to actually look at the passwords being stored, there are
+convenient commands
 .Po Ic Xclip xclip tmux
 .Pc
 .Pp
-By specifying another number after the index (eg.: '12 2' -- here 12 is the index, and 2 is the extra number (spice) after it), that many random characters will be displayed between the value's characters.
-You can navigate up/down through a multiline value's lines with keys j/k, n/p, f/b, +/-, [/], {/}, </>, <SPACE>, <ENTER>, <BACKSPACE>.
+By specifying another number after the index
+.Po eg.: '12 2' \(em here 12 is the index, and 2 is the extra number
+.Po spice
+.Pc after it
+.Pc , that many random characters will be displayed between the value's characters.
+You can navigate up/down through a multiline value's lines with keys j/k, n/p,
+f/b, +/-, [/], {/}, </>, <SPACE>, <ENTER>, <BACKSPACE>.
 Typing a number between 1-9 will jump directly to that line.
 .Pp
-It is possible to copy the displayed value to a clipboard (or such) with these hotkeys:
+It is possible to copy the displayed value to a clipboard
+.Po or such
+.Pc with these hotkeys:
 .Bl -tag -offset ||| -width |
 .It t
 Copy the value to the tmux paste buffer like the
@@ -766,29 +852,59 @@ Check the
 .Em CAVEATS
 section about the clipboard commands.
 .Pp
-Perhaps the extra number (spice) after a key's index and its usefulness can use some further explanation.
-Let's say you want to display a password to use it on a website's form, but you don't want the people walking by or around you to recognize words, numbers or parts of it.
+Perhaps the extra number
+.Po spice
+.Pc after a key's index and its usefulness can use some further explanation.
+Let's say you want to display a password to use it on a website's form, but you
+don't want the people walking by or around you to recognize words, numbers or
+parts of it.
 You can use this nifty "trick" to tell
 .Nm
-to display that many random characters between the value's original characters when showing it to you.
-Granted, it will look like a mess (although, that is what we wanted), but you can copy-paste it to the password entry in the website form in question.
-Then you can start to "blindly" delete the given number of characters from it by moving your cursor to the beginning (eg.: HOME key), pressing 'spice' numbers of DEL, then jump over one character to the right (with the right arrow key), then delete the random characters again, then repeating this until you reach the end of your original password (those who played Mortal Kombat will feel a bit nostalgic).
-You can catch on to this, because the random character padding is of fixed length, so the pattern remains the same for the whole password.
-You don't even have to pay attention to the original length of the password, because after you've completed the pattern (DELs-move-DELs-move...) and removed the spice (ie.: every padding random character), you end up with your original password, and you'll just be deleting nothing after the end of the string.
-This of course only makes sense if the form is a password input field, so you (and everybody else) just see stars or dots in place of the password.
+to display that many random characters between the value's original characters
+when showing it to you.
+Granted, it will look like a mess
+.Po although, that is what we wanted
+.Pc , but you
+can copy-paste it to the password entry in the website form in question.
+Then you can start to "blindly" delete the given number of characters from it
+by moving your cursor to the beginning
+.Po eg.: HOME key
+.Pc , pressing 'spice'
+numbers of DEL, then jump over one character to the right
+.Po with the right arrow key
+.Pc , then delete the random characters again, then repeating this until you
+reach the end of your original password
+.Po those who played Mortal Kombat will feel a bit nostalgic
+.Pc .
+You can catch on to this, because the random character padding is of fixed
+length, so the pattern remains the same for the whole password.
+You don't even have to pay attention to the original length of the password,
+because after you've completed the pattern
+.Po DELs-move-DELs-move...
+.Pc and removed
+the spice
+.Po ie.: every padding random character
+.Pc , you end up with your original
+password, and you'll just be deleting nothing after the end of the string.
+This of course only makes sense if the form is a password input field, so you
+.Po and everybody else
+.Pc just see stars or dots in place of the password.
 .El
 .Ss CIPHERS
-Databases are encrypted with the AES-256 cipher in CBC mode, if another cipher and mode was not specified explicitly
+Databases are encrypted with the AES-256 cipher in CBC mode, if another cipher
+and mode was not specified explicitly
 .Po see the
 .Fl e
 and
 .Fl m
 options
-.Pc . Ciphers use a key generated with a KDF from the user-supplied password (and optionally a signature from an SSH agent or a HMAC response from a YubiKey), and an IV (initialization vector) that is read when first creating a database from the host's specific random device
-.Po Pa /dev/urandom
-on Linux and
-.Pa /dev/random
-on everything else
+.Pc . Ciphers use a key generated with a KDF from the user-supplied password
+.Po and optionally a signature from an SSH agent or a HMAC response from a YubiKey
+.Pc , and an IV
+.Po initialization vector
+.Pc that is read when first creating a database from the host's specific random device
+.Po Pa /dev/urandom on Linux and
+.Pa /dev/random on everything else
 .Pc .
 .Pp
 To change the encryption cipher and/or its mode, you can use the
@@ -803,13 +919,25 @@ section.
 .Ss KDF
 The KDF
 .Po key derivation function
-.Pc converts the constructed password (either directly from the user input or after being treated with one of the relevant functions like an SSH agent or a security key) with a generated salt to a strong key that can be used safely during encryption.
+.Pc converts the constructed password
+.Po either directly from the user input or after being treated with one of the
+relevant functions like an SSH agent or a security key
+.Pc with a generated salt to a strong key that can be used safely during
+encryption.
 .Pp
-Every SHA-* based PBKDF2 function uses 100000 iterations and the bcrypt KDF uses 36 rounds by default. If you're using
+Every SHA-* based PBKDF2 function uses 100000 iterations and the bcrypt KDF
+uses 36 rounds by default.
+If you're using
 .Nm
-on an old enough (quite old) hardware, you might reckon that these numbers are too high, or in other words, opening a database takes too much time. See option
+on an old enough
+.Po quite old
+.Pc hardware, you might reckon that these numbers are too high, or in other
+words, opening a database takes too much time.
+See option
 .Fl R
-if you really think you should change this. And remember, after saving/exporting a database with a certain number of KDF rounds or iterations, you must use the same number when trying to open it.
+if you really think you should change this.
+And remember, after saving/exporting a database with a certain number of KDF
+rounds or iterations, you must use the same number when trying to open it.
 .Pp
 On changing the KDF being used, see the
 .Ic passwd
@@ -825,89 +953,138 @@ uses a key generated with a KDF to encrypt
 a database, one of the inputs of that is usually
 .Po but not necessarily
 .Pc
-a user-supplied password. There are currently a couple of options to consider when deciding how to create and/or use a database.
+a user-supplied password.
+There are currently a couple of options to consider when deciding how to create
+and/or use a database.
 .Bl -tag -width |
 .It A single password
 Most simple one
 .Po doesn't need any specific parameter to be specified
-.Pc , just type in a password when creating a database and use the same one when opening it. Old school.
+.Pc , just type in a password when creating a database and use the same one
+when opening it.
+Old school.
 .It A signature based on an SSH key loaded into an SSH agent
-This method -- when used with the
+This method \(em when used with the
 .Op -A
-option -- takes the database IV and salt
+option \(em takes the database IV and salt
 .Po both available when reading the database file
 .Pc
 and the SSH agent generates a
 .Ql new password
-from them. This will be the kind of gibberish that's essentially harder to guess than your average password, but takes data as input that's available directly from the database file. Thus, when someone has read access to the database file
+from them.
+This will be the kind of gibberish that's essentially harder to guess than your
+average password, but takes data as input that's available directly from the
+database file.
+Thus, when someone has read access to the database file
 .Em and
-the SSH agent that has the required key loaded (or the private key directly), they can open the database. This method is convenient because one doesn't have to input a password
+the SSH agent that has the required key loaded
+.Po or the private key directly
+.Pc ,
+they can open the database.
+This method is convenient because one doesn't have to input a password
 .Po the database open is non-interactive
 .Pc
-so it works neatly when combined with other tools -- I've used this e.g. with
+so it works neatly when combined with other tools \(em I've used this e.g. with
 .Xr mutt 1
-to get my IMAP/SMTP password without having to type in anything when I started it.
+to get my IMAP/SMTP password without having to type in anything when I started
+it.
 .Pp
 Additionally one can use a user-supplied password on top all of this
-.Po by supplying the 
+.Po by supplying the
 .Ar ,password
 parameter
-.Pc , that will be mixed in with the input when getting the signature from the SSH agent. Thus adding an interactive layer to the database opening, and making it harder for someone to open the database if they steal it along with the required SSH private key.
+.Pc , that will be mixed in with the input when getting the signature from the
+SSH agent.
+Thus adding an interactive layer to the database opening, and making it harder
+for someone to open the database if they steal it along with the required SSH
+private key.
 .Pp
 What
 .Nm
-actually does is not only mixing in the password when getting the signature, but also directly appending it to the signature when using it as input with the KDF. In this case, when opening the database
+actually does is not only mixing in the password when getting the signature,
+but also directly appending it to the signature when using it as input with the
+KDF.
+In this case, when opening the database
 .Nm
-will ask for a password and the SSH agent for a signature based on the correct private key.
+will ask for a password and the SSH agent for a signature based on the correct
+private key.
 .It A challenge-response from a security key
 .Nm
 supports the YubiKey's HMAC challenge-response mode
 .Po using the
-.Op -Y
-option
+.Op -Y option
 .Pc
-and the response is used as the password input for the KDF. This too can have an added conveniency of not having to type in anything when opening the database, because
+and the response is used as the password input for the KDF.
+This too can have an added conveniency of not having to type in anything when
+opening the database, because
 .Nm
-can use only the database salt as the challenge, and so the response from the security key will be based on this. The salt is directly available from the database file, so if someone steals it
+can use only the database salt as the challenge, and so the response from the
+security key will be based on this.
+The salt is directly available from the database file, so if someone steals it
 .Em and
 the required security key, they can open the database.
 .Pp
-There is however the 
+There is however the
 .Ar ,password
-parameter here as well, with which one can add an interactive layer on top all of this, and use the user-supplied password (combined with the salt if it's not long enough) as the challenge. In this case, when opening the database
+parameter here as well, with which one can add an interactive layer on top all
+of this, and use the user-supplied password
+.Po combined with the salt if it's not long enough
+.Pc as the challenge.
+In this case, when opening the database
 .Nm
 will ask for a password and the correct security key.
 .Pp
 More than one security key can be used in order for
 .Nm
-to require all of them in the right order when opening a database. See the
+to require all of them in the right order when opening a database.
+See the
 .Op -Y
 option on how this works.
 .It Combining authentication features
-Now, knowing that database passwords can be generated with the help of an SSH agent and a YubiKey security key with a user-supplied password, another thing one can do besides using either one of the above functions, is to combine any of these. If -- and only if -- SSH agent signing and security key challenge-response are used with a password
+Now, knowing that database passwords can be generated with the help of an SSH
+agent and a YubiKey security key with a user-supplied password, another thing
+one can do besides using either one of the above functions, is to combine any
+of these.
+If \(em and only if \(em SSH agent signing and security key challenge-response
+are used with a password
 .Po see
 .Ar ,password
 parameter for both of these
 .Pc
 then
 .Nm
-will treat the user-supplied password first with the SSH agent and then subsequently with the security key, thus requiring the user's password, the SSH private key and the security key to open the database later on. This may sound convoluted, and I'm not even sure if it's worth the
+will treat the user-supplied password first with the SSH agent and then
+subsequently with the security key, thus requiring the user's password, the SSH
+private key and the security key to open the database later on.
+This may sound convoluted, and I'm not even sure if it's worth the
 .Qq trouble ,
-nevertheless, it is a possibility and I think it shows how the separate features are built up.
+nevertheless, it is a possibility and I think it shows how the separate
+features are built up.
 .El
 .Pp
-At the end of the day, all these functions do is provide a password to be used with the KDF to generate a key from it. Choose one that you deem secure enough, is convenient and works for you.
+At the end of the day, all these functions do is provide a password to be used
+with the KDF to generate a key from it.
+Choose one that you deem secure enough, is convenient and works for you.
 .Ss LIMITS
 .Nm
 has its limits when it comes to dealing with keychains and keys in keychains.
-The maximum number of elements for both is the upper limit an unsigned long integer can store on the running platform, minus one.
-These limits are enforced every time a new keychain or key is being created (or moved, copied, etc...).
+The maximum number of elements for both is the upper limit an unsigned long
+integer can store on the running platform, minus one.
+These limits are enforced every time a new keychain or key is being created
+.Po or moved, copied, etc...
+.Pc .
 Appending is done in a non-atomic fashion.
 This means that
 .Nm
-will not create a keychain if it would not fit in the limit, and it will not append keys to an existing keychain if they would not fit in the limit.
-However, for example, if a database that is being appended contains a keychain whose keys could not fit in the existing keychain, and also contains a keychain whose keys could fit in the existing keychain, then the one that could fit will be appended, and the one that could not will not be appended.
-This means that appending is atomic on the keychain level (or keys level, if you like), and not atomic on the database level.
+will not create a keychain if it would not fit in the limit, and it will not
+append keys to an existing keychain if they would not fit in the limit.
+However, for example, if a database that is being appended contains a keychain
+whose keys could not fit in the existing keychain, and also contains a keychain
+whose keys could fit in the existing keychain, then the one that could fit will
+be appended, and the one that could not will not be appended.
+This means that appending is atomic on the keychain level
+.Po or keys level, if you like
+.Pc , and not atomic on the database level.
 .Ss SUPPORTED DEVICES
 .Bl -tag -width |
 .It SSH agent
@@ -975,7 +1152,7 @@ Using '/home/user/.kc/passwords_and_secrets.kcd' database.
 New password (empty to cancel):
 New password again (empty to cancel):
 Remember to touch your YubiKey if necessary
-<default% > 
+<default% >
 
 <default% > status
 Database file: .kc/passwords_and_secrets.kcd (/home/user/.kc/passwords_and_secrets.kcd)
@@ -1132,7 +1309,8 @@ Fair warnings before using the clipboard features:
 .It
 If you don't trust the system where you're running
 .Ic kc
-then don't use these features, as you can not be sure that the binaries in your PATH are not tampered with and would record the passwords.
+then don't use these features, as you can not be sure that the binaries in your
+PATH are not tampered with and would record the passwords.
 .It
 Removal of the
 .Em values
@@ -1143,9 +1321,12 @@ This should be the user's responsibility.
 SSH agent support:
 .Bl -enum -offset ||| -width |
 .It
-The password (signature) coming from
+The password
+.Po signature
+.Pc coming from
 .Xr ssh-agent 1
-varies between different types of SSH keys -- different keys/key bit lengths produce different signature lengths.
+varies between different types of SSH keys \(em different keys/key bit lengths
+produce different signature lengths.
 .It
 .Nm
 cannot handle spaces in the key comment when using the
@@ -1164,13 +1345,20 @@ Supports an at most 64 bytes long password.
 Only HMAC mode is supported by
 .Nm
 .It
-Maybe it goes without saying, but this method of password protection is not quite useful over network connections (e.g.: SSH on a remote machine), as the actual device is not plugged in there. There is, however, a USB-over-IP implementation for Linux that could overcome this.
+Maybe it goes without saying, but this method of password protection is not
+quite useful over network connections
+.Po e.g.: SSH on a remote machine
+.Pc , as the
+actual device is not plugged in there.
+There is, however, a USB-over-IP implementation for Linux that could overcome
+this.
 .El
 .Pp
 Miscellaneous:
 .Bl -enum -offset ||| -width |
 .It
-It is considered a good practice, to periodically manually backup the database file(s) you use with
+It is considered a good practice, to periodically manually backup the database
+file(s) you use with
 .Nm .
 This could just mean a simple:
 .Bd -literal -offset |||
@@ -1178,10 +1366,20 @@ $ cp ~/.kc/default ~/.kc/default-bkp
 .Ed
 .It
 .Nm
-doesn't try excessively hard to recover from hard and/or non-recoverable errors (OS, memory, disk etc...), and in some cases this could mean that it will simply exit (without saving the database) with an appropriate error message.
-No need to worry, but keep this in mind like you would with a common word processor or text editor and save periodically, for example when you edit many keys at once.
+doesn't try excessively hard to recover from hard and/or non-recoverable errors
+.Po OS, memory, disk etc...
+.Pc , and in some cases this could mean that it will
+simply exit
+.Po without saving the database
+.Pc with an appropriate error message.
+No need to worry, but keep this in mind like you would with a common word
+processor or text editor and save periodically, for example when you edit many
+keys at once.
 .It
-There is no character set conversion taking place in the program. In this case this means you must be ready to display anything you type in. If somehow you still end up with texts you can not display properly, and for whatever reason you can not edit them in
+There is no character set conversion taking place in the program.
+In this case this means you must be ready to display anything you type in.
+If somehow you still end up with texts you can not display properly, and for
+whatever reason you can not edit them in
 .Nm ,
 you can
 .Qq repair
@@ -1191,7 +1389,8 @@ XML file
 .Po see the
 .Ic dump
 command
-.Pc , converting the plain text XML file to a working character set, then importing back that XML file
+.Pc , converting the plain text XML file to a working character set, then
+importing back that XML file
 .Po see the
 .Ic importxml
 command
@@ -1202,7 +1401,9 @@ If you use
 .Ar ctr
 or
 .Ar ofb
-as the cipher mode, there is no specific sign if you enter a wrong password during opening a database; in this case the database will seem to be corrupt after decrypting, and
+as the cipher mode, there is no specific sign if you enter a wrong password
+during opening a database; in this case the database will seem to be corrupt
+after decrypting, and
 .Nm
 simply will not be able to open it.
 .It
@@ -1212,14 +1413,18 @@ uses
 .Xr pledge 2
 to restrict its access to certain functions, but only when
 .Em not
-compiled with YubiKey support. Currently the way yubikey libraries access USB devices cannot be allowed by any promise for
+compiled with YubiKey support.
+Currently the way yubikey libraries access USB devices cannot be allowed by any
+promise for
 .Xr pledge 2 .
 .It
-There is a Perl script in the source package (available from the project website) that converts an exported pwsafe database to a
+There is a Perl script in the source package
+.Po available from the project website
+.Pc that converts an exported pwsafe database to a
 .Nm
 compatible XML database, which can be imported using the
 .Ic importxml
 command.
-.Em NOTA BENE:
+.Em NOTA BENE :
 This script is really old and not maintained.
 .El
