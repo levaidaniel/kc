@@ -633,7 +633,7 @@ kc_crypt_iv_salt(struct db_parameters *db_params)
 	/* Setup the digest context */
 	mdctx = EVP_MD_CTX_create();
 	if (!mdctx) {
-		dprintf(STDERR_FILENO, "ERROR: Could not create digest context for IV!\n");
+		dprintf(STDERR_FILENO, "ERROR: Could not create digest context for salt!\n");
 
 		free(salt_tmp); salt_tmp = NULL;
 		return(0);
