@@ -228,8 +228,8 @@ get_random_str(const unsigned int length, const unsigned char mode)
 			break;
 		}
 
-		rnd_str[i] = *tmp;              /* store the value */
-		*tmp = '\0';            /* reset the value */
+		rnd_str[i] = *tmp;	/* store the value */
+		*tmp = '\0';		/* reset the value */
 	}
 
 	free(tmp); tmp = NULL;

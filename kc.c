@@ -101,11 +101,11 @@ main(int argc, char *argv[])
 
 
 	if (getenv("KC_DEBUG"))
-	       printf("%s(): Pledging for '%s'\n", __func__, pledges);
+		printf("%s(): Pledging for '%s'\n", __func__, pledges);
 
 	if (pledge(pledges, NULL) != 0) {
-	       perror("ERROR: Unable to pledge()!");
-	       quit(EXIT_FAILURE);
+		perror("ERROR: Unable to pledge()!");
+		quit(EXIT_FAILURE);
 	}
 #endif
 
