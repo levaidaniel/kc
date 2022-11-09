@@ -859,6 +859,9 @@ kc_crypt_key(struct db_parameters *db_params)
 char
 kc_crypt_setup(BIO *bio_chain, const unsigned int enc, struct db_parameters *db_params)
 {
+	const EVP_CIPHER	*(*kc_cipher)(void) = NULL;
+
+
 	/* extract bio_cipher from bio_chain */
 	bio_chain = BIO_find_type(bio_chain, BIO_TYPE_CIPHER);
 	if (!bio_chain) {
@@ -870,31 +873,36 @@ kc_crypt_setup(BIO *bio_chain, const unsigned int enc, struct db_parameters *db_
 
 	/* reconfigure {en,de}cryption with the key and IV */
 	if (strcmp(db_params->cipher, "aes256") == 0) {
-		if (strcmp(db_params->cipher_mode, "cfb") == 0)
-			BIO_set_cipher(bio_chain, EVP_aes_256_cfb(), db_params->key, db_params->iv, enc);
-		else if (strcmp(db_params->cipher_mode, "ofb") == 0)
-			BIO_set_cipher(bio_chain, EVP_aes_256_ofb(), db_params->key, db_params->iv, enc);
-		else if (strcmp(db_params->cipher_mode, "cbc") == 0)
-			BIO_set_cipher(bio_chain, EVP_aes_256_cbc(), db_params->key, db_params->iv, enc);
-		else if (strcmp(db_params->cipher_mode, "ctr") == 0)
-			BIO_set_cipher(bio_chain, EVP_aes_256_ctr(), db_params->key, db_params->iv, enc);
-		else {
+		if (strcmp(db_params->cipher_mode, "cfb") == 0) {
+			kc_cipher = &EVP_aes_256_cfb;
+		} else if (strcmp(db_params->cipher_mode, "ofb") == 0) {
+			kc_cipher = &EVP_aes_256_ofb;
+		} else if (strcmp(db_params->cipher_mode, "cbc") == 0) {
+			kc_cipher = &EVP_aes_256_cbc;
+		} else if (strcmp(db_params->cipher_mode, "ctr") == 0) {
+			kc_cipher = &EVP_aes_256_ctr;
+		} else {
 			printf("Unknown cipher mode: %s!\n", db_params->cipher_mode);
 			return(0);
 		}
 	} else if (strcmp(db_params->cipher, "blowfish") == 0) {
-		if (strcmp(db_params->cipher_mode, "cfb") == 0)
-			BIO_set_cipher(bio_chain, EVP_bf_cfb(), db_params->key, db_params->iv, enc);
-		else if (strcmp(db_params->cipher_mode, "ofb") == 0)
-			BIO_set_cipher(bio_chain, EVP_bf_ofb(), db_params->key, db_params->iv, enc);
-		else if (strcmp(db_params->cipher_mode, "cbc") == 0)
-			BIO_set_cipher(bio_chain, EVP_bf_cbc(), db_params->key, db_params->iv, enc);
-		else {
+		if (strcmp(db_params->cipher_mode, "cfb") == 0) {
+			kc_cipher = &EVP_bf_cfb;
+		} else if (strcmp(db_params->cipher_mode, "ofb") == 0) {
+			kc_cipher = &EVP_bf_ofb;
+		} else if (strcmp(db_params->cipher_mode, "cbc") == 0) {
+			kc_cipher = &EVP_bf_cbc;
+		} else {
 			printf("Unknown cipher mode: %s!\n", db_params->cipher_mode);
 			return(0);
 		}
 	} else {
 		printf("Unknown encryption cipher: %s!\n", db_params->cipher);
+		return(0);
+	}
+
+	if (BIO_set_cipher(bio_chain, (*kc_cipher)(), db_params->key, db_params->iv, enc) != 1) {
+		dprintf(STDERR_FILENO, "ERROR: Could not set cipher to '%s' with mode '%s'!\n", db_params->cipher, db_params->cipher_mode);
 		return(0);
 	}
 

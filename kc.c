@@ -109,6 +109,25 @@ main(int argc, char *argv[])
 	}
 #endif
 
+#if OPENSSL_VERSION_MAJOR >= 3
+	if (OSSL_PROVIDER_load(NULL, "default") != NULL) {
+		if (getenv("KC_DEBUG"))
+			printf("%s(): loaded 'default' OpenSSL provider\n", __func__);
+	} else {
+		dprintf(STDERR_FILENO, "ERROR: Could not load 'default' OpenSSL provider!\n");
+		quit(EXIT_FAILURE);
+	}
+
+	/* legacy is for the blowfish cipher */
+	if (OSSL_PROVIDER_load(NULL, "legacy") != NULL) {
+		if (getenv("KC_DEBUG"))
+			printf("%s(): loaded 'legacy' OpenSSL provider\n", __func__);
+	} else {
+		dprintf(STDERR_FILENO, "ERROR: Could not load 'legacy' OpenSSL provider!\n");
+		quit(EXIT_FAILURE);
+	}
+#endif
+
 
 	params.caller = "main";
 	params.keychain_start = NULL;

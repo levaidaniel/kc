@@ -27,6 +27,10 @@
 
 #include <openssl/bio.h>
 #include <openssl/evp.h>
+#include <openssl/opensslv.h>
+#if OPENSSL_VERSION_MAJOR >= 3
+#include <openssl/provider.h>
+#endif
 
 #ifndef _READLINE
 #include <histedit.h>
