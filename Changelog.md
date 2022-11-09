@@ -1,4 +1,10 @@
 # 2.5.0
+* OpenSSL-related fixes
+
+  Support OpenSSL v3.
+  OpenSSL 3 needs us to load the legacy OpenSSL provider to use the blowfish cipher.
+
+  Renamed a couple of functions and we check for a return value of functions that had one recently implemented.
 * Unify error messages in that they now appear on standard error output and they're prefixed with `ERROR:`..
 * Increase maximum allowed password length to 1024 bytes.
 * Implement OpenSSH agent support to acquire a database password from a signature based on the chosen SSH private key.
