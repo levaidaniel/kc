@@ -588,7 +588,7 @@ kc_crypt_iv_salt(struct db_parameters *db_params)
 	}
 
 	/* Setup the digest context */
-	mdctx = EVP_MD_CTX_create();
+	mdctx = EVP_MD_CTX_new();
 	if (!mdctx) {
 		dprintf(STDERR_FILENO, "ERROR: Could not create digest context for IV!\n");
 
@@ -598,7 +598,7 @@ kc_crypt_iv_salt(struct db_parameters *db_params)
 	EVP_DigestInit_ex(mdctx, EVP_sha512(), NULL);
 	EVP_DigestUpdate(mdctx, iv_tmp, IV_LEN);
 	EVP_DigestFinal_ex(mdctx, digested, &digested_len);
-	EVP_MD_CTX_destroy(mdctx);
+	EVP_MD_CTX_free(mdctx);
 	free(iv_tmp); iv_tmp = NULL;
 
 	/* Print the binary digest in hex as characters (numbers, effectively)
@@ -631,7 +631,7 @@ kc_crypt_iv_salt(struct db_parameters *db_params)
 	}
 
 	/* Setup the digest context */
-	mdctx = EVP_MD_CTX_create();
+	mdctx = EVP_MD_CTX_new();
 	if (!mdctx) {
 		dprintf(STDERR_FILENO, "ERROR: Could not create digest context for salt!\n");
 
@@ -641,7 +641,7 @@ kc_crypt_iv_salt(struct db_parameters *db_params)
 	EVP_DigestInit_ex(mdctx, EVP_sha512(), NULL);
 	EVP_DigestUpdate(mdctx, salt_tmp, SALT_LEN);
 	EVP_DigestFinal_ex(mdctx, digested, &digested_len);
-	EVP_MD_CTX_destroy(mdctx);
+	EVP_MD_CTX_free(mdctx);
 	free(salt_tmp); salt_tmp = NULL;
 
 	/* Print the binary digest in hex as characters (numbers, effectively)
