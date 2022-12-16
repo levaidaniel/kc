@@ -1269,7 +1269,12 @@ char kc_arg_parser(int largc, char **largv, const char *opts, db_parameters *db_
 	if (getenv("KC_DEBUG"))
 		printf("%s(): caller='%s' with opts='%s'\n", __func__, extra_params->caller, opts);
 
+#ifdef __FreeBSD__
+	optind = 1;
+#else
 	optind = 0;
+#endif
+
 	while ((c = getopt(largc, largv, opts)) != -1)
 		switch (c) {
 			case 'c':
