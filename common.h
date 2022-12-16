@@ -41,7 +41,7 @@
 
 
 #define	NAME		"kc"
-#define	VERSION		"2.5-dev-GIT_VERSION"
+#define	VERSION		"2.5.0"
 
 #define	PASSWORD_MAXLEN	1024
 #define	IV_LEN		64
