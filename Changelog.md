@@ -24,15 +24,27 @@
   With the exception being that any trailing spaces from a keychain name will be stripped.
 * `info` command shows how many lines there are in the value, and how many keys there are in the keychain.
 * `c` command supports keychain names with spaces in them, with the exception being that any trailing spaces from a keychain name will be stripped.
-* Removed support for the SHA-1 KDF.
+* Removed support for the _SHA-1_ KDF.
 
-  If you've been using the SHA-1 based KDF, before you upgrade, you need to change that to anything else with the 'passwd' or the 'export' command. Note that you would've had to explicitly specify this to use, as the default has always been SHA-2 512.
-* Added '-R' option to specify the iterations/rounds to be used with the KDFs.
+  If you've been using the _SHA-1_ based KDF, before you upgrade, either `dump` your database XML or change that to anything else with the `passwd` or the `export` command. Note that you would've had to explicitly specify this to use, as the default has always been _SHA-2 512_.
+* Added `-R` option to specify the iterations/rounds to be used with the KDFs.
 * Added support for the SHA-3 KDF (min. OpenSSL version is now 1.1.1).
 * SHA-\* KDF default iterations changed to 100000 and bcrypt KDF default rounds changed to 36.
 
-  Opening older datases where the defaults were smaller is possible with the '-R' option.
-* Added support for aes256 ctr encryption cipher mode.
-* Removed support for blowfish ecb encryption cipher mode.
+  Opening older databases where the default was smaller is possible with the new `-R` option. You can use the `passwd` or the `export` command to change this permanently to the new defaults in the database.
+* Added support for aes256 _ctr_ encryption cipher mode.
+* Removed support for blowfish _ecb_ encryption cipher mode.
+
+  If you've been using the _ecb_ mode for _blowfish_, before you upgrade, either `dump` your database XML or change that to anything else with the `passwd` or the `export` command. Note that you would've had to explicitly specify this to use, as the default has always been _cbc_.
 * Added support for POSIX regex functions (it can be used instead of PCRE).
 * Documentation and manual page fixes.
+
+# Compatiblity issues with older versions
+If you find yourself unable to import/open your v2.4 database, keep in mind, that:
+
+* There are new mandatory XML attributes for the database which `kc` will validate during opening. If your database lack these attritbues `kc` will complain and won't open it.
+
+  In this case, try creating a new, empty database, and use the `import` command with the `-o` option which tells `kc` to use the old XML DTD (validation schema) while opening (i.e. importing) the database. This way you'll end up with your secrets in the new database, while having the new mandatory attributes reset.
+* The iterations/rounds numbers have changed for the KDFs. If you created your database with v2.4, then it's possible you used the default settings which was _5000 iterations_ for SHA-* and _16 rounds_ for bcrypt.
+
+  Try specifying the old number - depending on the KDF you're using - with the new `-R` option. Note that `-R` is supported as a `kc` startup option **and** as e.g. an option for the `import` command.
