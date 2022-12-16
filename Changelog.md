@@ -48,3 +48,34 @@ If you find yourself unable to import/open your v2.4 database, keep in mind, tha
 * The iterations/rounds numbers have changed for the KDFs. If you created your database with v2.4, then it's possible you used the default settings which was _5000 iterations_ for SHA-* and _16 rounds_ for bcrypt.
 
   Try specifying the old number - depending on the KDF you're using - with the new `-R` option. Note that `-R` is supported as a `kc` startup option **and** as e.g. an option for the `import` command.
+
+Example:
+
+Running v2.5, creating a new then importing a v2.4 database that was using the default settings (sha512 KDF, aes256 cipher, cbc mode):
+
+```
+$ kc
+Creating 'default.kcd'
+Using 'default.kcd' database.
+New password (empty to cancel):
+New password again (empty to cancel):
+Initializing...
+Database file: default.kcd (default.kcd)
+XML structure size: 148 bytes
+Security key(s): no
+Password: yes
+SSH agent: no
+Password function: sha512 (100000 iterations)
+Encryption: aes256, cbc
+Read-only: no
+Modified: yes
+<default% > import -o -R 5000 -k passwords.kcd
+Reading database...
+Opening 'passwords.kcd'
+Password:
+Decrypting...
+Checking database...
+Counting keys and keychains...
+Import finished.
+<passwords% >
+```
