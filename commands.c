@@ -1251,7 +1251,7 @@ kc_db_reader(char **buf, BIO *bio_chain)
 } /* kc_db_reader() */
 
 
-char kc_arg_parser(int largc, char **largv, const char *opts, db_parameters *db_params, extra_parameters *extra_params)
+signed char kc_arg_parser(int largc, char **largv, const char *opts, db_parameters *db_params, extra_parameters *extra_params)
 {
 	char		*ssha_type = NULL, *ssha_comment = NULL;
 

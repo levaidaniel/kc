@@ -65,7 +65,7 @@ BIO		*kc_setup_bio_chain(const char *, const unsigned char);
 char		kc_db_writer(xmlDocPtr, BIO *, struct db_parameters *);
 char		kc_validate_xml(xmlDocPtr, char);
 int		kc_db_reader(char **, BIO *);
-char		kc_arg_parser(int, char **, const char *, db_parameters *, extra_parameters *);
+signed char	kc_arg_parser(int, char **, const char *, db_parameters *, extra_parameters *);
 
 
 #endif
