@@ -39,10 +39,10 @@
 * Added support for POSIX regex functions (it can be used instead of PCRE).
 * Documentation and manual page fixes.
 
-# Compatiblity issues with older versions
+# Compatibility issues with older versions
 If you find yourself unable to import/open your v2.4 database, keep in mind, that:
 
-* There are new mandatory XML attributes for the database which `kc` will validate during opening. If your database lack these attritbues `kc` will complain and won't open it.
+* There are new mandatory XML attributes for the database which `kc` will validate during opening. If your database lacks these attributes `kc` will complain and won't open it.
 
   In this case, try creating a new, empty database, and use the `import` command with the `-o` option which tells `kc` to use the old XML DTD (validation schema) while opening (i.e. importing) the database. This way you'll end up with your secrets in the new database, while having the new mandatory attributes reset.
 * The iterations/rounds numbers have changed for the KDFs. If you created your database with v2.4, then it's possible you used the default settings which was _5000 iterations_ for SHA-* and _16 rounds_ for bcrypt.
