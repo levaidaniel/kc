@@ -807,7 +807,6 @@ kc_crypt_key(struct db_parameters *db_params)
 
 			return(0);
 		}
-#ifndef __OpenBSD__
 	} else if (strcmp(db_params->kdf, "sha3") == 0) {
 		if (!PKCS5_PBKDF2_HMAC(db_params->pass, db_params->pass_len,
 			db_params->salt, SALT_DIGEST_LEN + 1,
@@ -820,7 +819,6 @@ kc_crypt_key(struct db_parameters *db_params)
 
 			return(0);
 		}
-#endif
 	} else if (strcmp(db_params->kdf, "bcrypt") == 0) {
 		if (bcrypt_pbkdf(db_params->pass, db_params->pass_len,
 			db_params->salt, SALT_DIGEST_LEN + 1,
