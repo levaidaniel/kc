@@ -90,27 +90,18 @@ if [ $SKIP -eq 0 ];then
 	fi
 fi
 
-if [ "${SYSTEM}" != "OpenBSD" ];then
-	if printf "passwd -P sha3\n${PASSWORD}\n${PASSWORD}\n" |${KC_RUN} -b -k ${KC_DB} -P bcrypt -p ${KC_PASSFILE};then
-		echo "$0 test ok (change to sha3 KDF from bcrypt)!"
-	else
-		echo "$0 test failed (change to sha3 KDF from bcrypt)!"
-		exit 1
-	fi
-
-	if printf "passwd -P sha512\n${PASSWORD}\n${PASSWORD}\n" |${KC_RUN} -b -k ${KC_DB} -P sha3 -p ${KC_PASSFILE};then
-		echo "$0 test ok (reset to sha512 KDF from sha3)!"
-	else
-		echo "$0 test failed (reset to sha512 KDF from sha3)!"
-		exit 1
-	fi
+if printf "passwd -P sha3\n${PASSWORD}\n${PASSWORD}\n" |${KC_RUN} -b -k ${KC_DB} -P bcrypt -p ${KC_PASSFILE};then
+	echo "$0 test ok (change to sha3 KDF from bcrypt)!"
 else
-	if printf "passwd -P sha512\n${PASSWORD}\n${PASSWORD}\n" |${KC_RUN} -b -k ${KC_DB} -P bcrypt -p ${KC_PASSFILE};then
-		echo "$0 test ok (reset to sha512 KDF from bcrypt)!"
-	else
-		echo "$0 test failed (reset to sha512 KDF from bcrypt)!"
-		exit 1
-	fi
+	echo "$0 test failed (change to sha3 KDF from bcrypt)!"
+	exit 1
+fi
+
+if printf "passwd -P sha512\n${PASSWORD}\n${PASSWORD}\n" |${KC_RUN} -b -k ${KC_DB} -P sha3 -p ${KC_PASSFILE};then
+	echo "$0 test ok (reset to sha512 KDF from sha3)!"
+else
+	echo "$0 test failed (reset to sha512 KDF from sha3)!"
+	exit 1
 fi
 
 
