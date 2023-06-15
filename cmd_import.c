@@ -138,7 +138,7 @@ cmd_import(const char *e_line, command *commands)
 	}
 
 	if (!db_params_new.key_len) {
-		db_params_new.key_len = MAX_KEY_LEN;
+		db_params_new.key_len = KEY_MAX_LEN;
 	}
 
 	/* reset kdf reps only if kdf was changed and no -R option was

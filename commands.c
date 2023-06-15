@@ -1398,8 +1398,8 @@ signed char kc_arg_parser(int largc, char **largv, const char *opts, db_paramete
 					return(-1);
 				}
 
-				if (db_params->key_len < MIN_KEY_LEN  ||  db_params->key_len > MAX_KEY_LEN) {
-					dprintf(STDERR_FILENO, "ERROR: Key length is outside the minimum (%d) and maximum (%d) limits!\n", MIN_KEY_LEN, MAX_KEY_LEN);
+				if (db_params->key_len < KEY_MIN_LEN  ||  db_params->key_len > KEY_MAX_LEN) {
+					dprintf(STDERR_FILENO, "ERROR: Key length is outside the minimum (%d) and maximum (%d) limits!\n", KEY_MIN_LEN, KEY_MAX_LEN);
 					return(-1);
 				}
 			break;
