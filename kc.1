@@ -17,7 +17,7 @@
 .\"ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 .\"(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 .\"SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-.Dd $Mdocdate: April 30 2022 $
+.Dd $Mdocdate: June 15 2023 $
 .Dt KC 1
 .Os
 .Sh NAME
@@ -33,6 +33,7 @@
 .Op Fl Y Ar key-slot Op ,device-index|serial-number Op Ql ,password
 .Op Fl p Ar password file
 .Op Fl P Ar kdf
+.Op Fl K Ar key length
 .Op Fl R Ar kdf iterations
 .Op Fl e Ar cipher
 .Op Fl m Ar cipher mode
@@ -295,6 +296,13 @@ option is ignored when using this.
 More information is in the
 .Em KDF
 section.
+.It Fl K Ar key length
+Key length in bytes to use for encryption (and decryption). A valid length is between 16 and 32 (default). Some combinations of a KDF and an encryption cipher don't make sense with low or high values. I suggest if it's not really necessary, leave it at the default: 32 bytes == 256 bits.
+.Pp
+.Em NOTE :
+Please make sure you can open your database after setting this to other than the default, as
+.Nm
+can be made to create databases with key lengths that it won't be able to open afterwards.
 .It Fl R Ar iterations
 Number of iterations or rounds to use with the KDF.
 .Pp
@@ -578,9 +586,9 @@ is the key's index number in the current keychain.
 .It Ic rm Ar index
 Alias of
 .Ic del .
-.It Ic passwd Op Fl A Ar key-type,key-comment Op ,password Op Fl Y Ar Key-slotDevice-index Op ,password Op Fl P Ar kdf Op Fl R Ar kdf iterations Op Fl e Ar cipher Op Fl m Ar cipher mode
+.It Ic passwd Op Fl A Ar key-type,key-comment Op ,password Op Fl Y Ar Key-slot,Device-index|Serial-number Op ,password Op Fl P Ar kdf Op Fl K Ar key length Op Fl R Ar kdf iterations Op Fl e Ar cipher Op Fl m Ar cipher mode
 Change the database password or SSH public key identity being used to encrypt.
-Optionally, the KDF, cipher and cipher mode can also be changed.
+Optionally, SSH key, security key information, KDF, key length, KDF iterations, cipher and cipher mode can also be changed.
 All changes will be written immediately.
 .Pp
 More information about the
@@ -594,7 +602,7 @@ Print application help or describe a
 .Ar command .
 .It Ic status
 Display information about the database.
-.It Ic export Fl k Ar filename Op Fl A Ar key-type,key-comment Op ,password Op Fl Y Ar Key-slotDevice-index Op ,password Op Fl P Ar kdf Op Fl R Ar kdf iterations Op Fl e Ar cipher Op Fl m Ar cipher mode Op Fl c Ar keychain
+.It Ic export Fl k Ar filename Op Fl A Ar key-type,key-comment Op ,password Op Fl Y Ar Key-slot,Device-index|Serial-number Op ,password Op Fl P Ar kdf Op Fl K Ar key length Op Fl R Ar kdf iterations Op Fl e Ar cipher Op Fl m Ar cipher mode Op Fl c Ar keychain
 Export the database to a
 .Nm
 compatible encrypted database file named
@@ -643,7 +651,7 @@ Index number takes priority when addressing a keychain.
 the created XML file will be plain text.
 .Pp
 .Pq see command Ic export
-.It Ic import Fl k Ar filename Op Fl A Ar key-type,key-comment Op ,password Op Fl Y Ar Key-slotDevice-index Op ,password Op Fl P Ar kdf Op Fl R Ar kdf iterations Op Fl e Ar cipher Op Fl m Ar cipher mode Op Fl o
+.It Ic import Fl k Ar filename Op Fl A Ar key-type,key-comment Op ,password Op Fl Y Ar Key-slot,Device-index|Serial-number Op ,password Op Fl P Ar kdf Op Fl K Ar key length Op Fl R Ar kdf iterations Op Fl e Ar cipher Op Fl m Ar cipher mode Op Fl o
 Import and overwrite the current database with the one from a
 .Nm
 compatible encrypted database file named
@@ -654,8 +662,12 @@ must be a proper
 database.
 .Pp
 The
-.Ar kdf
-.Ar cipher
+.Ar SSH key,
+.Ar Security key information,
+.Ar kdf,
+.Ar key length,
+.Ar kdf iterations,
+.Ar encryption cipher
 and
 .Ar cipher mode
 optional arguments can be used to specify these parameters if they differ from
@@ -689,7 +701,7 @@ option you can import legacy (<v2.5) XML files with missing attributes.
 .Ic export ,
 .Ic append
 .Pc
-.It Ic append Fl k Ar filename Op Fl P Ar kdf Op Fl m Ar cipher mode
+.It Ic append Fl k Ar filename Op Fl A Ar key-type,key-comment Op ,password Op Fl Y Ar Key-slot,Device-index|Serial-number Op ,password Op Fl P Ar kdf Op Fl K Ar key length Op Fl R Ar kdf iterations Op Fl e Ar cipher Op Fl m Ar cipher mode Op Fl o
 Append new and merge existing keychains to the database from a
 .Nm
 compatible encrypted database file named
@@ -699,12 +711,10 @@ must be a proper
 .Nm
 database.
 .Pp
-The
-.Ar kdf
-and
-.Ar cipher mode
-optional arguments can be used to specify these parameters if they differ from
-the current database's.
+See command
+.Ic import
+for description of parameters.
+.Pp
 See the
 .Em LIMITS
 section for information about how
@@ -716,7 +726,7 @@ deals with limits reached while appending.
 .Ic export ,
 .Ic import
 .Pc
-.It Ic appendxml Fl k Ar filename
+.It Ic appendxml Fl k Ar filename Op Fl o
 Append new and merge existing keychains to the database from a
 .Nm
 compatible XML file named
@@ -725,6 +735,11 @@ compatible XML file named
 must contain a properly formatted
 .Nm
 XML document.
+.Pp
+With the
+.Fl o
+option you can import legacy (<v2.5) databases with missing attributes.
+.Pp
 See the
 .Em LIMITS
 section for information about how

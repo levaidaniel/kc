@@ -89,6 +89,8 @@ cmd_import(const char *e_line, command *commands)
 	db_params_new.db_filename = NULL;
 	db_params_new.pass_filename = NULL;
 	db_params_new.kdf = NULL;
+	db_params_new.key_len = 0;
+	db_params_new.key = NULL;
 	db_params_new.kdf_reps = 0;
 	db_params_new.cipher = NULL;
 	db_params_new.cipher_mode = NULL;
@@ -106,9 +108,9 @@ cmd_import(const char *e_line, command *commands)
 	free(line); line = NULL;
 
 #ifdef _HAVE_YUBIKEY
-	opts = "A:k:P:R:e:m:Y:o";
+	opts = "A:k:P:K:R:e:m:Y:o";
 #else
-	opts = "A:k:P:R:e:m:o";
+	opts = "A:k:P:K:R:e:m:o";
 #endif
 	switch (kc_arg_parser(largc, largv, opts, &db_params_new, &params)) {
 		case -1:
@@ -133,6 +135,10 @@ cmd_import(const char *e_line, command *commands)
 			dprintf(STDERR_FILENO, "ERROR: Error while setting up default database parameters (kdf).\n");
 			goto exiting;
 		}
+	}
+
+	if (!db_params_new.key_len) {
+		db_params_new.key_len = MAX_KEY_LEN;
 	}
 
 	/* reset kdf reps only if kdf was changed and no -R option was
@@ -316,7 +322,9 @@ cmd_import(const char *e_line, command *commands)
 		ret = kc_crypt_key(&db_params_new)  &&  kc_crypt_setup(bio_chain, 0, &db_params_new);
 
 		/* from here on now, we don't need to store the key or the password text anymore */
-		memset(db_params_new.key, '\0', KEY_LEN);
+		if (db_params_new.key)
+			memset(db_params_new.key, '\0', db_params_new.key_len);
+		free(db_params_new.key); db_params_new.key = NULL;
 		if (db_params_new.pass)
 			memset(db_params_new.pass, '\0', db_params_new.pass_len);
 		free(db_params_new.pass); db_params_new.pass = NULL;
@@ -617,7 +625,9 @@ exiting:
 	if (db_params_new.db_file >= 0)
 		close(db_params_new.db_file);
 
-	memset(db_params_new.key, '\0', KEY_LEN);
+	if (db_params_new.key)
+		memset(db_params_new.key, '\0', db_params_new.key_len);
+	free(db_params_new.key); db_params_new.key = NULL;
 	if (db_params_new.pass)
 		memset(db_params_new.pass, '\0', db_params_new.pass_len);
 	free(db_params_new.pass); db_params_new.pass = NULL;

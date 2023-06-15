@@ -57,6 +57,8 @@ cmd_passwd(const char *e_line, command *commands)
 	db_params_tmp.pass_len = 0;
 	db_params_tmp.pass_filename = NULL;
 	db_params_tmp.kdf = NULL;
+	db_params_tmp.key_len = 0;
+	db_params_tmp.key = NULL;
 	db_params_tmp.kdf_reps = 0;
 	db_params_tmp.cipher = NULL;
 	db_params_tmp.cipher_mode = NULL;
@@ -72,9 +74,9 @@ cmd_passwd(const char *e_line, command *commands)
 	free(line); line = NULL;
 
 #ifdef _HAVE_YUBIKEY
-	opts = "A:P:R:e:m:Y:";
+	opts = "A:P:K:R:e:m:Y:";
 #else
-	opts = "A:P:R:e:m:";
+	opts = "A:P:K:R:e:m:";
 #endif
 	switch (kc_arg_parser(largc, largv, opts, &db_params_tmp, &params)) {
 		case -1:
@@ -99,6 +101,10 @@ cmd_passwd(const char *e_line, command *commands)
 			dprintf(STDERR_FILENO, "ERROR: Error while setting up database parameters (kdf).\n");
 			goto exiting;
 		}
+	}
+
+	if (!db_params_tmp.key_len) {
+		db_params_tmp.key_len = MAX_KEY_LEN;
 	}
 
 	/* reset kdf reps only if kdf was changed and no -R option was
@@ -177,12 +183,21 @@ cmd_passwd(const char *e_line, command *commands)
 
 
 	/* store the new key, IV and salt in our working copy of 'db_params' */
-	memcpy(db_params.key, db_params_tmp.key, KEY_LEN);
-	if (memcmp(db_params.key, db_params_tmp.key, KEY_LEN) != 0) {
+
+	/* we re-allocate the 'key' space for perhaps the key length has been changed */
+	if (db_params.key)
+		memset(db_params.key, '\0', db_params.key_len);
+	free(db_params.key); db_params.key = NULL;
+	db_params.key = malloc(db_params_tmp.key_len); malloc_check(db_params.key);
+
+	memcpy(db_params.key, db_params_tmp.key, db_params_tmp.key_len);
+	if (memcmp(db_params.key, db_params_tmp.key, db_params_tmp.key_len) != 0) {
 		dprintf(STDERR_FILENO, "ERROR: Could not copy encryption key!");
 		goto exiting;
 	}
-	memset(db_params_tmp.key, '\0', KEY_LEN);
+	if (db_params_tmp.key)
+		memset(db_params_tmp.key, '\0', db_params_tmp.key_len);
+	free(db_params_tmp.key); db_params_tmp.key = NULL;
 	if (db_params_tmp.pass)
 		memset(db_params_tmp.pass, '\0', db_params_tmp.pass_len);
 	free(db_params_tmp.pass); db_params_tmp.pass = NULL;
@@ -239,7 +254,9 @@ exiting:
 	}
 	free(largv); largv = NULL;
 
-	memset(db_params_tmp.key, '\0', KEY_LEN);
+	if (db_params_tmp.key)
+		memset(db_params_tmp.key, '\0', db_params_tmp.key_len);
+	free(db_params_tmp.key); db_params_tmp.key = NULL;
 	if (db_params_tmp.pass)
 		memset(db_params_tmp.pass, '\0', db_params_tmp.pass_len);
 	free(db_params_tmp.pass); db_params_tmp.pass = NULL;

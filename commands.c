@@ -792,6 +792,14 @@ kc_crypt_key(struct db_parameters *db_params)
 	if (getenv("KC_DEBUG")) {
 		printf("%s(): generating new key from pass (len:%zd) and salt.\n", __func__, db_params->pass_len);
 		printf("%s(): using %s based KDF (%lu iterations)\n", __func__, db_params->kdf, db_params->kdf_reps);
+		printf("%s(): encryption key length is %lu bytes\n", __func__, db_params->key_len);
+	}
+
+	if (!(db_params->key)) {
+		db_params->key = malloc(db_params->key_len); malloc_check(db_params->key);
+	} else {
+		dprintf(STDERR_FILENO, "ERROR: Failed to allocate space for new key; already occupied!\n");
+		return(0);
 	}
 
 	/* Generate a proper key from the user's password */
@@ -799,7 +807,7 @@ kc_crypt_key(struct db_parameters *db_params)
 		if (!PKCS5_PBKDF2_HMAC(db_params->pass, db_params->pass_len,
 			db_params->salt, SALT_DIGEST_LEN + 1,
 			db_params->kdf_reps, EVP_sha512(),
-			KEY_LEN, db_params->key))
+			db_params->key_len, db_params->key))
 		{
 			dprintf(STDERR_FILENO, "ERROR: Failed to generate a key from the password!\n");
 			if (getenv("KC_DEBUG"))
@@ -811,7 +819,7 @@ kc_crypt_key(struct db_parameters *db_params)
 		if (!PKCS5_PBKDF2_HMAC(db_params->pass, db_params->pass_len,
 			db_params->salt, SALT_DIGEST_LEN + 1,
 			db_params->kdf_reps, EVP_sha3_512(),
-			KEY_LEN, db_params->key))
+			db_params->key_len, db_params->key))
 		{
 			dprintf(STDERR_FILENO, "ERROR: Failed to generate a key from the password!\n");
 			if (getenv("KC_DEBUG"))
@@ -822,7 +830,7 @@ kc_crypt_key(struct db_parameters *db_params)
 	} else if (strcmp(db_params->kdf, "bcrypt") == 0) {
 		if (bcrypt_pbkdf(db_params->pass, db_params->pass_len,
 			db_params->salt, SALT_DIGEST_LEN + 1,
-			db_params->key, KEY_LEN, db_params->kdf_reps) != 0)
+			db_params->key, db_params->key_len, db_params->kdf_reps) != 0)
 		{
 			dprintf(STDERR_FILENO, "ERROR: Failed to generate a key from the password!\n");
 			if (getenv("KC_DEBUG"))
@@ -835,7 +843,7 @@ kc_crypt_key(struct db_parameters *db_params)
 		if (libscrypt_scrypt((const unsigned char *)db_params->pass, db_params->pass_len,
 			db_params->salt, SALT_DIGEST_LEN + 1,
 			SCRYPT_N, SCRYPT_r, SCRYPT_p,
-			db_params->key, KEY_LEN) != 0)
+			db_params->key, db_params->key_len) != 0)
 		{
 			dprintf(STDERR_FILENO, "ERROR: Failed to generate a key from the password!\n");
 			if (getenv("KC_DEBUG"))
@@ -1371,6 +1379,29 @@ signed char kc_arg_parser(int largc, char **largv, const char *opts, db_paramete
 					return(-1);
 				}
 				db_params->kdf = strdup(optarg); malloc_check(db_params->kdf);
+			break;
+			case 'K':
+				if (db_params->key_len) {
+					dprintf(STDERR_FILENO, "ERROR: Please specify the '-%c' option only once!\n", c);
+					return(-1);
+				}
+
+
+				if (optarg[0] == '-') {
+					dprintf(STDERR_FILENO, "ERROR: Key length parameter seems to be negative.\n");
+					return(-1);
+				}
+
+				db_params->key_len = strtoul(optarg, &inv, 10);
+				if (inv[0] != '\0') {
+					dprintf(STDERR_FILENO, "ERROR: Unable to convert the key length parameter.\n");
+					return(-1);
+				}
+
+				if (db_params->key_len < MIN_KEY_LEN  ||  db_params->key_len > MAX_KEY_LEN) {
+					dprintf(STDERR_FILENO, "ERROR: Key length is outside the minimum (%d) and maximum (%d) limits!\n", MIN_KEY_LEN, MAX_KEY_LEN);
+					return(-1);
+				}
 			break;
 			case 'R':
 				if (db_params->kdf_reps) {

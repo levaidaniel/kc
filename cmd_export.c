@@ -84,6 +84,8 @@ cmd_export(const char *e_line, command *commands)
 	db_params_new.db_filename = NULL;
 	db_params_new.pass_filename = NULL;
 	db_params_new.kdf = NULL;
+	db_params_new.key_len = 0;
+	db_params_new.key = NULL;
 	db_params_new.kdf_reps = 0;
 	db_params_new.cipher = NULL;
 	db_params_new.cipher_mode = NULL;
@@ -101,9 +103,9 @@ cmd_export(const char *e_line, command *commands)
 	free(line); line = NULL;
 
 #ifdef _HAVE_YUBIKEY
-	opts = "A:k:c:P:R:e:m:Y:";
+	opts = "A:k:c:P:K:R:e:m:Y:";
 #else
-	opts = "A:k:c:P:R:e:m:";
+	opts = "A:k:c:P:K:R:e:m:";
 #endif
 	switch (kc_arg_parser(largc, largv, opts, &db_params_new, &params)) {
 		case -1:
@@ -128,6 +130,10 @@ cmd_export(const char *e_line, command *commands)
 			dprintf(STDERR_FILENO, "ERROR: Error while setting up default database parameters (kdf).\n");
 			goto exiting;
 		}
+	}
+
+	if (!db_params_new.key_len) {
+		db_params_new.key_len = MAX_KEY_LEN;
 	}
 
 	/* reset kdf reps only if kdf was changed and no -R option was
@@ -341,7 +347,9 @@ cmd_export(const char *e_line, command *commands)
 			dprintf(STDERR_FILENO, "ERROR: Could not setup encrypting!\n");
 			goto exiting;
 		}
-		memset(db_params_new.key, '\0', KEY_LEN);
+		if (db_params_new.key)
+			memset(db_params_new.key, '\0', db_params_new.key_len);
+		free(db_params_new.key); db_params_new.key = NULL;
 		if (db_params_new.pass)
 			memset(db_params_new.pass, '\0', db_params_new.pass_len);
 		free(db_params_new.pass); db_params_new.pass = NULL;
@@ -374,7 +382,9 @@ exiting:
 
 	free(params.cname); params.cname = NULL;
 
-	memset(db_params_new.key, '\0', KEY_LEN);
+	if (db_params_new.key)
+		memset(db_params_new.key, '\0', db_params_new.key_len);
+	free(db_params_new.key); db_params_new.key = NULL;
 	if (db_params_new.pass)
 		memset(db_params_new.pass, '\0', db_params_new.pass_len);
 	free(db_params_new.pass); db_params_new.pass = NULL;

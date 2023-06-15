@@ -65,6 +65,8 @@ cmd_write(const char *e_line, command *commands)
 	db_params_tmp.dirty = 0;
 	db_params_tmp.readonly = 0;
 	db_params_tmp.kdf = db_params.kdf;
+	db_params_tmp.key_len = db_params.key_len;
+	db_params_tmp.key = malloc(db_params_tmp.key_len); malloc_check(db_params_tmp.key);
 	db_params_tmp.kdf_reps = db_params.kdf_reps;
 	db_params_tmp.cipher = db_params.cipher;
 	db_params_tmp.cipher_mode = db_params.cipher_mode;
@@ -131,8 +133,8 @@ cmd_write(const char *e_line, command *commands)
 	}
 
 
-	memcpy(db_params_tmp.key, db_params.key, KEY_LEN);
-	if (memcmp(db_params_tmp.key, db_params.key, KEY_LEN) != 0) {
+	memcpy(db_params_tmp.key, db_params.key, db_params.key_len);
+	if (memcmp(db_params_tmp.key, db_params.key, db_params.key_len) != 0) {
 		dprintf(STDERR_FILENO, "ERROR: Could not duplicate the original encryption key!\n");
 		goto exiting;
 	}
@@ -141,7 +143,9 @@ cmd_write(const char *e_line, command *commands)
 		dprintf(STDERR_FILENO, "ERROR: Could not setup encrypting!\n");
 		goto exiting;
 	}
-	memset(db_params_tmp.key, '\0', KEY_LEN);
+	if (db_params_tmp.key)
+		memset(db_params_tmp.key, '\0', db_params_tmp.key_len);
+	free(db_params_tmp.key); db_params_tmp.key = NULL;
 
 
 	if (!kc_db_writer(db, bio_chain_tmp, &db_params_tmp)) {
@@ -224,5 +228,7 @@ exiting:
 	if (bio_chain_tmp)
 		BIO_free_all(bio_chain_tmp);
 
-	memset(db_params_tmp.key, '\0', KEY_LEN);
+	if (db_params_tmp.key)
+		memset(db_params_tmp.key, '\0', db_params_tmp.key_len);
+	free(db_params_tmp.key); db_params_tmp.key = NULL;
 } /* cmd_write() */

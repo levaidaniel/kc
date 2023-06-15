@@ -149,6 +149,8 @@ main(int argc, char *argv[])
 	db_params.db_file = -1;
 	db_params.pass_filename = NULL;
 	db_params.kdf = NULL;
+	db_params.key_len = 0;
+	db_params.key = NULL;
 	db_params.kdf_reps = 0;
 	db_params.cipher = NULL;
 	db_params.cipher_mode = NULL;
@@ -157,9 +159,9 @@ main(int argc, char *argv[])
 
 
 #ifdef _HAVE_YUBIKEY
-	opts = "A:k:c:C:rp:P:R:e:m:Y:bBvh";
+	opts = "A:k:c:C:rp:P:K:R:e:m:Y:bBvh";
 #else
-	opts = "A:k:c:C:rp:P:R:e:m:bBvh";
+	opts = "A:k:c:C:rp:P:K:R:e:m:bBvh";
 #endif
 	switch (kc_arg_parser(argc, argv, opts, &db_params, &params)) {
 		case -1:
@@ -170,7 +172,7 @@ main(int argc, char *argv[])
 #ifdef _HAVE_YUBIKEY
 				"[-Y <YubiKey slot><YubiKey device index>] "
 #endif
-				"[-p <file>] [-P <kdf>] [-R <kdf iterations>] [-e <cipher>] [-m <mode>] [-B/-b] [-v] [-h]\n\n", argv[0]);
+				"[-p <file>] [-P <kdf>] [-K <key length>] [-R <kdf iterations>] [-e <cipher>] [-m <mode>] [-B/-b] [-v] [-h]\n\n", argv[0]);
 			printf(	"-k <file>: Use file as database. The default is ~/.kc/default.kcd .\n"
 				"-r: Open the database in read-only mode.\n"
 				"-c/-C <keychain>: Start in <keychain>.\n"
@@ -180,6 +182,7 @@ main(int argc, char *argv[])
 #endif
 				"-p <file>: Read password from file.\n"
 				"-P <kdf>: KDF to use.\n"
+				"-K <key length>: encryption key length to use.\n"
 				"-R <iterations>: Number of KDF iterations to use.\n"
 				"-e <cipher>: Encryption cipher.\n"
 				"-m <mode>: Cipher mode.\n"
@@ -208,6 +211,10 @@ main(int argc, char *argv[])
 			dprintf(STDERR_FILENO, "ERROR: Error while setting up default database parameters (kdf).\n");
 			quit(EXIT_FAILURE);
 		}
+	}
+
+	if (!db_params.key_len) {
+		db_params.key_len = MAX_KEY_LEN;
 	}
 
 	if (db_params.kdf_reps) {
@@ -1112,7 +1119,9 @@ version(void)
 void
 quit(int retval)
 {
-	memset(db_params.key, '\0', KEY_LEN);
+	if (db_params.key)
+		memset(db_params.key, '\0', db_params.key_len);
+	free(db_params.key); db_params.key = NULL;
 
 	if (db_params.pass)
 		memset(db_params.pass, '\0', db_params.pass_len);
