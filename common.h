@@ -48,7 +48,8 @@
 #define	IV_DIGEST_LEN	128
 #define	SALT_LEN	64
 #define	SALT_DIGEST_LEN	128
-#define	KEY_LEN		128
+#define	MIN_KEY_LEN	16
+#define	MAX_KEY_LEN	32
 
 #define KC_BCRYPT_PBKDF_ROUNDS		36
 #define KC_PKCS_PBKDF2_ITERATIONS	100000
@@ -83,12 +84,13 @@ typedef struct db_parameters {
 	char 		*pass;
 	size_t 		pass_len;
 	char		*kdf;
+	unsigned long int	key_len;
 	unsigned long int	kdf_reps;
 	char		*cipher;
 	char		*cipher_mode;
 	unsigned char	iv[IV_DIGEST_LEN + 1];
 	unsigned char	salt[SALT_DIGEST_LEN + 1];
-	unsigned char	key[KEY_LEN];
+	unsigned char	*key;
 	unsigned char	dirty;
 	unsigned char	readonly;
 } db_parameters;

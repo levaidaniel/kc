@@ -98,6 +98,8 @@ cmd_status(const char *e_line, command *commands)
 
 	printf("Password function: %s (%lu %s)\n", db_params.kdf, db_params.kdf_reps, strncmp(db_params.kdf, "bcrypt", 6) == 0 ? "rounds" : "iterations");
 
+	printf("Key length: %lu bytes / %lu bits\n", db_params.key_len, db_params.key_len * 8);
+
 	printf("Encryption: %s, %s\n", db_params.cipher, db_params.cipher_mode);
 
 	printf("Read-only: %s\n", (db_params.readonly ? "yes" : "no"));
