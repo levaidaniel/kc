@@ -144,6 +144,10 @@ cmd_export(const char *e_line, command *commands)
 			}
 		}
 	}
+
+	/* I'd rather put this into kc_arg_parser(), but we can't know if there
+	 * was already a 'kdf' paramter parsed before this, and this logic
+	 * depends on that */
 	if (strncmp(db_params_new.kdf, "sha", 3) == 0  &&  db_params_new.kdf_reps < 1000) {
 		dprintf(STDERR_FILENO, "ERROR: When using %s KDF, iterations (-R option) should be at least 1000 (the default is %d)\n", db_params_new.kdf, KC_PKCS_PBKDF2_ITERATIONS);
 		goto exiting;
