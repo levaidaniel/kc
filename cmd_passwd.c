@@ -190,6 +190,7 @@ cmd_passwd(const char *e_line, command *commands)
 	free(db_params.key); db_params.key = NULL;
 	db_params.key = malloc(db_params_tmp.key_len); malloc_check(db_params.key);
 
+	db_params.key_len = db_params_tmp.key_len;
 	memcpy(db_params.key, db_params_tmp.key, db_params_tmp.key_len);
 	if (memcmp(db_params.key, db_params_tmp.key, db_params_tmp.key_len) != 0) {
 		dprintf(STDERR_FILENO, "ERROR: Could not copy encryption key!");
