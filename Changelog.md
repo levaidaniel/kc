@@ -1,3 +1,14 @@
+# 2.5.2
+* _SHA-3 512_ support on OpenBSD.
+* New '-K' parameter to specify encryption key length.
+* Documentation fixes and enhancements to address missing parameters and badly specified arguments (especially with '-Y').
+
+
+# 2.5.1
+* Fix an overflow in the parameter/argument parser on arm* architectures.
+* Extend regression tests with checks.
+
+
 # 2.5.0
 * OpenSSL-related fixes
 
