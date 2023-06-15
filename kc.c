@@ -48,8 +48,10 @@ char		*cmd_generator(const char *, int);
 
 db_parameters	db_params;
 BIO		*bio_chain = NULL;
+#if OPENSSL_VERSION_MAJOR >= 3
 OSSL_PROVIDER	*osslp_default = NULL;
 OSSL_PROVIDER	*osslp_legacy = NULL;
+#endif
 
 command		*commands_first = NULL;
 
@@ -1127,6 +1129,7 @@ quit(int retval)
 			printf("%s(): closed bio_chain\n", __func__);
 	}
 
+#if OPENSSL_VERSION_MAJOR >= 3
 	if (OSSL_PROVIDER_unload(osslp_default)) {
 		if (getenv("KC_DEBUG"))
 			printf("%s(): unloaded 'default' OpenSSL provider\n", __func__);
@@ -1135,6 +1138,7 @@ quit(int retval)
 		if (getenv("KC_DEBUG"))
 			printf("%s(): unloaded 'legacy' OpenSSL provider\n", __func__);
 	}
+#endif
 
 	if (db_params.db_file > 0) {
 		if (close(db_params.db_file) == 0) {
