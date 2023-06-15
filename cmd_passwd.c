@@ -139,7 +139,7 @@ cmd_passwd(const char *e_line, command *commands)
 	 * specified.
 	 * This needs to come after we figured out our cipher */
 	if (!db_params_tmp.key_len) {
-		db_params_tmp.key_len = MAX_KEY_LEN;
+		db_params_tmp.key_len = KEY_MAX_LEN;
 
 		/* -K option was not specified, because our default is 0 */
 		if (strcmp(db_params.cipher, db_params_tmp.cipher) == 0) {
@@ -147,9 +147,9 @@ cmd_passwd(const char *e_line, command *commands)
 		}
 	}
 	if (	strncmp(db_params_tmp.cipher, "aes256", 6) == 0  &&
-		db_params_tmp.key_len < MAX_KEY_LEN) {
-			printf("WARNING: Resetting encryption key length to %d!\n", MAX_KEY_LEN);
-			db_params_tmp.key_len = MAX_KEY_LEN;
+		db_params_tmp.key_len < KEY_MAX_LEN) {
+			printf("WARNING: Resetting encryption key length to %d!\n", KEY_MAX_LEN);
+			db_params_tmp.key_len = KEY_MAX_LEN;
 	}
 
 	/* reset cipher mode only if cipher was changed and no -m option was
