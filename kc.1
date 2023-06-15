@@ -297,12 +297,7 @@ More information is in the
 .Em KDF
 section.
 .It Fl K Ar key length
-Key length in bytes to use for encryption (and decryption). A valid length is between 16 and 32 (default). Some combinations of a KDF and an encryption cipher don't make sense with low or high values. I suggest if it's not really necessary, leave it at the default: 32 bytes == 256 bits.
-.Pp
-.Em NOTE :
-Please make sure you can open your database after setting this to other than the default, as
-.Nm
-can be made to create databases with key lengths that it won't be able to open afterwards.
+Key length in bytes to use for encryption (and decryption). A valid length is between 16 and 32 (default). Some combinations of an encryption cipher and key length don't make sense with low or high values. If it's not really necessary, I suggest leaving it at the default: 32 bytes == 256 bits.
 .It Fl R Ar iterations
 Number of iterations or rounds to use with the KDF.
 .Pp
