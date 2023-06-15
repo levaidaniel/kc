@@ -48,6 +48,8 @@ char		*cmd_generator(const char *, int);
 
 db_parameters	db_params;
 BIO		*bio_chain = NULL;
+OSSL_PROVIDER	*osslp_default = NULL;
+OSSL_PROVIDER	*osslp_legacy = NULL;
 
 command		*commands_first = NULL;
 
@@ -110,7 +112,8 @@ main(int argc, char *argv[])
 #endif
 
 #if OPENSSL_VERSION_MAJOR >= 3
-	if (OSSL_PROVIDER_load(NULL, "default") != NULL) {
+	osslp_default = OSSL_PROVIDER_load(NULL, "default");
+	if (osslp_default != NULL) {
 		if (getenv("KC_DEBUG"))
 			printf("%s(): loaded 'default' OpenSSL provider\n", __func__);
 	} else {
@@ -119,7 +122,8 @@ main(int argc, char *argv[])
 	}
 
 	/* legacy is for the blowfish cipher */
-	if (OSSL_PROVIDER_load(NULL, "legacy") != NULL) {
+	osslp_legacy = OSSL_PROVIDER_load(NULL, "legacy");
+	if (osslp_legacy != NULL) {
 		if (getenv("KC_DEBUG"))
 			printf("%s(): loaded 'legacy' OpenSSL provider\n", __func__);
 	} else {
@@ -1123,12 +1127,27 @@ quit(int retval)
 			printf("%s(): closed bio_chain\n", __func__);
 	}
 
+	if (OSSL_PROVIDER_unload(osslp_default)) {
+		if (getenv("KC_DEBUG"))
+			printf("%s(): unloaded 'default' OpenSSL provider\n", __func__);
+	}
+	if (OSSL_PROVIDER_unload(osslp_legacy)) {
+		if (getenv("KC_DEBUG"))
+			printf("%s(): unloaded 'legacy' OpenSSL provider\n", __func__);
+	}
+
 	if (db_params.db_file > 0) {
 		if (close(db_params.db_file) == 0) {
 			if (getenv("KC_DEBUG"))
 				printf("%s(): closed database file\n", __func__);
 		} else
 			perror("ERROR: close(database file)");
+	}
+
+	if (db) {
+		xmlFreeDoc(db); db = NULL;
+		if (getenv("KC_DEBUG"))
+			printf("%s(): free'd database\n", __func__);
 	}
 
 #ifndef _READLINE
