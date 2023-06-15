@@ -151,6 +151,8 @@ main(int argc, char *argv[])
 	db_params.db_file = -1;
 	db_params.pass_filename = NULL;
 	db_params.kdf = NULL;
+	db_params.key_len = 0;
+	db_params.key = NULL;
 	db_params.kdf_reps = 0;
 	db_params.cipher = NULL;
 	db_params.cipher_mode = NULL;
@@ -159,9 +161,9 @@ main(int argc, char *argv[])
 
 
 #ifdef _HAVE_YUBIKEY
-	opts = "A:k:c:C:rp:P:R:e:m:Y:bBvh";
+	opts = "A:k:c:C:rp:P:K:R:e:m:Y:bBvh";
 #else
-	opts = "A:k:c:C:rp:P:R:e:m:bBvh";
+	opts = "A:k:c:C:rp:P:K:R:e:m:bBvh";
 #endif
 	switch (kc_arg_parser(argc, argv, opts, &db_params, &params)) {
 		case -1:
@@ -172,7 +174,7 @@ main(int argc, char *argv[])
 #ifdef _HAVE_YUBIKEY
 				"[-Y <YubiKey slot><YubiKey device index>] "
 #endif
-				"[-p <file>] [-P <kdf>] [-R <kdf iterations>] [-e <cipher>] [-m <mode>] [-B/-b] [-v] [-h]\n\n", argv[0]);
+				"[-p <file>] [-P <kdf>] [-K <key length>] [-R <kdf iterations>] [-e <cipher>] [-m <mode>] [-B/-b] [-v] [-h]\n\n", argv[0]);
 			printf(	"-k <file>: Use file as database. The default is ~/.kc/default.kcd .\n"
 				"-r: Open the database in read-only mode.\n"
 				"-c/-C <keychain>: Start in <keychain>.\n"
@@ -182,6 +184,7 @@ main(int argc, char *argv[])
 #endif
 				"-p <file>: Read password from file.\n"
 				"-P <kdf>: KDF to use.\n"
+				"-K <key length>: encryption key length to use.\n"
 				"-R <iterations>: Number of KDF iterations to use.\n"
 				"-e <cipher>: Encryption cipher.\n"
 				"-m <mode>: Cipher mode.\n"
@@ -212,20 +215,20 @@ main(int argc, char *argv[])
 		}
 	}
 
-	if (db_params.kdf_reps) {
-		if (strncmp(db_params.kdf, "sha", 3) == 0  &&  db_params.kdf_reps < 1000) {
-			dprintf(STDERR_FILENO, "ERROR: When using %s KDF, iterations (-R option) should be at least 1000 (the default is %d)\n", db_params.kdf, KC_PKCS_PBKDF2_ITERATIONS);
-			quit(EXIT_FAILURE);
-		} else if (strcmp(db_params.kdf, "bcrypt") == 0  &&  db_params.kdf_reps < 16) {
-			dprintf(STDERR_FILENO, "ERROR: When using %s KDF, iterations (-R option) should be at least 16 (the default is %d)\n", db_params.kdf, KC_BCRYPT_PBKDF_ROUNDS);
-			quit(EXIT_FAILURE);
-		}
-	} else {
+	if (!db_params.kdf_reps) {
+		/* -R option was not specified, because our default is 0 */
 		if (strncmp(db_params.kdf, "sha", 3) == 0) {
 			db_params.kdf_reps = KC_PKCS_PBKDF2_ITERATIONS;
 		} else if (strcmp(db_params.kdf, "bcrypt") == 0) {
 			db_params.kdf_reps = KC_BCRYPT_PBKDF_ROUNDS;
 		}
+	}
+	if (strncmp(db_params.kdf, "sha", 3) == 0  &&  db_params.kdf_reps < 1000) {
+		dprintf(STDERR_FILENO, "ERROR: When using %s KDF, iterations (-R option) should be at least 1000 (the default is %d)\n", db_params.kdf, KC_PKCS_PBKDF2_ITERATIONS);
+		quit(EXIT_FAILURE);
+	} else if (strcmp(db_params.kdf, "bcrypt") == 0  &&  db_params.kdf_reps < 16) {
+		dprintf(STDERR_FILENO, "ERROR: When using %s KDF, iterations (-R option) should be at least 16 (the default is %d)\n", db_params.kdf, KC_BCRYPT_PBKDF_ROUNDS);
+		quit(EXIT_FAILURE);
 	}
 
 	if (!db_params.cipher) {
@@ -234,6 +237,17 @@ main(int argc, char *argv[])
 		if (strlcpy(db_params.cipher, DEFAULT_CIPHER, len) >= len) {
 			dprintf(STDERR_FILENO, "ERROR: Error while setting up default database parameters (cipher).\n");
 			quit(EXIT_FAILURE);
+		}
+	}
+
+	/* This needs to come after we figured out our cipher */
+	if (!db_params.key_len) {
+		db_params.key_len = MAX_KEY_LEN;
+	} else {
+		if (	strncmp(db_params.cipher, "aes256", 6) == 0  &&
+			db_params.key_len < MAX_KEY_LEN) {
+				printf("WARNING: Resetting encryption key length to %d!\n", MAX_KEY_LEN);
+				db_params.key_len = MAX_KEY_LEN;
 		}
 	}
 
@@ -1114,7 +1128,9 @@ version(void)
 void
 quit(int retval)
 {
-	memset(db_params.key, '\0', KEY_LEN);
+	if (db_params.key)
+		memset(db_params.key, '\0', db_params.key_len);
+	free(db_params.key); db_params.key = NULL;
 
 	if (db_params.pass)
 		memset(db_params.pass, '\0', db_params.pass_len);

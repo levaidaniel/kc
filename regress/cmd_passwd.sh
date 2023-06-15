@@ -90,7 +90,14 @@ if [ $SKIP -eq 0 ];then
 	fi
 fi
 
-if printf "passwd -P sha3\n${PASSWORD}\n${PASSWORD}\n" |${KC_RUN} -b -k ${KC_DB} -P bcrypt -p ${KC_PASSFILE};then
+if printf "passwd -e blowfish -P bcrypt -K 16\n${PASSWORD}\n${PASSWORD}\n" |${KC_RUN} -b -k ${KC_DB} -P bcrypt -p ${KC_PASSFILE};then
+	echo "$0 test ok (change to blowfish cipher, bcrypt KDF w/ 16 byte key length)!"
+else
+	echo "$0 test failed (change to blowfish cipher, bcrypt KDF w/ 16 byte key length)!"
+	exit 1
+fi
+
+if printf "passwd -e aes256 -P sha3 -K 32\n${PASSWORD}\n${PASSWORD}\n" |${KC_RUN} -b -k ${KC_DB} -e blowfish -P bcrypt -K 16 -p ${KC_PASSFILE};then
 	echo "$0 test ok (change to sha3 KDF from bcrypt)!"
 else
 	echo "$0 test failed (change to sha3 KDF from bcrypt)!"
