@@ -213,24 +213,20 @@ main(int argc, char *argv[])
 		}
 	}
 
-	if (!db_params.key_len) {
-		db_params.key_len = MAX_KEY_LEN;
-	}
-
-	if (db_params.kdf_reps) {
-		if (strncmp(db_params.kdf, "sha", 3) == 0  &&  db_params.kdf_reps < 1000) {
-			dprintf(STDERR_FILENO, "ERROR: When using %s KDF, iterations (-R option) should be at least 1000 (the default is %d)\n", db_params.kdf, KC_PKCS_PBKDF2_ITERATIONS);
-			quit(EXIT_FAILURE);
-		} else if (strcmp(db_params.kdf, "bcrypt") == 0  &&  db_params.kdf_reps < 16) {
-			dprintf(STDERR_FILENO, "ERROR: When using %s KDF, iterations (-R option) should be at least 16 (the default is %d)\n", db_params.kdf, KC_BCRYPT_PBKDF_ROUNDS);
-			quit(EXIT_FAILURE);
-		}
-	} else {
+	if (!db_params.kdf_reps) {
+		/* -R option was not specified, because our default is 0 */
 		if (strncmp(db_params.kdf, "sha", 3) == 0) {
 			db_params.kdf_reps = KC_PKCS_PBKDF2_ITERATIONS;
 		} else if (strcmp(db_params.kdf, "bcrypt") == 0) {
 			db_params.kdf_reps = KC_BCRYPT_PBKDF_ROUNDS;
 		}
+	}
+	if (strncmp(db_params.kdf, "sha", 3) == 0  &&  db_params.kdf_reps < 1000) {
+		dprintf(STDERR_FILENO, "ERROR: When using %s KDF, iterations (-R option) should be at least 1000 (the default is %d)\n", db_params.kdf, KC_PKCS_PBKDF2_ITERATIONS);
+		quit(EXIT_FAILURE);
+	} else if (strcmp(db_params.kdf, "bcrypt") == 0  &&  db_params.kdf_reps < 16) {
+		dprintf(STDERR_FILENO, "ERROR: When using %s KDF, iterations (-R option) should be at least 16 (the default is %d)\n", db_params.kdf, KC_BCRYPT_PBKDF_ROUNDS);
+		quit(EXIT_FAILURE);
 	}
 
 	if (!db_params.cipher) {
@@ -239,6 +235,17 @@ main(int argc, char *argv[])
 		if (strlcpy(db_params.cipher, DEFAULT_CIPHER, len) >= len) {
 			dprintf(STDERR_FILENO, "ERROR: Error while setting up default database parameters (cipher).\n");
 			quit(EXIT_FAILURE);
+		}
+	}
+
+	/* This needs to come after we figured out our cipher */
+	if (!db_params.key_len) {
+		db_params.key_len = MAX_KEY_LEN;
+	} else {
+		if (	strncmp(db_params.cipher, "aes256", 6) == 0  &&
+			db_params.key_len < MAX_KEY_LEN) {
+				printf("WARNING: Resetting encryption key length to %d!\n", MAX_KEY_LEN);
+				db_params.key_len = MAX_KEY_LEN;
 		}
 	}
 

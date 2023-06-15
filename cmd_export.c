@@ -132,10 +132,6 @@ cmd_export(const char *e_line, command *commands)
 		}
 	}
 
-	if (!db_params_new.key_len) {
-		db_params_new.key_len = MAX_KEY_LEN;
-	}
-
 	/* reset kdf reps only if kdf was changed and no -R option was
 	 * specified */
 	if (!db_params_new.kdf_reps) {
@@ -168,6 +164,17 @@ cmd_export(const char *e_line, command *commands)
 		if (strlcpy(db_params_new.cipher, DEFAULT_CIPHER, len) >= len) {
 			dprintf(STDERR_FILENO, "ERROR: Error while setting up default database parameters (cipher).\n");
 			goto exiting;
+		}
+	}
+
+	/* This needs to come after we figured out our cipher */
+	if (!db_params_new.key_len) {
+		db_params_new.key_len = MAX_KEY_LEN;
+	} else {
+		if (	strncmp(db_params_new.cipher, "aes256", 6) == 0  &&
+			db_params_new.key_len < MAX_KEY_LEN) {
+				printf("WARNING: Resetting encryption key length to %d!\n", MAX_KEY_LEN);
+				db_params_new.key_len = MAX_KEY_LEN;
 		}
 	}
 
