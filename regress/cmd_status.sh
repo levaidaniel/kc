@@ -12,6 +12,7 @@ ssh_agent=$(echo "status" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -
 yubikey=$(echo "status" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." -e "^Using password file: ${KC_PASSFILE}" -e "^Decrypting\.\.\." |grep -E -e '^Security key\(s\):')
 encryption=$(echo "status" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." -e "^Using password file: ${KC_PASSFILE}" -e "^Decrypting\.\.\." |grep -E -e '^Encryption:')
 kdf=$(echo "status" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." -e "^Using password file: ${KC_PASSFILE}" -e "^Decrypting\.\.\." |grep -E -e '^Password function:')
+key_length=$(echo "status" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." -e "^Using password file: ${KC_PASSFILE}" -e "^Decrypting\.\.\." |grep -E -e '^Key length:')
 read_only=$(echo "status" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." -e "^Using password file: ${KC_PASSFILE}" -e "^Decrypting\.\.\." |grep -E -e '^Read-only: ')
 modified=$(echo "status" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -v -e '^<default% >' -e "^Opening '${KC_DB}'" -e "^Using '${KC_DB}' database." -e "^Using password file: ${KC_PASSFILE}" -e "^Decrypting\.\.\." |grep -E -e '^Modified: ')
 
@@ -54,6 +55,13 @@ if [ "$kdf" = 'Password function: sha512 (100000 iterations)' ];then
 	echo "$0 test ok (kdf)!"
 else
 	echo "$0 test failed (kdf)!"
+	exit 1
+fi
+
+if [ "$key_length" = 'Key length: 32 bytes / 256 bits' ];then
+	echo "$0 test ok (key length)!"
+else
+	echo "$0 test failed (key length)!"
 	exit 1
 fi
 
