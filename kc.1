@@ -103,7 +103,8 @@ intact
 .Po but potentially older
 .Pc version of your database file.
 .Pp
-On OpenBSD
+On
+.Ox
 .Nm
 tries to use
 .Xr pledge 2
@@ -295,7 +296,12 @@ More information is in the
 .Em KDF
 section.
 .It Fl K Ar key length
-Key length in bytes to use for encryption (and decryption). A valid length is between 16 and 32 (default). Some combinations of an encryption cipher and key length don't make sense with low or high values. If it's not really necessary, I suggest leaving it at the default: 32 bytes == 256 bits.
+Key length in bytes to use for encryption (and decryption).
+A valid length is between 16 and 32 (default).
+Some combinations of an encryption cipher and key length don't make sense with
+low or high values.
+If it's not really necessary, I suggest leaving it at the default:
+32 bytes == 256 bits.
 .It Fl R Ar iterations
 Number of iterations or rounds to use with the KDF.
 .Pp
@@ -581,7 +587,8 @@ Alias of
 .Ic del .
 .It Ic passwd Op Fl A Ar key-type,key-comment Op ,password Op Fl Y Ar Key-slot,Device-index|Serial-number Op ,password Op Fl P Ar kdf Op Fl K Ar key length Op Fl R Ar kdf iterations Op Fl e Ar cipher Op Fl m Ar cipher mode
 Change the database password or SSH public key identity being used to encrypt.
-Optionally, SSH key, security key information, KDF, key length, KDF iterations, cipher and cipher mode can also be changed.
+Optionally, SSH key, security key information, KDF, key length, KDF iterations,
+cipher and cipher mode can also be changed.
 All changes will be written immediately.
 .Pp
 More information about the
@@ -655,11 +662,11 @@ must be a proper
 database.
 .Pp
 The
-.Ar SSH key,
-.Ar Security key information,
-.Ar kdf,
-.Ar key length,
-.Ar kdf iterations,
+.Ar SSH key ,
+.Ar Security key information ,
+.Ar kdf ,
+.Ar key length ,
+.Ar kdf iterations ,
 .Ar encryption cipher
 and
 .Ar cipher mode
@@ -1415,7 +1422,8 @@ after decrypting, and
 .Nm
 simply will not be able to open it.
 .It
-On OpenBSD
+On
+.Ox
 .Nm
 uses
 .Xr pledge 2
