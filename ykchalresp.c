@@ -74,7 +74,7 @@ static void yk_report_error(yk_array *);
 int
 kc_ykchalresp(struct db_parameters *db_params)
 {
-	YK_KEY		*yk_key = 0;
+	YK_KEY		*yk_key = NULL;
 	int		yk_cmd = 0;
 	yk_array	*yk = db_params->yk;
 	unsigned int	yk_serial = 0;
@@ -123,6 +123,11 @@ kc_ykchalresp(struct db_parameters *db_params)
 				if (yk_get_serial(yk_key, 1, 0, &yk_serial)) {
 					if (yk->serial == yk_serial)
 						yk->dev = yk_counter;
+
+					if (yk_key && !yk_close_key(yk_key)) {
+						goto err;
+					}
+					yk_key = NULL;
 				} else {
 					dprintf(STDERR_FILENO, "ERROR: Could not read serial number from YubiKey device #%zu!\n", yk_counter);
 					goto err;
@@ -253,6 +258,11 @@ kc_ykchalresp(struct db_parameters *db_params)
 
 		memset(challenge, '\0', sizeof(challenge_len));
 		free(challenge); challenge = NULL;
+
+		if (yk_key && !yk_close_key(yk_key)) {
+			goto err;
+		}
+		yk_key = NULL;
 
 		/* realloc ..->pass and use the response */
 		/* copy the response as the constructed password */
