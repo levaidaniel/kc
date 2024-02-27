@@ -71,7 +71,7 @@ cmd_status(const char *e_line, command *commands)
 		puts("");
 
 		while (yk) {
-			printf(" YubiKey slot #%d on device #%d\n", yk->slot, yk->dev);
+			printf(" YubiKey slot #%d on device #%d, serial: %d\n", yk->slot, yk->dev, yk->serial);
 			yk = yk->next;
 		}
 	} else {
