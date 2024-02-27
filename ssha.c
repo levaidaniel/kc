@@ -105,7 +105,7 @@ kc_ssha_connect(void)
 	char	*sock_name = NULL;
 
 
-	memset(&addr, 0, sizeof(struct sockaddr_un));
+	memset(&addr, '\0', sizeof(struct sockaddr_un));
 	addr.sun_family = AF_UNIX;
 
 	sock_name = getenv("SSH_AUTH_SOCK");
@@ -155,7 +155,7 @@ kc_ssha_identity_list_request(int sock)
 		return(-1);
 	} else {
 		/* reset the send buffer */
-		memset(buf, 0, buf_len);
+		memset(buf, '\0', buf_len);
 	}
 
 	/* my request */
@@ -198,7 +198,7 @@ kc_ssha_sign_request(int sock, struct kc_ssha_identity *id, char *data, unsigned
 	/* my request's length */
 	put_u32(len, req_len);
 	memcpy(buf+pos, len, 4);
-	memset(len, 0, 4);
+	memset(len, '\0', 4);
 	pos += 4;
 
 	/* my request */
@@ -208,7 +208,7 @@ kc_ssha_sign_request(int sock, struct kc_ssha_identity *id, char *data, unsigned
 	/* my key's length */
 	put_u32(len, id->pubkey_len);
 	memcpy(buf+pos, len, 4);
-	memset(len, 0, 4);
+	memset(len, '\0', 4);
 	pos += 4;
 
 	/* pubkey */
@@ -218,7 +218,7 @@ kc_ssha_sign_request(int sock, struct kc_ssha_identity *id, char *data, unsigned
 	/* my data's length */
 	put_u32(len, data_len);
 	memcpy(buf+pos, len, 4);
-	memset(len, 0, 4);
+	memset(len, '\0', 4);
 	pos += 4;
 
 	/* data to sign */
@@ -292,7 +292,7 @@ kc_ssha_get_full_response(int sock)
 		return(NULL);
 	} else {
 		/* reset the send buffer */
-		memset(buf, 0, buf_len);
+		memset(buf, '\0', buf_len);
 	}
 
 	rem = len;
@@ -632,13 +632,13 @@ exiting:
 	free(data_to_sign); data_to_sign = NULL;
 
 	if (signature != NULL) {
-		memset(signature->signature, 0, signature->length);
+		memset(signature->signature, '\0', signature->length);
 		free(signature->signature); signature->signature = NULL;
 		free(signature); signature = NULL;
 	}
 
 	if (response != NULL) {
-		memset(response->data, 0, response->length);
+		memset(response->data, '\0', response->length);
 		free(response->data); response->data = NULL;
 		free(response); response = NULL;
 	}

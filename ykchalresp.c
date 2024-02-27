@@ -243,7 +243,7 @@ kc_ykchalresp(struct db_parameters *db_params)
 
 
 		printf("Remember to touch your YubiKey if necessary\n");
-		memset(response, 0, sizeof(response));
+		memset(response, '\0', sizeof(response));
 		if (!yk_challenge_response(yk_key, yk_cmd, may_block,
 			challenge_len, challenge,
 			sizeof(response), response))
@@ -260,7 +260,7 @@ kc_ykchalresp(struct db_parameters *db_params)
 		db_params->pass_len = sizeof(response) > PASSWORD_MAXLEN ? PASSWORD_MAXLEN : sizeof(response);
 		db_params->pass = realloc(db_params->pass, db_params->pass_len); malloc_check(db_params->pass);
 		memcpy(db_params->pass, response, db_params->pass_len);
-		memset(response, 0, sizeof(response));
+		memset(response, '\0', sizeof(response));
 
 		yk = yk->next;
 	}
