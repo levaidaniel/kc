@@ -101,7 +101,7 @@ kc_ykchalresp(struct db_parameters *db_params)
 	if (db_params->yk_password) {
 		userpass = malloc(db_params->pass_len); malloc_check(userpass);
 		userpass_len = db_params->pass_len;
-		memcpy(userpass, db_params->pass, db_params->pass_len);
+		memcpy(userpass, db_params->pass, userpass_len);
 	}
 
 	while (yk) {
@@ -163,7 +163,7 @@ kc_ykchalresp(struct db_parameters *db_params)
 			goto err;
 		}
 
-		if (db_params->yk_password  &&  db_params->pass_len > YUBIKEY_CHALLENGE_MAXLEN) {
+		if (userpass  &&  userpass_len > YUBIKEY_CHALLENGE_MAXLEN) {
 			dprintf(STDERR_FILENO, "ERROR: Password cannot be longer than %d bytes when using YubiKey challenge-response!\n", YUBIKEY_CHALLENGE_MAXLEN);
 			yk_errno = YK_EWRONGSIZ;
 			goto err;
@@ -184,7 +184,7 @@ kc_ykchalresp(struct db_parameters *db_params)
 
 
 		/* set up challenge */
-		if (!db_params->yk_password  &&  yk_counter == 1) {
+		if (!userpass  &&  yk_counter == 1) {
 			/* Use the salt as the challenge when we *don't* want
 			 * to use a user-password with the security key *and*
 			 * this is the first key.
@@ -251,6 +251,9 @@ kc_ykchalresp(struct db_parameters *db_params)
 			goto err;
 		}
 
+		memset(challenge, '\0', sizeof(challenge_len));
+		free(challenge); challenge = NULL;
+
 		/* realloc ..->pass and use the response */
 		/* copy the response as the constructed password */
 		memset(db_params->pass, '\0', db_params->pass_len);
@@ -289,6 +292,13 @@ err:
 		memset(userpass, '\0', userpass_len);
 	free(userpass); userpass = NULL;
 	userpass_len = 0;
+
+	if (challenge)
+		memset(challenge, '\0', sizeof(challenge_len));
+	free(challenge); challenge = NULL;
+	challenge_len = 0;
+
+	memset(response, '\0', sizeof(response));
 
 	yk_report_error(yk);
 	if (yk_key && !yk_close_key(yk_key)) {
