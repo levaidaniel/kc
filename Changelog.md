@@ -1,3 +1,9 @@
+# 2.5.3
+* Plug some memory leaks.
+* `status` command prints YubiKey serial number(s).
+* Documentation and manual page fixes.
+
+
 # 2.5.2
 * _SHA-3 512_ support on OpenBSD.
 * New '-K' parameter to specify encryption key length.
