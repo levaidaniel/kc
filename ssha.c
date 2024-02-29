@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2023 LEVAI Daniel
+ * Copyright (c) 2018-2024 LEVAI Daniel
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
