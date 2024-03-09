@@ -888,7 +888,7 @@ kc_crypt_setup(BIO *bio_chain, const unsigned int enc, struct db_parameters *db_
 		} else if (strcmp(db_params->cipher_mode, "ctr") == 0) {
 			kc_cipher = &EVP_aes_256_ctr;
 		} else {
-			printf("Unknown cipher mode: %s!\n", db_params->cipher_mode);
+			dprintf(STDERR_FILENO, "ERROR: Unknown cipher mode: %s!\n", db_params->cipher_mode);
 			return(0);
 		}
 	} else if (strcmp(db_params->cipher, "blowfish") == 0) {
@@ -899,7 +899,16 @@ kc_crypt_setup(BIO *bio_chain, const unsigned int enc, struct db_parameters *db_
 		} else if (strcmp(db_params->cipher_mode, "cbc") == 0) {
 			kc_cipher = &EVP_bf_cbc;
 		} else {
-			printf("Unknown cipher mode: %s!\n", db_params->cipher_mode);
+			dprintf(STDERR_FILENO, "ERROR: Unknown cipher mode: %s!\n", db_params->cipher_mode);
+			return(0);
+		}
+	} else if (strcmp(db_params->cipher, "chacha20-poly1305") == 0) {
+		kc_cipher = &EVP_chacha20_poly1305;
+
+		/* chacha20-poly1305 doesn't use cipher_mode */
+		db_params->cipher_mode = realloc(db_params->cipher_mode, 4); malloc_check(db_params->cipher_mode);
+		if (strlcpy(db_params->cipher_mode, "n/a", 4) >= 4) {
+			dprintf(STDERR_FILENO, "ERROR: Error while setting up database parameter (cipher mode).\n");
 			return(0);
 		}
 	} else {

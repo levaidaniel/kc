@@ -100,7 +100,12 @@ cmd_status(const char *e_line, command *commands)
 
 	printf("Key length: %lu bytes / %lu bits\n", db_params.key_len, db_params.key_len * 8);
 
-	printf("Encryption: %s, %s\n", db_params.cipher, db_params.cipher_mode);
+	printf("Encryption: %s", db_params.cipher);
+	if (strncmp(db_params.cipher_mode, "n/a", 4) == 0) {
+		printf("\n");
+	} else {
+		printf(", %s\n", db_params.cipher_mode);
+	}
 
 	printf("Read-only: %s\n", (db_params.readonly ? "yes" : "no"));
 
