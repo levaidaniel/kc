@@ -792,7 +792,7 @@ kc_crypt_key(struct db_parameters *db_params)
 	/* only for Argon2id */
 	EVP_KDF		*kdf_impl = NULL;
 	EVP_KDF_CTX	*kdf_ctx = NULL;
-	OSSL_PARAM	kdf_opts[7];
+	OSSL_PARAM	kdf_opts[6];
 	uint32_t	argon2id_lanes = KC_ARGON2ID_LANES;
 	uint32_t	argon2id_memcost = KC_ARGON2ID_MEMCOST;
 
