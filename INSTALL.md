@@ -3,7 +3,7 @@
 - libbsd >= 0.2.0 (except on BSDs, of course)
 - libxml >= 2.6
 - libedit or libreadline
-- openssl >= 1.1.1
+- openssl >= 1.1.1 (for Argon2id: openssl >= 3.2.0)
 
 ### Optional
 - libpcre >= 8.12 <= 10.0 (i.e. not PCRE2)

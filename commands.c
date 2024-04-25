@@ -849,6 +849,7 @@ kc_crypt_key(struct db_parameters *db_params)
 
 			return(0);
 		}
+#ifdef _HAVE_ARGON2
 	} else if (strcmp(db_params->kdf, "argon2id") == 0) {
 		kdf_opts[0] = OSSL_PARAM_construct_octet_string(OSSL_KDF_PARAM_SALT, db_params->salt, SALT_DIGEST_LEN + 1);
 		kdf_opts[1] = OSSL_PARAM_construct_octet_string(OSSL_KDF_PARAM_PASSWORD, db_params->pass, db_params->pass_len);
@@ -868,6 +869,7 @@ kc_crypt_key(struct db_parameters *db_params)
 			return(0);
 		if (EVP_KDF_derive(kdf_ctx, db_params->key, db_params->key_len, NULL) != 1)
 			return(0);
+#endif
 #ifdef _HAVE_LIBSCRYPT
 	} else if (strcmp(db_params->kdf, "scrypt") == 0) {
 		if (libscrypt_scrypt((const unsigned char *)db_params->pass, db_params->pass_len,
