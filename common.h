@@ -98,6 +98,11 @@ typedef struct db_parameters {
 	unsigned long int	kdf_reps;
 	char		*cipher;
 	char		*cipher_mode;
+	void		*first;
+	void		*second;
+	void		*third;
+	void		*fourth;
+	void		*fifth;
 	unsigned char	iv[IV_DIGEST_LEN + 1];
 	unsigned char	salt[SALT_DIGEST_LEN + 1];
 	unsigned char	*key;

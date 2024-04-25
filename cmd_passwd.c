@@ -62,6 +62,11 @@ cmd_passwd(const char *e_line, command *commands)
 	db_params_tmp.kdf_reps = 0;
 	db_params_tmp.cipher = NULL;
 	db_params_tmp.cipher_mode = NULL;
+	db_params_tmp.first = NULL;
+	db_params_tmp.second = NULL;
+	db_params_tmp.third = NULL;
+	db_params_tmp.fourth = NULL;
+	db_params_tmp.fifth = NULL;
 
 
 	/* Parse the arguments */
@@ -74,9 +79,9 @@ cmd_passwd(const char *e_line, command *commands)
 	free(line); line = NULL;
 
 #ifdef _HAVE_YUBIKEY
-	opts = "A:P:K:R:e:m:Y:";
+	opts = "A:P:K:R:e:m:Y:1:2:3:4:5:";
 #else
-	opts = "A:P:K:R:e:m:";
+	opts = "A:P:K:R:e:m:1:2:3:4:5:";
 #endif
 	switch (kc_arg_parser(largc, largv, opts, &db_params_tmp, &params)) {
 		case -1:
