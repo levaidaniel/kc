@@ -1,3 +1,9 @@
+# 2.5.4
+* Support Argon2id KDF.
+* Support ChaCha20-Poly1305 cipher.
+* Generic/reusable positional arguments, '-1' through '-5'.
+* Fix some error message printing.
+
 # 2.5.3
 * Plug some memory leaks.
 * `status` command prints YubiKey serial number(s).
