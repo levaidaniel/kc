@@ -152,6 +152,8 @@ cmd_import(const char *e_line, command *commands)
 				db_params_new.kdf_reps = KC_PKCS_PBKDF2_ITERATIONS;
 			} else if (strcmp(db_params_new.kdf, "bcrypt") == 0) {
 				db_params_new.kdf_reps = KC_BCRYPT_PBKDF_ROUNDS;
+			} else if (strcmp(db_params_new.kdf, "argon2id") == 0) {
+				db_params_new.kdf_reps = KC_ARGON2ID_ITERATIONS;
 			}
 		}
 	}
@@ -160,6 +162,9 @@ cmd_import(const char *e_line, command *commands)
 		goto exiting;
 	} else if (strcmp(db_params_new.kdf, "bcrypt") == 0  &&  db_params_new.kdf_reps < 16) {
 		dprintf(STDERR_FILENO, "ERROR: When using %s KDF, iterations (-R option) should be at least 16 (the default is %d)\n", db_params_new.kdf, KC_BCRYPT_PBKDF_ROUNDS);
+		goto exiting;
+	} else if (strcmp(db_params_new.kdf, "argon2id") == 0  &&  db_params_new.kdf_reps < 1) {
+		dprintf(STDERR_FILENO, "ERROR: When using %s KDF, iterations (-R option) should be at least 1 (the default is %d)\n", db_params.kdf, KC_ARGON2ID_ITERATIONS);
 		goto exiting;
 	}
 

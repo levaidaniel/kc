@@ -789,9 +789,20 @@ kc_crypt_pass(struct db_parameters *db_params, const unsigned char newdb)
 char
 kc_crypt_key(struct db_parameters *db_params)
 {
+	/* only for Argon2id */
+	EVP_KDF		*kdf_impl = NULL;
+	EVP_KDF_CTX	*kdf_ctx = NULL;
+	OSSL_PARAM	kdf_opts[7];
+	uint32_t	argon2id_lanes = KC_ARGON2ID_LANES;
+	uint32_t	argon2id_memcost = KC_ARGON2ID_MEMCOST;
+
+
 	if (getenv("KC_DEBUG")) {
 		printf("%s(): generating new key from pass (len:%zd) and salt.\n", __func__, db_params->pass_len);
-		printf("%s(): using %s based KDF (%lu iterations)\n", __func__, db_params->kdf, db_params->kdf_reps);
+		printf("%s(): using %s based KDF (%lu iterations", __func__, db_params->kdf, db_params->kdf_reps);
+		if (strcmp(db_params->kdf, "argon2id") == 0)
+			printf(", %d memory lanes, %dk memory cost", KC_ARGON2ID_LANES, KC_ARGON2ID_MEMCOST);
+		printf(")\n");
 		printf("%s(): encryption key length is %lu bytes\n", __func__, db_params->key_len);
 	}
 
@@ -838,6 +849,25 @@ kc_crypt_key(struct db_parameters *db_params)
 
 			return(0);
 		}
+	} else if (strcmp(db_params->kdf, "argon2id") == 0) {
+		kdf_opts[0] = OSSL_PARAM_construct_octet_string(OSSL_KDF_PARAM_SALT, db_params->salt, SALT_DIGEST_LEN + 1);
+		kdf_opts[1] = OSSL_PARAM_construct_octet_string(OSSL_KDF_PARAM_PASSWORD, db_params->pass, db_params->pass_len);
+		/* we truncate 'kdf_reps' here from /long/ to /int/ */
+		kdf_opts[2] = OSSL_PARAM_construct_uint32(OSSL_KDF_PARAM_ITER, (uint32_t*)&(db_params->kdf_reps));
+		kdf_opts[3] = OSSL_PARAM_construct_uint32(OSSL_KDF_PARAM_ARGON2_LANES, &argon2id_lanes);
+		kdf_opts[4] = OSSL_PARAM_construct_uint32(OSSL_KDF_PARAM_ARGON2_MEMCOST, &argon2id_memcost);
+		kdf_opts[5] = OSSL_PARAM_construct_end();
+
+
+		if ((kdf_impl = EVP_KDF_fetch(NULL, "ARGON2ID", NULL)) == NULL)
+			return(0);
+		if ((kdf_ctx = EVP_KDF_CTX_new(kdf_impl)) == NULL)
+			return(0);
+
+		if (EVP_KDF_CTX_set_params(kdf_ctx, kdf_opts) != 1)
+			return(0);
+		if (EVP_KDF_derive(kdf_ctx, db_params->key, db_params->key_len, NULL) != 1)
+			return(0);
 #ifdef _HAVE_LIBSCRYPT
 	} else if (strcmp(db_params->kdf, "scrypt") == 0) {
 		if (libscrypt_scrypt((const unsigned char *)db_params->pass, db_params->pass_len,
