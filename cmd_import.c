@@ -94,6 +94,11 @@ cmd_import(const char *e_line, command *commands)
 	db_params_new.kdf_reps = 0;
 	db_params_new.cipher = NULL;
 	db_params_new.cipher_mode = NULL;
+	db_params_new.first = NULL;
+	db_params_new.second = NULL;
+	db_params_new.third = NULL;
+	db_params_new.fourth = NULL;
+	db_params_new.fifth = NULL;
 	db_params_new.dirty = 0;
 	db_params_new.readonly = 0;
 
@@ -108,9 +113,9 @@ cmd_import(const char *e_line, command *commands)
 	free(line); line = NULL;
 
 #ifdef _HAVE_YUBIKEY
-	opts = "A:k:P:K:R:e:m:Y:o";
+	opts = "A:k:P:K:R:e:m:Y:o1:2:3:4:5:";
 #else
-	opts = "A:k:P:K:R:e:m:o";
+	opts = "A:k:P:K:R:e:m:o1:2:3:4:5:";
 #endif
 	switch (kc_arg_parser(largc, largv, opts, &db_params_new, &params)) {
 		case -1:
@@ -152,6 +157,8 @@ cmd_import(const char *e_line, command *commands)
 				db_params_new.kdf_reps = KC_PKCS_PBKDF2_ITERATIONS;
 			} else if (strcmp(db_params_new.kdf, "bcrypt") == 0) {
 				db_params_new.kdf_reps = KC_BCRYPT_PBKDF_ROUNDS;
+			} else if (strcmp(db_params_new.kdf, "argon2id") == 0) {
+				db_params_new.kdf_reps = KC_ARGON2ID_ITERATIONS;
 			}
 		}
 	}
@@ -160,6 +167,9 @@ cmd_import(const char *e_line, command *commands)
 		goto exiting;
 	} else if (strcmp(db_params_new.kdf, "bcrypt") == 0  &&  db_params_new.kdf_reps < 16) {
 		dprintf(STDERR_FILENO, "ERROR: When using %s KDF, iterations (-R option) should be at least 16 (the default is %d)\n", db_params_new.kdf, KC_BCRYPT_PBKDF_ROUNDS);
+		goto exiting;
+	} else if (strcmp(db_params_new.kdf, "argon2id") == 0  &&  db_params_new.kdf_reps < 1) {
+		dprintf(STDERR_FILENO, "ERROR: When using %s KDF, iterations (-R option) should be at least 1 (the default is %d)\n", db_params.kdf, KC_ARGON2ID_ITERATIONS);
 		goto exiting;
 	}
 

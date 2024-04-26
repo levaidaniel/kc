@@ -156,14 +156,19 @@ main(int argc, char *argv[])
 	db_params.kdf_reps = 0;
 	db_params.cipher = NULL;
 	db_params.cipher_mode = NULL;
+	db_params.first = NULL;
+	db_params.second = NULL;
+	db_params.third = NULL;
+	db_params.fourth = NULL;
+	db_params.fifth = NULL;
 	db_params.dirty = 0;
 	db_params.readonly = 0;
 
 
 #ifdef _HAVE_YUBIKEY
-	opts = "A:k:c:C:rp:P:K:R:e:m:Y:bBvh";
+	opts = "A:k:c:C:rp:P:K:R:e:m:Y:bBvh1:2:3:4:5:";
 #else
-	opts = "A:k:c:C:rp:P:K:R:e:m:bBvh";
+	opts = "A:k:c:C:rp:P:K:R:e:m:bBvh1:2:3:4:5:";
 #endif
 	switch (kc_arg_parser(argc, argv, opts, &db_params, &params)) {
 		case -1:
@@ -174,7 +179,7 @@ main(int argc, char *argv[])
 #ifdef _HAVE_YUBIKEY
 				"[-Y <YubiKey slot><YubiKey device index>] "
 #endif
-				"[-p <file>] [-P <kdf>] [-K <key length>] [-R <kdf iterations>] [-e <cipher>] [-m <mode>] [-B/-b] [-v] [-h]\n\n", argv[0]);
+				"[-p <file>] [-P <kdf>] [-K <key length>] [-R <kdf iterations>] [-e <cipher>] [-m <mode>] [-1,-2,-3,-4,-5 <parameter>] [-B/-b] [-v] [-h]\n\n", argv[0]);
 			printf(	"-k <file>: Use file as database. The default is ~/.kc/default.kcd .\n"
 				"-r: Open the database in read-only mode.\n"
 				"-c/-C <keychain>: Start in <keychain>.\n"
@@ -188,6 +193,7 @@ main(int argc, char *argv[])
 				"-R <iterations>: Number of KDF iterations to use.\n"
 				"-e <cipher>: Encryption cipher.\n"
 				"-m <mode>: Cipher mode.\n"
+				"-1,-2,-3,-4,-5 <parameter>: 1-5 optional parameters for specific features.\n"
 				"-B/-b: Batch mode.\n"
 				"-v: Display version.\n"
 				"-h: This help.\n"
@@ -221,6 +227,8 @@ main(int argc, char *argv[])
 			db_params.kdf_reps = KC_PKCS_PBKDF2_ITERATIONS;
 		} else if (strcmp(db_params.kdf, "bcrypt") == 0) {
 			db_params.kdf_reps = KC_BCRYPT_PBKDF_ROUNDS;
+		} else if (strcmp(db_params.kdf, "argon2id") == 0) {
+			db_params.kdf_reps = KC_ARGON2ID_ITERATIONS;
 		}
 	}
 	if (strncmp(db_params.kdf, "sha", 3) == 0  &&  db_params.kdf_reps < 1000) {
@@ -228,6 +236,9 @@ main(int argc, char *argv[])
 		quit(EXIT_FAILURE);
 	} else if (strcmp(db_params.kdf, "bcrypt") == 0  &&  db_params.kdf_reps < 16) {
 		dprintf(STDERR_FILENO, "ERROR: When using %s KDF, iterations (-R option) should be at least 16 (the default is %d)\n", db_params.kdf, KC_BCRYPT_PBKDF_ROUNDS);
+		quit(EXIT_FAILURE);
+	} else if (strcmp(db_params.kdf, "argon2id") == 0  &&  db_params.kdf_reps < 1) {
+		dprintf(STDERR_FILENO, "ERROR: When using %s KDF, iterations (-R option) should be at least 1 (the default is %d)\n", db_params.kdf, KC_ARGON2ID_ITERATIONS);
 		quit(EXIT_FAILURE);
 	}
 
@@ -244,7 +255,8 @@ main(int argc, char *argv[])
 	if (!db_params.key_len) {
 		db_params.key_len = KEY_MAX_LEN;
 	} else {
-		if (	strncmp(db_params.cipher, "aes256", 6) == 0  &&
+		if (	(strncmp(db_params.cipher, "aes256", 6) == 0  || \
+			strncmp(db_params.cipher, "chacha20-poly1305", 17) == 0)  &&
 			db_params.key_len < KEY_MAX_LEN) {
 				printf("WARNING: Resetting encryption key length to %d!\n", KEY_MAX_LEN);
 				db_params.key_len = KEY_MAX_LEN;

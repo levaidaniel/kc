@@ -96,11 +96,19 @@ cmd_status(const char *e_line, command *commands)
 	else
 		puts("no");
 
-	printf("Password function: %s (%lu %s)\n", db_params.kdf, db_params.kdf_reps, strncmp(db_params.kdf, "bcrypt", 6) == 0 ? "rounds" : "iterations");
+	printf("Password function: %s (%lu %s", db_params.kdf, db_params.kdf_reps, strncmp(db_params.kdf, "bcrypt", 6) == 0 ? "rounds" : "iterations");
+	if (strcmp(db_params.kdf, "argon2id") == 0)
+		printf(", %lu memory lanes, %luk memory cost", db_params.first ? strtoul(db_params.first, NULL, 10) : KC_ARGON2ID_LANES, db_params.second ? strtoul(db_params.second, NULL, 10) : KC_ARGON2ID_MEMCOST);
+	printf(")\n");
 
 	printf("Key length: %lu bytes / %lu bits\n", db_params.key_len, db_params.key_len * 8);
 
-	printf("Encryption: %s, %s\n", db_params.cipher, db_params.cipher_mode);
+	printf("Encryption: %s", db_params.cipher);
+	if (strncmp(db_params.cipher_mode, "n/a", 4) == 0) {
+		printf("\n");
+	} else {
+		printf(", %s\n", db_params.cipher_mode);
+	}
 
 	printf("Read-only: %s\n", (db_params.readonly ? "yes" : "no"));
 

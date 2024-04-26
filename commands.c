@@ -789,6 +789,16 @@ kc_crypt_pass(struct db_parameters *db_params, const unsigned char newdb)
 char
 kc_crypt_key(struct db_parameters *db_params)
 {
+	char		*inv = NULL;
+
+	/* only for Argon2id */
+	EVP_KDF		*kdf_impl = NULL;
+	EVP_KDF_CTX	*kdf_ctx = NULL;
+	OSSL_PARAM	kdf_opts[6];
+	uint32_t	argon2id_lanes = KC_ARGON2ID_LANES;
+	uint32_t	argon2id_memcost = KC_ARGON2ID_MEMCOST;
+
+
 	if (getenv("KC_DEBUG")) {
 		printf("%s(): generating new key from pass (len:%zd) and salt.\n", __func__, db_params->pass_len);
 		printf("%s(): using %s based KDF (%lu iterations)\n", __func__, db_params->kdf, db_params->kdf_reps);
@@ -838,6 +848,58 @@ kc_crypt_key(struct db_parameters *db_params)
 
 			return(0);
 		}
+#ifdef _HAVE_ARGON2
+	} else if (strcmp(db_params->kdf, "argon2id") == 0) {
+		kdf_opts[0] = OSSL_PARAM_construct_octet_string(OSSL_KDF_PARAM_SALT, db_params->salt, SALT_DIGEST_LEN + 1);
+		kdf_opts[1] = OSSL_PARAM_construct_octet_string(OSSL_KDF_PARAM_PASSWORD, db_params->pass, db_params->pass_len);
+		/* we truncate 'kdf_reps' here from /long/ to /int/ */
+		kdf_opts[2] = OSSL_PARAM_construct_uint32(OSSL_KDF_PARAM_ITER, (uint32_t*)&(db_params->kdf_reps));
+
+		/* Option '-1' is memory lanes here */
+		if (db_params->first) {
+			argon2id_lanes = strtoul(db_params->first, &inv, 10);
+			if (inv[0] != '\0') {
+				dprintf(STDERR_FILENO, "ERROR: Unable to convert the Argon2 memory lanes parameter.\n");
+				return(-1);
+			}
+		}
+		if (getenv("KC_DEBUG"))
+			printf("%s(): Argon2id memory lanes: %d\n", __func__, argon2id_lanes);
+		kdf_opts[3] = OSSL_PARAM_construct_uint32(OSSL_KDF_PARAM_ARGON2_LANES, &argon2id_lanes);
+
+		/* Option '-2' is memcost here */
+		if (db_params->second) {
+			argon2id_memcost = strtoul(db_params->second, &inv, 10);
+			if (inv[0] != '\0') {
+				dprintf(STDERR_FILENO, "ERROR: Unable to convert the Argon2 memcost parameter.\n");
+				return(-1);
+			}
+		}
+		if (getenv("KC_DEBUG"))
+			printf("%s(): Argon2id memcost: %d\n", __func__, argon2id_memcost);
+		kdf_opts[4] = OSSL_PARAM_construct_uint32(OSSL_KDF_PARAM_ARGON2_MEMCOST, &argon2id_memcost);
+
+		kdf_opts[5] = OSSL_PARAM_construct_end();
+
+
+		if ((kdf_impl = EVP_KDF_fetch(NULL, "ARGON2ID", NULL)) == NULL) {
+			dprintf(STDERR_FILENO, "ERROR: Unable to fetch Argon2 KDF.\n");
+			return(0);
+		}
+		if ((kdf_ctx = EVP_KDF_CTX_new(kdf_impl)) == NULL) {
+			dprintf(STDERR_FILENO, "ERROR: Unable to create Argon2 KDF context.\n");
+			return(0);
+		}
+
+		if (EVP_KDF_CTX_set_params(kdf_ctx, kdf_opts) != 1) {
+			dprintf(STDERR_FILENO, "ERROR: Unable to set parameters for Argon2 KDF.\n");
+			return(0);
+		}
+		if (EVP_KDF_derive(kdf_ctx, db_params->key, db_params->key_len, NULL) != 1) {
+			dprintf(STDERR_FILENO, "ERROR: Unable to derive key with Argon2 KDF.\n");
+			return(0);
+		}
+#endif
 #ifdef _HAVE_LIBSCRYPT
 	} else if (strcmp(db_params->kdf, "scrypt") == 0) {
 		if (libscrypt_scrypt((const unsigned char *)db_params->pass, db_params->pass_len,
@@ -888,7 +950,7 @@ kc_crypt_setup(BIO *bio_chain, const unsigned int enc, struct db_parameters *db_
 		} else if (strcmp(db_params->cipher_mode, "ctr") == 0) {
 			kc_cipher = &EVP_aes_256_ctr;
 		} else {
-			printf("Unknown cipher mode: %s!\n", db_params->cipher_mode);
+			dprintf(STDERR_FILENO, "ERROR: Unknown cipher mode: %s!\n", db_params->cipher_mode);
 			return(0);
 		}
 	} else if (strcmp(db_params->cipher, "blowfish") == 0) {
@@ -899,7 +961,16 @@ kc_crypt_setup(BIO *bio_chain, const unsigned int enc, struct db_parameters *db_
 		} else if (strcmp(db_params->cipher_mode, "cbc") == 0) {
 			kc_cipher = &EVP_bf_cbc;
 		} else {
-			printf("Unknown cipher mode: %s!\n", db_params->cipher_mode);
+			dprintf(STDERR_FILENO, "ERROR: Unknown cipher mode: %s!\n", db_params->cipher_mode);
+			return(0);
+		}
+	} else if (strcmp(db_params->cipher, "chacha20-poly1305") == 0) {
+		kc_cipher = &EVP_chacha20_poly1305;
+
+		/* chacha20-poly1305 doesn't use cipher_mode */
+		db_params->cipher_mode = realloc(db_params->cipher_mode, 4); malloc_check(db_params->cipher_mode);
+		if (strlcpy(db_params->cipher_mode, "n/a", 4) >= 4) {
+			dprintf(STDERR_FILENO, "ERROR: Error while setting up database parameter (cipher mode).\n");
 			return(0);
 		}
 	} else {
@@ -1511,6 +1582,21 @@ signed char kc_arg_parser(int largc, char **largv, const char *opts, db_paramete
 				}
 			break;
 #endif
+			case '1':
+				db_params->first = strdup(optarg); malloc_check(db_params->first);
+			break;
+			case '2':
+				db_params->second = strdup(optarg); malloc_check(db_params->second);
+			break;
+			case '3':
+				db_params->third = strdup(optarg); malloc_check(db_params->third);
+			break;
+			case '4':
+				db_params->fourth = strdup(optarg); malloc_check(db_params->fourth);
+			break;
+			case '5':
+				db_params->fifth = strdup(optarg); malloc_check(db_params->fifth);
+			break;
 			case 'o':
 				if (strncmp(extra_params->caller, "import", 6) == 0)
 					extra_params->legacy++;

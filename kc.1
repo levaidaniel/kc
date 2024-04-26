@@ -17,7 +17,7 @@
 .\"ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 .\"(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 .\"SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-.Dd $Mdocdate: February 13 2024 $
+.Dd $Mdocdate: April 25 2024 $
 .Dt KC 1
 .Os
 .Sh NAME
@@ -37,6 +37,11 @@
 .Op Fl R Ar kdf iterations
 .Op Fl e Ar cipher
 .Op Fl m Ar cipher mode
+.Op Fl 1 Ar parameter
+.Op Fl 2 Ar parameter
+.Op Fl 3 Ar parameter
+.Op Fl 4 Ar parameter
+.Op Fl 5 Ar parameter
 .Op Fl b
 .Op Fl B
 .Op Fl v
@@ -289,6 +294,19 @@ The speed of this is somewhere between SHA-* and bcrypt.
 The
 .Fl R
 option is ignored when using this.
+.It Ar argon2id
+If compiled with Argon2 and a new enough OpenSSL,
+.Nm
+supports the Argon2id KDF.
+Argon2 is a memory-hard function.
+.Fl R
+is used for specifying its iterations (default is 2),
+.Fl 1
+is used for specifying the number of memory lanes (default is 4), and
+.Fl 2
+is used for specifying the memory cost (default is 6291456).
+.Pp
+These defaults have been selected based on the recommendation of its RFC 9106.
 .El
 .Pp
 More information is in the
@@ -314,6 +332,9 @@ Valid parameters are:
 .It Ar aes256
 This is the default
 .It Ar blowfish
+.It Ar chacha20-poly1305
+.Ar cipher mode
+is ignored when using this.
 .El
 .It Fl m Ar cipher mode
 Cipher mode for database encryption.
