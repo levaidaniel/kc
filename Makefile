@@ -5,7 +5,9 @@ PROG =		kc
 MANDIR =	${LOCALBASE}/man/man
 MAN =		src/man/kc.1
 
-BCRYPT_DIR =	src/lib/bcrypt
+SRC_DIR= $(PWD)/src
+BCRYPT_DIR =	${SRC_DIR}/lib/bcrypt
+VPATH= ${SRC_DIR}
 
 SRCS =		kc.c malloc_check.c
 SRCS +=		cmd_c.c cmd_cdel.c cmd_clear.c cmd_clipboard.c cmd_clist.c cmd_cnew.c cmd_copy.c \
@@ -18,7 +20,12 @@ SRCS +=		cmd_c.c cmd_cdel.c cmd_clear.c cmd_clipboard.c cmd_clist.c cmd_cnew.c c
 SRCS +=		ykchalresp.c
 .endif
 
-CFLAGS +=	-pedantic -Wall -Isrc
+BCRYPT_OBJS =	${BCRYPT_DIR}/bcrypt_pbkdf.o ${BCRYPT_DIR}/blf.o ${BCRYPT_DIR}/explicit_bzero.o ${BCRYPT_DIR}/sha2.o
+
+BUNDLED_BCRYPT=1
+_ALLOW_ABSOLUTE_OBJ_PATH=1
+
+CFLAGS +=	-pedantic -Wall -I${SRC_DIR} -I${SRC_DIR}/lib -L${BCRYPT_DIR}
 CFLAGS +=	`pkg-config --cflags libxml-2.0`
 .ifdef READLINE
 CFLAGS +=	-D_READLINE
@@ -69,10 +76,10 @@ OBJS +=		${BCRYPT_DIR}/bcrypt_pbkdf.o ${BCRYPT_DIR}/blf.o ${BCRYPT_DIR}/explicit
 .endif
 
 set_version:
-	$(shell) if grep -E -q -e '^\#define[[:space:]]+VERSION[[:space:]]+"[0-9]\.[0-9]-dev-' common.h;then sed -E -i -e "s/(^\#define[[:space:]]+VERSION[[:space:]]+\"[0-9]\.[0-9]-dev-)(.*)\"$$/\1`git log -1 --pretty=format:%cd-%h --date=short`\"/" common.h; fi
+	$(shell) cd ${SRC_DIR} ; if grep -E -q -e '^\#define[[:space:]]+VERSION[[:space:]]+"[0-9]\.[0-9]-dev-' common.h;then sed -E -i -e "s/(^\#define[[:space:]]+VERSION[[:space:]]+\"[0-9]\.[0-9]-dev-)(.*)\"$$/\1`git log -1 --pretty=format:%cd-%h --date=short`\"/" common.h; fi
 
 unset_version:
-	$(shell) if grep -E -q -e '^\#define[[:space:]]+VERSION[[:space:]]+"[0-9]\.[0-9]-dev-' common.h;then sed -E -i -e "s/(^\#define[[:space:]]+VERSION[[:space:]]+\"[0-9]\.[0-9]-dev-)(.*)\"$$/\1GIT_VERSION\"/" common.h; fi
+	$(shell) cd ${SRC_DIR} ; if grep -E -q -e '^\#define[[:space:]]+VERSION[[:space:]]+"[0-9]\.[0-9]-dev-' common.h;then sed -E -i -e "s/(^\#define[[:space:]]+VERSION[[:space:]]+\"[0-9]\.[0-9]-dev-)(.*)\"$$/\1GIT_VERSION\"/" common.h; fi
 
 all: set_version ${PROG} unset_version
 
