@@ -789,6 +789,7 @@ kc_crypt_pass(struct db_parameters *db_params, const unsigned char newdb)
 char
 kc_crypt_key(struct db_parameters *db_params)
 {
+#ifdef _HAVE_ARGON2
 	char		*inv = NULL;
 
 	/* only for Argon2id */
@@ -797,6 +798,7 @@ kc_crypt_key(struct db_parameters *db_params)
 	OSSL_PARAM	kdf_opts[6];
 	uint32_t	argon2id_lanes = KC_ARGON2ID_LANES;
 	uint32_t	argon2id_memcost = KC_ARGON2ID_MEMCOST;
+#endif
 
 
 	if (getenv("KC_DEBUG")) {
