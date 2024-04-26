@@ -3,9 +3,9 @@ BINDIR =	${LOCALBASE}/bin
 PROG =		kc
 
 MANDIR =	${LOCALBASE}/man/man
-MAN =		kc.1
+MAN =		src/man/kc.1
 
-BCRYPT_DIR =	bcrypt
+BCRYPT_DIR =	src/lib/bcrypt
 
 SRCS =		kc.c malloc_check.c
 SRCS +=		cmd_c.c cmd_cdel.c cmd_clear.c cmd_clipboard.c cmd_clist.c cmd_cnew.c cmd_copy.c \
@@ -18,7 +18,7 @@ SRCS +=		cmd_c.c cmd_cdel.c cmd_clear.c cmd_clipboard.c cmd_clist.c cmd_cnew.c c
 SRCS +=		ykchalresp.c
 .endif
 
-CFLAGS +=	-pedantic -Wall
+CFLAGS +=	-pedantic -Wall -Isrc
 CFLAGS +=	`pkg-config --cflags libxml-2.0`
 .ifdef READLINE
 CFLAGS +=	-D_READLINE

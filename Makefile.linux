@@ -1,9 +1,11 @@
 PROG =		kc
 
-DESTDIR ?=	
+DESTDIR ?=
 PREFIX ?=	usr/local
 
-BCRYPT_DIR =	bcrypt
+BCRYPT_DIR =	src/lib/bcrypt
+SRC_DIR= $(PWD)/src
+VPATH= ${SRC_DIR}
 
 SRCS =		kc.c malloc_check.c
 SRCS +=		cmd_c.c cmd_cdel.c cmd_clear.c cmd_clipboard.c cmd_clist.c cmd_cnew.c cmd_copy.c \
@@ -27,7 +29,7 @@ endif
 BCRYPT_OBJS =	${BCRYPT_DIR}/bcrypt_pbkdf.o ${BCRYPT_DIR}/blf.o ${BCRYPT_DIR}/explicit_bzero.o ${BCRYPT_DIR}/sha2.o
 
 
-CFLAGS +=	-pedantic -Wall
+CFLAGS +=	-pedantic -Wall -I ${SRC_DIR} -I ${SRC_DIR}/lib
 CFLAGS +=	`pkg-config --cflags libcrypto`
 CFLAGS +=	`pkg-config --cflags libbsd`
 CFLAGS +=	`pkg-config --cflags libxml-2.0`
@@ -75,7 +77,7 @@ all: bcrypt ${PROG}
 
 .PHONY: bcrypt
 bcrypt:
-	${MAKE} -C ${BCRYPT_DIR} -f Makefile.linux
+	 ${MAKE} -C ${BCRYPT_DIR} -f Makefile.linux
 
 CLEANFILES +=	${BCRYPT_DIR}/*.o
 
@@ -90,10 +92,10 @@ test:
 	$(shell) regress/run_tests.sh
 
 set_version:
-	$(shell) if grep -E -q -e '^\#define\s+VERSION\s+"[0-9]\.[0-9]-dev-' common.h;then sed -i -e "s/\(^\#define\s\+VERSION\s\+\"[0-9]\.[0-9]-dev-\)\(.*\)\"$$/\1`git log -1 --pretty=format:%cd-%h --date=short`\"/" common.h; fi
+	$(shell) cd ${SRC_DIR} ; if grep -E -q -e '^\#define\s+VERSION\s+"[0-9]\.[0-9]-dev-' common.h;then sed -i -e "s/\(^\#define\s\+VERSION\s\+\"[0-9]\.[0-9]-dev-\)\(.*\)\"$$/\1`git log -1 --pretty=format:%cd-%h --date=short`\"/" common.h; fi
 
 unset_version:
-	$(shell) if grep -E -q -e '^\#define\s+VERSION\s+"[0-9]\.[0-9]-dev-' common.h;then sed -i -e "s/\(^\#define\s\+VERSION\s\+\"[0-9]\.[0-9]-dev-\)\(.*\)\"$$/\1GIT_VERSION\"/" common.h; fi
+	$(shell) cd ${SRC_DIR} ; if grep -E -q -e '^\#define\s+VERSION\s+"[0-9]\.[0-9]-dev-' common.h;then sed -i -e "s/\(^\#define\s\+VERSION\s\+\"[0-9]\.[0-9]-dev-\)\(.*\)\"$$/\1GIT_VERSION\"/" common.h; fi
 
 ${PROG}: set_version ${OBJS} ${BCRYPT_OBJS} unset_version
 	${CC} ${LDFLAGS} ${OBJS} ${BCRYPT_OBJS} -o ${PROG} ${LDADD}
