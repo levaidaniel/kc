@@ -254,6 +254,48 @@ cmd_passwd(const char *e_line, command *commands)
 		perror("ERROR: Could not save the cipher mode");
 		goto exiting;
 	}
+
+	if (db_params_tmp.first) {
+		free(db_params.first); db_params.first = NULL;
+		db_params.first = strdup(db_params_tmp.first);
+		if (!db_params.first) {
+			perror("ERROR: Could not save the '-1' parameter");
+			goto exiting;
+		}
+	}
+	if (db_params_tmp.second) {
+		free(db_params.second); db_params.second = NULL;
+		db_params.second = strdup(db_params_tmp.second);
+		if (!db_params.second) {
+			perror("ERROR: Could not save the '-2' parameter");
+			goto exiting;
+		}
+	}
+	if (db_params_tmp.third) {
+		free(db_params.third); db_params.third = NULL;
+		db_params.third = strdup(db_params_tmp.third);
+		if (!db_params.third) {
+			perror("ERROR: Could not save the '-3' parameter");
+			goto exiting;
+		}
+	}
+	if (db_params_tmp.fourth) {
+		free(db_params.fourth); db_params.fourth = NULL;
+		db_params.fourth = strdup(db_params_tmp.fourth);
+		if (!db_params.fourth) {
+			perror("ERROR: Could not save the '-4' parameter");
+			goto exiting;
+		}
+	}
+	if (db_params_tmp.fifth) {
+		free(db_params.fifth); db_params.fifth = NULL;
+		db_params.fifth = strdup(db_params_tmp.fifth);
+		if (!db_params.fifth) {
+			perror("ERROR: Could not save the '-5' parameter");
+			goto exiting;
+		}
+	}
+
 	if (strlcpy((char *)db_params.ssha_type, (const char*)db_params_tmp.ssha_type, sizeof(db_params.ssha_type)) >= sizeof(db_params.ssha_type)) {
 		dprintf(STDERR_FILENO, "ERROR: Could not save SSH key type!\n");
 		goto exiting;

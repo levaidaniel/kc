@@ -10,7 +10,7 @@ typeset -i YKVER_MAJ=0
 typeset -i YKVER_MIN=0
 typeset -i RETVAL=0
 
-if ! printf "version\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e '^Compiled with (Readline|Editline)(, PCRE)*(, scrypt)*(, YubiKey)+ support\.$';then
+if ! printf "version\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e '^Compiled with (Readline|Editline)(, PCRE)*(, scrypt)*(, argon2id)*(, YubiKey)+ support\.$';then
 	SKIP=1
 	echo "$0 test skipped (kc was not compiled with Yubikey support)!"
 fi

@@ -14,7 +14,7 @@ else
 	exit 1
 fi
 
-if printf "version\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e '^Compiled with (Readline|Editline)(, PCRE)*(, scrypt)*(, YubiKey)* support\.$';then
+if printf "version\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE} |grep -E -e '^Compiled with (Readline|Editline)(, PCRE)*(, scrypt)*(, argon2id)*(, YubiKey)* support\.$';then
 	echo "$0 test ok (compile options)!"
 else
 	echo "$0 test failed (compile options)!"

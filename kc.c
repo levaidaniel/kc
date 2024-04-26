@@ -1128,6 +1128,9 @@ version(void)
 #ifdef	_HAVE_LIBSCRYPT
 		", scrypt"
 #endif
+#ifdef	_HAVE_ARGON2
+		", argon2id"
+#endif
 #ifdef	_HAVE_YUBIKEY
 		", YubiKey"
 #endif
