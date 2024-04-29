@@ -227,8 +227,10 @@ main(int argc, char *argv[])
 			db_params.kdf_reps = KC_PKCS_PBKDF2_ITERATIONS;
 		} else if (strcmp(db_params.kdf, "bcrypt") == 0) {
 			db_params.kdf_reps = KC_BCRYPT_PBKDF_ROUNDS;
+#ifdef	_HAVE_ARGON2
 		} else if (strcmp(db_params.kdf, "argon2id") == 0) {
 			db_params.kdf_reps = KC_ARGON2ID_ITERATIONS;
+#endif
 		}
 	}
 	if (strncmp(db_params.kdf, "sha", 3) == 0  &&  db_params.kdf_reps < 1000) {
@@ -237,9 +239,11 @@ main(int argc, char *argv[])
 	} else if (strcmp(db_params.kdf, "bcrypt") == 0  &&  db_params.kdf_reps < 16) {
 		dprintf(STDERR_FILENO, "ERROR: When using %s KDF, iterations (-R option) should be at least 16 (the default is %d)\n", db_params.kdf, KC_BCRYPT_PBKDF_ROUNDS);
 		quit(EXIT_FAILURE);
+#ifdef	_HAVE_ARGON2
 	} else if (strcmp(db_params.kdf, "argon2id") == 0  &&  db_params.kdf_reps < 1) {
 		dprintf(STDERR_FILENO, "ERROR: When using %s KDF, iterations (-R option) should be at least 1 (the default is %d)\n", db_params.kdf, KC_ARGON2ID_ITERATIONS);
 		quit(EXIT_FAILURE);
+#endif
 	}
 
 	if (!db_params.cipher) {
@@ -256,7 +260,7 @@ main(int argc, char *argv[])
 		db_params.key_len = KEY_MAX_LEN;
 	} else {
 		if (	(strncmp(db_params.cipher, "aes256", 6) == 0  || \
-			strncmp(db_params.cipher, "chacha20-poly1305", 17) == 0)  &&
+			strncmp(db_params.cipher, "chacha20", 8) == 0)  &&
 			db_params.key_len < KEY_MAX_LEN) {
 				printf("WARNING: Resetting encryption key length to %d!\n", KEY_MAX_LEN);
 				db_params.key_len = KEY_MAX_LEN;

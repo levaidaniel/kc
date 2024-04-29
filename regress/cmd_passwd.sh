@@ -97,18 +97,18 @@ else
 	exit 1
 fi
 
-if printf "passwd -e chacha20-poly1305 -P sha3 -K 32\n${PASSWORD}\n${PASSWORD}\n" |${KC_RUN} -b -k ${KC_DB} -e blowfish -P bcrypt -K 16 -p ${KC_PASSFILE};then
-	echo "$0 test ok (change to sha3 KDF, chacha20-poly1305 cipher from bcrypt KDF, blowfish cipher)!"
+if printf "passwd -e chacha20 -P sha3 -K 32\n${PASSWORD}\n${PASSWORD}\n" |${KC_RUN} -b -k ${KC_DB} -e blowfish -P bcrypt -K 16 -p ${KC_PASSFILE};then
+	echo "$0 test ok (change to sha3 KDF, chacha20 cipher from bcrypt KDF, blowfish cipher)!"
 else
-	echo "$0 test failed (change to sha3 KDF, chacha20-poly1305 cipher from bcrypt KDF, blowfish cipher)!"
+	echo "$0 test failed (change to sha3 KDF, chacha20 cipher from bcrypt KDF, blowfish cipher)!"
 	exit 1
 fi
 
 if ${KC_RUN} -v |grep -q -E -e '^Compiled with .*argon2id';then
-	if printf "passwd -e aes256 -P argon2id -1 1 -2 512000 -R 1\n${PASSWORD}\n${PASSWORD}\n" |${KC_RUN} -b -k ${KC_DB} -e chacha20-poly1305 -P sha3 -K 32 -p ${KC_PASSFILE};then
-		echo "$0 test ok (change to argon2id KDF, aes256 cipher from sha3 KDF, chacha20-poly1305 cipher)!"
+	if printf "passwd -e aes256 -P argon2id -1 1 -2 512000 -R 1\n${PASSWORD}\n${PASSWORD}\n" |${KC_RUN} -b -k ${KC_DB} -e chacha20 -P sha3 -K 32 -p ${KC_PASSFILE};then
+		echo "$0 test ok (change to argon2id KDF, aes256 cipher from sha3 KDF, chacha20 cipher)!"
 	else
-		echo "$0 test failed (change to argon2id KDF, aes256 cipher from sha3 KDF, chacha20-poly1305 cipher)!"
+		echo "$0 test failed (change to argon2id KDF, aes256 cipher from sha3 KDF, chacha20 cipher)!"
 		exit 1
 	fi
 
@@ -119,10 +119,10 @@ if ${KC_RUN} -v |grep -q -E -e '^Compiled with .*argon2id';then
 		exit 1
 	fi
 else
-	if printf "passwd -e aes256 -P sha512\n${PASSWORD}\n${PASSWORD}\n" |${KC_RUN} -b -k ${KC_DB} -e chacha20-poly1305 -P sha3 -K 32 -p ${KC_PASSFILE};then
-		echo "$0 test ok (reset to sha512 KDF, aes256 cipher from sha3 KDF, chacha20-poly1305 cipher)!"
+	if printf "passwd -e aes256 -P sha512\n${PASSWORD}\n${PASSWORD}\n" |${KC_RUN} -b -k ${KC_DB} -e chacha20 -P sha3 -K 32 -p ${KC_PASSFILE};then
+		echo "$0 test ok (reset to sha512 KDF, aes256 cipher from sha3 KDF, chacha20 cipher)!"
 	else
-		echo "$0 test failed (reset to sha512 KDF, aes256 cipher from sha3 KDF, chacha20-poly1305 cipher)!"
+		echo "$0 test failed (reset to sha512 KDF, aes256 cipher from sha3 KDF, chacha20 cipher)!"
 		exit 1
 	fi
 fi

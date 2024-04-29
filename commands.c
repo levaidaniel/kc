@@ -901,6 +901,9 @@ kc_crypt_key(struct db_parameters *db_params)
 			dprintf(STDERR_FILENO, "ERROR: Unable to derive key with Argon2 KDF.\n");
 			return(0);
 		}
+
+		EVP_KDF_free(kdf_impl);
+		EVP_KDF_CTX_free(kdf_ctx);
 #endif
 #ifdef _HAVE_LIBSCRYPT
 	} else if (strcmp(db_params->kdf, "scrypt") == 0) {
@@ -966,10 +969,10 @@ kc_crypt_setup(BIO *bio_chain, const unsigned int enc, struct db_parameters *db_
 			dprintf(STDERR_FILENO, "ERROR: Unknown cipher mode: %s!\n", db_params->cipher_mode);
 			return(0);
 		}
-	} else if (strcmp(db_params->cipher, "chacha20-poly1305") == 0) {
-		kc_cipher = &EVP_chacha20_poly1305;
+	} else if (strcmp(db_params->cipher, "chacha20") == 0) {
+		kc_cipher = &EVP_chacha20;
 
-		/* chacha20-poly1305 doesn't use cipher_mode */
+		/* chacha20 doesn't use cipher_mode */
 		db_params->cipher_mode = realloc(db_params->cipher_mode, 4); malloc_check(db_params->cipher_mode);
 		if (strlcpy(db_params->cipher_mode, "n/a", 4) >= 4) {
 			dprintf(STDERR_FILENO, "ERROR: Error while setting up database parameter (cipher mode).\n");
