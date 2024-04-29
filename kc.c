@@ -260,7 +260,7 @@ main(int argc, char *argv[])
 		db_params.key_len = KEY_MAX_LEN;
 	} else {
 		if (	(strncmp(db_params.cipher, "aes256", 6) == 0  || \
-			strncmp(db_params.cipher, "chacha20-poly1305", 17) == 0)  &&
+			strncmp(db_params.cipher, "chacha20", 8) == 0)  &&
 			db_params.key_len < KEY_MAX_LEN) {
 				printf("WARNING: Resetting encryption key length to %d!\n", KEY_MAX_LEN);
 				db_params.key_len = KEY_MAX_LEN;
