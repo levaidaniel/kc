@@ -19,6 +19,7 @@ coredumps
 # Object files
 *.o
 *.ko
+*.d
 
 # Libraries
 *.lib
