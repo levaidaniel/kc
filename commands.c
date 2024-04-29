@@ -901,6 +901,9 @@ kc_crypt_key(struct db_parameters *db_params)
 			dprintf(STDERR_FILENO, "ERROR: Unable to derive key with Argon2 KDF.\n");
 			return(0);
 		}
+
+		EVP_KDF_free(kdf_impl);
+		EVP_KDF_CTX_free(kdf_ctx);
 #endif
 #ifdef _HAVE_LIBSCRYPT
 	} else if (strcmp(db_params->kdf, "scrypt") == 0) {
