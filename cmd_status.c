@@ -96,11 +96,18 @@ cmd_status(const char *e_line, command *commands)
 	else
 		puts("no");
 
-	printf("Password function: %s (%lu %s", db_params.kdf, db_params.kdf_reps, strncmp(db_params.kdf, "bcrypt", 6) == 0 ? "rounds" : "iterations");
-#ifdef	_HAVE_ARGON2
-	if (strcmp(db_params.kdf, "argon2id") == 0)
-		printf(", %lu memory lanes, %luk memory cost", db_params.first ? strtoul(db_params.first, NULL, 10) : KC_ARGON2ID_LANES, db_params.second ? strtoul(db_params.second, NULL, 10) : KC_ARGON2ID_MEMCOST);
+	printf("Password function: %s (", db_params.kdf);
+#ifdef _HAVE_LIBSCRYPT
+	if (strcmp(db_params.kdf, "scrypt") == 0)
+		printf("N(%lu), r(%lu), p(%lu)", db_params.first ? strtoul(db_params.first, NULL, 10) : SCRYPT_N, db_params.second ? strtoul(db_params.second, NULL, 10) : SCRYPT_r, db_params.third ? strtoul(db_params.third, NULL, 10) : SCRYPT_p);
+	else
 #endif
+#ifdef _HAVE_ARGON2
+	if (strcmp(db_params.kdf, "argon2id") == 0)
+		printf("%lu iterations, %lu memory lanes, %luk memory cost", db_params.kdf_reps, db_params.first ? strtoul(db_params.first, NULL, 10) : KC_ARGON2ID_LANES, db_params.second ? strtoul(db_params.second, NULL, 10) : KC_ARGON2ID_MEMCOST);
+	else
+#endif
+	printf("%lu %s", db_params.kdf_reps, strncmp(db_params.kdf, "bcrypt", 6) == 0 ? "rounds" : "iterations");
 	printf(")\n");
 
 	printf("Key length: %lu bytes / %lu bits\n", db_params.key_len, db_params.key_len * 8);

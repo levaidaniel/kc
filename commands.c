@@ -48,10 +48,6 @@
 #include "bcrypt/bcrypt_pbkdf.h"
 #endif
 
-#ifdef _HAVE_LIBSCRYPT
-#include <libscrypt.h>
-#endif
-
 #ifdef _HAVE_YUBIKEY
 #include "ykchalresp.h"
 #endif
@@ -798,6 +794,10 @@ kc_crypt_key(struct db_parameters *db_params)
 	OSSL_PARAM	kdf_opts[6];
 	uint32_t	argon2id_lanes = KC_ARGON2ID_LANES;
 	uint32_t	argon2id_memcost = KC_ARGON2ID_MEMCOST;
+
+	uint32_t	scrypt_cpu_ram_cost = SCRYPT_N;
+	uint32_t	scrypt_ram_cost = SCRYPT_r;
+	uint32_t	scrypt_cpu_cost = SCRYPT_p;
 #endif
 
 
@@ -907,9 +907,42 @@ kc_crypt_key(struct db_parameters *db_params)
 #endif
 #ifdef _HAVE_LIBSCRYPT
 	} else if (strcmp(db_params->kdf, "scrypt") == 0) {
+		/* Option '-1' is CPU AND RAM cost here */
+		if (db_params->first) {
+			scrypt_cpu_ram_cost = strtoul(db_params->first, &inv, 10);
+			if (inv[0] != '\0') {
+				dprintf(STDERR_FILENO, "ERROR: Unable to convert the scrypt CPU AND RAM cost parameter.\n");
+				return(-1);
+			}
+		}
+		if (getenv("KC_DEBUG"))
+			printf("%s(): scrypt CPU AND RAM cost: %d\n", __func__, scrypt_cpu_ram_cost);
+
+		/* Option '-2' is RAM cost here */
+		if (db_params->second) {
+			scrypt_ram_cost = strtoul(db_params->second, &inv, 10);
+			if (inv[0] != '\0') {
+				dprintf(STDERR_FILENO, "ERROR: Unable to convert the scrypt RAM cost parameter.\n");
+				return(-1);
+			}
+		}
+		if (getenv("KC_DEBUG"))
+			printf("%s(): scrypt RAM cost: %d\n", __func__, scrypt_ram_cost);
+
+		/* Option '-3' is CPU cost here */
+		if (db_params->third) {
+			scrypt_cpu_cost = strtoul(db_params->third, &inv, 10);
+			if (inv[0] != '\0') {
+				dprintf(STDERR_FILENO, "ERROR: Unable to convert the scrypt CPU cost parameter.\n");
+				return(-1);
+			}
+		}
+		if (getenv("KC_DEBUG"))
+			printf("%s(): scrypt CPU cost: %d\n", __func__, scrypt_cpu_cost);
+
 		if (libscrypt_scrypt((const unsigned char *)db_params->pass, db_params->pass_len,
 			db_params->salt, SALT_DIGEST_LEN + 1,
-			SCRYPT_N, SCRYPT_r, SCRYPT_p,
+			scrypt_cpu_ram_cost, scrypt_ram_cost, scrypt_cpu_cost,
 			db_params->key, db_params->key_len) != 0)
 		{
 			dprintf(STDERR_FILENO, "ERROR: Failed to generate a key from the password!\n");

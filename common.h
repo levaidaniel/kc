@@ -40,6 +40,10 @@
 #endif
 #endif
 
+#ifdef _HAVE_LIBSCRYPT
+#include <libscrypt.h>
+#endif
+
 #ifndef _READLINE
 #include <histedit.h>
 #else
