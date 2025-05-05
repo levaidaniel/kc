@@ -1225,15 +1225,11 @@ kc_validate_xml(xmlDocPtr db, char legacy)
 		return(0);
 	}
 
-	/* XXX xmlIOParseDTD() is supposed to free the ParserInputBuffer context.
-	 * https://mail.gnome.org/archives/xml/2001-July/msg00035.html
-	 */
 	dtd = xmlIOParseDTD(NULL, buf, XML_CHAR_ENCODING_NONE);
 	if (!dtd) {
 		if (getenv("KC_DEBUG"))
 			xmlGenericError(xmlGenericErrorContext, "ERROR: Could not parse kc DTD.\n");
 
-		xmlFreeParserInputBuffer(buf);
 		return(0);
 	}
 
