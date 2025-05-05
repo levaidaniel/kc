@@ -24,6 +24,7 @@
 #include <libxml/xmlsave.h>
 #include <libxml/encoding.h>
 #include <libxml/xmlstring.h>
+#include <libxml/xmlversion.h>
 
 #include <openssl/bio.h>
 #include <openssl/evp.h>

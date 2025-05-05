@@ -1203,9 +1203,21 @@ kc_validate_xml(xmlDocPtr db, char legacy)
 
 
 	if (legacy)
-		buf = xmlParserInputBufferCreateMem(KC_DTD_LEGACY, sizeof(KC_DTD_LEGACY), XML_CHAR_ENCODING_NONE);
+		buf = xmlParserInputBufferCreateMem(KC_DTD_LEGACY,
+			/* "xmlIOParseDTD doesn't allow null bytes at the end of the input anymore."
+			 * https://download.gnome.org/sources/libxml2/2.14/libxml2-2.14.1.news
+			 * So we're removing the last '\0' from the end of the string if it's the newer libxml.
+			 */
+			sizeof(KC_DTD_LEGACY) - (LIBXML_VERSION < 21401 ? 0 : 1),
+			XML_CHAR_ENCODING_NONE);
 	else
-		buf = xmlParserInputBufferCreateMem(KC_DTD, sizeof(KC_DTD), XML_CHAR_ENCODING_NONE);
+		buf = xmlParserInputBufferCreateMem(KC_DTD,
+			/* "xmlIOParseDTD doesn't allow null bytes at the end of the input anymore."
+			 * https://download.gnome.org/sources/libxml2/2.14/libxml2-2.14.1.news
+			 * So we're removing the last '\0' from the end of the string if it's the newer libxml.
+			 */
+			sizeof(KC_DTD) - (LIBXML_VERSION < 21401 ? 0 : 1),
+			XML_CHAR_ENCODING_NONE);
 	if (!buf) {
 		if (getenv("KC_DEBUG"))
 			xmlGenericError(xmlGenericErrorContext, "ERROR: Could not allocate buffer for DTD.\n");
