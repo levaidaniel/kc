@@ -1234,7 +1234,7 @@ kc_validate_xml(xmlDocPtr db, char legacy)
 	}
 
 	valid_ctx = xmlNewValidCtxt();
-	if (!valid_ctx ) {
+	if (!valid_ctx) {
 		if (getenv("KC_DEBUG"))
 			xmlGenericError(xmlGenericErrorContext, "ERROR: Could not allocate a new validation context.\n");
 
