@@ -794,11 +794,11 @@ kc_crypt_key(struct db_parameters *db_params)
 	OSSL_PARAM	kdf_opts[6];
 	uint32_t	argon2id_lanes = KC_ARGON2ID_LANES;
 	uint32_t	argon2id_memcost = KC_ARGON2ID_MEMCOST;
+#endif
 
 	uint32_t	scrypt_cpu_ram_cost = SCRYPT_N;
 	uint32_t	scrypt_ram_cost = SCRYPT_r;
 	uint32_t	scrypt_cpu_cost = SCRYPT_p;
-#endif
 
 
 	if (getenv("KC_DEBUG")) {
