@@ -785,9 +785,9 @@ kc_crypt_pass(struct db_parameters *db_params, const unsigned char newdb)
 char
 kc_crypt_key(struct db_parameters *db_params)
 {
-#ifdef _HAVE_ARGON2
 	char		*inv = NULL;
 
+#ifdef _HAVE_ARGON2
 	/* only for Argon2id */
 	EVP_KDF		*kdf_impl = NULL;
 	EVP_KDF_CTX	*kdf_ctx = NULL;
@@ -796,9 +796,11 @@ kc_crypt_key(struct db_parameters *db_params)
 	uint32_t	argon2id_memcost = KC_ARGON2ID_MEMCOST;
 #endif
 
+#ifdef _HAVE_LIBSCRYPT
 	uint32_t	scrypt_cpu_ram_cost = SCRYPT_N;
 	uint32_t	scrypt_ram_cost = SCRYPT_r;
 	uint32_t	scrypt_cpu_cost = SCRYPT_p;
+#endif
 
 
 	if (getenv("KC_DEBUG")) {
