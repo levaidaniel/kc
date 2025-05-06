@@ -24,6 +24,7 @@
 #include <libxml/xmlsave.h>
 #include <libxml/encoding.h>
 #include <libxml/xmlstring.h>
+#include <libxml/xmlversion.h>
 
 #include <openssl/bio.h>
 #include <openssl/evp.h>
@@ -37,6 +38,10 @@
 #include <openssl/thread.h>
 #include <openssl/kdf.h>
 #endif
+#endif
+
+#ifdef _HAVE_LIBSCRYPT
+#include <libscrypt.h>
 #endif
 
 #ifndef _READLINE
