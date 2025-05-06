@@ -290,30 +290,38 @@ release.
 If compiled with libscrypt,
 .Nm
 can use the scrypt KDF.
-The speed of this is somewhere between SHA-* and bcrypt.
 The
 .Fl R
 option is ignored when using this.
-.Fl 1
-is used for specifying the CPU + RAM cost of the algorithm,
-.Fl 2
-is used for specifying the RAM cost of the algorithm, and
-.Fl 3
-is used for specifying the CPU cost of the algorithm.
 .Pp
+Algorithm options:
+.Bl -tag -offset ||| -width |
+.It Fl 1 Ar number
+CPU + RAM cost of the algorithm (must be a power of 2 and greater than 1).
+This is the main performance modifier.
+.It Fl 2 Ar number
+RAM cost of the algorithm.
+.It Fl 3 Ar number
+CPU cost of the algorithm.
+.It (RAM cost * CPU cost) must be less than 2^30.
+.El
 .It Ar argon2id
 If compiled with Argon2 and a new enough OpenSSL,
 .Nm
 supports the Argon2id KDF.
 Argon2 is a memory-hard function.
-.Fl R
-is used for specifying its iterations (default is 2),
-.Fl 1
-is used for specifying the number of memory lanes (default is 4), and
-.Fl 2
-is used for specifying the memory cost (default is 6291456).
 .Pp
-These defaults have been selected based on the recommendation of its RFC 9106.
+Algorithm options:
+.Bl -tag -offset ||| -width |
+.It Fl 1 Ar number
+is used for specifying the number of memory lanes (default is 4), and
+.It Fl 2 Ar number
+is used for specifying the memory cost (default is 6291456).
+.It These defaults have been selected based on the recommendation of its RFC 9106.
+.El
+.Pp
+Default number of iterations is 2, see option
+.Fl R .
 .El
 .Pp
 More information is in the
@@ -368,10 +376,11 @@ More information is in the
 .Em CIPHERS
 section.
 .It Fl 1 Ar parameter , Fl 2 Ar parameter , Fl 3 Ar parameter , Fl 4 Ar parameter , Fl 5 Ar parameter
-Generic options for various functions and features. When something has unique
-and particular features that can be tuned, these re-usable options are there
-for specifying these particular parameters. Depending on the actual
-function/feature in use, the meaning of these options vary.
+Generic options for various functions and features.
+When something has unique and particular features that can be tuned, these
+re-usable options are there for specifying these particular parameters.
+Depending on the actual function/feature in use, the meaning of these options
+vary.
 .Pp
 For example, when using the
 .Ar scrypt
