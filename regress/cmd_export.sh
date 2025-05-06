@@ -72,6 +72,21 @@ if [ ${SCRYPT} ];then
 		echo "$0 test failed (export, scrypt)!"
 		exit 1
 	fi
+
+	rm -f regress/test_export.kcd
+	printf "export -k regress/test_export -P scrypt -1 32768 -2 10 -3 24\n${PASSWORD}\n${PASSWORD}\n" |${KC_RUN} -b -k ${KC_DB} -p ${KC_PASSFILE}
+
+	if [ ! -r "regress/test_export.kcd" ];then
+		echo "$0 test failed (unreadable export file, scrypt #2)!"
+		exit 1
+	fi
+
+	if printf "${PASSWORD}" |${KC_RUN} -b -k regress/test_export.kcd -P scrypt -1 32768 -2 10 -3 24;then
+		echo "$0 test ok (export, scrypt #2)!"
+	else
+		echo "$0 test failed (export, scrypt #2)!"
+		exit 1
+	fi
 fi
 
 
