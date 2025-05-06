@@ -1,14 +1,12 @@
-# 2.5.5
-* Support scrypt KDF algorithm parameters (CPU/RAM cost).
-* Print more information about KDF algorithms in 'status' command output.
-* Documentation updates.
-* Support libxml2 v2.14+.
-
 # 2.5.4
+* Support libxml2 v2.14+.
 * Support Argon2id KDF.
 * Support ChaCha20 cipher.
+* Support scrypt KDF algorithm parameters (CPU/RAM cost).
 * Generic/reusable positional arguments, '-1' through '-5'.
+* Print more information about KDF algorithms in 'status' command output.
 * Fix some error message printing.
+* Documentation updates.
 
 # 2.5.3
 * Plug some memory leaks.
