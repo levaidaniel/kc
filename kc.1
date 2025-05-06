@@ -294,6 +294,13 @@ The speed of this is somewhere between SHA-* and bcrypt.
 The
 .Fl R
 option is ignored when using this.
+.Fl 1
+is used for specifying the CPU + RAM cost of the algorithm,
+.Fl 2
+is used for specifying the RAM cost of the algorithm, and
+.Fl 3
+is used for specifying the CPU cost of the algorithm.
+.Pp
 .It Ar argon2id
 If compiled with Argon2 and a new enough OpenSSL,
 .Nm
@@ -360,6 +367,17 @@ This is the default
 More information is in the
 .Em CIPHERS
 section.
+.It Fl 1 Ar parameter , Fl 2 Ar parameter , Fl 3 Ar parameter , Fl 4 Ar parameter , Fl 5 Ar parameter
+Generic options for various functions and features. When something has unique
+and particular features that can be tuned, these re-usable options are there
+for specifying these particular parameters. Depending on the actual
+function/feature in use, the meaning of these options vary.
+.Pp
+For example, when using the
+.Ar scrypt
+or
+.Ar argon2id
+KDFs, these options specify different tunable parameters for these algorithms.
 .It Fl b
 Batch mode.
 Enable reading commands and the password from standard input.
