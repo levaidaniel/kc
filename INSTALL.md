@@ -38,6 +38,9 @@ These are environment variables passed to _make_ (the value doesn't matter, only
   - `HAVE_YUBIKEY=y`
 
     Turn on YubiKey challenge-response support. Needs libykpers-1 and libyubikey (see above).
+  - `HAVE_ARGON2=y`
+
+    Turn on Argon2id KDF support. Needs openssl newer than v3.2.0.
   - `BUNDLED_BCRYPT=y`
 
     To use the packaged bcrypt implementation (that comes from OpenBSD). This is hardcoded in **`Makefile.linux`**, and on BSDs you should specify this everywhere except on OpenBSD.
@@ -54,10 +57,10 @@ These are environment variables passed to _make_ (the value doesn't matter, only
     **`Makefile.linux`** uses Readline and **`Makefile`** uses Editline by default.
 
 ### Linux example
-    $ make -f Makefile.linux HAVE_PCRE=1 HAVE_YUBIKEY=nice HAVE_LIBSCRYPT=yeah && make -f Makefile.linux install
+`$ make -f Makefile.linux HAVE_PCRE=1 HAVE_YUBIKEY=nice HAVE_LIBSCRYPT=yeah HAVE_ARGON2=sure && make -f Makefile.linux install`
 
 ### OpenBSD example
-    $ make OS_OPENBSD=1 && make install
+`$ make OS_OPENBSD=1 && make install`
 
 ### FreeBSD example
-    $ make HAVE_LIBSCRYPT=1 BUNDLED_BCRYPT=yesplease && make install
+`$ make HAVE_LIBSCRYPT=1 BUNDLED_BCRYPT=yesplease && make install`
