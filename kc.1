@@ -17,7 +17,7 @@
 .\"ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 .\"(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 .\"SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-.Dd $Mdocdate: May 06 2025 $
+.Dd $Mdocdate: May 07 2025 $
 .Dt KC 1
 .Os
 .Sh NAME
@@ -275,9 +275,13 @@ Valid parameters are:
 .Bl -tag -offset ||| -width |
 .It Ar sha3
 OpenSSL's PKCS5 PBKDF2 with SHA-3 512.
+Default number of iterations is 100000, see option
+.Fl R .
 .It Ar sha512
 OpenSSL's PKCS5 PBKDF2 with SHA-2 512.
 This is the default.
+Default number of iterations is 100000, see option
+.Fl R .
 .It Ar bcrypt
 Bcrypt PBKDF based on Blowfish.
 This is slower than the SHA-* or scrypt variants.
@@ -286,39 +290,52 @@ On Linux, a bundled bcrypt implementation from
 is used, and its version is the one that was available at the time of this
 .Nm
 release.
+Default number of rounds is 32, see option
+.Fl R .
 .It Ar scrypt
 If compiled with libscrypt,
 .Nm
 can use the scrypt KDF.
-The speed of this is somewhere between SHA-* and bcrypt.
 The
 .Fl R
 option is ignored when using this.
-.Fl 1
-is used for specifying the CPU + RAM cost of the algorithm,
-.Fl 2
-is used for specifying the RAM cost of the algorithm, and
-.Fl 3
-is used for specifying the CPU cost of the algorithm.
 .Pp
+Algorithm options:
+.Bl -tag -offset ||| -width |
+.It Fl 1 Ar number
+CPU + RAM cost of the algorithm (must be a power of 2 and greater than 1).
+This is the main performance modifier.
+Default is whatever is defined in the currently used libscrypt.
+.It Fl 2 Ar number
+RAM cost of the algorithm.
+Default is whatever is defined in the currently used libscrypt.
+.It Fl 3 Ar number
+CPU cost of the algorithm.
+Default is whatever is defined in the currently used libscrypt.
+.It (RAM cost * CPU cost) must be less than 2^30.
+.El
 .It Ar argon2id
 If compiled with Argon2 and a new enough OpenSSL,
 .Nm
 supports the Argon2id KDF.
 Argon2 is a memory-hard function.
-.Fl R
-is used for specifying its iterations (default is 2),
-.Fl 1
-is used for specifying the number of memory lanes (default is 4), and
-.Fl 2
-is used for specifying the memory cost (default is 6291456).
 .Pp
-These defaults have been selected based on the recommendation of its RFC 9106.
+Algorithm options:
+.Bl -tag -offset ||| -width |
+.It Fl 1 Ar number
+Number of memory lanes (default is 4).
+.It Fl 2 Ar number
+Memory cost (default is 6291456).
+.It These defaults have been selected based on the recommendation of its RFC 9106.
+.El
+.Pp
+Default number of iterations is 2, see option
+.Fl R .
 .El
 .Pp
 More information is in the
 .Em KDF
-section.
+section and the individual KDF descriptions.
 .It Fl K Ar key length
 Key length in bytes to use for encryption (and decryption).
 A valid length is between 16 and 32 (default).
@@ -368,10 +385,11 @@ More information is in the
 .Em CIPHERS
 section.
 .It Fl 1 Ar parameter , Fl 2 Ar parameter , Fl 3 Ar parameter , Fl 4 Ar parameter , Fl 5 Ar parameter
-Generic options for various functions and features. When something has unique
-and particular features that can be tuned, these re-usable options are there
-for specifying these particular parameters. Depending on the actual
-function/feature in use, the meaning of these options vary.
+Generic options for various functions and features.
+When something has unique and particular features that can be tuned, these
+re-usable options are there for specifying these particular parameters.
+Depending on the actual function/feature in use, the meaning of these options
+vary.
 .Pp
 For example, when using the
 .Ar scrypt
