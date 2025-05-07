@@ -99,7 +99,7 @@ cmd_status(const char *e_line, command *commands)
 	printf("Password function: %s (", db_params.kdf);
 #ifdef _HAVE_LIBSCRYPT
 	if (strcmp(db_params.kdf, "scrypt") == 0)
-		printf("N(%lu), r(%lu), p(%lu)", db_params.first ? strtoul(db_params.first, NULL, 10) : SCRYPT_N, db_params.second ? strtoul(db_params.second, NULL, 10) : SCRYPT_r, db_params.third ? strtoul(db_params.third, NULL, 10) : SCRYPT_p);
+		printf("%lu CPU+RAM cost (N), %lu RAM cost (r), %lu CPU cost (p)", db_params.first ? strtoul(db_params.first, NULL, 10) : SCRYPT_N, db_params.second ? strtoul(db_params.second, NULL, 10) : SCRYPT_r, db_params.third ? strtoul(db_params.third, NULL, 10) : SCRYPT_p);
 	else
 #endif
 #ifdef _HAVE_ARGON2
