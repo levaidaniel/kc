@@ -797,7 +797,7 @@ kc_crypt_key(struct db_parameters *db_params)
 #endif
 
 #ifdef _HAVE_LIBSCRYPT
-	uint32_t	scrypt_cpu_ram_cost = SCRYPT_N;
+	uint64_t	scrypt_cpu_ram_cost = SCRYPT_N;
 	uint32_t	scrypt_ram_cost = SCRYPT_r;
 	uint32_t	scrypt_cpu_cost = SCRYPT_p;
 #endif
