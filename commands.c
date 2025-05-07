@@ -918,7 +918,7 @@ kc_crypt_key(struct db_parameters *db_params)
 			}
 		}
 		if (getenv("KC_DEBUG"))
-			printf("%s(): scrypt CPU AND RAM cost: %d\n", __func__, scrypt_cpu_ram_cost);
+			printf("%s(): scrypt CPU AND RAM cost: %ld\n", __func__, scrypt_cpu_ram_cost);
 
 		/* Option '-2' is RAM cost here */
 		if (db_params->second) {
