@@ -797,9 +797,9 @@ kc_crypt_key(struct db_parameters *db_params)
 #endif
 
 #ifdef _HAVE_LIBSCRYPT
-	uint64_t	scrypt_cpu_ram_cost = SCRYPT_N;
-	uint32_t	scrypt_ram_cost = SCRYPT_r;
-	uint32_t	scrypt_cpu_cost = SCRYPT_p;
+	unsigned long	scrypt_cpu_ram_cost = SCRYPT_N;
+	unsigned int	scrypt_ram_cost = SCRYPT_r;
+	unsigned int	scrypt_cpu_cost = SCRYPT_p;
 #endif
 
 
@@ -918,7 +918,7 @@ kc_crypt_key(struct db_parameters *db_params)
 			}
 		}
 		if (getenv("KC_DEBUG"))
-			printf("%s(): scrypt CPU AND RAM cost: %ld\n", __func__, scrypt_cpu_ram_cost);
+			printf("%s(): scrypt CPU AND RAM cost: %lu\n", __func__, scrypt_cpu_ram_cost);
 
 		/* Option '-2' is RAM cost here */
 		if (db_params->second) {
