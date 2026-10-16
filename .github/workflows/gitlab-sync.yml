@@ -1,0 +1,21 @@
+name: Sync to GitLab
+
+on:
+  push:
+  delete:
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Mirror repository to GitLab
+        env:
+          GITLAB_USER: ${{ secrets.GITLAB_USERNAME }}
+          GITLAB_TOKEN: ${{ secrets.GITLAB_ACCESS_TOKEN }}
+        run: |
+          git clone --mirror "https://github.com/${GITHUB_REPOSITORY}.git" repo.git
+          cd repo.git
+          git remote add gitlab "https://${GITLAB_USER}:${GITLAB_TOKEN}@gitlab.com/levaidaniel/kc.git"
+          git push --mirror gitlab
