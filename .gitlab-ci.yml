@@ -1,0 +1,43 @@
+stages:
+  - test
+
+readline test:
+  stage: test
+  image: ubuntu:latest
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "master"'
+  before_script:
+    - ln -sf bash /bin/sh
+    - export SSH_AGENT_INFO="${HOME}/ssh-agent"
+    - echo "SSH_AGENT_INFO=${SSH_AGENT_INFO}"
+    - ssh-agent -s | fgrep -v echo > "${SSH_AGENT_INFO}"
+    - apt-get update
+    - DEBIAN_FRONTEND=noninteractive apt-get install -y libbsd-dev libscrypt-dev libreadline-dev
+  script:
+    - export SSH_AGENT_INFO="${HOME}/ssh-agent"
+    - eval "$(cat "${SSH_AGENT_INFO}")"
+    - set | fgrep SSH
+    - export HAVE_LIBSCRYPT=yes
+    - make -f Makefile.linux
+    - make -f Makefile.linux test
+
+editline test:
+  stage: test
+  image: ubuntu:latest
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "master"'
+  before_script:
+    - ln -sf bash /bin/sh
+    - export SSH_AGENT_INFO="${HOME}/ssh-agent"
+    - echo "SSH_AGENT_INFO=${SSH_AGENT_INFO}"
+    - ssh-agent -s | fgrep -v echo > "${SSH_AGENT_INFO}"
+    - apt-get update
+    - DEBIAN_FRONTEND=noninteractive apt-get install -y libbsd-dev libscrypt-dev libedit-dev libncurses-dev libncursesw5-dev
+  script:
+    - export SSH_AGENT_INFO="${HOME}/ssh-agent"
+    - eval "$(cat "${SSH_AGENT_INFO}")"
+    - set | fgrep SSH
+    - export EDITLINE=yes
+    - export HAVE_LIBSCRYPT=yes
+    - make -f Makefile.linux
+    - make -f Makefile.linux test
