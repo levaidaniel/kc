@@ -19,7 +19,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt update
-        DEBIAN_FRONTEND=noninteractive sudo apt -y install libbsd-dev libscrypt-dev libreadline-dev openssh-client libxml2-dev pkgconf
+        DEBIAN_FRONTEND=noninteractive sudo apt -y install libbsd-dev libscrypt-dev libreadline-dev openssh-client libxml2-dev pkgconf libssl-dev
 
     - name: Set up environment variable for ssh agent information
       run: echo "SSH_AGENT_INFO=${HOME}/ssh-agent" >> $GITHUB_ENV
@@ -47,7 +47,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt update
-        DEBIAN_FRONTEND=noninteractive sudo apt -y install libbsd-dev libscrypt-dev libedit-dev libncurses-dev libncursesw5-dev openssh-client libxml2-dev pkgconf
+        DEBIAN_FRONTEND=noninteractive sudo apt -y install libbsd-dev libscrypt-dev libedit-dev libncurses-dev libncursesw5-dev openssh-client libxml2-dev pkgconf libssl-dev
 
     - name: Set up environment variable for ssh agent information
       run: echo "SSH_AGENT_INFO=${HOME}/ssh-agent" >> $GITHUB_ENV
