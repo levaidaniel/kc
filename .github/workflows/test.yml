@@ -16,14 +16,16 @@ jobs:
     - name: Replace sh symlink
       run: sudo ln -sf bash /bin/sh
 
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        DEBIAN_FRONTEND=noninteractive sudo apt -y install libbsd-dev libscrypt-dev libreadline-dev openssh-client
+
     - name: Set up environment variable for ssh agent information
       run: echo "SSH_AGENT_INFO=${HOME}/ssh-agent" >> $GITHUB_ENV
 
     - name: Start SSH agent and save the environment variables
       run: echo SSH_AGENT_INFO=${SSH_AGENT_INFO}; ssh-agent -s |fgrep -v echo > ${SSH_AGENT_INFO}
-
-    - name: Install dependencies
-      run: sudo apt install libbsd-dev libscrypt-dev libreadline-dev
 
     - name: build readline
       env:
@@ -42,14 +44,16 @@ jobs:
     - name: Replace sh symlink
       run: sudo ln -sf bash /bin/sh
 
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        DEBIAN_FRONTEND=noninteractive sudo apt -y install libbsd-dev libscrypt-dev libedit-dev libncurses-dev libncursesw5-dev openssh-client
+
     - name: Set up environment variable for ssh agent information
       run: echo "SSH_AGENT_INFO=${HOME}/ssh-agent" >> $GITHUB_ENV
 
     - name: Start SSH agent and save the environment variables
       run: echo SSH_AGENT_INFO=${SSH_AGENT_INFO}; ssh-agent -s |fgrep -v echo > ${SSH_AGENT_INFO}
-
-    - name: Install dependencies
-      run: sudo apt install libbsd-dev libscrypt-dev libedit-dev libncurses-dev libncursesw5-dev
 
     - name: build editline
       env:
