@@ -9,7 +9,7 @@ readline test:
   before_script:
     - ln -sf bash /bin/sh
     - apt update
-    - DEBIAN_FRONTEND=noninteractive apt -y install libbsd-dev libscrypt-dev libreadline-dev openssh-client
+    - DEBIAN_FRONTEND=noninteractive apt -y install libbsd-dev libscrypt-dev libreadline-dev openssh-client make clang
     - export SSH_AGENT_INFO="${HOME}/ssh-agent"
     - echo "SSH_AGENT_INFO=${SSH_AGENT_INFO}"
     - ssh-agent -s | fgrep -v echo > "${SSH_AGENT_INFO}"
@@ -18,6 +18,7 @@ readline test:
     - eval "$(cat "${SSH_AGENT_INFO}")"
     - set | fgrep SSH
     - export HAVE_LIBSCRYPT=yes
+    - export CC=clang
     - make -f Makefile.linux
     - make -f Makefile.linux test
 
@@ -29,7 +30,7 @@ editline test:
   before_script:
     - ln -sf bash /bin/sh
     - apt update
-    - DEBIAN_FRONTEND=noninteractive apt -y install libbsd-dev libscrypt-dev libedit-dev libncurses-dev libncursesw5-dev openssh-client
+    - DEBIAN_FRONTEND=noninteractive apt -y install libbsd-dev libscrypt-dev libedit-dev libncurses-dev libncursesw5-dev openssh-client make clang
     - export SSH_AGENT_INFO="${HOME}/ssh-agent"
     - echo "SSH_AGENT_INFO=${SSH_AGENT_INFO}"
     - ssh-agent -s | fgrep -v echo > "${SSH_AGENT_INFO}"
@@ -39,5 +40,6 @@ editline test:
     - set | fgrep SSH
     - export EDITLINE=yes
     - export HAVE_LIBSCRYPT=yes
+    - export CC=clang
     - make -f Makefile.linux
     - make -f Makefile.linux test
